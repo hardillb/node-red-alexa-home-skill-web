@@ -1,0 +1,17 @@
+body {
+  padding-top: 50px;
+}
+
+.main {
+  display: flex;
+}
+
+.side-menu {
+  float: left;
+  padding-top: 60px;
+  width: 150px;
+}
+
+.main-content {
+  padding-left: 10px;
+}

@@ -1,0 +1,15 @@
+<% include ../fragments/header.ejs %>
+  <div class="container main-content">
+    <div id="login">
+      <form method="POST" action="/login">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"/>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"/>
+        <br>
+        <input type="submit" value="Login">
+      </form>
+    </div>
+  </div>
+<% include ../fragments/footer.ejs %>
