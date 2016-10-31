@@ -4,6 +4,9 @@
       <label for="username">Username</label>
       <input type="text" id="username"/>
       <br>
+      <label for="email">Email</label>
+      <input type="email" id="email"/>
+      <br>
       <label for="password">Password:</label>
       <input type="password" id="password"/>
       <br>
@@ -17,20 +20,21 @@
       	button.onclick = function(){
       		var username = document.getElementById('username').value;
       		var password = document.getElementById('password').value;
-                  var passwordAgain = document.getElementById('passwordAgain').value;
+          var passwordAgain = document.getElementById('passwordAgain').value;
 
-                  if (password !== passwordAgain) {
-                    alert("Passwords don't match");
-                    return;
-                  }
-
-      		var params = "username=" + username + "&password=" + password;
+          if (password !== passwordAgain) {
+            alert("Passwords don't match");
+            return;
+          }
+          var email = document.getElementById('email').value;
+      		var params = "username=" + encodeURIComponent(username)
+            + "&password=" + encodeURIComponent(password)
+            + "&email=" + encodeURIComponent(email);
       		xhr.open('POST', '/newUser',true);
       		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       		xhr.onreadystatechange = function () {
       			if( xhr.readyState == 4 && xhr.status == 201) {
       				//new user created
-      				//forward to 2FA addition page
       				window.location = '/';
       			} else if (xhr.readyState == 4 && xhr.status == 400) {
       				//show error

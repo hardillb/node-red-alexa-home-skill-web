@@ -15,10 +15,6 @@ var PassportOAuthBearer = require('passport-http-bearer');
 
 var oauthServer = require('./oauth');
 
-var Account = require('./models/account');
-var oauthModels = require('./models/oauth');
-var Devices = require('./models/devices');
-
 var port = (process.env.VCAP_APP_PORT || process.env.PORT ||3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var mongo_url = (process.env.MONGO_URL || 'mongodb://localhost/users');
@@ -35,6 +31,13 @@ if (process.env.VCAP_SERVICES) {
 		}
 	}
 }
+
+mongoose.connect(mongo_url);
+
+var Account = require('./models/account');
+var oauthModels = require('./models/oauth');
+var Devices = require('./models/devices');
+var Topics = require('./models/topics');
 
 var app_id = 'https://localhost:' + port;
 
@@ -107,8 +110,6 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 
 passport.use(accessTokenStrategy);
 
-mongoose.connect(mongo_url);
-
 app.get('/', function(req,res){
 	res.render('pages/index');
 });
@@ -125,11 +126,28 @@ app.get('/newuser', function(req,res){
 });
 
 app.post('/newuser', function(req,res){
-	Account.register(new Account({ username : req.body.username }), req.body.password, function(err, account) {
+	Account.register(new Account({ username : req.body.username, email: req.body.email, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
 			console.log(err);
 			return res.status(400).send(err.message);
 		}
+
+		var topics = new Topics({topics: [account.username+'/#']});
+		topics.save(function(err){
+			if (!err){
+				var s = Buffer.from(account.salt, 'hex').toString('base64');
+				var h = Buffer.from(account.hash, 'hex').toString(('base64'));
+
+				var mqttPass = "PBKDF2$sha256$25000$" + s + "$" + h;
+
+				Account.update(
+					{username: account.username}, 
+					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
+					{ multi: false },
+					function(err, count){}
+				);
+			}
+		});
 
 		passport.authenticate('local')(req, res, function () {
 			console.log("created new user %s", req.body.username);
