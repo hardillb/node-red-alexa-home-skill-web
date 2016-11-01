@@ -1,0 +1,110 @@
+<% include ../fragments/header.ejs %>
+	<div class="container main-content">
+		<h1>Devices</h1>
+		<div class="decivesHeader">
+			<div class="deviceName"><strong>Name</strong></div>
+			<div class="deviceDescription"><strong>Description</strong></div>
+			<div class="deviceActions"><strong>Actions</strong></div>
+		</div>
+		<% devices.forEach(function(device){ %>
+		<div class="device">
+			<div class="deviceName"><%= device.friendlyName %></div>
+			<div class="deviceDescription"><%= device.friendlyDescription %></div>
+			<div class="deviceActions">
+				<% device.actions.forEach(function(action){ %>
+					<img src="/images/<%= action %>.png" title="<%= action %>">
+				<% }); %>
+			</div>
+		</div>
+		<% }); %>
+		<div>
+			<button onclick="addDevice();">Add Device</button>
+		</div>
+	</div>
+	<div id="dialog" hidden>
+		<label for="friendlyName">Name: </label>
+		<input id="friendlyName" type="text">
+		<label for="friendlyDescription">Description: </label>
+		<br>
+		<textarea id="friendlyDescription" rows="2"></textarea>
+		<fieldset>
+			<legend>Actions</legend>
+			<label for="action-on">On: </label>
+			<input type="checkbox" name="actions" id="action-on" value="turnOn">
+			<label for="action-off">Off: </label>
+			<input type="checkbox" name="actions" id="action-off" value="turnOff">
+			<label for="action-perc">%: </label>
+			<input type="checkbox" name="actions" id="action-perc" value="setPercentage">
+			<label for="action-inc-perc">+%: </label>
+			<input type="checkbox" name="actions" id="action-inc-perc" value="incrementPercentage">
+			<label for="action-dec-perc">-%: </label>
+			<input type="checkbox" name="actions" id="action-dec-perc" value="decrementPercentage">
+		</fieldset>
+	</div>
+	<script>
+	function addDevice() {
+		$( "#dialog" ).dialog({
+			title: "Add New Device",
+			dialogClass: "no-close",
+			buttons: [
+				{
+					text: "OK",
+					click: function(){
+						var device = {
+							actions: []
+						};
+						device.friendlyName = $('#friendlyName').val();
+						device.friendlyDescription = $('#friendlyDescription').val();
+						$('input[name=actions]').each(function(index){
+							if (this.checked) {
+								device.actions.push(this.value);
+							}
+						});
+						console.log(device);
+						if (device.friendlyName && 
+							device.friendlyDescription && 
+							device.actions.length > 1) {
+
+							$.ajax({
+								url:"/devices",
+								type: 'POST',
+								data: JSON.stringify(device),
+								contentType: "application/json",
+								success: function(data){
+									console.log("post response");
+									console.log(data);
+									//reload
+									document.location.reload();
+								},
+								dataType   : 'json'
+							}).fail(function(){
+								alert("failed to create device");
+							});
+
+							$(this).dialog( "close" );
+						} else {
+							alert("Name or desciption can not be empty and at least one action is needed");
+						}
+					}				
+				},
+				{
+					text: "Cancel",
+					click: function() {
+						clearDevice();
+						$(this).dialog( "close" );
+					}
+				}
+			]
+		});
+		$("#dialog").show();
+	}
+
+	function clearDevice() {
+		$('#friendlyName').val("");
+		$('#friendlyDescription').val("");
+		$('input[name=actions]').each(function(index){
+			this.checked = false;
+		});
+	}
+	</script>
+<% include ../fragments/footer.ejs %>

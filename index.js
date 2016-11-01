@@ -119,7 +119,19 @@ app.get('/login', function(req,res){
 });
 
 //app.post('/login',passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/2faCheck', failureFlash: true }));
-app.post('/login',passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }));
+app.post('/login',
+	passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+	function(req,res){
+		res.redirect('/');
+	});
+
+function ensureAuthenticated(req,res,next) {
+	if (req.isAuthenticated()) {
+    	return next();
+	} else {
+		res.redirect('/login');
+	}
+}
 
 app.get('/newuser', function(req,res){
 	res.render('pages/register');
@@ -248,6 +260,47 @@ app.post('/api/v1/command',
 	}
 );
 
+app.get('/devices',
+	ensureAuthenticated,
+	function(req,res){
+		var user = req.user.username;
+
+		Devices.find({username:user}, function(err, data){
+			if (!err) {
+				console.log(data);
+				res.render('pages/devices',{devices: data});
+			}
+		});
+});
+
+app.post('/devices',
+	ensureAuthenticated,
+	function(req,res){
+
+		var user = req.user.username;
+		var device = req.body;
+
+		console.log("headers");
+		console.log(req.headers);
+		console.log("post devices");
+		console.log(device);
+
+		device.username = user;
+		device.isReachable = true;
+
+		var dev = new Devices(device);
+		dev.save(function(err, dev){
+			if (!err) {
+				res.status(201)
+				res.send(dev);
+			} else {
+				res.status(500);
+				res.send(err);
+			}
+		});
+
+});
+
 app.post('/api/v1/devices',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
@@ -276,8 +329,10 @@ app.post('/api/v1/devices',
 app.get('/api/v1/devices',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
-		Devices.find({user: req.user},function(error, data){
-			res.send(data);	
+		Devices.find({username: req.user.username},function(error, data){
+			if (!error) {
+				res.send(data);
+			}	
 		});
 	}
 );

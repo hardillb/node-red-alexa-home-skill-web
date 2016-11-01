@@ -15,3 +15,21 @@ body {
 .main-content {
   padding-left: 10px;
 }
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.device {
+	
+}
+
+.deviceName {
+	float: left;
+	width: 200px;
+}
+
+.deviceDescription {
+	float: left;
+	width: 500px;
+}
