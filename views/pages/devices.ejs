@@ -15,9 +15,11 @@
 					<img src="/images/<%= action %>.png" title="<%= action %>">
 				<% }); %>
 			</div>
+			<button onclick="edit('<%= device._id %>')">Edit</button>
+			<button onclick="edit('<%= device._id%>')">Delete</button>
 		</div>
 		<% }); %>
-		<div>
+		<div style="padding-top: 10px;">
 			<button onclick="addDevice();">Add Device</button>
 		</div>
 	</div>

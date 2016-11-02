@@ -31,12 +31,19 @@
         <ul class="nav navbar-nav">
           <li class="active"><a href="/">Home</a></li>
           <li><a href="/docs/docs.html">Documentation</a></li>
+          <% if (user) { %>
+          <li><a href="/devices">Devices</a></li>
+          <% } %>
           <li><a href="/about.html">About</a></li>
         </ul>
       </div><!--/.nav-collapse -->
     </div>
   </nav>
-  <div class="container main">
-    <!-- <div class="container">
+  <div class="container login">
+    <% if (user) { %>
+      <a href="/logout">Logout</a>
+    <% } else { %>
       <a href="/login">Login</a> or <a href="/newuser">Register</a>
-    </div> -->
+    <% } %>
+  </div>
+  <div class="container main">

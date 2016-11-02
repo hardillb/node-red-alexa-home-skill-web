@@ -111,11 +111,16 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 passport.use(accessTokenStrategy);
 
 app.get('/', function(req,res){
-	res.render('pages/index');
+	res.render('pages/index', {user: req.user});
 });
 
 app.get('/login', function(req,res){
-	res.render('pages/login');
+	res.render('pages/login',{user: req.user});
+});
+
+app.get('/logout', function(req,res){
+	req.logout();
+	res.redirect('/');
 });
 
 //app.post('/login',passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/2faCheck', failureFlash: true }));
@@ -268,7 +273,7 @@ app.get('/devices',
 		Devices.find({username:user}, function(err, data){
 			if (!err) {
 				console.log(data);
-				res.render('pages/devices',{devices: data});
+				res.render('pages/devices',{user: req.user ,devices: data});
 			}
 		});
 });

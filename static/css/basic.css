@@ -6,6 +6,10 @@ body {
   display: flex;
 }
 
+.login {
+	float: right;
+}
+
 .side-menu {
   float: left;
   padding-top: 60px;
@@ -21,7 +25,9 @@ body {
 }
 
 .device {
-	
+	padding: 5px;
+	margin: 1px;
+	border: 1px solid;	
 }
 
 .deviceName {
