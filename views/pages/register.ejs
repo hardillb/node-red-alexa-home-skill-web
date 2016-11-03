@@ -1,16 +1,17 @@
 <% include ../fragments/header.ejs %>
   <div class="container main-content">
     <div id="register">
-      <label for="username">Username</label>
+      <label style="width: 75px" for="username">Username:</label>
       <input type="text" id="username"/>
+      <span>(can contain any utf-8 chars except /, + or #)</span>
       <br>
-      <label for="email">Email</label>
+      <label style="width: 75px" for="email">Email:</label>
       <input type="email" id="email"/>
       <br>
-      <label for="password">Password:</label>
+      <label style="width: 75px" for="password">Password:</label>
       <input type="password" id="password"/>
       <br>
-      <label for="password">Password:</label>
+      <label style="width: 75px" for="password">Password:</label>
       <input type="password" id="passwordAgain"/>
       <br>
       <button id="registerButton">Register</button>
