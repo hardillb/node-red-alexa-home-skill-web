@@ -32,6 +32,7 @@ if (process.env.VCAP_SERVICES) {
 	}
 }
 
+console.log(mongo_url);
 mongoose.connect(mongo_url);
 
 var Account = require('./models/account');
@@ -114,6 +115,10 @@ app.get('/', function(req,res){
 	res.render('pages/index', {user: req.user});
 });
 
+app.get('/docs', function(req,res){
+	res.render('pages/docs', {user: req.user});
+});
+
 app.get('/login', function(req,res){
 	res.render('pages/login',{user: req.user});
 });
@@ -139,7 +144,7 @@ function ensureAuthenticated(req,res,next) {
 }
 
 app.get('/newuser', function(req,res){
-	res.render('pages/register');
+	res.render('pages/register',{user: req.user});
 });
 
 app.post('/newuser', function(req,res){
@@ -152,16 +157,21 @@ app.post('/newuser', function(req,res){
 		var topics = new Topics({topics: [account.username+'/#']});
 		topics.save(function(err){
 			if (!err){
+
 				var s = Buffer.from(account.salt, 'hex').toString('base64');
 				var h = Buffer.from(account.hash, 'hex').toString(('base64'));
 
-				var mqttPass = "PBKDF2$sha256$25000$" + s + "$" + h;
+				var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
 
 				Account.update(
 					{username: account.username}, 
 					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 					{ multi: false },
-					function(err, count){}
+					function(err, count){
+						if (err) {
+							console.log(err);
+						}
+					}
 				);
 			}
 		});
@@ -278,17 +288,12 @@ app.get('/devices',
 		});
 });
 
-app.post('/devices',
+app.put('/devices',
 	ensureAuthenticated,
 	function(req,res){
 
 		var user = req.user.username;
 		var device = req.body;
-
-		console.log("headers");
-		console.log(req.headers);
-		console.log("post devices");
-		console.log(device);
 
 		device.username = user;
 		device.isReachable = true;
@@ -304,6 +309,49 @@ app.post('/devices',
 			}
 		});
 
+});
+
+app.post('/device/:dev_id',
+	ensureAuthenticated,
+	function(req,res){
+		var user = req.user.username;
+		var id = req.params.dev_id;
+		var device = req.body;
+		if (user === device.username) {
+			Devices.findOne({_id: device._id, username: device.username},
+				function(err, data){
+					if (err) {
+						res.status(500);
+						res.send(err);
+					} else {
+						data.friendlyDescription = device.friendlyDescription;
+						data.actions = device.actions;
+						data.save(function(err, d){
+							res.status(201);
+							res.send(d);
+						});
+					}
+				});
+		}
+});
+
+app.delete('/device/:dev_id',
+	ensureAuthenticated,
+	function(req,res){
+		var user = req.user.username;
+		var id = req.params.dev_id;
+		console.log(id);
+		Devices.remove({_id: id, username: user},
+			function(err) {
+				if (err) {
+					console.log(err);
+					res.status(500);
+					res.send(err);
+				} else {
+					res.status(202);
+					res.send();
+				}
+			});
 });
 
 app.post('/api/v1/devices',

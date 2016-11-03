@@ -11,6 +11,14 @@ var Account = new Schema({
     topics: { type: Number}
 });
 
-Account.plugin(passportLocalMongoose);
+var options = {
+	usernameUnique: true,
+	saltlen: 12,
+	keylen: 24,
+	iterations: 901,
+	encoding: 'base64'
+};
+
+Account.plugin(passportLocalMongoose,options);
 
 module.exports = mongoose.model('Account', Account);

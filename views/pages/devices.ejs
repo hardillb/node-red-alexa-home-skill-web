@@ -12,11 +12,11 @@
 			<div class="deviceDescription"><%= device.friendlyDescription %></div>
 			<div class="deviceActions">
 				<% device.actions.forEach(function(action){ %>
-					<img src="/images/<%= action %>.png" title="<%= action %>">
+					<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
 				<% }); %>
 			</div>
 			<button onclick="edit('<%= device._id %>')">Edit</button>
-			<button onclick="edit('<%= device._id%>')">Delete</button>
+			<button onclick="deleteDevice('<%= device._id%>')">Delete</button>
 		</div>
 		<% }); %>
 		<div style="padding-top: 10px;">
@@ -24,6 +24,7 @@
 		</div>
 	</div>
 	<div id="dialog" hidden>
+		<input id="devID" type="hidden">
 		<label for="friendlyName">Name: </label>
 		<input id="friendlyName" type="text">
 		<label for="friendlyDescription">Description: </label>
@@ -31,27 +32,37 @@
 		<textarea id="friendlyDescription" rows="2"></textarea>
 		<fieldset>
 			<legend>Actions</legend>
-			<label for="action-on">On: </label>
-			<input type="checkbox" name="actions" id="action-on" value="turnOn">
-			<label for="action-off">Off: </label>
-			<input type="checkbox" name="actions" id="action-off" value="turnOff">
-			<label for="action-perc">%: </label>
-			<input type="checkbox" name="actions" id="action-perc" value="setPercentage">
-			<label for="action-inc-perc">+%: </label>
-			<input type="checkbox" name="actions" id="action-inc-perc" value="incrementPercentage">
-			<label for="action-dec-perc">-%: </label>
-			<input type="checkbox" name="actions" id="action-dec-perc" value="decrementPercentage">
+			<label for="turnOn">On: </label>
+			<input type="checkbox" name="actions" id="turnOn" value="turnOn">
+			<label for="turnOff">Off: </label>
+			<input type="checkbox" name="actions" id="turnOff" value="turnOff">
+			<br>
+			<label for="setPercentage">%: </label>
+			<input type="checkbox" name="actions" id="setPercentage" value="setPercentage">
+			<label for="incrementPercentage">+%: </label>
+			<input type="checkbox" name="actions" id="incrementPercentage" value="incrementPercentage">
+			<label for="decrementPercentage">-%: </label>
+			<input type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage">
+			<br>
+			<label for="setTargetTemperature">&deg;C: </label>
+			<input type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature">
+			<label for="incrementTargetTemperature">+&deg;C: </label>
+			<input type="checkbox" name="actions" id="incrementTargetTemperature" value="incrementTargetTemperature">
+			<label for="decrementTargetTemperature">-&deg;C: </label>
+			<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature">
 		</fieldset>
 	</div>
 	<script>
-	function addDevice() {
-		$( "#dialog" ).dialog({
-			title: "Add New Device",
-			dialogClass: "no-close",
-			buttons: [
-				{
-					text: "OK",
-					click: function(){
+	$( "#dialog" ).dialog({
+		autoOpen: false,
+		title: "Add New Device",
+		dialogClass: "no-close",
+		buttons: [
+			{
+				text: "OK",
+				click: function(){
+					var devID = $('#devID').val();
+					if ( devID === "") {
 						var device = {
 							actions: []
 						};
@@ -66,9 +77,40 @@
 						if (device.friendlyName && 
 							device.friendlyDescription && 
 							device.actions.length > 1) {
-
 							$.ajax({
 								url:"/devices",
+								type: 'PUT',
+								data: JSON.stringify(device),
+								contentType: "application/json",
+								success: function(data){
+									console.log("put response");
+									console.log(data);
+									//reload
+									document.location.reload();
+								},
+								dataType   : 'json'
+							}).fail(function(){
+								alert("failed to create device");
+							});
+							$(this).dialog( "close" );
+						} else {
+							alert("Name or desciption can not be empty and at least one action is needed");
+						}
+					} else {
+						var device = devices[devID];
+						device.friendlyDescription = $('#friendlyDescription').val();
+						device.actions = [];
+						$('input[name=actions]').each(function(index){
+							if (this.checked) {
+								device.actions.push(this.value);
+							}
+						});
+						if (device.friendlyName && 
+							device.friendlyDescription && 
+							device.actions.length > 1) {
+							//post update
+							$.ajax({
+								url: '/device/' + device._id,
 								type: 'POST',
 								data: JSON.stringify(device),
 								contentType: "application/json",
@@ -78,35 +120,69 @@
 									//reload
 									document.location.reload();
 								},
-								dataType   : 'json'
-							}).fail(function(){
-								alert("failed to create device");
 							});
-
-							$(this).dialog( "close" );
+							console.log(device);
+							$(this).dialog("close");
 						} else {
 							alert("Name or desciption can not be empty and at least one action is needed");
 						}
-					}				
-				},
-				{
-					text: "Cancel",
-					click: function() {
-						clearDevice();
-						$(this).dialog( "close" );
 					}
+				}				
+			},
+			{
+				text: "Cancel",
+				click: function() {
+					clearDevice();
+					$(this).dialog( "close" );
 				}
-			]
-		});
-		$("#dialog").show();
+			}
+		]
+	});
+
+	function addDevice() {
+		clearDevice();
+		$("#dialog").dialog("open");
 	}
 
 	function clearDevice() {
+		$('#devID').val("");
 		$('#friendlyName').val("");
+		$('#friendlyName').prop('readonly', false);
 		$('#friendlyDescription').val("");
 		$('input[name=actions]').each(function(index){
 			this.checked = false;
 		});
 	}
+
+	function edit(id) {
+		clearDevice();
+		$("#dialog").dialog("open");
+		var device = devices[id];
+		$('#devID').val(device._id);
+		$('#friendlyName').val(device.friendlyName);
+		$('#friendlyName').prop('readonly', true);
+		$('#friendlyDescription').val(device.friendlyDescription);
+		device.actions.forEach(function(action){
+			$('#'+action).prop('checked',true);
+		});
+	}
+
+	function deleteDevice(id) {
+		var answer = confirm("Are you sure you want to delete this device?");
+		if(answer) {
+			$.ajax({
+				url:"/device/" + id,
+				type: 'DELETE',
+				success: function(data){
+					document.location.reload();
+				}
+			});
+		}
+	}
+
+	var devices = {};
+	<%- JSON.stringify(devices) %>.forEach(function(device){
+		devices[device._id] = device;
+	});
 	</script>
 <% include ../fragments/footer.ejs %>

@@ -39,3 +39,9 @@ body {
 	float: left;
 	width: 500px;
 }
+
+.action {
+	padding: 1px;
+	margin: 1px;
+	border: 1px solid;
+}

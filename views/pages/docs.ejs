@@ -1,0 +1,46 @@
+<% include ../fragments/header.ejs %>
+<div class="container main">
+    <nav class="side-menu">
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="#createAccount">Create Account</a></li>
+        <li><a href="#linkAccount">Link Account</a></li>
+        <li><a href="#installNodes">Install Nodes</a></li>
+        <li><a href="#configNodes">Configure Nodes</a></li>
+      </ul>
+    </nav>
+
+    <div class="container main-content">
+      <h1>Documentation</h1>
+      <p>Welcome to the Node-RED Alexa Home Skill Bridge documentation</p>
+      <h2 id="createAccount">Create Account</h2>
+      <p>Before you start the first thing that needs to be done is to create an account on this site.
+      You can do this by clicking <a href="/newuser">here</a></p>
+      <p>While your here you can define some devices to control. Once you are logged ina "Devices" 
+      tab should appear in the menu at the top of the page. From here you can add new,
+      edit or delete existing devices.</p>
+      <img width="1133" height="276" src="/images/devices.png">
+      The name you give to the device will be how you access it from Alexa.
+      <h2 id="linkAccount">Link Account</h2>
+      <p>Once you have an account you need to add the Skill to your Alexa powered device. You can do 
+      this from Alexa app on your phone/tablet by searching for 'Node-RED'</p>
+      <h2 id="installNodes">Install Nodes</h2>
+      <p>node-red-contrib-alexa-home-skill provides the end point node to bring your commands into Node-RED.</p>
+      <p>There are serveral ways to install new nodes into Node-RED</p>
+      <p>The simplest is to use the installer built into the Node-RED admin UI.</p>
+      <p>You can also install the nodes from the command line</p>
+      <pre>
+cd ~/.node-red
+npm install node-red-contrib-alexa-home-skill</pre>
+      <p>And finally if you are embedding Node-RED into your own application you can add the node to 
+      the package.json file for your project and it will be included when you do an install.</p>
+      <pre>
+...
+  "dependencies": {
+    "node-red": "~0.15.x",
+    "node-red-contrib-alexa-home-skill": "*",
+...</pre>
+      <h2 id="configNodes">Configure Nodes</h2>
+      <p></p>
+    </div>
+</div>
+<% include ../fragments/footer.ejs %>
