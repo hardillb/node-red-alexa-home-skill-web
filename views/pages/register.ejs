@@ -2,8 +2,8 @@
   <div class="container main-content">
     <div id="register">
       <label style="width: 75px" for="username">Username:</label>
-      <input type="text" id="username"/>
-      <span>(can contain any utf-8 chars except /, + or #)</span>
+      <input type="text" onchange="validate()" id="username"/>
+      <span>(can contain any utf-8 chars except /, + or # and must not start with $)</span>
       <br>
       <label style="width: 75px" for="email">Email:</label>
       <input type="email" id="email"/>
@@ -45,6 +45,16 @@
       		
       		xhr.send(params);
       	};
+
+        function validate() {
+          var data = $('#username').val();
+          console.log(data);
+          if (data.indexOf('/') > 0 || data.indexOf('#') > 0 || data.indexOf('+') > 0) {
+            alert("invalid username");
+          } else if (data.indexOf('$') == 0) {
+            alert("invalid username");
+          }
+        }
       </script>
     </div>
   </div>

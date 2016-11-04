@@ -18,7 +18,7 @@ var GrantCodeSchema = new Schema({
 			return uid(24);
 		}
 	},
-	user: { type: Schema.Types.ObjectId, ref: 'User' },
+	user: { type: Schema.Types.ObjectId, ref: 'Account' },
 	application: { type: Schema.Types.ObjectId, ref: 'Application' },
 	scope: [ { type: String } ],
 	active: { type: Boolean, default: true }
@@ -29,7 +29,7 @@ var AccessTokenSchema = new Schema({
 			return uid(124);
 		}
 	},
-	user: { type: Schema.Types.ObjectId, ref: 'User' },
+	user: { type: Schema.Types.ObjectId, ref: 'Account' },
 	application: { type: Schema.Types.ObjectId, ref: 'Application' },
 	grant: { type: Schema.Types.ObjectId, ref: 'GrantCode' },
 	scope: [ { type: String }],

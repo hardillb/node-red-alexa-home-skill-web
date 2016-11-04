@@ -1,5 +1,6 @@
 var fs = require('fs');
 var url = require('url');
+var mqtt = require('mqtt');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
@@ -18,6 +19,25 @@ var oauthServer = require('./oauth');
 var port = (process.env.VCAP_APP_PORT || process.env.PORT ||3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var mongo_url = (process.env.MONGO_URL || 'mongodb://localhost/users');
+
+var mqtt_url = (process.env.MQTT_URL || 'mqtt://localhost:1883');
+var mqtt_user = (process.env.MQTT_USER || undefined);
+var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
+console.log(mqtt_url);
+
+var mqttOptions = {
+	keepAlive: 10,
+	clean: true,
+	clientId: 'webApp_' + Math.random().toString(16).substr(2, 8)
+};
+
+if (mqtt_user) {
+	mqttOptions.username = mqtt_user;
+	mqttOptions.password = mqtt_password;
+}
+
+var mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+
 
 if (process.env.VCAP_SERVICES) {
 	var services = JSON.parse(process.env.VCAP_SERVICES);
@@ -101,7 +121,7 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (token && token.active && token.grant.active && token.user) {
 			done(null, token.user, { scope: token.scope });
-		} else if (!error) {p
+		} else if (!error) {
 			done(null, false);
 		} else {
 			done(error);
@@ -289,6 +309,14 @@ app.post('/api/v1/command',
 	function(req,res,next){
 		console.log(req.user.username);
 		console.log(req.body);
+		var topic = req.user.username + "/" + req.body.payload.appliance.applianceId;
+		var message = JSON.stringify(req.body);
+		try{
+			mqttClient.publish(topic,message);
+		} catch (err) {
+
+		}
+		res.status(200).send();
 	}
 );
 
