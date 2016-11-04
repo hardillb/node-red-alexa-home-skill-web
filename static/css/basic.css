@@ -45,3 +45,29 @@ body {
 	margin: 1px;
 	border: 1px solid;
 }
+
+.service {
+	padding: 5px;
+	margin: 1px;
+	border: 1px solid;	
+}
+
+.serviceTitle {
+	float: left;
+	width: 200px;
+}
+
+.serviceId {
+	float: left;
+	width: 100px;
+}
+
+.serviceSecret {
+	float: left;
+	width: 150px;
+}
+
+.serviceDomains {
+}
+
+

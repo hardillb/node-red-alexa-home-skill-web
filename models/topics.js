@@ -8,4 +8,5 @@ var Topics = new Schema({
 },{ _id: false });
 
 Topics.plugin(AutoIncrement, {inc_field: '_id'});
+
 module.exports = mongoose.model('Topics', Topics);

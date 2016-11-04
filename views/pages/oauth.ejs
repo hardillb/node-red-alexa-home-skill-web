@@ -26,7 +26,7 @@
         <% if (user) { %>
             <div class="form-group">
                 <p>Signed in as <strong><%= user.name%></strong>.</p>
-                <a href="/logout?next=">Not </a><%= user.name%>?
+                <a href="/logout?next=">Not </a><%= user.username %>?
                 <input type="submit" value="Authorise">
             </div>
         <% } else { %>

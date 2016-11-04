@@ -111,6 +111,13 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 
 passport.use(accessTokenStrategy);
 
+app.get('/cleanDB', function(req,res){
+	Account.remove({});
+	Devices.remove({});
+	Topics.remove({});
+	res.send();
+});
+
 app.get('/', function(req,res){
 	res.render('pages/index', {user: req.user});
 });
@@ -264,14 +271,24 @@ app.post('/auth/exchange',function(req,res,next){
 app.get('/api/v1/discover',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
+		var user = req.user.username;
 
+		Devices.find({username:user}, function(err, data){
+			if (!err) {
+				console.log(data);
+				res.send(data);
+			} else {
+				res.status(404).send();
+			}
+		});
 	}
 );
 
 app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
-
+		console.log(req.user.username);
+		console.log(req.body);
 	}
 );
 
@@ -389,6 +406,110 @@ app.get('/api/v1/devices',
 		});
 	}
 );
+
+app.get('/services',
+	ensureAuthenticated, 
+	function(req,res){
+		if (req.user.username == 'hardillb') {
+			oauthModels.Application.find({}, function(error, data){
+				if (!error){
+					res.render('pages/services',{user:req.user, services: data});
+				}
+			});
+		} else {
+			res.redirect('/');
+		}
+});
+
+app.put('/services',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username == 'hardillb') {
+			
+			var application = oauthModels.Application(req.body);
+			application.save(function(err, application){
+				if (!err) {
+					res.status(201).send(application);
+				}
+			});
+		} else {
+			res.status(401).send();
+		}
+});
+
+app.post('/service/:id',
+	ensureAuthenticated,
+	function(req,res){
+		var service = req.body;
+		oauthModels.Application.findOne({_id: req.params.id},
+			function(err,data){
+				if (err) {
+						res.status(500);
+						res.send(err);
+					} else {
+						data.title = service.title;
+						data.oauth_secret = service.oauth_secret;
+						data.domains = service.domains;
+						data.save(function(err, d){
+							res.status(201);
+							res.send(d);
+						});
+					}
+			});
+});
+
+app.delete('/service/:id',
+	ensureAuthenticated,
+	function(req,res){
+		oauthModels.Application.remove({_id:req.params.id},
+			function(err){
+				if (!err) {
+					res.status(200).send();
+				} else {
+					res.status(500).send();
+				}
+			});
+});
+
+//Work around for not being able to access Mongo from container
+app.post('/mqtt/auth',function(req,res){
+	var username = req.body.username;
+	var password = req.body.password;
+	var topic = req.body.topic;
+	var acc = req.body.acc;
+
+	passport.authenticate('local',function(err,user,info){
+		if (!err && user) {
+			return res.status(200).send();
+		} else {
+			return res.status(401).send();
+		}
+	})(req, res, function () {
+		
+    });
+});
+
+app.post('/mqtt/acl',function(req,res){
+	var username = req.body.username;
+	var clientid = req.body.clientid;
+	var topic = req.body.topic;
+	var acc = req.body.acc;
+
+	if (topic.indexOf(username+'/') === 0) {
+		res.status(200).send();
+	} else {
+		res.status(401).send();
+	}
+});
+
+app.post('/mqtt/superuser',function(req,res){
+	var username = req.body.username;
+	if (username === 'hardillb') {
+		res.status(200).send();
+	} else {
+		res.status(401).send();
+	}
+});
 
 var server = http.Server(app);
 if (app_id.match(/^https:\/\/localhost:/)) {

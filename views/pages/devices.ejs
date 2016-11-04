@@ -1,7 +1,7 @@
 <% include ../fragments/header.ejs %>
 	<div class="container main-content">
 		<h1>Devices</h1>
-		<div class="decivesHeader">
+		<div class="deviceHeader">
 			<div class="deviceName"><strong>Name</strong></div>
 			<div class="deviceDescription"><strong>Description</strong></div>
 			<div class="deviceActions"><strong>Actions</strong></div>
@@ -23,6 +23,7 @@
 			<button onclick="addDevice();">Add Device</button>
 		</div>
 	</div>
+
 	<div id="dialog" hidden>
 		<input id="devID" type="hidden">
 		<label for="friendlyName">Name: </label>
@@ -52,6 +53,7 @@
 			<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature">
 		</fieldset>
 	</div>
+	
 	<script>
 	$( "#dialog" ).dialog({
 		autoOpen: false,

@@ -1,6 +1,7 @@
 var uid = require('uid2');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var AutoIncrement = require('mongoose-sequence');
 
 var ApplicationSchema = new Schema({
 	title: { type: String, required: true },
@@ -45,6 +46,8 @@ var AccessTokenSchema = new Schema({
 		}
 	}, default: true }
 });
+
+ApplicationSchema.plugin(AutoIncrement, {inc_field: 'oauth_id'});
 
 var Application = mongoose.model('Application', ApplicationSchema);
 var GrantCode = mongoose.model('GrantCode', GrantCodeSchema);
