@@ -25,6 +25,8 @@ var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 console.log(mqtt_url);
 
+var mqttClient;
+
 var mqttOptions = {
 	keepAlive: 10,
 	clean: true,
@@ -35,9 +37,6 @@ if (mqtt_user) {
 	mqttOptions.username = mqtt_user;
 	mqttOptions.password = mqtt_password;
 }
-
-var mqttClient = mqtt.connect(mqtt_url, mqttOptions);
-
 
 if (process.env.VCAP_SERVICES) {
 	var services = JSON.parse(process.env.VCAP_SERVICES);
@@ -144,6 +143,10 @@ app.get('/', function(req,res){
 
 app.get('/docs', function(req,res){
 	res.render('pages/docs', {user: req.user});
+});
+
+app.get('/about', function(req,res){
+	res.render('pages/about', {user: req.user});
 });
 
 app.get('/login', function(req,res){
@@ -295,11 +298,47 @@ app.get('/api/v1/discover',
 
 		Devices.find({username:user}, function(err, data){
 			if (!err) {
-				console.log(data);
-				res.send(data);
+				var devs = [];
+				for (var i=0; i<data.length; i++) {
+					var dev = {};
+					dev.friendlyName = data[i].friendlyName;
+					dev.friendlyDescription = data[i].friendlyDescription;
+					dev.applianceId = data[i].applianceId;
+					dev.isReachable = data[i].isReachable;
+					dev.actions = data[i].actions;
+					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
+
+					devs.push(dev);
+				}
+				console.log(devs);
+				res.send(devs);
 			} else {
 				res.status(404).send();
 			}
+		});
+	}
+);
+
+app.get('/api/v1/devices',
+	passport.authenticate('bearer', { session: false }),
+	function(req,res,next){
+		var user = req.user.username
+		Devices.find({username: user},function(error, data){
+			if (!error) {
+				var devs = [];
+				for (var i=0; i< data.length; i++) {
+					var dev = {};
+					dev.friendlyName = data[i].friendlyName;
+					dev.friendlyDescription = data[i].friendlyDescription;
+					dev.applianceId = data[i].applianceId;
+					dev.isReachable = data[i].isReachable;
+					dev.actions = data[i].actions;
+					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
+
+					devs.push(dev);
+				}
+				res.send(data);
+			}	
 		});
 	}
 );
@@ -403,7 +442,7 @@ app.post('/api/v1/devices',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		var devices = req.body;
-		if (typeof devices == 'object' && Array.isArray(foo)) {
+		if (typeof devices == 'object' && Array.isArray(devices)) {
 			for (var i=0; i<devices.lenght; i++) {
 				var applianceId = devices[i].applianceId;
 				Devices.update({
@@ -421,17 +460,6 @@ app.post('/api/v1/devices',
 		} else {
 			res.error(400);
 		}
-	}
-);
-
-app.get('/api/v1/devices',
-	passport.authenticate('bearer', { session: false }),
-	function(req,res,next){
-		Devices.find({username: req.user.username},function(error, data){
-			if (!error) {
-				res.send(data);
-			}	
-		});
 	}
 );
 
@@ -552,4 +580,14 @@ if (app_id.match(/^https:\/\/localhost:/)) {
 server.listen(port, host, function(){
 	console.log('App listening on  %s:%d!', host, port);
 	console.log("App_ID -> %s", app_id);
+
+	setTimeout(function(){
+		mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+		mqttClient.on('error',function(err){
+
+		});
+	},5000);
+	
+	
+	
 });
