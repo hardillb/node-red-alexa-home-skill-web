@@ -28,6 +28,8 @@ var users = {};
 passport.use(new OAuth2Strategy({
 	authorizationURL: 'https://alexa-node-red.eu-gb.mybluemix.net/auth/start',
 	tokenURL: 'https://alexa-node-red.eu-gb.mybluemix.net/auth/exchange',
+	// authorizationURL: 'https://localhost:3000/auth/start',
+	// tokenURL: 'https://localhost:3000/auth/exchange',
 	clientID: '2',
 	clientSecret: 'password1234',
 	scope: "access_devices",

@@ -118,11 +118,17 @@ passport.deserializeUser(Account.deserializeUser());
 
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+		// console.log("db token: " + token.active);
+		// console.log("db token.grant : " + token.grant.active);
+		// console.log("db token.user: " + token.user);
 		if (token && token.active && token.grant.active && token.user) {
+			// console.log("Token is GOOD!");
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
+			// console.log("TOKEN PROBLEM");
 			done(null, false);
 		} else {
+			// console.log("TOKEN PROBLEM 2");
 			done(error);
 		}
 	});
@@ -256,21 +262,27 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 });
 
 app.post('/auth/finish',function(req,res,next) {
+	//console.log("/auth/finish user: ", req.user);
 	if (req.user) {
 		next();
 	} else {
 		passport.authenticate('local', {
 			session: false
 		}, function(error,user,info){
+			//console.log("/auth/finish authenting");
 			if (user) {
+				//console.log(user.username);
+				req.user = user;
 				next();
 			} else if (!error){
+				//console.log("not authed");
 				req.flash('error', 'Your email or password was incorrect. Try again.');
 				res.redirect(req.body['auth_url'])
 			}
  		})(req,res,next);
 	}
 }, oauthServer.decision(function(req,done){
+	//console.log("decision user: ", req);
 	done(null, { scope: req.oauth2.req.scope });
 }));
 
@@ -291,37 +303,42 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
-app.get('/api/v1/discover',
-	passport.authenticate('bearer', { session: false }),
-	function(req,res,next){
-		var user = req.user.username;
+// app.get('/api/v1/discover',
+// 	passport.authenticate('bearer', { session: false }),
+// 	function(req,res,next){
 
-		Devices.find({username:user}, function(err, data){
-			if (!err) {
-				var devs = [];
-				for (var i=0; i<data.length; i++) {
-					var dev = {};
-					dev.friendlyName = data[i].friendlyName;
-					dev.friendlyDescription = data[i].friendlyDescription;
-					dev.applianceId = data[i].applianceId;
-					dev.isReachable = data[i].isReachable;
-					dev.actions = data[i].actions;
-					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
+// 		console.log("all good, doing discover");
+// 		var user = req.user.username;
 
-					devs.push(dev);
-				}
-				console.log(devs);
-				res.send(devs);
-			} else {
-				res.status(404).send();
-			}
-		});
-	}
-);
+// 		Devices.find({username:user}, function(err, data){
+// 			if (!err) {
+// 				var devs = [];
+// 				for (var i=0; i<data.length; i++) {
+// 					var dev = {};
+// 					dev.friendlyName = data[i].friendlyName;
+// 					dev.friendlyDescription = data[i].friendlyDescription;
+// 					dev.applianceId =  "" + data[i].applianceId;
+// 					dev.isReachable = data[i].isReachable;
+// 					dev.actions = data[i].actions;
+// 					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
+
+// 					devs.push(dev);
+// 				}
+// 				console.log(devs);
+// 				res.send(devs);
+// 			} else {
+// 				res.status(404).send();
+// 			}
+// 		});
+// 	}
+// );
 
 app.get('/api/v1/devices',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
+
+		console.log("all good, doing discover devices");
+
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
 			if (!error) {
@@ -330,14 +347,18 @@ app.get('/api/v1/devices',
 					var dev = {};
 					dev.friendlyName = data[i].friendlyName;
 					dev.friendlyDescription = data[i].friendlyDescription;
-					dev.applianceId = data[i].applianceId;
+					dev.applianceId = "" + data[i].applianceId;
 					dev.isReachable = data[i].isReachable;
 					dev.actions = data[i].actions;
 					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
+					dev.modelName = "Node-RED Endpoint";
+					dev.version = "0.0.1";
+					dev.manufacturerName = "Node-RED"
 
 					devs.push(dev);
 				}
-				res.send(data);
+				console.log(devs)
+				res.send(devs);
 			}	
 		});
 	}
@@ -349,6 +370,7 @@ app.post('/api/v1/command',
 		console.log(req.user.username);
 		console.log(req.body);
 		var topic = req.user.username + "/" + req.body.payload.appliance.applianceId;
+		delete req.body.payload.accessToken;
 		var message = JSON.stringify(req.body);
 		try{
 			mqttClient.publish(topic,message);

@@ -6,6 +6,8 @@ var server = oauth2orize.createServer();
 server.grant(oauth2orize.grant.code({
 	scopeSeparator: [ ' ', ',' ]
 }, function(application, redirectURI, user, ares, done) {
+	//console.log("grant user: ", user);
+
 	var grant = new OAuth.GrantCode({
 		application: application,
 		user: user,
@@ -21,20 +23,31 @@ server.exchange(oauth2orize.exchange.code({
 }, function(application, code, redirectURI, done) {
 	OAuth.GrantCode.findOne({ code: code }, function(error, grant) {
 		if (grant && grant.active && grant.application == application.id) {
+			//console.log("exchange user ", grant.user);
 			var token = new OAuth.AccessToken({
 				application: grant.application,
 				user: grant.user,
 				grant: grant,
 				scope: grant.scope
 			});
+
 			token.save(function(error) {
-				done(error, error ? null : token.token, null, error ? null : { token_type: 'standard' });
+
+				var refreshToken = new OAuth.RefreshToken({
+					user: grant.user,
+					application: grant.application
+				});
+
+				refreshToken.save(function(error){
+					done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'standard' });
+				});
 			});
 		} else {
 			done(error, false);
 		}
 	});
 }));
+
 
 server.serializeClient(function(application, done) {
 	done(null, application.id);
