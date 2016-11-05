@@ -11,6 +11,7 @@ var passport = require('passport');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 
@@ -112,6 +113,8 @@ app.use(requireHTTPS);
 app.use('/',express.static('static'));
 
 passport.use(new LocalStrategy(Account.authenticate()));
+
+passport.use(new BasicStrategy(Account.authenticate()));
 
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
@@ -334,7 +337,7 @@ app.post('/auth/exchange',function(req,res,next){
 // );
 
 app.get('/api/v1/devices',
-	passport.authenticate('bearer', { session: false }),
+	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 
 		console.log("all good, doing discover devices");
