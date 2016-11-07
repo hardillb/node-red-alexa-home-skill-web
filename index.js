@@ -147,15 +147,15 @@ app.get('/cleanDB', function(req,res){
 });
 
 app.get('/', function(req,res){
-	res.render('pages/index', {user: req.user});
+	res.render('pages/index', {user: req.user, home: true});
 });
 
 app.get('/docs', function(req,res){
-	res.render('pages/docs', {user: req.user});
+	res.render('pages/docs', {user: req.user, docs: true});
 });
 
 app.get('/about', function(req,res){
-	res.render('pages/about', {user: req.user});
+	res.render('pages/about', {user: req.user, about: true});
 });
 
 app.get('/login', function(req,res){
@@ -392,7 +392,7 @@ app.get('/devices',
 		Devices.find({username:user}, function(err, data){
 			if (!err) {
 				console.log(data);
-				res.render('pages/devices',{user: req.user ,devices: data});
+				res.render('pages/devices',{user: req.user ,devices: data, devs: true});
 			}
 		});
 });
