@@ -12,18 +12,25 @@
     <div class="container main-content">
       <h1>Documentation</h1>
       <p>Welcome to the Node-RED Alexa Home Skill Bridge documentation</p>
+      
       <h2 id="createAccount">Create Account</h2>
       <p>Before you start the first thing that needs to be done is to create an account on this site.
       You can do this by clicking <a href="/newuser">here</a></p>
-      <p>While your here you can define some devices to control. Once you are logged ina "Devices" 
-      tab should appear in the menu at the top of the page. From here you can add new,
-      edit or delete existing devices.</p>
+      <p>After you have created an account you need to define some devices to control. Once you are 
+      logged ina "Devices" tab should appear in the menu at the top of the page. From here you can 
+      add new, edit or delete existing devices.</p>
       <img width="1133" height="276" src="/images/devices.png">
       The name you give to the device will be how you access it from Alexa.
+      
       <h2 id="linkAccount">Link Account</h2>
       <p>Once you have an account you need to add the Skill to your Alexa powered device. You can do 
-      this from Alexa app on your phone/tablet by searching for 'Node-RED'</p>
+      this from Alexa app on your phone/tablet by searching for 'Node-RED' in the Skills section. Once
+      enabled you will be asked to link your account. This will ask for the same username and password
+      you used when you created the account here.</p>
+      <p>Once the accounts are linked you can discover the devices you declared earlier.</p>
+      
       <h2 id="installNodes">Install Nodes</h2>
+      <p>Now that the Echo side of things is all setup it's time to set up Node-RED.</p>
       <p>node-red-contrib-alexa-home-skill provides the end point node to bring your commands into Node-RED.</p>
       <p>There are serveral ways to install new nodes into Node-RED</p>
       <p>The simplest is to use the installer built into the Node-RED admin UI.</p>
@@ -39,8 +46,10 @@ npm install node-red-contrib-alexa-home-skill</pre>
     "node-red": "~0.15.x",
     "node-red-contrib-alexa-home-skill": "*",
 ...</pre>
+      
       <h2 id="configNodes">Configure Nodes</h2>
-      <p></p>
+      <p>Configuring the nodes is relatively simple, just enter your username and password into the config 
+      node and then select the device you want to receive commands from.</p>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
