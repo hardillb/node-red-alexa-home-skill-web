@@ -27,29 +27,45 @@
       this from Alexa app on your phone/tablet by searching for 'Node-RED' in the Skills section. Once
       enabled you will be asked to link your account. This will ask for the same username and password
       you used when you created the account here.</p>
-      <p>Once the accounts are linked you can discover the devices you declared earlier.</p>
+      <p>Once the accounts are linked you can discover the devices you declared earlier. You can do 
+      this from within the app or by saying "Alexa, discover devices".</p>
       
       <h2 id="installNodes">Install Nodes</h2>
       <p>Now that the Echo side of things is all setup it's time to set up Node-RED.</p>
-      <p>node-red-contrib-alexa-home-skill provides the end point node to bring your commands into Node-RED.</p>
-      <p>There are serveral ways to install new nodes into Node-RED</p>
-      <p>The simplest is to use the installer built into the Node-RED admin UI.</p>
-      <p>You can also install the nodes from the command line</p>
+      <p>node-red-contrib-alexa-home-skill provides the end point node to bring your commands into 
+      Node-RED.</p>
+      <p>There are serveral ways to install new nodes into Node-RED. There is detailed documentation
+      on how to install nodes on the Node-RED website 
+      <a href="http://nodered.org/docs/getting-started/adding-nodes">here</a>, but here's a quick 
+      version.</p>
+      <ul>
+      <li><p>The simplest is to use the installer built into the Node-RED admin UI. You do this by clicking 
+      on the menu icon in the top right hand corner, then selecting "Manage Pallet". Then on the left 
+      hand side select install, type "node-red-contrib-alexa-home-skill" in the box. Finally click on
+      the install button for the node in the list.</p>
+      </li>
+      <li><p>You can also install the nodes from the command line</p>
       <pre>
 cd ~/.node-red
 npm install node-red-contrib-alexa-home-skill</pre>
-      <p>And finally if you are embedding Node-RED into your own application you can add the node to 
+      </li>
+      <li><p>And finally if you are embedding Node-RED into your own application you can add the node to 
       the package.json file for your project and it will be included when you do an install.</p>
       <pre>
 ...
   "dependencies": {
     "node-red": "~0.15.x",
     "node-red-contrib-alexa-home-skill": "*",
-...</pre>
+...</pre></li>
+    </ul>
       
       <h2 id="configNodes">Configure Nodes</h2>
       <p>Configuring the nodes is relatively simple, just enter your username and password into the config 
-      node and then select the device you want to receive commands from.</p>
+      node.</p>
+      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/user-password.png">
+      <br>
+      <p>and then select the device you want to receive commands from.</p>
+      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/pick-device.png">
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
