@@ -8,7 +8,10 @@ var Account = new Schema({
     email: String,
     mqttPass: { type: String, default: '' },
     superuser: { type: Number, default: 0},
-    topics: { type: Number}
+    topics: { type: Number},
+    created: { type: Date, default: function(){
+        return new Date();
+    }}
 });
 
 var options = {

@@ -47,18 +47,83 @@ if (process.env.VCAP_SERVICES) {
 			var creds = services[serviceName][0]['credentials'];
 			mongo_url = creds.url;
 		} else {
-			console.log("no database found");
+			console.log("no database found in vcap_services");
 		}
 	}
 }
 
 console.log(mongo_url);
+var mongoose_options = {
+	server: {
+		auto_reconnect:true,
+		reconnectTries: Number.MAX_VALUE
+	}
+};
+var mongoose_connection = mongoose.connection;
+
+mongoose_connection.on('connecting', function() {
+	console.log('connecting to MongoDB...');
+});
+
+mongoose_connection.on('error', function(error) {
+	console.error('Error in MongoDb connection: ' + error);
+	mongoose.disconnect();
+});
+
+mongoose_connection.on('connected', function() {
+    console.log('MongoDB connected!');
+});
+  
+mongoose_connection.once('open', function() {
+    console.log('MongoDB connection opened!');
+});
+
+mongoose_connection.on('reconnected', function () {
+    console.log('MongoDB reconnected!');
+});
+
+mongoose_connection.on('disconnected', function() {
+	console.log('MongoDB disconnected!');
+});
+
 mongoose.connect(mongo_url);
 
 var Account = require('./models/account');
 var oauthModels = require('./models/oauth');
 var Devices = require('./models/devices');
 var Topics = require('./models/topics');
+
+Account.findOne({username: mqtt_user}, function(error, account){
+	if (!error && !account) {
+		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1}),
+			mqtt_password, function(err, account){
+
+			var topics = new Topics({topics: [account.username+'/#']});
+			topics.save(function(err){
+				if (!err){
+
+					var s = Buffer.from(account.salt, 'hex').toString('base64');
+					var h = Buffer.from(account.hash, 'hex').toString(('base64'));
+
+					var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
+
+					Account.update(
+						{username: account.username}, 
+						{$set: {mqttPass: mqttPass, topics: topics._id}}, 
+						{ multi: false },
+						function(err, count){
+							if (err) {
+								console.log(err);
+							}
+						}
+					);
+				}
+			});
+		});
+	} else {
+		console.log("MQTT account already exists");
+	}
+});
 
 var app_id = 'https://localhost:' + port;
 
@@ -171,7 +236,7 @@ app.get('/logout', function(req,res){
 app.post('/login',
 	passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
 	function(req,res){
-		res.redirect('/');
+		res.redirect('/devices');
 	});
 
 function ensureAuthenticated(req,res,next) {
@@ -305,36 +370,6 @@ app.post('/auth/exchange',function(req,res,next){
 		}
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
-
-// app.get('/api/v1/discover',
-// 	passport.authenticate('bearer', { session: false }),
-// 	function(req,res,next){
-
-// 		console.log("all good, doing discover");
-// 		var user = req.user.username;
-
-// 		Devices.find({username:user}, function(err, data){
-// 			if (!err) {
-// 				var devs = [];
-// 				for (var i=0; i<data.length; i++) {
-// 					var dev = {};
-// 					dev.friendlyName = data[i].friendlyName;
-// 					dev.friendlyDescription = data[i].friendlyDescription;
-// 					dev.applianceId =  "" + data[i].applianceId;
-// 					dev.isReachable = data[i].isReachable;
-// 					dev.actions = data[i].actions;
-// 					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
-
-// 					devs.push(dev);
-// 				}
-// 				console.log(devs);
-// 				res.send(devs);
-// 			} else {
-// 				res.status(404).send();
-// 			}
-// 		});
-// 	}
-// );
 
 app.get('/api/v1/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
@@ -488,10 +523,20 @@ app.post('/api/v1/devices',
 	}
 );
 
-app.get('/services',
+app.get('/admin',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username == mqtt_user) {
+			Account.count({},function(err, count){
+				res.render('pages/admin',{user:req.user, userCount: count});
+			});
+		}
+});
+
+app.get('/admin/services',
 	ensureAuthenticated, 
 	function(req,res){
-		if (req.user.username == 'hardillb') {
+		if (req.user.username === mqtt_user) {
 			oauthModels.Application.find({}, function(error, data){
 				if (!error){
 					res.render('pages/services',{user:req.user, services: data});
@@ -502,10 +547,34 @@ app.get('/services',
 		}
 });
 
+app.get('/admin/users',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) {
+			Account.find({}, function(error, data){
+				res.send(data);
+			});
+		} else {
+			res.status(401).send();
+		}
+});
+
+app.get('/admin/devices',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) {
+			Devices.find({},function(error, data){
+				res.send(data);
+			});
+		} else {
+			res.status(401).send();
+		}
+	});
+
 app.put('/services',
 	ensureAuthenticated,
 	function(req,res){
-		if (req.user.username == 'hardillb') {
+		if (req.user.username == mqtt_user) {
 			
 			var application = oauthModels.Application(req.body);
 			application.save(function(err, application){
@@ -552,7 +621,7 @@ app.delete('/service/:id',
 			});
 });
 
-//Work around for not being able to access Mongo from container
+// Work around for not being able to access Mongo from container
 app.post('/mqtt/auth',function(req,res){
 	var username = req.body.username;
 	var password = req.body.password;
@@ -585,7 +654,7 @@ app.post('/mqtt/acl',function(req,res){
 
 app.post('/mqtt/superuser',function(req,res){
 	var username = req.body.username;
-	if (username === 'hardillb') {
+	if (username === mqtt_user) {
 		res.status(200).send();
 	} else {
 		res.status(401).send();
