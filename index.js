@@ -258,7 +258,7 @@ app.post('/newuser', function(req,res){
 			return res.status(400).send(err.message);
 		}
 
-		var topics = new Topics({topics: [account.username+'/#']});
+		var topics = new Topics({topics: ['command/' +account.username+'/#', 'presence/'+ account.username+ '/#']});
 		topics.save(function(err){
 			if (!err){
 
@@ -407,7 +407,7 @@ app.post('/api/v1/command',
 	function(req,res,next){
 		console.log(req.user.username);
 		console.log(req.body);
-		var topic = req.user.username + "/" + req.body.payload.appliance.applianceId;
+		var topic = "command/" +req.user.username + "/" + req.body.payload.appliance.applianceId;
 		delete req.body.payload.accessToken;
 		var message = JSON.stringify(req.body);
 		try{
@@ -530,6 +530,8 @@ app.get('/admin',
 			Account.count({},function(err, count){
 				res.render('pages/admin',{user:req.user, userCount: count});
 			});
+		} else {
+			res.redirect('/');
 		}
 });
 
@@ -543,7 +545,7 @@ app.get('/admin/services',
 				}
 			});
 		} else {
-			res.redirect('/');
+			res.status(401).send();
 		}
 });
 

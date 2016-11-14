@@ -44,7 +44,7 @@
   </nav>
   <div class="container login">
     <% if (user) { %>
-      <a href="/logout">Logout</a>
+      <a href="/logout">Logout</a> - <%= user.username %>
     <% } else { %>
       <a href="/login">Login</a> or <a href="/newuser">Register</a>
     <% } %>
