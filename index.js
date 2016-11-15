@@ -98,7 +98,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1}),
 			mqtt_password, function(err, account){
 
-			var topics = new Topics({topics: [account.username+'/#']});
+			var topics = new Topics({topics: ['command/' +account.username+'/#', 'presence/' + account.username + '/#']});
 			topics.save(function(err){
 				if (!err){
 
