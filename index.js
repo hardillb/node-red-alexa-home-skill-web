@@ -4,9 +4,9 @@ var mqtt = require('mqtt');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
+var morgan = require('morgan');
 var express = require('express');
 var session = require('express-session');
-var morgan = require('morgan');
 var passport = require('passport');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
@@ -203,13 +203,6 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 });
 
 passport.use(accessTokenStrategy);
-
-app.get('/cleanDB', function(req,res){
-	Account.remove({});
-	Devices.remove({});
-	Topics.remove({});
-	res.send();
-});
 
 app.get('/', function(req,res){
 	res.render('pages/index', {user: req.user, home: true});
@@ -624,44 +617,51 @@ app.delete('/service/:id',
 });
 
 // Work around for not being able to access Mongo from container
-app.post('/mqtt/auth',function(req,res){
-	var username = req.body.username;
-	var password = req.body.password;
-	var topic = req.body.topic;
-	var acc = req.body.acc;
+// app.post('/mqtt/auth',function(req,res){
+// 	var username = req.body.username;
+// 	var password = req.body.password;
+// 	var topic = req.body.topic;
+// 	var acc = req.body.acc;
 
-	passport.authenticate('local',function(err,user,info){
-		if (!err && user) {
-			return res.status(200).send();
-		} else {
-			return res.status(401).send();
-		}
-	})(req, res, function () {
+// 	passport.authenticate('local',function(err,user,info){
+// 		if (!err && user) {
+// 			return res.status(200).send();
+// 		} else {
+// 			return res.status(401).send();
+// 		}
+// 	})(req, res, function () {
 		
-    });
-});
+//     });
+// });
 
-app.post('/mqtt/acl',function(req,res){
-	var username = req.body.username;
-	var clientid = req.body.clientid;
-	var topic = req.body.topic;
-	var acc = req.body.acc;
+// app.post('/mqtt/acl',function(req,res){
+// 	var username = req.body.username;
+// 	var clientid = req.body.clientid;
+// 	var topic = req.body.topic;
+// 	var acc = req.body.acc;
 
-	if (topic.indexOf(username+'/') === 0) {
-		res.status(200).send();
-	} else {
-		res.status(401).send();
-	}
-});
+// 	if (topic.indexOf(username+'/') === 0) {
+// 		res.status(200).send();
+// 	} else {
+// 		res.status(401).send();
+// 	}
+// });
 
-app.post('/mqtt/superuser',function(req,res){
-	var username = req.body.username;
-	if (username === mqtt_user) {
-		res.status(200).send();
-	} else {
-		res.status(401).send();
-	}
-});
+// app.post('/mqtt/superuser',function(req,res){
+// 	var username = req.body.username;
+// 	if (username === mqtt_user) {
+// 		res.status(200).send();
+// 	} else {
+// 		res.status(401).send();
+// 	}
+// });
+
+// app.get('/cleanDB', function(req,res){
+// 	Account.remove({});
+// 	Devices.remove({});
+// 	Topics.remove({});
+// 	res.send();
+// });
 
 var server = http.Server(app);
 if (app_id.match(/^https:\/\/localhost:/)) {
