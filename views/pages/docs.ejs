@@ -79,38 +79,40 @@ npm install node-red-contrib-alexa-home-skill</pre>
       </ul>
       <p>To start with leave the Auto Acknoledge checked, this tells Alexa that the command has succeeded as soon
       as it is received by Node-RED. If you want to report failures then you can uncheck this option and user the
-      Alexa Home Resp node to signal sucess or failure.</p>
+      Alexa Home Resp node to signal sucess or failure. Details about the Alexa Home Resp node are in the Building
+      Flows section of the documentation.</p>
 
       <h2 id="buidFlows">Building Flows</h2>
+      <h3>Alexa Home</h3>
       <p>The Alexa Home node outputs a message that looks like this:</p>
       
     <pre>{
-  _messageId: (UUID),
-  _applianceId: 3,
-  _confId: (a node id),
+  _messageId: 'd6734865-6a96-4967-8504-6056e75ba5c3',
+  _applianceId: '3',
+  _confId: 'cc670790.9f0eb8',
   "command": "TurnOnRequest",
   "extraInfo": {},
   payload: true
 }</pre>
     <p>or</p>
     <pre>{
-  _messageId: (UUID),
-  _applianceId: 3,
-  _confId: (a node id),
+  _messageId: 'd6734865-6a96-4967-8504-6056e75ba5c3',
+  _applianceId: '3',
+  _confId: 'cc670790.9f0eb8',
   "command": "SetPercentageRequest",
   "extraInfo": {},
   payload: 50
 }</pre>
     <p>or</p>
     <pre>{
-  _messageId: (UUID),
-  _applianceId: 3,
-  _confId: (a node id),
+  _messageId: 'd6734865-6a96-4967-8504-6056e75ba5c3',
+  _applianceId: '3',
+  _confId: 'cc670790.9f0eb8',
   "command": "DecrementTemperatureRequest",
   "extraInfo": {},
   payload: -5
 }</pre>
-      <p>The important bits ae the <i>payload.command</i> and the <i>payload.value</i> if present. The command will be one of the following list (that corresponds to the capabilities you added to the device when you defined it):</p>
+      <p>The important bits ae the <i>msg.command</i> and the <i>msg.payload</i>. The <i>msg.command</i> will be one of the following list (that corresponds to the capabilities you added to the device when you defined it):</p>
       <ul>
         <li>TurnOnRequest</li>
         <li>TurnOffRequest</li>
@@ -121,8 +123,70 @@ npm install node-red-contrib-alexa-home-skill</pre>
         <li>IncrementTemperatureRequest</li>
         <li>DecrementTemperatureRequest</li>
       </ul>
-      <p>The payload field will hold positive numbers for the Set and Incrment versions of commands and negative numbers
+      <p>The payload field will hold positive numbers for the Set and Increment versions of commands and negative numbers
       for the Decrement versions. For TurnOn/TurnOff the payload will be true/false</p>
+
+      <p>With this you can build a flow to turn a light on for a specific length of time or until turned off:</p>
+
+      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/on-for-5min-small.png">
+
+      <p>The Switch node works out which command was used:</p>
+
+      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/switch-node-small.png">
+
+      <p>The Trigger node sets the length of time the light should be on for:</p>
+
+      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/trigger-node-small.png">
+
+      <p>The Change node resets the Trigger node by setting the <i>msg.reset</i> and removing <i>msg.payload</i></p>
+
+      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/change-node-small.png">
+
+      <p>And all this feeds into the WeMo node to control a WeMo light bulb.</p>
+
+      <h3>Alexa Home Resp</h3>
+      <p>The Alexa Home Resp node is for if you want to have more control over the response sent back to the Alexa service.
+      Messages passed to this node need to have orginated from a Alexa Home node as information required to respond to the
+      specific request are attached to that message. To use this node you need to uncheck <i>Auto Acknoledge</i></p>
+
+      <p>For TurnOnRequest/TurnOffRequest and SetPercentageRequest/IncrementPercentageRequest/DecrementPercentageRequest 
+      requests setting the <i>msg.payload</i> of the input message to true/false to signify success or failure.</p>
+
+      <p>For SetTemperatureRequest/IncrementTemperatureRequest/DecrementTemperatureRequest requrest you can also include a
+      <i>msg.extra</i> object.</p>
+      <p>When the input value is outside the supported range, the <i>msg.extra</i> should look like this:</p>
+      <pre>{
+    min: 10.0,
+    max: 30.0
+}</pre>
+      <p>For a sucessful target temperature change the <i>msg.extra</i> should be simiar to this:</p>
+      <pre>{
+    targetTemperature: { 
+        value: 21.0
+    }
+}</pre>
+      <p>An example would be to use a function node with 2 output and the following code:</p>
+      <pre>if (msg.payload < 10 || msg.payload > 30) {
+    var range = {
+        min: 10,
+        max: 30
+    }
+    msg.payload = false;
+    msg.extra = range;
+    
+    return [[],msg];
+} else {
+    var success = RED.util.cloneMessage(msg);
+    success.payload = true;
+    success.extra = {
+        targetTemperature: {
+            value: msg.payload
+        }
+    }
+    return [[msg],success];
+}</pre>
+      <p>This enforces a temperature range between 10&deg;C and 30&deg;C, sending the Alexa response to the second output and 
+      if in range the control message is sent to the first function output.</p>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
