@@ -6,6 +6,7 @@
         <li><a href="#linkAccount">Link Account</a></li>
         <li><a href="#installNodes">Install Nodes</a></li>
         <li><a href="#configNodes">Configure Nodes</a></li>
+        <li><a href="#buildFlows">Building Flows</a></li>
       </ul>
     </nav>
 
@@ -60,12 +61,68 @@ npm install node-red-contrib-alexa-home-skill</pre>
     </ul>
       
       <h2 id="configNodes">Configure Nodes</h2>
-      <p>Configuring the nodes is relatively simple, just enter your username and password into the config 
-      node.</p>
-      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/user-password.png">
-      <br>
-      <p>and then select the device you want to receive commands from.</p>
-      <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/pick-device.png">
+      <p>You can find the Alexa Home Skill nodes in the alexa section of the Node-RED pallette.</p>
+      <img style="margin-right: auto; margin-left: auto; display: block" src="/images/alexa-nodes.png">
+      <p>Once you've dragged a Alexa Home node on to the canvas, configuring it is relatively simple<p>
+      <ul> 
+        <li>Click on the pencil at the end of the Accounts line to add a new account</li>
+        <li>
+          <p>Enter your username and password</p>
+          <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/user-password.png">
+        </li>
+        <li>Click OK to return to the node config</li>
+        <li>
+          <p>The devices drop down should now be populated with the devices you defined earlier, if 
+          not hit the refresh button at the end.</p>
+          <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/pick-device.png">
+        </li>
+      </ul>
+      <p>To start with leave the Auto Acknoledge checked, this tells Alexa that the command has succeeded as soon
+      as it is received by Node-RED. If you want to report failures then you can uncheck this option and user the
+      Alexa Home Resp node to signal sucess or failure.</p>
+
+      <h2 id="buidFlows">Building Flows</h2>
+      <p>The Alexa Home node outputs a message that looks like this:</p>
+      
+    <pre>{
+  _messageId: (UUID),
+  _applianceId: 3,
+  _confId: (a node id),
+  "command": "TurnOnRequest",
+  "extraInfo": {},
+  payload: true
+}</pre>
+    <p>or</p>
+    <pre>{
+  _messageId: (UUID),
+  _applianceId: 3,
+  _confId: (a node id),
+  "command": "SetPercentageRequest",
+  "extraInfo": {},
+  payload: 50
+}</pre>
+    <p>or</p>
+    <pre>{
+  _messageId: (UUID),
+  _applianceId: 3,
+  _confId: (a node id),
+  "command": "DecrementTemperatureRequest",
+  "extraInfo": {},
+  payload: -5
+}</pre>
+      <p>The important bits ae the <i>payload.command</i> and the <i>payload.value</i> if present. The command will be one of the following list (that corresponds to the capabilities you added to the device when you defined it):</p>
+      <ul>
+        <li>TurnOnRequest</li>
+        <li>TurnOffRequest</li>
+        <li>SetPercentageRequest</li>
+        <li>IncrementPercentageRequest</li>
+        <li>DecrementPercentageRequest</li>
+        <li>SetTemperatureRequest</li>
+        <li>IncrementTemperatureRequest</li>
+        <li>DecrementTemperatureRequest</li>
+      </ul>
+      <p>The payload field will hold positive numbers for the Set and Incrment versions of commands and negative numbers
+      for the Decrement versions. For TurnOn/TurnOff the payload will be true/false</p>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>

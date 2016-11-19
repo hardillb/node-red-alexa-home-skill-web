@@ -29,6 +29,7 @@ console.log(mqtt_url);
 var mqttClient;
 
 var mqttOptions = {
+	reconnectPeriod: 3000,
 	keepAlive: 10,
 	clean: true,
 	clientId: 'webApp_' + Math.random().toString(16).substr(2, 8)
@@ -38,6 +39,20 @@ if (mqtt_user) {
 	mqttOptions.username = mqtt_user;
 	mqttOptions.password = mqtt_password;
 }
+
+mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+
+mqttClient.on('error',function(err){
+});
+
+mqttClient.on('reconnect', function(){
+
+});
+
+mqttClient.on('connect', function(){
+	mqttClient.subscribe('response/#');
+});
+
 
 if (process.env.VCAP_SERVICES) {
 	var services = JSON.parse(process.env.VCAP_SERVICES);
@@ -98,7 +113,11 @@ Account.findOne({username: mqtt_user}, function(error, account){
 		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1}),
 			mqtt_password, function(err, account){
 
-			var topics = new Topics({topics: ['command/' +account.username+'/#', 'presence/' + account.username + '/#']});
+			var topics = new Topics({topics: [
+					'command/' +account.username+'/#', 
+					'presence/' + account.username + '/#',
+					'response/' + account.username + '/#'
+				]});
 			topics.save(function(err){
 				if (!err){
 
@@ -251,7 +270,11 @@ app.post('/newuser', function(req,res){
 			return res.status(400).send(err.message);
 		}
 
-		var topics = new Topics({topics: ['command/' +account.username+'/#', 'presence/'+ account.username+ '/#']});
+		var topics = new Topics({topics: [
+				'command/' + account.username +'/#', 
+				'presence/'+ account.username + '/#',
+				'response/' + account.username + '/#'
+			]});
 		topics.save(function(err){
 			if (!err){
 
@@ -395,6 +418,45 @@ app.get('/api/v1/devices',
 	}
 );
 
+var onGoingCommands = {};
+
+mqttClient.on('message',function(topic,message){
+	if (topic.startsWith('response/')){
+		var payload = JSON.parse(message.toString());
+		var waiting = onGoingCommands[payload.messageId];
+		if (waiting) {
+			console.log(payload);
+			if (payload.success) {
+				waiting.res.status(200).send();
+			} else {
+				if (payload.range) {
+					waiting.res.status(416).send(payload.range);
+				} else {
+					waiting.res.status(503).send();
+				}
+			}
+			delete onGoingCommands[payload.messageId];
+		}
+	}
+});
+
+var timeout = setInterval(function(){
+	var now = Date.now();
+	var keys = Object.keys(onGoingCommands);
+	for (key in keys){
+		var waiting = onGoingCommands[keys[key]];
+		console.log(keys[key]);
+		if (waiting) {
+			var diff = now - waiting.timestamp;
+			if (diff > 4000) {
+				console.log("timed out");
+				waiting.res.status(504).send('{"error": "timeout"}');
+				delete onGoingCommands[keys[key]];
+			}
+		}
+	}
+},500);
+
 app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
@@ -408,7 +470,11 @@ app.post('/api/v1/command',
 		} catch (err) {
 
 		}
-		res.status(200).send();
+		var command = {
+			res: res,
+			timestamp: Date.now()
+		};
+		onGoingCommands[req.body.header.messageId] = command;
 	}
 );
 
@@ -678,10 +744,7 @@ server.listen(port, host, function(){
 	console.log("App_ID -> %s", app_id);
 
 	setTimeout(function(){
-		mqttClient = mqtt.connect(mqtt_url, mqttOptions);
-		mqttClient.on('error',function(err){
-
-		});
+		
 	},5000);
 	
 	

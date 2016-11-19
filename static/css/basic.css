@@ -37,8 +37,12 @@ body {
 
 .deviceDescription {
 	float: left;
-	width: 500px;
+	width: 400px;
 }
+
+/*.deviceActions {
+	width: 200px;	
+}*/
 
 .action {
 	padding: 1px;
