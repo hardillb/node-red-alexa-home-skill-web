@@ -38,19 +38,23 @@
 			<label for="turnOff">Off: </label>
 			<input type="checkbox" name="actions" id="turnOff" value="turnOff">
 			<br>
-			<label for="setPercentage">%: </label>
-			<input type="checkbox" name="actions" id="setPercentage" value="setPercentage">
-			<label for="incrementPercentage">+%: </label>
-			<input type="checkbox" name="actions" id="incrementPercentage" value="incrementPercentage">
-			<label for="decrementPercentage">-%: </label>
-			<input type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage">
+			<fieldset id="percentCheck">
+				<label for="setPercentage">%: </label>
+				<input type="checkbox" name="actions" id="setPercentage" value="setPercentage" onclick='checkCapability(this)'>
+				<label for="incrementPercentage">+%: </label>
+				<input type="checkbox" name="actions" id="incrementPercentage" value="incrementPercentage" onclick='checkCapability(this)'>
+				<label for="decrementPercentage">-%: </label>
+				<input type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage" onclick='checkCapability(this)'>
+			</fieldset>
 			<br>
-			<label for="setTargetTemperature">&deg;C/F: </label>
-			<input type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature">
-			<label for="incrementTargetTemperature">+&deg;C/F: </label>
-			<input type="checkbox" name="actions" id="incrementTargetTemperature" value="incrementTargetTemperature">
-			<label for="decrementTargetTemperature">-&deg;C/F: </label>
-			<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature">
+			<fieldset id="temperatureCheck">
+				<label for="setTargetTemperature">&deg;C/F: </label>
+				<input type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature" onclick='checkCapability(this)'>
+				<label for="incrementTargetTemperature">+&deg;C/F: </label>
+				<input type="checkbox" name="actions" id="incrementTargetTemperature" value="incrementTargetTemperature" onclick='checkCapability(this)'>
+				<label for="decrementTargetTemperature">-&deg;C/F: </label>
+				<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature" onclick='checkCapability(this)'>
+			</fieldset>
 		</fieldset>
 	</div>
 	
@@ -167,6 +171,7 @@
 		device.actions.forEach(function(action){
 			$('#'+action).prop('checked',true);
 		});
+		checkCapability();
 	}
 
 	function deleteDevice(id) {
@@ -180,6 +185,38 @@
 				}
 			});
 		}
+	}
+
+	function checkCapability(check) {
+		var percent = $('#setPercentage').prop('checked');
+		var incPercent = $('#incrementPercentage').prop('checked');
+		var decPercent = $('#decrementPercentage').prop('checked');
+
+		var p = percent | incPercent | decPercent;
+
+		var temp = $('#setTargetTemperature').prop('checked');
+		var incTemp = $('#incrementTargetTemperature').prop('checked');
+		var decTemp = $('#decrementTargetTemperature').prop('checked');
+
+		var t = temp | incTemp | decTemp;
+
+		if (p & t) {
+			alert("You can not control both percentage and temperature on the same device");
+			return;
+		}
+
+		if (p) {
+			$('#temperatureCheck').attr('disabled', true);	
+		} else {
+			$('#temperatureCheck').attr('disabled', false);
+		}
+
+		if (t) {
+			$('#percentCheck').attr('disabled', true);
+		} else {
+			$('#percentCheck').attr('disabled', false);
+		}
+
 	}
 
 	var devices = {};
