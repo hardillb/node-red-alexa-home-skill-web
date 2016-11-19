@@ -425,13 +425,22 @@ mqttClient.on('message',function(topic,message){
 		var payload = JSON.parse(message.toString());
 		var waiting = onGoingCommands[payload.messageId];
 		if (waiting) {
-			console.log(payload);
+			console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
-				waiting.res.status(200).send();
-			} else {
-				if (payload.range) {
-					waiting.res.status(416).send(payload.range);
+				waiting.res.status(200);
+				if (payload.extra) {
+					console.log("sending extra");
+					waiting.res.send(payload.extra);
 				} else {
+					console.log("not sending extra");
+					waiting.res.send({});
+				}
+			} else {
+				if (payload.extra && payload.extra.min) {
+					console.log("out of range");
+					waiting.res.status(416).send(payload.extra);
+				} else {
+					console.log("malfunction");
 					waiting.res.status(503).send();
 				}
 			}
