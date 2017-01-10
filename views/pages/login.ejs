@@ -1,5 +1,8 @@
 <% include ../fragments/header.ejs %>
   <div class="container main-content">
+    <% if (message) { %>
+      <p><strong><%= message %></strong></p>
+    <% } %>
     <div id="login">
       <form method="POST" action="/login">
         <label style="width: 75px" for="username">Username:</label>

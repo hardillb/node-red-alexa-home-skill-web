@@ -236,7 +236,7 @@ app.get('/about', function(req,res){
 });
 
 app.get('/login', function(req,res){
-	res.render('pages/login',{user: req.user});
+	res.render('pages/login',{user: req.user, message: req.flash('error')});
 });
 
 app.get('/logout', function(req,res){
