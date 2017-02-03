@@ -17,7 +17,7 @@ var PassportOAuthBearer = require('passport-http-bearer');
 
 var oauthServer = require('./oauth');
 
-var port = (process.env.VCAP_APP_PORT || process.env.PORT ||3000);
+var port = (process.env.VCAP_APP_PORT || process.env.PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var mongo_url = (process.env.MONGO_URL || 'mongodb://localhost/users');
 
@@ -82,7 +82,7 @@ mongoose_connection.on('connecting', function() {
 
 mongoose_connection.on('error', function(error) {
 	console.error('Error in MongoDb connection: ' + error);
-	mongoose.disconnect();
+	//mongoose.disconnect();
 });
 
 mongoose_connection.on('connected', function() {
@@ -101,7 +101,7 @@ mongoose_connection.on('disconnected', function() {
 	console.log('MongoDB disconnected!');
 });
 
-mongoose.connect(mongo_url);
+mongoose.connect(mongo_url, mongoose_options);
 
 var Account = require('./models/account');
 var oauthModels = require('./models/oauth');

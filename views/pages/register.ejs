@@ -16,6 +16,7 @@
       <br>
       <button id="registerButton">Register</button>
       <script type="application/javascript">
+
       	var xhr = new XMLHttpRequest();
       	var button = document.getElementById('registerButton');
       	button.onclick = function(){
@@ -28,6 +29,12 @@
             return;
           }
           var email = document.getElementById('email').value;
+          //need to try validate the email address here:
+          if (email.indexOf('@') == -1) {
+            alert("Please enter a valid email address");
+            return;
+          }
+
       		var params = "username=" + encodeURIComponent(username)
             + "&password=" + encodeURIComponent(password)
             + "&email=" + encodeURIComponent(email);
