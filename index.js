@@ -71,7 +71,12 @@ console.log(mongo_url);
 var mongoose_options = {
 	server: {
 		auto_reconnect:true,
-		reconnectTries: Number.MAX_VALUE
+		autoReconnect: true,
+		reconnectTries: Number.MAX_VALUE,
+		reconnectInterval: 1000,
+		socketOptions: {
+			autoReconnect: true
+		}
 	}
 };
 var mongoose_connection = mongoose.connection;
