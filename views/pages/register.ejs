@@ -24,6 +24,11 @@
       		var password = document.getElementById('password').value;
           var passwordAgain = document.getElementById('passwordAgain').value;
 
+          if (username.length < 1) {
+            alert("Please enter a valid username");
+            return;
+          }
+
           if (password !== passwordAgain) {
             alert("Passwords don't match");
             return;

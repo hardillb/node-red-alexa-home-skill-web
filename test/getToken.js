@@ -14,8 +14,9 @@ app.use(session({
   //   return genuuid() // use UUIDs for session IDs
   // },
   secret: 'boo',
-  resave: false,
+  resave: true,
   saveUninitialized: false,
+  name: 'bar',
   cookie: {
   	secure: true
   }
@@ -30,7 +31,7 @@ passport.use(new OAuth2Strategy({
 	// tokenURL: 'https://alexa-node-red.eu-gb.mybluemix.net/auth/exchange',
 	authorizationURL: 'https://localhost:3000/auth/start',
 	tokenURL: 'https://localhost:3000/auth/exchange',
-	clientID: '1',
+	clientID: '2',
 	clientSecret: 'password1234',
 	scope: "access_devices",
 	callbackURL: 'http://localhost:3001/callback'

@@ -10,6 +10,7 @@ var session = require('express-session');
 var passport = require('passport');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var Measurement = require('./googleMeasurement.js');
 var cookieParser = require('cookie-parser');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
@@ -25,6 +26,9 @@ var mqtt_url = (process.env.MQTT_URL || 'mqtt://localhost:1883');
 var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 console.log(mqtt_url);
+
+var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
+var measurement = new Measurement(googleAnalyicsTID);
 
 var mqttClient;
 
@@ -68,6 +72,7 @@ if (process.env.VCAP_SERVICES) {
 }
 
 console.log(mongo_url);
+mongoose.Promise = global.Promise;
 var mongoose_options = {
 	server: {
 		auto_reconnect:true,
@@ -246,14 +251,24 @@ app.get('/login', function(req,res){
 
 app.get('/logout', function(req,res){
 	req.logout();
-	res.redirect('/');
+	if (req.query.next) {
+		console.log(req.query.next);
+		res.redirect(req.query.next);
+	} else {
+		res.redirect('/');
+	}
+	
 });
 
 //app.post('/login',passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/2faCheck', failureFlash: true }));
 app.post('/login',
-	passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+	passport.authenticate('local', { failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
-		res.redirect('/devices');
+		if (req.query.next) {
+			res.reconnect(req.query.next);
+		} else {
+			res.redirect('/devices');
+		}
 	});
 
 function ensureAuthenticated(req,res,next) {
@@ -303,6 +318,12 @@ app.post('/newuser', function(req,res){
 
 		passport.authenticate('local')(req, res, function () {
 			console.log("created new user %s", req.body.username);
+			measurement.send({
+				t:'event', 
+				ec:'System', 
+				ea: 'NewUser',
+				uid: req.body.username
+			});
             res.status(201).send();
         });
 
@@ -340,7 +361,7 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 
 	res.render('pages/oauth', {
 		transaction_id: req.oauth2.transactionID,
-		currentURL: req.originalUrl,
+		currentURL: encodeURIComponent(req.originalUrl),
 		response_type: req.query.response_type,
 		errors: req.flash('error'),
 		scope: req.oauth2.req.scope,
@@ -365,7 +386,7 @@ app.post('/auth/finish',function(req,res,next) {
 				next();
 			} else if (!error){
 				//console.log("not authed");
-				req.flash('error', 'Your email or password was incorrect. Try again.');
+				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
 			}
  		})(req,res,next);
@@ -397,6 +418,12 @@ app.get('/api/v1/devices',
 	function(req,res,next){
 
 		console.log("all good, doing discover devices");
+		measurement.send({
+			t:'event', 
+			ec:'discover', 
+			ea: req.body.header ? req.body.header.name : "Node-RED",
+			uid: req.user.username
+		});
 
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
@@ -450,6 +477,13 @@ mqttClient.on('message',function(topic,message){
 				}
 			}
 			delete onGoingCommands[payload.messageId];
+			// should really parse uid out of topic
+			measurement.send({
+				t:'event', 
+				ec:'command', 
+				ea: 'complete',
+				uid: waiting.user
+			});
 		}
 	}
 });
@@ -466,6 +500,12 @@ var timeout = setInterval(function(){
 				console.log("timed out");
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
+				measurement.send({
+					t:'event', 
+					ec:'command', 
+					ea: 'timeout',
+					uid: waiting.user
+				});
 			}
 		}
 	}
@@ -476,6 +516,12 @@ app.post('/api/v1/command',
 	function(req,res,next){
 		console.log(req.user.username);
 		console.log(req.body);
+		measurement.send({
+			e:'event', 
+			ec:'command', 
+			ea: req.body.header.name,
+			uid: req.user.username
+		});
 		var topic = "command/" +req.user.username + "/" + req.body.payload.appliance.applianceId;
 		delete req.body.payload.accessToken;
 		var message = JSON.stringify(req.body);
@@ -485,6 +531,7 @@ app.post('/api/v1/command',
 
 		}
 		var command = {
+			user: req.user.username,
 			res: res,
 			timestamp: Date.now()
 		};

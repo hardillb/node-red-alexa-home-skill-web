@@ -32,6 +32,8 @@
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^4.0.0",
     "passport-totp": "0.0.2",
+    "querystring": "^0.2.0",
+    "request": "^2.79.0",
     "uid2": "0.0.3"
   },
   "devDependencies": {

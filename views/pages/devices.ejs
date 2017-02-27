@@ -37,7 +37,6 @@
 			<input type="checkbox" name="actions" id="turnOn" value="turnOn">
 			<label for="turnOff">Off: </label>
 			<input type="checkbox" name="actions" id="turnOff" value="turnOff">
-			<br>
 			<fieldset id="percentCheck">
 				<label for="setPercentage">%: </label>
 				<input type="checkbox" name="actions" id="setPercentage" value="setPercentage" onclick='checkCapability(this)'>
@@ -46,7 +45,6 @@
 				<label for="decrementPercentage">-%: </label>
 				<input type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage" onclick='checkCapability(this)'>
 			</fieldset>
-			<br>
 			<fieldset id="temperatureCheck">
 				<label for="setTargetTemperature">&deg;C/F: </label>
 				<input type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature" onclick='checkCapability(this)'>
@@ -55,6 +53,14 @@
 				<label for="decrementTargetTemperature">-&deg;C/F: </label>
 				<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature" onclick='checkCapability(this)'>
 			</fieldset>
+			<!-- 
+			<fieldset id="queryTemperature">
+				<label ofr="getTargetTemperature">Query Set Point: </label>
+				<input type="checkbox" name="actions" id="getTargetTemperature" value="getTargetTemperature" onclick='checkCapability(this)'>
+				<label ofr="getTemperatureReading">Query Current Temp: </label>
+				<input type="checkbox" name="actions" id="getTemperatureReading" value="getTemperatureReading" onclick='checkCapability(this)'>
+			</fieldset>
+			 -->	
 		</fieldset>
 	</div>
 	
@@ -197,8 +203,10 @@
 		var temp = $('#setTargetTemperature').prop('checked');
 		var incTemp = $('#incrementTargetTemperature').prop('checked');
 		var decTemp = $('#decrementTargetTemperature').prop('checked');
+		var qSetTemp = $('#getTargetTemperature').prop('checked');
+		var qCurTemp = $('#getTemperatureReading').prop('checked');
 
-		var t = temp | incTemp | decTemp;
+		var t = temp | incTemp | decTemp | qSetTemp | qCurTemp;
 
 		if (p & t) {
 			alert("You can not control both percentage and temperature on the same device");
