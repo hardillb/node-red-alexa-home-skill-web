@@ -159,11 +159,13 @@ npm install node-red-contrib-alexa-home-skill</pre>
       Messages passed to this node need to have orginated from a Alexa Home node as information required to respond to the
       specific request are attached to that message. To use this node you need to uncheck <i>Auto Acknoledge</i></p>
 
-      <p>For TurnOnRequest/TurnOffRequest and SetPercentageRequest/IncrementPercentageRequest/DecrementPercentageRequest 
+      <p>For TurnOnRequest/TurnOffRequest and SetPercentageRequest, IncrementPercentageRequest, DecrementPercentageRequest 
       requests setting the <i>msg.payload</i> of the input message to true/false to signify success or failure.</p>
 
-      <p>For SetTemperatureRequest/IncrementTemperatureRequest/DecrementTemperatureRequest requrest you can also include a
-      <i>msg.extra</i> object.</p>
+      <p>For SetTemperatureRequest, IncrementTemperatureRequest, DecrementTemperatureRequest, GetTemperatureReadingRequest, 
+      GetTargetTemperatureRequest, GetLockStateRequest request you can also include a <i>msg.extra</i> object. The format 
+      of the <i>msg.extra</i> field matches the <i>response.payload</i> in the Alexa Smart Home Skill API 
+      <a href="https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/smart-home-skill-api-reference">documentaion</a></p>
       <p>When the input value is outside the supported range, the <i>msg.extra</i> should look like this:</p>
       <pre>{
     min: 10.0,
@@ -173,6 +175,15 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <pre>{
     targetTemperature: { 
         value: 21.0
+    }
+}</pre>
+      <p>The ability to query the current temperature and the termostat setpoint. To respond to these queries a response similar to this is needed.</p>
+      <pre>{
+    targetTemperature: {
+        value: 25
+    },
+    temperatureMode: {
+        value: "AUTO"
     }
 }</pre>
       <p>An example would be to use a function node with 2 output and the following code:</p>
@@ -196,7 +207,11 @@ npm install node-red-contrib-alexa-home-skill</pre>
     return [[msg],success];
 }</pre>
       <p>This enforces a temperature range between 10&deg;C and 30&deg;C, sending the Alexa response to the second output and 
-      if in range the control message is sent to the first function output.</p>
+      if the input is in range the control message is sent to the first function output.</p>
+      <p>A recent update added Lock support, Both the set and query can be answered with either "LOCKED" or "UNLOCKED" as follows:</p>
+      <pre>{
+    locked: "LOCKED"
+}</pre>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
