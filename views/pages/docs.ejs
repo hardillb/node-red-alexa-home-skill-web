@@ -20,7 +20,7 @@
       <p>After you have created an account you need to define some devices to control. Once you are 
       logged in a "Devices" tab should appear in the menu at the top of the page. From here you can 
       add new, edit or delete existing devices.</p>
-      <img width="1133" height="276" src="/images/devices.png">
+      <img width="1134" height="388" src="/images/devices.png">
       The name you give to the device will be how you access it from Alexa.
       
       <h2 id="linkAccount">Link Account</h2>
@@ -112,7 +112,7 @@ npm install node-red-contrib-alexa-home-skill</pre>
   "extraInfo": {},
   payload: -5
 }</pre>
-      <p>The important bits ae the <i>msg.command</i> and the <i>msg.payload</i>. The <i>msg.command</i> will be one of the following list (that corresponds to the capabilities you added to the device when you defined it):</p>
+      <p>The important bits are the <i>msg.command</i> and the <i>msg.payload</i>. The <i>msg.command</i> will be one of the following list (that corresponds to the capabilities you added to the device when you defined it):</p>
       <ul>
         <li>TurnOnRequest</li>
         <li>TurnOffRequest</li>
@@ -122,7 +122,17 @@ npm install node-red-contrib-alexa-home-skill</pre>
         <li>SetTemperatureRequest</li>
         <li>IncrementTemperatureRequest</li>
         <li>DecrementTemperatureRequest</li>
+        <li>GetTemperatureReadingRequest <sup>1,2</sup></li>
+        <li>GetTargetTemperatureRequests <sup>1,2</sup></li>
+        <li>SetLockState <sup>1</sup></li>
+        <li>GetLockState <sup>1,2</sup></li>
       </ul>
+
+      <ol>
+        <li>Only available in to US users at the moment</li>
+        <li>Can not be Auto Acknoledged as they need to return a value</li>
+      </ol>
+
       <p>The payload field will hold positive numbers for the Set and Increment versions of commands and negative numbers
       for the Decrement versions. For TurnOn/TurnOff the payload will be true/false</p>
 

@@ -33,10 +33,12 @@
 		<textarea id="friendlyDescription" rows="2"></textarea>
 		<fieldset>
 			<legend>Actions</legend>
-			<label for="turnOn">On: </label>
-			<input type="checkbox" name="actions" id="turnOn" value="turnOn">
-			<label for="turnOff">Off: </label>
-			<input type="checkbox" name="actions" id="turnOff" value="turnOff">
+			<fieldset id="onOff">
+				<label for="turnOn">On: </label>
+				<input type="checkbox" name="actions" id="turnOn" value="turnOn">
+				<label for="turnOff">Off: </label>
+				<input type="checkbox" name="actions" id="turnOff" value="turnOff">
+			</fieldset>
 			<fieldset id="percentCheck">
 				<label for="setPercentage">%: </label>
 				<input type="checkbox" name="actions" id="setPercentage" value="setPercentage" onclick='checkCapability(this)'>
@@ -53,14 +55,20 @@
 				<label for="decrementTargetTemperature">-&deg;C/F: </label>
 				<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature" onclick='checkCapability(this)'>
 			</fieldset>
-			<!-- 
+			<!-- -->
 			<fieldset id="queryTemperature">
-				<label ofr="getTargetTemperature">Query Set Point: </label>
+				<label for="getTargetTemperature">Query Set Point: </label>
 				<input type="checkbox" name="actions" id="getTargetTemperature" value="getTargetTemperature" onclick='checkCapability(this)'>
 				<label ofr="getTemperatureReading">Query Current Temp: </label>
 				<input type="checkbox" name="actions" id="getTemperatureReading" value="getTemperatureReading" onclick='checkCapability(this)'>
 			</fieldset>
-			 -->	
+			<fieldset id="lockControl">
+				<label for="">Lock/Unlock</label>
+				<input type="checkbox" name="actions" id="setLockState" value="setLockState" onclick='checkCapability(this)'>
+				<label for="">Query Lock State</label>
+				<input type="checkbox" name="actions" id="getLockState" value="getLockState" onclick='checkCapability(this)'>
+			</fieldset>
+			<!-- -->
 		</fieldset>
 	</div>
 	
@@ -208,21 +216,36 @@
 
 		var t = temp | incTemp | decTemp | qSetTemp | qCurTemp;
 
-		if (p & t) {
-			alert("You can not control both percentage and temperature on the same device");
-			return;
+		var lock = $('#setLockState').prop('checked');
+		var qLock = $('#getLockState').prop('checked');
+
+		var l = lock | qLock;
+
+		if (p & t || p & l || t & l) {
+			alert("You can not control percentage and temperature, percentage and lock or temperature and lock on the same device");
+			return false;
 		}
 
 		if (p) {
-			$('#temperatureCheck').attr('disabled', true);	
+			$('#percentCheck').removeAttr('disabled');
+			$('#temperatureCheck').attr('disabled', '');
+			$('#queryTemperature').attr('disabled', '');
+			$('#lockControl').attr('disabled', '');
+		} else if (t) {
+			$('#temperatureCheck').removeAttr('disabled');
+			$('#queryTemperature').removeAttr('disabled');
+			$('#lockControl').attr('disabled', '');
+			$('#percentCheck').attr('disabled', '');
+		} else if (l) {
+			$('#lockControl').removeAttr('disabled');
+			$('#temperatureCheck').attr('disabled', '');
+			$('#queryTemperature').attr('disabled', '');
+			$('#percentCheck').attr('disabled', '');
 		} else {
-			$('#temperatureCheck').attr('disabled', false);
-		}
-
-		if (t) {
-			$('#percentCheck').attr('disabled', true);
-		} else {
-			$('#percentCheck').attr('disabled', false);
+			$('#percentCheck').removeAttr('disabled');
+			$('#temperatureCheck').removeAttr('disabled');
+			$('#queryTemperature').removeAttr('disabled');
+			$('#lockControl').removeAttr('disabled');
 		}
 
 	}
