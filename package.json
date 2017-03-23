@@ -1,6 +1,6 @@
 {
   "name": "home-skill-web",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "mongoose-sequence": "^3.1.0",
     "morgan": "^1.7.0",
     "mqtt": "^2.0.1",
+    "nodemailer": "^1.11.0",
     "oauth2orize": "^1.5.1",
     "passport": "^0.3.2",
     "passport-http": "^0.3.0",

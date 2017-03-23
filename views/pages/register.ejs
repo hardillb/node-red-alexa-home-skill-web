@@ -33,6 +33,12 @@
             alert("Passwords don't match");
             return;
           }
+
+          if (password.length < 1) {
+            alert("Zero length passwords are note really a good idea");
+            return;
+          }
+
           var email = document.getElementById('email').value;
           //need to try validate the email address here:
           if (email.indexOf('@') == -1) {

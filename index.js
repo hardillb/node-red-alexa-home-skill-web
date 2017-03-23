@@ -117,6 +117,8 @@ var Account = require('./models/account');
 var oauthModels = require('./models/oauth');
 var Devices = require('./models/devices');
 var Topics = require('./models/topics');
+var LostPassword = require('./models/lostPassword');
+
 
 Account.findOne({username: mqtt_user}, function(error, account){
 	if (!error && !account) {
@@ -330,6 +332,84 @@ app.post('/newuser', function(req,res){
 	});
 });
 
+
+app.get('/changePassword/:key',function(req, res, next){
+	var uuid = req.params.key;
+	LostPassword.findOne({uuid: uuid}).populate('user').exec(function(error, lostPassword){
+		if (!error && lostPassword) {
+			req.login(lostPassword.user, function(err){
+				if (!err){
+					lostPassword.remove();
+					res.redirect('/changePassword');
+				} else {
+					console.log(err);
+					res.redirect('/');
+				}
+			})
+		} else {
+			res.redirect('/');
+		}
+	});
+});
+
+app.get('/changePassword', ensureAuthenticated, function(req, res, next){
+	res.render('pages/changePassword', {user: req.user});
+});
+
+app.post('/changePassword', ensureAuthenticated, function(req, res, next){
+	Account.findOne({username: req.user.username}, function (err, user){
+		if (!err && user) {
+			user.setPassword(req.body.password, function(e,u){
+				// var s = Buffer.from(account.salt, 'hex').toString('base64');
+				// var h = Buffer.from(account.hash, 'hex').toString(('base64'));
+				var mqttPass = "PBKDF2$sha256$901$" + user.salt + "$" + user.hash;
+				u.mqttPass = mqttPass;
+				u.save(function(error){
+					if (!error) {
+						console.log("Chagned %s's password", u.username);
+						res.status(200).send();
+					} else {
+						console.log(error);
+						res.status(400).send("Problem setting new password");
+					}
+				});
+			});
+		} else {
+			console.log(err);
+			res.status(400).send("Problem setting new password");
+		}
+	});
+});
+
+app.get('/lostPassword', function(req, res, next){
+	res.render('pages/lostPassword', { user: req.user});
+});
+
+var sendemail = require('./sendemail');
+var mailer = new sendemail();
+
+app.post('/lostPassword', function(req, res, next){
+	var email = req.body.email;
+	Account.findOne({email: email}, function(error, user){
+		if (!error){
+			if (user){
+				var lostPassword = new LostPassword({user: user});
+				console.log(lostPassword);
+				lostPassword.save(function(err){
+					if (!err) {
+						res.status(200).send();
+					}
+					console.log(lostPassword.uuid);
+					console.log(lostPassword.user.username);
+					var body = mailer.buildLostPasswordBody(lostPassword.uuid, lostPassword.user.username);
+					mailer.send(email, 'alexa-node-red@hardill.me.uk', 'Password Reset for Alexa Node-RED', body.text, body.html);
+				});
+			} else {
+				res.status(404).send("No user found with that email address");
+			}
+		}
+	});
+});
 
 app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,done){
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
