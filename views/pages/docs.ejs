@@ -21,7 +21,8 @@
       logged in a "Devices" tab should appear in the menu at the top of the page. From here you can 
       add new, edit or delete existing devices.</p>
       <img width="1134" height="388" src="/images/devices.png">
-      The name you give to the device will be how you access it from Alexa.
+      <p>The name you give to the device will be how you access it from Alexa, be careful with names
+      like "Livingroom" that may be interpreted as "Livingroom" or "Living room".</p>
       
       <h2 id="linkAccount">Link Account</h2>
       <p>Once you have an account you need to add the Skill to your Alexa powered device. You can do 
@@ -154,18 +155,20 @@ npm install node-red-contrib-alexa-home-skill</pre>
 
       <p>And all this feeds into the WeMo node to control a WeMo light bulb.</p>
 
-      <h3>Alexa Home Resp</h3>
-      <p>The Alexa Home Resp node is for if you want to have more control over the response sent back to the Alexa service.
+      <h3>Alexa Home Response</h3>
+      <p>The Alexa Home Response node is for if you want to have more control over the response sent back to the Alexa service.
       Messages passed to this node need to have orginated from a Alexa Home node as information required to respond to the
-      specific request are attached to that message. To use this node you need to uncheck <i>Auto Acknoledge</i></p>
+      specific request are attached to that message. To use this node you need to uncheck <i>Auto Acknowledge</i> check box
+      in the Alexa Home input node.</p>
+
+      <p>Responses need to be sent within 6 seconds of the incoming request or the service will respond to Alexa with a 
+      timeout message.</p>
 
       <p>For TurnOnRequest/TurnOffRequest and SetPercentageRequest, IncrementPercentageRequest, DecrementPercentageRequest 
       requests setting the <i>msg.payload</i> of the input message to true/false to signify success or failure.</p>
 
       <p>For SetTemperatureRequest, IncrementTemperatureRequest, DecrementTemperatureRequest, GetTemperatureReadingRequest, 
-      GetTargetTemperatureRequest, GetLockStateRequest request you can also include a <i>msg.extra</i> object. The format 
-      of the <i>msg.extra</i> field matches the <i>response.payload</i> in the Alexa Smart Home Skill API 
-      <a href="https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/smart-home-skill-api-reference">documentaion</a></p>
+      GetTargetTemperatureRequest, GetLockStateRequest request you can also include a <i>msg.extra</i> object.
       <p>When the input value is outside the supported range, the <i>msg.extra</i> should look like this:</p>
       <pre>{
     min: 10.0,
@@ -180,7 +183,7 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <p>The ability to query the current temperature and the termostat setpoint. To respond to these queries a response similar to this is needed.</p>
       <pre>{
     targetTemperature: {
-        value: 25
+        value: 25.0
     },
     temperatureMode: {
         value: "AUTO"
@@ -189,8 +192,8 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <p>An example would be to use a function node with 2 output and the following code:</p>
       <pre>if (msg.payload < 10 || msg.payload > 30) {
     var range = {
-        min: 10,
-        max: 30
+        min: 10.0,
+        max: 30.0
     }
     msg.payload = false;
     msg.extra = range;
@@ -207,10 +210,12 @@ npm install node-red-contrib-alexa-home-skill</pre>
     return [[msg],success];
 }</pre>
       <p>This enforces a temperature range between 10&deg;C and 30&deg;C, sending the Alexa response to the second output and 
-      if the input is in range the control message is sent to the first function output.</p>
-      <p>A recent update added Lock support, Both the set and query can be answered with either "LOCKED" or "UNLOCKED" as follows:</p>
+      if the input is in range the control message is sent to the first function output. Note: All values are passed in Degrees 
+      C even if the input voice commands are in Degrees F when using Alexa in the US.</p>
+      <p>A recent update added Lock support, Both the set and query can be answered with a <i>msg.extra</i> of either "LOCKED" 
+      or "UNLOCKED" as follows:</p>
       <pre>{
-    locked: "LOCKED"
+    lockState: "LOCKED"
 }</pre>
     </div>
 </div>

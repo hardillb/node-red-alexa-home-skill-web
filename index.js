@@ -576,7 +576,7 @@ var timeout = setInterval(function(){
 		console.log(keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
-			if (diff > 4000) {
+			if (diff > 6000) {
 				console.log("timed out");
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
