@@ -37,38 +37,40 @@
 			<legend>Actions</legend>
 			<fieldset id="onOff">
 				<label for="turnOn">On: </label>
-				<input type="checkbox" name="actions" id="turnOn" value="turnOn">
+				<input title="Turn device on" type="checkbox" name="actions" id="turnOn" value="turnOn">
 				<label for="turnOff">Off: </label>
-				<input type="checkbox" name="actions" id="turnOff" value="turnOff">
+				<input title="Turn device off" type="checkbox" name="actions" id="turnOff" value="turnOff">
 			</fieldset>
 			<fieldset id="percentCheck">
 				<label for="setPercentage">%: </label>
-				<input type="checkbox" name="actions" id="setPercentage" value="setPercentage" onclick='checkCapability(this)'>
+				<input title="Set device %" type="checkbox" name="actions" id="setPercentage" value="setPercentage" onclick='checkCapability(this)'>
 				<label for="incrementPercentage">+%: </label>
-				<input type="checkbox" name="actions" id="incrementPercentage" value="incrementPercentage" onclick='checkCapability(this)'>
+				<input title="Turn device up" type="checkbox" name="actions" id="incrementPercentage" value="incrementPercentage" onclick='checkCapability(this)'>
 				<label for="decrementPercentage">-%: </label>
-				<input type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage" onclick='checkCapability(this)'>
+				<input title="Turn device down" type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage" onclick='checkCapability(this)'>
 			</fieldset>
 			<fieldset id="temperatureCheck">
 				<label for="setTargetTemperature">&deg;C/F: </label>
-				<input type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature" onclick='checkCapability(this)'>
+				<input title="Set target temperature" type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature" onclick='checkCapability(this)'>
 				<label for="incrementTargetTemperature">+&deg;C/F: </label>
-				<input type="checkbox" name="actions" id="incrementTargetTemperature" value="incrementTargetTemperature" onclick='checkCapability(this)'>
+				<input title="Turn target temperature up" type="checkbox" name="actions" id="incrementTargetTemperature" value="incrementTargetTemperature" onclick='checkCapability(this)'>
 				<label for="decrementTargetTemperature">-&deg;C/F: </label>
-				<input type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature" onclick='checkCapability(this)'>
+				<input title="Turn target temperature down" type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature" onclick='checkCapability(this)'>
 			</fieldset>
 			<!-- -->
 			<fieldset id="queryTemperature">
 				<label for="getTargetTemperature">Query Set Point: </label>
-				<input type="checkbox" name="actions" id="getTargetTemperature" value="getTargetTemperature" onclick='checkCapability(this)'>
+				<input title="Query target temperature" type="checkbox" name="actions" id="getTargetTemperature" value="getTargetTemperature" onclick='checkCapability(this)'>
+				<br/>
 				<label ofr="getTemperatureReading">Query Current Temp: </label>
-				<input type="checkbox" name="actions" id="getTemperatureReading" value="getTemperatureReading" onclick='checkCapability(this)'>
+				<input title="Query current temperature" type="checkbox" name="actions" id="getTemperatureReading" value="getTemperatureReading" onclick='checkCapability(this)'>
 			</fieldset>
 			<fieldset id="lockControl">
 				<label for="">Lock/Unlock</label>
-				<input type="checkbox" name="actions" id="setLockState" value="setLockState" onclick='checkCapability(this)'>
+				<input title="Lock or Unlock" type="checkbox" name="actions" id="setLockState" value="setLockState" onclick='checkCapability(this)'>
+				<br/>
 				<label for="">Query Lock State</label>
-				<input type="checkbox" name="actions" id="getLockState" value="getLockState" onclick='checkCapability(this)'>
+				<input title="Query Lock state" type="checkbox" name="actions" id="getLockState" value="getLockState" onclick='checkCapability(this)'>
 			</fieldset>
 			<!-- -->
 		</fieldset>
@@ -77,6 +79,17 @@
 	<script>
 	$( "#dialog" ).dialog({
 		autoOpen: false,
+		dragable: false,
+		modal: true,
+		position: {
+			my: "center",
+			at: "center",
+			of: window,
+			using: function( pos ) {
+				$(this).css("top", '55px');
+				$(this).css("left", pos.left);
+	        }
+		},
 		title: "Add New Device",
 		dialogClass: "no-close",
 		buttons: [
@@ -98,7 +111,7 @@
 						console.log(device);
 						if (device.friendlyName && 
 							device.friendlyDescription && 
-							device.actions.length > 1) {
+							device.actions.length > 0) {
 							$.ajax({
 								url:"/devices",
 								type: 'PUT',
