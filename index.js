@@ -369,6 +369,7 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						console.log("Chagned %s's password", u.username);
 						res.status(200).send();
 					} else {
+						console.log("Error changing %s's password", u.username);
 						console.log(error);
 						res.status(400).send("Problem setting new password");
 					}
@@ -497,7 +498,7 @@ app.get('/api/v1/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 
-		console.log("all good, doing discover devices");
+		//console.log("all good, doing discover devices");
 		measurement.send({
 			t:'event', 
 			ec:'discover', 
@@ -523,7 +524,7 @@ app.get('/api/v1/devices',
 
 					devs.push(dev);
 				}
-				console.log(devs)
+				//console.log(devs)
 				res.send(devs);
 			}	
 		});

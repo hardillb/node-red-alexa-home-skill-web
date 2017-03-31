@@ -74,4 +74,9 @@ body {
 .serviceDomains {
 }
 
-
+.pwq {
+	text-align: center;
+	margin-left: 80px;
+	width: 75px;
+	height: 20px;
+}
