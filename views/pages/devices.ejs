@@ -142,7 +142,7 @@
 						});
 						if (device.friendlyName && 
 							device.friendlyDescription && 
-							device.actions.length > 1) {
+							device.actions.length > 0) {
 							//post update
 							$.ajax({
 								url: '/device/' + device._id,
