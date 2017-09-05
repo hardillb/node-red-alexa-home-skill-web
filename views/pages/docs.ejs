@@ -318,16 +318,7 @@ npm install node-red-contrib-alexa-home-skill</pre>
         value: 21.0
     }
 }</pre>
-      <p>The ability to query the current temperature and the termostat setpoint. To respond to these queries a response similar to this is needed.</p>
-      <pre>{
-    targetTemperature: {
-        value: 25.0
-    },
-    temperatureMode: {
-        value: "AUTO"
-    }
-}</pre>
-      <p>An example would be to use a function node with 2 output and the following code:</p>
+      <p>Combining both of these in a single function node to handle the request would look something like the following: </p>
       <pre>if (msg.payload < 10 || msg.payload > 30) {
     var range = {
         min: 10.0,
@@ -350,6 +341,35 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <p>This enforces a temperature range between 10&deg;C and 30&deg;C, sending the Alexa response to the second output and 
       if the input is in range the control message is sent to the first function output. Note: All values are passed in Degrees 
       C even if the input voice commands are in Degrees F when using Alexa in the US.</p>
+      <p>To query termostat setpoint with GetTargetTemperatureRequest, respond with something similar to this.</p>
+      <pre>{
+    targetTemperature: {
+        value: 25.0
+    },
+    temperatureMode: {
+        value: "AUTO"
+    }
+}</pre>
+      <p>temperatureMode values can be AUTO, HEAT, COOL or CUSTOM. When Custom is used then you also need to include a freindlyName.</p>
+      <pre>{
+    targetTemperature: {
+        value: 25.0
+    },
+    temperatureMode: {
+        value: "CUSTOM",
+        friendlyName: "Space Heater"
+    }
+}</pre>
+      <p>For GetTemperatureReadingRequest (the current temperature) a response whould look like this:</p>
+      <pre>msg.extra = {
+    "temperatureReading": {
+        "value": 21.11
+    },
+    "applianceResponseTimestamp": new Date().toISOString()
+};
+msg.payload = true;
+return msg; </pre>
+      <p>The applianceResponseTimestamp can be the set to the last time the sensor was polled or in this case just set to the current time. </p>
       <p>A recent update added Lock support, Both the set and query can be answered with a <i>msg.extra.lockState</i> of either "LOCKED" 
       or "UNLOCKED" as follows:</p>
       <pre>{
