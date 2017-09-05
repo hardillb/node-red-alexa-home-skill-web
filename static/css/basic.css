@@ -24,25 +24,37 @@ body {
   display: none;
 }
 
-.device {
+.devicerow {
 	padding: 5px;
 	margin: 1px;
-	border: 1px solid;	
+	border: 1px solid;
+}
+
+.device {
+	display: flex;
 }
 
 .deviceName {
-	float: left;
+	flex-shrink: 0; 
+	flex-basis: 200px;
 	width: 200px;
+	order: 1;
 }
 
 .deviceDescription {
-	float: left;
+	flex-shrink: 0;
+	flex-basis: 400px;
 	width: 400px;
+	order: 2;
 }
 
-/*.deviceActions {
-	width: 200px;	
-}*/
+
+.deviceActions {
+	order: 3;
+	display: flex;
+	flex-wrap: wrap;
+}
+
 
 .action {
 	padding: 1px;
@@ -79,4 +91,13 @@ body {
 	margin-left: 80px;
 	width: 75px;
 	height: 20px;
+}
+
+fieldset.action {
+	border-style: solid;
+	border-width: 1px;
+}
+
+.toggle {
+	cursor: context-menu;
 }

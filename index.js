@@ -412,7 +412,7 @@ app.post('/lostPassword', function(req, res, next){
 	});
 });
 
-app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,done){
+app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI, done) {
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
@@ -432,7 +432,7 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 		} else {
 			done(error);
 		}
-   	});
+	});
 }),function(req,res){
 	var scopeMap = {
 		// ... display strings for all scope variables ...
@@ -453,7 +453,9 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 });
 
 app.post('/auth/finish',function(req,res,next) {
-	//console.log("/auth/finish user: ", req.user);
+	console.log("/auth/finish user: ", req.user);
+	console.log(req.body);
+	console.log(req.params);
 	if (req.user) {
 		next();
 	} else {

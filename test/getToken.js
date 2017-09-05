@@ -32,7 +32,7 @@ passport.use(new OAuth2Strategy({
 	authorizationURL: 'https://localhost:3000/auth/start',
 	tokenURL: 'https://localhost:3000/auth/exchange',
 	clientID: '2',
-	clientSecret: 'password1234',
+	clientSecret: 'foobar',
 	scope: "access_devices",
 	callbackURL: 'http://localhost:3001/callback'
 }, function(accessToken, refreshToken, profile, callback){
@@ -59,6 +59,8 @@ app.get('/start',passport.authenticate('oauth2'));
 app.get('/callback',
 	function(req,res,next){
 		console.log("callback");
+		console.log(req.body);
+		console.log(req.params);
 		next();
 	},
 	passport.authenticate('oauth2', { failureRedirect: '/login' }),

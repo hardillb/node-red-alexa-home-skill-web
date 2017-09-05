@@ -24,6 +24,9 @@
         <div>
 
         <% if (user) { %>
+            <% if (errors) { %>
+              <p style="color: red"><%= errors %></p>
+            <% } %>
             <div class="form-group">
                 <p>Signed in as <strong><%= user.name%></strong>.</p>
                 <a href="/logout?next=<%= currentURL %>">Not </a><%= user.username %>?
