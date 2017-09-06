@@ -258,9 +258,35 @@ npm install node-red-contrib-alexa-home-skill</pre>
 }</pre>
         </div>
         </li>
+        <li><span class="toggle" data-toggle="collapse" data-target="#SetColorRequest">SetColorRequest <sup>1</sup></span>
+        <div id="SetColorRequest" class="collapse">
+        <pre>{
+  '_messageId': 'd6734865-6a96-4967-8504-6056e75ba5c3',
+  '_applianceId': '3',
+  '_confId': 'cc670790.9f0eb8',
+  'command': 'SetColorRequest',
+  'extraInfo': {},
+  'payload': {
+      'hue': 0.0,
+      'saturation': 1.0000,
+      'brigtness': 1.0000
+  }
+}</pre>
+        </div>
+        </li>
+        <li><span class="toggle" data-toggle="collapse" data-target="#SetColorTemperatureRequest">SetColorTemperatureRequest <sup>1</sup></span>
+        <div id="SetColorTemperatureRequest" class="collapse">
+        <pre>{
+  '_messageId': 'd6734865-6a96-4967-8504-6056e75ba5c3',
+  '_applianceId': '3',
+  '_confId': 'cc670790.9f0eb8',
+  'command': 'SetColorTemperatureRequest',
+  'extraInfo': {},
+  'payload': 2700
+}</pre>
+        </div>
+        </li>
         <!--
-        <li>SetColorRequest <sup>1</sup></li>
-        <li>SetColorTemperatureRequest <sup>1</sup></li>
         <li>IncrementColorTemperatureRequest <sup>1,3</sup></li>
         <li>DecrementColorTemperatureRequest <sup>1,3</sup></li>
         -->
@@ -341,7 +367,7 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <p>This enforces a temperature range between 10&deg;C and 30&deg;C, sending the Alexa response to the second output and 
       if the input is in range the control message is sent to the first function output. Note: All values are passed in Degrees 
       C even if the input voice commands are in Degrees F when using Alexa in the US.</p>
-      <p>To query termostat setpoint with GetTargetTemperatureRequest, respond with something similar to this.</p>
+      <p>To query termostat setpoint with GetTargetTemperatureRequest, respond with a msg.extra similar to this.</p>
       <pre>{
     targetTemperature: {
         value: 25.0
@@ -370,11 +396,18 @@ npm install node-red-contrib-alexa-home-skill</pre>
 msg.payload = true;
 return msg; </pre>
       <p>The applianceResponseTimestamp can be the set to the last time the sensor was polled or in this case just set to the current time. </p>
-      <p>A recent update added Lock support, Both the set and query can be answered with a <i>msg.extra.lockState</i> of either "LOCKED" 
+      <p>For Lock device support, both the SetLockState and GetLockState can be answered with a <i>msg.extra.lockState</i> of either "LOCKED" 
       or "UNLOCKED" as follows:</p>
       <pre>{
     lockState: "LOCKED"
 }</pre>
+      <p>Lighting Color (US spelling) needs a msg.extra that contains the hue, saturation and brightness values</p>
+      <pre>{
+    hue: 0.0,
+    saturation: 1.0000
+    brigtness: 1.0000
+}</pre>
+      <p>Where hue is a value between 0.0 and 360.0, and saturation & brightness are between 0.0 and 1.0</p>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
