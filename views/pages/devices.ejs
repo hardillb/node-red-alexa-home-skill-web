@@ -41,9 +41,9 @@
 			<legend>Actions</legend>
 			<fieldset class="action" id="onOff">
 				<label for="turnOn">On: </label>
-				<input title="Turn device on" type="checkbox" name="actions" id="turnOn" value="turnOn">
+				<input title="Turn device on" type="checkbox" name="actions" id="turnOn" value="turnOn" onclick='checkCapability(this)'>
 				<label for="turnOff">Off: </label>
-				<input title="Turn device off" type="checkbox" name="actions" id="turnOff" value="turnOff">
+				<input title="Turn device off" type="checkbox" name="actions" id="turnOff" value="turnOff" onclick='checkCapability(this)'>
 			</fieldset>
 			<fieldset class="action" id="percentCheck">
 				<label for="setPercentage">%: </label>
@@ -88,6 +88,29 @@
 				<label for="decrementColorTemperature">Decrement Color Temperature</label>
 				<input title="Decrement Color Temperature" type="checkbox" name="actions" id="decrementColorTemperature" value="decrementColorTemperature" onclick='checkCapability(this)'>
 			</fieldset>
+			<!-- -->
+		</fieldset>
+		<fieldset>
+			<legend>Application Type</legend>
+			<fieldset class="action" id="applicationType">
+				<label for="LIGHT">LIGHT: </label>
+				<input type="checkbox" id="LIGHT" name="appType" value="LIGHT" onclick='checkCapability(this)'>
+				<br/>
+				<label for="SWITCH">SWITCH: </label>
+				<input type="checkbox" id="SWITCH" name="appType" value="SWITCH" onclick='checkCapability(this)'>
+				<br/>
+				<label for="SMARTPLUG">SMARTPLUG: </label>
+				<input type="checkbox" id="SMARTPLUG" name="appType" value="SMARTPLUG" onclick='checkCapability(this)'>
+				<br/>
+				<label for="THERMOSTAT">THERMOSTAT: </label>
+				<input type="checkbox" id="THERMOSTAT" name="appType" value="THERMOSTAT" onclick='checkCapability(this)'>
+				<br/>
+				<label for="SMARTLOCK">SMARTLOCK: </label>
+				<input type="checkbox" id="SMARTLOCK" name="appType" value="SMARTLOCK" onclick='checkCapability(this)'>
+				<br/>
+				<label for="ACTIVITY_TRIGGER">ACTIVITY: </label>
+				<input type="checkbox" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" onclick='checkCapability(this)'>
+			</fieldset>
 		</fieldset>
 	</div>
 	
@@ -114,13 +137,19 @@
 					var devID = $('#devID').val();
 					if ( devID === "") {
 						var device = {
-							actions: []
+							actions: [],
+							applianceTypes: []
 						};
 						device.friendlyName = $('#friendlyName').val();
 						device.friendlyDescription = $('#friendlyDescription').val();
 						$('input[name=actions]').each(function(index){
 							if (this.checked) {
 								device.actions.push(this.value);
+							}
+						});
+						$('input[name=appType]').each(function(index){
+							if (this.checked) {
+								device.applianceTypes.push(this.value);
 							}
 						});
 						console.log(device);
@@ -153,6 +182,11 @@
 						$('input[name=actions]').each(function(index){
 							if (this.checked) {
 								device.actions.push(this.value);
+							}
+						});
+						$('input[name=appType]').each(function(index){
+							if (this.checked) {
+								device.applianceTypes.push(this.value);
 							}
 						});
 						if (device.friendlyName && 
@@ -203,6 +237,9 @@
 		$('input[name=actions]').each(function(index){
 			this.checked = false;
 		});
+		$('input[name=appType]').each(function(index) {
+		  this.checked = false;
+		});
 	}
 
 	function edit(id) {
@@ -215,6 +252,9 @@
 		$('#friendlyDescription').val(device.friendlyDescription);
 		device.actions.forEach(function(action){
 			$('#'+action).prop('checked',true);
+		});
+		device.applianceTypes.forEach(function(type){
+			$('#' + type).prop('checked',true);
 		});
 		checkCapability();
 	}
@@ -233,6 +273,11 @@
 	}
 
 	function checkCapability(check) {
+		var on = $('#turnOn').prop('checked');
+		var off = $('#turnOff').prop('checked');
+
+		var o = on | off;
+
 		var percent = $('#setPercentage').prop('checked');
 		var incPercent = $('#incrementPercentage').prop('checked');
 		var decPercent = $('#decrementPercentage').prop('checked');
@@ -260,7 +305,7 @@
 		var c = color | colorTemp | incColorTemp | decColorTemp;
 
 		if (p & t || p & l || t & l || t & c || l & c) {
-			alert("You can not control percentage and temperature, percentage and lock, temperature and lock or temperatur and color or lock and color on the same device");
+			alert("You can not control percentage and temperature, percentage and lock, temperature and lock or temperature and color or lock and color on the same device");
 			return false;
 		}
 
@@ -296,6 +341,66 @@
 			$('#lighting').removeAttr('disabled');
 		}
 
+		if ((o & p & c) || (o & p) || (o & c) || c || p) {
+			$('#LIGHT').removeAttr('disabled');
+			$('#SWITCH').attr('disabled','');
+			$('#SWITCH').prop('checked',false);
+			$('#SMARTPLUG').attr('disabled','');
+			$('#SMARTPLUG').prop('checked',false);
+			$('#SMARTLOCK').attr('disabled','');
+			$('#SMARTLOCK').prop('checked',false);
+			//$('#ACTIVITY_TRIGGER').attr('disabled','');
+			//$('#ACTIVITY_TRIGGER').prop('checked',false);
+			$('#THERMOSTAT').attr('disabled','');
+			$('#THERMOSTAT').prop('checked',false);
+		} else if (o & !p & !c) {
+			$('#LIGHT').removeAttr('disabled');
+			$('#SWITCH').removeAttr('disabled');
+			$('#SMARTPLUG').removeAttr('disabled');
+			$('#ACTIVITY_TRIGGER').removeAttr('disabled');
+			$('#SMARTLOCK').attr('disabled','');
+			$('#SMARTLOCK').prop('checked',false);
+		} else if (l) {
+			console.log("lock");
+			$('#SMARTLOCK').removeAttr('disabled');
+			$('#LIGHT').attr('disabled','');
+			$('#LIGHT').prop('checked',false);
+			$('#SWITCH').attr('disabled','');
+			$('#SWITCH').prop('checked',false);
+			$('#SMARTPLUG').attr('disabled','');
+			$('#SMARTPLUG').prop('checked',false);
+			$('#ACTIVITY_TRIGGER').attr('disabled','');
+			$('#ACTIVITY_TRIGGER').prop('checked',false);
+			$('#THERMOSTAT').attr('disabled','');
+			$('#THERMOSTAT').prop('checked',false);
+		} else if ((o & t) || t) {
+			$('#THERMOSTAT').removeAttr('disabled');
+			$('#LIGHT').attr('disabled','');
+			$('#LIGHT').prop('checked',false);
+			$('#SWITCH').attr('disabled','');
+			$('#SWITCH').prop('checked',false);
+			$('#SMARTPLUG').attr('disabled','');
+			$('#SMARTPLUG').prop('checked',false);
+			$('#ACTIVITY_TRIGGER').attr('disabled','');
+			$('#ACTIVITY_TRIGGER').prop('checked',false);
+			$('#SMARTLOCK').attr('disabled','');
+			$('#SMARTLOCK').prop('checked',false);
+		} else {
+			$('#LIGHT').removeAttr('disabled');
+			$('#LIGHT').prop('checked',false);
+			$('#SWITCH').removeAttr('disabled');
+			$('#SWITCH').prop('checked',false);
+			$('#SMARTPLUG').removeAttr('disabled');
+			$('#SMARTPLUG').prop('checked',false);
+			$('#ACTIVITY_TRIGGER').removeAttr('disabled');
+			$('#ACTIVITY_TRIGGER').prop('checked',false);
+			$('#SMARTLOCK').removeAttr('disabled');
+			$('#SMARTLOCK').prop('checked',false);
+			$('#THERMOSTAT').removeAttr('disabled');
+			$('#THERMOSTAT').prop('checked',false);
+		}
+
+		
 	}
 
 	var devices = {};
