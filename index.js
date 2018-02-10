@@ -156,7 +156,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 	}
 });
 
-var app_id = 'https://localhost:' + port;
+var app_id = 'http://localhost:' + port;
 
 if (process.env.VCAP_APPLICATION) {
 	var application = JSON.parse(process.env.VCAP_APPLICATION);
@@ -183,7 +183,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-  	secure: true
+  	//secure: true
   }
 }));
 app.use(bodyParser.json());
@@ -264,19 +264,27 @@ app.get('/logout', function(req,res){
 
 //app.post('/login',passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/2faCheck', failureFlash: true }));
 app.post('/login',
-	passport.authenticate('local', { failureRedirect: '/login', failureFlash: true, session: true }),
+	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
+		console.log("login success");
+		console.log(req.isAuthenticated());
+		console.log(req.user);
 		if (req.query.next) {
 			res.reconnect(req.query.next);
 		} else {
+			console.log("passed Auth");
 			res.redirect('/devices');
 		}
 	});
 
 function ensureAuthenticated(req,res,next) {
+	console.log("ensureAuthenticated - %j", req.isAuthenticated());
+	console.log("ensureAuthenticated - %j", req.user);
+	console.log("ensureAuthenticated - %j", req.session);
 	if (req.isAuthenticated()) {
     	return next();
 	} else {
+		console.log("failed auth?");
 		res.redirect('/login');
 	}
 }
@@ -519,6 +527,7 @@ app.get('/api/v1/devices',
 					dev.applianceId = "" + data[i].applianceId;
 					dev.isReachable = data[i].isReachable;
 					dev.actions = data[i].actions;
+					dev.applianceTypes = data[i].applianceTypes;
 					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
 					dev.modelName = "Node-RED Endpoint";
 					dev.version = "0.0.1";
@@ -673,6 +682,7 @@ app.post('/device/:dev_id',
 					} else {
 						data.friendlyDescription = device.friendlyDescription;
 						data.actions = device.actions;
+						data.applianceTypes = device.applianceTypes;
 						data.save(function(err, d){
 							res.status(201);
 							res.send(d);

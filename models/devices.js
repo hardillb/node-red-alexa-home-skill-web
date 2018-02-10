@@ -9,6 +9,7 @@ var Devices = new Schema({
     friendlyDescription: String,
     isReachable: Boolean,
     actions: [String],
+    applianceTypes: [String],
     additionalApplianceDetails: {
     	extraDetail1: String,
     	extraDetail2: String,

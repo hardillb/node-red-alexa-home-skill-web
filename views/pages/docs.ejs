@@ -352,18 +352,17 @@ npm install node-red-contrib-alexa-home-skill</pre>
     }
     msg.payload = false;
     msg.extra = range;
-    
-    return [[],msg];
+
 } else {
-    var success = RED.util.cloneMessage(msg);
-    success.payload = true;
-    success.extra = {
+    msg.payload = true;
+    msg.extra = {
         targetTemperature: {
             value: msg.payload
         }
     }
-    return [[msg],success];
-}</pre>
+    
+}
+return msg;</pre>
       <p>This enforces a temperature range between 10&deg;C and 30&deg;C, sending the Alexa response to the second output and 
       if the input is in range the control message is sent to the first function output. Note: All values are passed in Degrees 
       C even if the input voice commands are in Degrees F when using Alexa in the US.</p>
