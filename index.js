@@ -483,7 +483,7 @@ app.post('/auth/finish',function(req,res,next) {
  		})(req,res,next);
 	}
 }, oauthServer.decision(function(req,done){
-	//console.log("decision user: ", req);
+	console.log("decision user: ", req);
 	done(null, { scope: req.oauth2.req.scope });
 }));
 

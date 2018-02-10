@@ -354,12 +354,12 @@ npm install node-red-contrib-alexa-home-skill</pre>
     msg.extra = range;
 
 } else {
-    msg.payload = true;
     msg.extra = {
         targetTemperature: {
             value: msg.payload
         }
-    }
+    };
+    msg.payload = true;
     
 }
 return msg;</pre>
