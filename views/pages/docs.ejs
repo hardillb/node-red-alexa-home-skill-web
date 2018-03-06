@@ -397,16 +397,34 @@ return msg; </pre>
       <p>The applianceResponseTimestamp can be the set to the last time the sensor was polled or in this case just set to the current time. </p>
       <p>For Lock device support, both the SetLockState and GetLockState can be answered with a <i>msg.extra.lockState</i> of either "LOCKED" 
       or "UNLOCKED" as follows:</p>
-      <pre>{
+      <pre>msg.payload = {
     lockState: "LOCKED"
-}</pre>
+};
+msg.paylaod = true;
+return msg;</pre>
       <p>Lighting Color (US spelling) needs a msg.extra that contains the hue, saturation and brightness values</p>
-      <pre>{
-    hue: 0.0,
-    saturation: 1.0000
-    brigtness: 1.0000
-}</pre>
+      <pre>msg.extra = {
+  achievedState: {
+    color: {
+      hue: 0.0,
+      saturation: 1.0000
+      brigtness: 1.0000
+    }
+  }
+};
+msg.payload = true;
+return msg;</pre>
       <p>Where hue is a value between 0.0 and 360.0, and saturation & brightness are between 0.0 and 1.0</p>
+      <p>For Color Temperature commands the response needs to be:</p>
+      <pre>msg.extra = {
+    achievedState: {
+        colorTemperature: {
+            value: 2700
+        }
+    }
+};
+msg.payload = true;
+return msg;</pre>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
