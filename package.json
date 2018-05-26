@@ -35,6 +35,7 @@
     "passport-totp": "0.0.2",
     "querystring": "^0.2.0",
     "request": "^2.79.0",
+    "rotating-file-stream": "^1.3.6",
     "uid2": "0.0.3"
   },
   "devDependencies": {

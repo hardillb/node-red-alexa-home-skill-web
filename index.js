@@ -1,6 +1,8 @@
 var fs = require('fs');
 var url = require('url');
+var rfs = require('rotating-file-stream');
 var mqtt = require('mqtt');
+var path = require('path');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
@@ -15,6 +17,7 @@ var cookieParser = require('cookie-parser');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
+
 
 var oauthServer = require('./oauth');
 
@@ -168,11 +171,23 @@ if (process.env.VCAP_APPLICATION) {
 
 var cookieSecret = 'ihytsrf334';
 
+var logDirectory = path.join(__dirname, 'log');
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+
+var accessLogStream = rfs('access.log', {
+  interval: '1d', // rotate daily
+  compress: 'gzip', // compress rotated files
+  maxFiles: 30,
+  path: logDirectory
+});
+
+
+
 var app = express();
 
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
-app.use(morgan("combined"));
+app.use(morgan("combined", {stream: accessLogStream}));
 app.use(cookieParser(cookieSecret));
 app.use(flash());
 app.use(session({
@@ -254,7 +269,7 @@ app.get('/login', function(req,res){
 app.get('/logout', function(req,res){
 	req.logout();
 	if (req.query.next) {
-		console.log(req.query.next);
+		//console.log(req.query.next);
 		res.redirect(req.query.next);
 	} else {
 		res.redirect('/');
@@ -266,25 +281,25 @@ app.get('/logout', function(req,res){
 app.post('/login',
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
-		console.log("login success");
-		console.log(req.isAuthenticated());
-		console.log(req.user);
+		//console.log("login success");
+		//console.log(req.isAuthenticated());
+		//console.log(req.user);
 		if (req.query.next) {
 			res.reconnect(req.query.next);
 		} else {
-			console.log("passed Auth");
+			//console.log("passed Auth");
 			res.redirect('/devices');
 		}
 	});
 
 function ensureAuthenticated(req,res,next) {
-	console.log("ensureAuthenticated - %j", req.isAuthenticated());
-	console.log("ensureAuthenticated - %j", req.user);
-	console.log("ensureAuthenticated - %j", req.session);
+	//console.log("ensureAuthenticated - %j", req.isAuthenticated());
+	//console.log("ensureAuthenticated - %j", req.user);
+	//console.log("ensureAuthenticated - %j", req.session);
 	if (req.isAuthenticated()) {
     	return next();
 	} else {
-		console.log("failed auth?");
+		//console.log("failed auth?");
 		res.redirect('/login');
 	}
 }
@@ -374,7 +389,7 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 				u.mqttPass = mqttPass;
 				u.save(function(error){
 					if (!error) {
-						console.log("Chagned %s's password", u.username);
+						//console.log("Chagned %s's password", u.username);
 						res.status(200).send();
 					} else {
 						console.log("Error changing %s's password", u.username);
@@ -403,13 +418,13 @@ app.post('/lostPassword', function(req, res, next){
 		if (!error){
 			if (user){
 				var lostPassword = new LostPassword({user: user});
-				console.log(lostPassword);
+				//console.log(lostPassword);
 				lostPassword.save(function(err){
 					if (!err) {
 						res.status(200).send();
 					}
-					console.log(lostPassword.uuid);
-					console.log(lostPassword.user.username);
+					//console.log(lostPassword.uuid);
+					//console.log(lostPassword.user.username);
 					var body = mailer.buildLostPasswordBody(lostPassword.uuid, lostPassword.user.username);
 					mailer.send(email, 'alexa-node-red@hardill.me.uk', 'Password Reset for Alexa Node-RED', body.text, body.html);
 				});
@@ -461,9 +476,9 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 });
 
 app.post('/auth/finish',function(req,res,next) {
-	console.log("/auth/finish user: ", req.user);
-	console.log(req.body);
-	console.log(req.params);
+	//console.log("/auth/finish user: ", req.user);
+	//console.log(req.body);
+	//console.log(req.params);
 	if (req.user) {
 		next();
 	} else {
@@ -483,7 +498,7 @@ app.post('/auth/finish',function(req,res,next) {
  		})(req,res,next);
 	}
 }, oauthServer.decision(function(req,done){
-	console.log("decision user: ", req);
+	//console.log("decision user: ", req);
 	done(null, { scope: req.oauth2.req.scope });
 }));
 
@@ -549,22 +564,22 @@ mqttClient.on('message',function(topic,message){
 		var payload = JSON.parse(message.toString());
 		var waiting = onGoingCommands[payload.messageId];
 		if (waiting) {
-			console.log("mqtt response: " + JSON.stringify(payload,null," "));
+			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				waiting.res.status(200);
 				if (payload.extra) {
-					console.log("sending extra");
+					//console.log("sending extra");
 					waiting.res.send(payload.extra);
 				} else {
-					console.log("not sending extra");
+					//console.log("not sending extra");
 					waiting.res.send({});
 				}
 			} else {
 				if (payload.extra && payload.extra.min) {
-					console.log("out of range");
+					//console.log("out of range");
 					waiting.res.status(416).send(payload.extra);
 				} else {
-					console.log("malfunction");
+					//console.log("malfunction");
 					waiting.res.status(503).send();
 				}
 			}
@@ -585,11 +600,11 @@ var timeout = setInterval(function(){
 	var keys = Object.keys(onGoingCommands);
 	for (key in keys){
 		var waiting = onGoingCommands[keys[key]];
-		console.log(keys[key]);
+		//console.log(keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
-				console.log("timed out");
+				//console.log("timed out");
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				measurement.send({
@@ -606,8 +621,8 @@ var timeout = setInterval(function(){
 app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
-		console.log(req.user.username);
-		console.log(req.body);
+		//console.log(req.user.username);
+		//console.log(req.body);
 		measurement.send({
 			e:'event', 
 			ec:'command', 
@@ -638,7 +653,7 @@ app.get('/devices',
 
 		Devices.find({username:user}, function(err, data){
 			if (!err) {
-				console.log(data);
+				//console.log(data);
 				res.render('pages/devices',{user: req.user ,devices: data, devs: true});
 			}
 		});
@@ -835,53 +850,6 @@ app.delete('/service/:id',
 				}
 			});
 });
-
-// Work around for not being able to access Mongo from container
-// app.post('/mqtt/auth',function(req,res){
-// 	var username = req.body.username;
-// 	var password = req.body.password;
-// 	var topic = req.body.topic;
-// 	var acc = req.body.acc;
-
-// 	passport.authenticate('local',function(err,user,info){
-// 		if (!err && user) {
-// 			return res.status(200).send();
-// 		} else {
-// 			return res.status(401).send();
-// 		}
-// 	})(req, res, function () {
-		
-//     });
-// });
-
-// app.post('/mqtt/acl',function(req,res){
-// 	var username = req.body.username;
-// 	var clientid = req.body.clientid;
-// 	var topic = req.body.topic;
-// 	var acc = req.body.acc;
-
-// 	if (topic.indexOf(username+'/') === 0) {
-// 		res.status(200).send();
-// 	} else {
-// 		res.status(401).send();
-// 	}
-// });
-
-// app.post('/mqtt/superuser',function(req,res){
-// 	var username = req.body.username;
-// 	if (username === mqtt_user) {
-// 		res.status(200).send();
-// 	} else {
-// 		res.status(401).send();
-// 	}
-// });
-
-// app.get('/cleanDB', function(req,res){
-// 	Account.remove({});
-// 	Devices.remove({});
-// 	Topics.remove({});
-// 	res.send();
-// });
 
 var server = http.Server(app);
 if (app_id.match(/^https:\/\/localhost:/)) {
