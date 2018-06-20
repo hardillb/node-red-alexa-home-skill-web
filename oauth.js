@@ -45,7 +45,7 @@ server.exchange(oauth2orize.exchange.code({
 					OAuth.RefreshToken.findOne({application:application, user: grant.user},function(error, refreshToken){
 						if (refreshToken){
 							var expires = Math.round((token.expires - (new Date().getTime()))/1000);
-							done(null,token.token, refreshToken.token,{token_type: 'Bearer', expires_in: expires});
+							done(null,token.token, refreshToken.token,{token_type: 'Bearer', expires_in: expires, scope: token.scope});
 						} else {
 							// Shouldn't get here unless there is an error as there
 							// should be a refresh token if there is an access token
