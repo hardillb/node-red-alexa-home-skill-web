@@ -232,10 +232,12 @@ passport.deserializeUser(Account.deserializeUser());
 
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-		// console.log("db token: " + token.active);
-		// console.log("db token.grant : " + token.grant.active);
-		// console.log("db token.user: " + token.user);
-		if (token && token.active && token.grant.active && token.user) {
+		if (!error) {
+			// console.log("db token: " + token.active);
+			// console.log("db token.grant : " + token.grant.active);
+			// console.log("db token.user: " + token.user);
+		}
+		if (!error && token && token.active && token.grant.active && token.user) {
 			// console.log("Token is GOOD!");
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
