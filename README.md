@@ -117,7 +117,7 @@ sudo docker build -t nr-alexav3-webb:0.1 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
-export MQTT_URL=<hostname/IP>
+export MQTT_URL=mqtt://<hostname/IP>
 export MQTT_USER=<username>
 export MQTT_PASSWORD=<password>
 export MONGO_HOST=<hostname/IP>
