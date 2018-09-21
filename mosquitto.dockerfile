@@ -2,12 +2,9 @@ FROM ubuntu:18.04
 
 LABEL maintainer="Chris Bradford <chrismbradford@gmail.com>"
 
-ARG MQTTUSER="<username>"
-ARG MQTTPASSWORD="<password>"
-ARG MONGOSERVER="<hostname/IP>"
-
-# No need to set user as using ubuntu packaged mosquitto
-# USER mosquitto
+ARG MQTTUSER="mqtt-user"
+ARG MQTTPASSWORD="27T6fog7Vq1S#nSjKZYiLlzYU4uRscKZ3W"
+ARG MONGOSERVER="192.168.1.97"
 
 # Install Dependencies / Required Services
 RUN apt-get -y update \
@@ -55,8 +52,8 @@ RUN wget http://mosquitto.org/files/source/mosquitto-1.4.15.tar.gz \
 # Download/ modify Mosquitto Config File **remove password**
 WORKDIR /mosquitto/config
 RUN mkdir -p /mosquitto/config/conf.d /mosquitto/data /mosquitto/log \
-    && wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5bd8408762581fe6/raw/9a9fd7790e4edb5f0129e9a5ff0bd7449b43dffd/mosquitto.conf \
-    && cd /mosquitto/config/conf.d \
+    && cp /etc/mosquitto/mosquitto.conf /mosquitto/config \
+    && cd  /mosquitto/config/conf.d \
     && wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/5f5013a3f703647d9fb9fcdf700b26dae6e967a1/node-red-alexa-smart-home-v3.conf \
     && sed -i "s/<mongo-server>/$MONGOSERVER/g" node-red-alexa-smart-home-v3.conf \
     && sed -i "s/<user>/$MQTTUSER/g" node-red-alexa-smart-home-v3.conf \
