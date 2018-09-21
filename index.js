@@ -20,10 +20,7 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 //var Measurement = require('./googleMeasurement.js');
 
-// Service-wide Settings
-var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
-
-// Validate CRITICAL environment variables passed to container
+/* // Validate CRITICAL environment variables passed to container
 if (process.env.WEB_HOSTNAME && process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD ) {
 	console.log("ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER and MQTT_PASSWORD environment variables.")
 	process.exit()
@@ -35,9 +32,10 @@ if (process.env.MONGO_HOST && process.env.MQTT_URL ) {
 
 if (process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD ) {
 	console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
-}
+} */
 
-
+// Service-wide Settings
+var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
 // NodeJS App Settings
 var port = (process.env.PORT || 3000);
 var host = ('0.0.0.0');
