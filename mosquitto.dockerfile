@@ -4,7 +4,7 @@ LABEL maintainer="Chris Bradford <chrismbradford@gmail.com>"
 
 ARG MQTTUSER="<username>"
 ARG MQTTPASSWORD="<password>"
-ARG MONGOSERVER="<hostname/IP"
+ARG MONGOSERVER="<hostname/IP>"
 
 # No need to set user as using ubuntu packaged mosquitto
 # USER mosquitto
