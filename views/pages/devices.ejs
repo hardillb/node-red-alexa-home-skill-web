@@ -4,15 +4,15 @@
 		<div class="deviceHeader">
 			<div style="width:200px; float:left" ><strong>Name</strong></div>
 			<div style="width:400px; float:left"><strong>Description</strong></div>
-			<div class="deviceActions"><strong>Actions</strong></div>
+			<div class="deviceCapabilities"><strong>Capabilities</strong></div>
 		</div>
 		<% devices.forEach(function(device){ %>
 		<div class="deviceRow">
 			<div class="device">
 			<div class="deviceName"><%= device.friendlyName %></div>
-			<div class="deviceDescription"><%= device.friendlyDescription %></div>
+			<div class="deviceDescription"><%= device.description %></div>
 			<div class="deviceActions">
-				<% device.actions.forEach(function(action){ %>
+				<% device.capabilities.forEach(function(action){ %>
 					<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
 				<% }); %>
 			</div>
@@ -34,82 +34,34 @@
 		<input id="devID" type="hidden">
 		<label for="friendlyName">Name: </label>
 		<input id="friendlyName" type="text">
-		<label for="friendlyDescription">Description: </label>
+		<label for="description">Description: </label>
 		<br>
-		<textarea id="friendlyDescription" rows="2" style="width: 95%"></textarea>
+		<textarea id="description" rows="2" style="width: 95%"></textarea>
 		<fieldset>
-			<legend>Actions</legend>
-			<fieldset class="action" id="onOff">
-				<label for="turnOn">On: </label>
-				<input title="Turn device on" type="checkbox" name="actions" id="turnOn" value="turnOn" onclick='checkCapability(this)'>
-				<label for="turnOff">Off: </label>
-				<input title="Turn device off" type="checkbox" name="actions" id="turnOff" value="turnOff" onclick='checkCapability(this)'>
-			</fieldset>
-			<fieldset class="action" id="percentCheck">
-				<label for="setPercentage">%: </label>
-				<input title="Set device %" type="checkbox" name="actions" id="setPercentage" value="setPercentage" onclick='checkCapability(this)'>
-				<label for="incrementPercentage">+%: </label>
-				<input title="Turn device up" type="checkbox" name="actions" id="incrementPercentage" value="incrementPercentage" onclick='checkCapability(this)'>
-				<label for="decrementPercentage">-%: </label>
-				<input title="Turn device down" type="checkbox" name="actions" id="decrementPercentage" value="decrementPercentage" onclick='checkCapability(this)'>
-			</fieldset>
-			<fieldset class="action" id="temperatureCheck">
-				<label for="setTargetTemperature">&deg;C/F: </label>
-				<input title="Set target temperature" type="checkbox" name="actions" id="setTargetTemperature" value="setTargetTemperature" onclick='checkCapability(this)'>
-				<label for="incrementTargetTemperature">+&deg;C/F: </label>
-				<input title="Turn target temperature up" type="checkbox" name="actions" id="incrementTargetTemperature" value="incrementTargetTemperature" onclick='checkCapability(this)'>
-				<label for="decrementTargetTemperature">-&deg;C/F: </label>
-				<input title="Turn target temperature down" type="checkbox" name="actions" id="decrementTargetTemperature" value="decrementTargetTemperature" onclick='checkCapability(this)'>
-			</fieldset>
-			<!-- -->
-			<fieldset class="action" id="queryTemperature">
-				<label for="getTargetTemperature">Query Set Point: </label>
-				<input title="Query target temperature" type="checkbox" name="actions" id="getTargetTemperature" value="getTargetTemperature" onclick='checkCapability(this)'>
-				<br/>
-				<label ofr="getTemperatureReading">Query Current Temp: </label>
-				<input title="Query current temperature" type="checkbox" name="actions" id="getTemperatureReading" value="getTemperatureReading" onclick='checkCapability(this)'>
-			</fieldset>
-			<fieldset class="action" id="lockControl">
-				<label for="">Lock/Unlock</label>
-				<input title="Lock or Unlock" type="checkbox" name="actions" id="setLockState" value="setLockState" onclick='checkCapability(this)'>
-				<br/>
-				<label for="">Query Lock State</label>
-				<input title="Query Lock state" type="checkbox" name="actions" id="getLockState" value="getLockState" onclick='checkCapability(this)'>
-			</fieldset>
-			<!-- -->
-			<fieldset class="action" id="lighting">
-				<label for="setColor">Set Color</label>
-				<input title="Set Color" type="checkbox" name="actions" id="setColor" value="setColor" onclick='checkCapability(this)'>
-				<br/>
-				<label for="setColorTemperature">Set Color Temperature</label>
-				<input title="Set Color Temperature" type="checkbox" name="actions" id="setColorTemperature" value="setColorTemperature" onclick='checkCapability(this)'>
-				<label for="incrementColorTemperature">Increment Color Temperature</label>
-				<input title="Increment Color Temperature" type="checkbox" name="actions" id="incrementColorTemperature" value="incrementColorTemperature" onclick='checkCapability(this)'>
-				<label for="decrementColorTemperature">Decrement Color Temperature</label>
-				<input title="Decrement Color Temperature" type="checkbox" name="actions" id="decrementColorTemperature" value="decrementColorTemperature" onclick='checkCapability(this)'>
+			<legend>Capabilities</legend>
+			<fieldset class="action" id="capabilityType">
+				<label for="PowerController"> Power Control </label>
+				<input title="Power Control" type="checkbox" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
+				<br />
+				<label for="PlaybackController"> Playback Control </label>
+				<input title="Playback Control" type="checkbox" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
+				<br />
+				<label for="StepSpeaker"> Speaker Control</label>
+				<input title="Step Speaker Control" type="checkbox" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
 			</fieldset>
 			<!-- -->
 		</fieldset>
 		<fieldset>
-			<legend>Application Type</legend>
+			<legend>Alexa App Icon</legend>
 			<fieldset class="action" id="applicationType">
-				<label for="LIGHT">LIGHT: </label>
-				<input type="checkbox" id="LIGHT" name="appType" value="LIGHT" onclick='checkCapability(this)'>
-				<br/>
-				<label for="SWITCH">SWITCH: </label>
-				<input type="checkbox" id="SWITCH" name="appType" value="SWITCH" onclick='checkCapability(this)'>
-				<br/>
-				<label for="SMARTPLUG">SMARTPLUG: </label>
-				<input type="checkbox" id="SMARTPLUG" name="appType" value="SMARTPLUG" onclick='checkCapability(this)'>
-				<br/>
-				<label for="THERMOSTAT">THERMOSTAT: </label>
-				<input type="checkbox" id="THERMOSTAT" name="appType" value="THERMOSTAT" onclick='checkCapability(this)'>
-				<br/>
-				<label for="SMARTLOCK">SMARTLOCK: </label>
-				<input type="checkbox" id="SMARTLOCK" name="appType" value="SMARTLOCK" onclick='checkCapability(this)'>
-				<br/>
-				<label for="ACTIVITY_TRIGGER">ACTIVITY: </label>
-				<input type="checkbox" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" onclick='checkCapability(this)'>
+				<label for="SWITCH">Smart Switch: </label>
+				<input type="checkbox" id="SWITCH" name="appType" value="SWITCH" disabled="true">
+				<br />
+				<label for="TV">TV: </label>
+				<input type="checkbox" id="TV" name="appType" value="TV" disabled="true">
+				<br />
+				<label for="SPEAKER">Speaker: </label>
+				<input type="checkbox" id="SPEAKER" name="appType" value="SPEAKER" disabled="true">
 			</fieldset>
 		</fieldset>
 	</div>
@@ -137,25 +89,23 @@
 					var devID = $('#devID').val();
 					if ( devID === "") {
 						var device = {
-							actions: [],
-							applianceTypes: []
+							capabilities: [],
+							displayCategories: []
 						};
 						device.friendlyName = $('#friendlyName').val();
-						device.friendlyDescription = $('#friendlyDescription').val();
-						$('input[name=actions]').each(function(index){
+						device.description = $('#description').val();
+						$('input[name=capabilities]').each(function(index){
 							if (this.checked) {
-								device.actions.push(this.value);
+								device.capabilities.push(this.value);
 							}
 						});
 						$('input[name=appType]').each(function(index){
 							if (this.checked) {
-								device.applianceTypes.push(this.value);
+								device.displayCategories.push(this.value);
 							}
 						});
 						console.log(device);
-						if (device.friendlyName && 
-							device.friendlyDescription && 
-							device.actions.length > 0) {
+						if (device.friendlyName && device.description && device.capabilities.length > 0) {
 							$.ajax({
 								url:"/devices",
 								type: 'PUT',
@@ -177,22 +127,22 @@
 						}
 					} else {
 						var device = devices[devID];
-						device.friendlyDescription = $('#friendlyDescription').val();
-						device.actions = [];
-						$('input[name=actions]').each(function(index){
+						device.description = $('#description').val();
+						device.capabilities = [];
+						$('input[name=capabilities]').each(function(index){
 							if (this.checked) {
-								device.actions.push(this.value);
+								device.capabilities.push(this.value);
 							}
 						});
-						device.applianceTypes = [];
+						device.displayCategories = [];
 						$('input[name=appType]').each(function(index){
 							if (this.checked) {
-								device.applianceTypes.push(this.value);
+								device.displayCategories.push(this.value);
 							}
 						});
 						if (device.friendlyName && 
-							device.friendlyDescription && 
-							device.actions.length > 0) {
+							device.description && 
+							device.capabilities.length > 0) {
 							//post update
 							$.ajax({
 								url: '/device/' + device._id,
@@ -234,8 +184,8 @@
 		$('#devID').val("");
 		$('#friendlyName').val("");
 		$('#friendlyName').prop('readonly', false);
-		$('#friendlyDescription').val("");
-		$('input[name=actions]').each(function(index){
+		$('#description').val("");
+		$('input[name=capabilities]').each(function(index){
 			this.checked = false;
 		});
 		$('input[name=appType]').each(function(index) {
@@ -250,11 +200,11 @@
 		$('#devID').val(device._id);
 		$('#friendlyName').val(device.friendlyName);
 		$('#friendlyName').prop('readonly', true);
-		$('#friendlyDescription').val(device.friendlyDescription);
-		device.actions.forEach(function(action){
-			$('#'+action).prop('checked',true);
+		$('#description').val(device.description);
+		device.capabilities.forEach(function(action){
+			$('#' + action).prop('checked',true);
 		});
-		device.applianceTypes.forEach(function(type){
+		device.displayCategories.forEach(function(type){
 			$('#' + type).prop('checked',true);
 		});
 		checkCapability();
@@ -274,134 +224,44 @@
 	}
 
 	function checkCapability(check) {
-		var on = $('#turnOn').prop('checked');
-		var off = $('#turnOff').prop('checked');
+		var power = $('#PowerController').prop('checked');
+		var playback = $('#PlaybackController').prop('checked');
+		var stepSpeaker = $('#StepSpeaker').prop('checked');
 
-		var o = on | off;
-
-		var percent = $('#setPercentage').prop('checked');
-		var incPercent = $('#incrementPercentage').prop('checked');
-		var decPercent = $('#decrementPercentage').prop('checked');
-
-		var p = percent | incPercent | decPercent;
-
-		var temp = $('#setTargetTemperature').prop('checked');
-		var incTemp = $('#incrementTargetTemperature').prop('checked');
-		var decTemp = $('#decrementTargetTemperature').prop('checked');
-		var qSetTemp = $('#getTargetTemperature').prop('checked');
-		var qCurTemp = $('#getTemperatureReading').prop('checked');
-
-		var t = temp | incTemp | decTemp | qSetTemp | qCurTemp;
-
-		var lock = $('#setLockState').prop('checked');
-		var qLock = $('#getLockState').prop('checked');
-
-		var l = lock | qLock;
-
-		var color = $('#setColor').prop('checked');
-		var colorTemp = $('#setColorTemp').prop('checked');
-		var incColorTemp = $('#incrementColorTemp').prop('checked');
-		var decColorTemp = $('#decrementColorTemp').prop('checked');
-
-		var c = color | colorTemp | incColorTemp | decColorTemp;
-
-		if (p & t || p & l || t & l || t & c || l & c) {
-			alert("You can not control percentage and temperature, percentage and lock, temperature and lock or temperature and color or lock and color on the same device");
+		// Ensure only one device type checked
+		if (power & playback || power & stepSpeaker || playback & stepSpeaker ) {
+			alert("Please select one device type!");
+			$('#PowerController').prop('checked', false);
+			$('#PlaybackController').prop('checked', false);
+			$('#StepSpeaker').prop('checked', false);
+			$('#SWITCH').prop('checked', false)
+			$('#TV').prop('checked', false)
+			$('#SPEAKER').prop('checked', false)
 			return false;
 		}
-
-		if (p) {
-			$('#percentCheck').removeAttr('disabled');
-			$('#lighting').removeAttr('disabled');
-			$('#temperatureCheck').attr('disabled', '');
-			$('#queryTemperature').attr('disabled', '');
-			$('#lockControl').attr('disabled', '');
-		} else if (t) {
-			$('#temperatureCheck').removeAttr('disabled');
-			$('#queryTemperature').removeAttr('disabled');
-			$('#lockControl').attr('disabled', '');
-			$('#percentCheck').attr('disabled', '');
-			$('#lighting').attr('disabled', '');
-		} else if (l) {
-			$('#lockControl').removeAttr('disabled');
-			$('#temperatureCheck').attr('disabled', '');
-			$('#queryTemperature').attr('disabled', '');
-			$('#percentCheck').attr('disabled', '');
-			$('#lighting').attr('disabled', '');
-		} else if (c) {
-			$('#percentCheck').removeAttr('disabled');
-			$('#lighting').removeAttr('disabled');
-			$('#lockControl').attr('disabled', '');
-			$('#temperatureCheck').attr('disabled', '');
-			$('#queryTemperature').attr('disabled', '');
-		} else {
-			$('#percentCheck').removeAttr('disabled');
-			$('#temperatureCheck').removeAttr('disabled');
-			$('#queryTemperature').removeAttr('disabled');
-			$('#lockControl').removeAttr('disabled');
-			$('#lighting').removeAttr('disabled');
+		else {
+			if (power) {
+				$('#SWITCH').prop('checked', true);
+				$('#TV').prop('checked', false);
+				$('#SPEAKER').prop('checked', false);
+			}
+			else if (playback) {
+				$('#SWITCH').prop('checked', false)
+				$('#TV').prop('checked', true)
+				$('#SPEAKER').prop('checked', false)
+			}
+			else if (stepSpeaker) {
+				$('#SWITCH').prop('checked', false)
+				$('#TV').prop('checked', false)
+				$('#SPEAKER').prop('checked', true)
+			}
+			else {
+				$('#SWITCH').prop('checked', false)
+				$('#TV').prop('checked', false)
+				$('#SPEAKER').prop('checked', false)
+				return false;
+			}
 		}
-
-		if ((o & p & c) || (o & p) || (o & c) || c || p) {
-			$('#LIGHT').removeAttr('disabled');
-			$('#SWITCH').attr('disabled','');
-			$('#SWITCH').prop('checked',false);
-			$('#SMARTPLUG').attr('disabled','');
-			$('#SMARTPLUG').prop('checked',false);
-			$('#SMARTLOCK').attr('disabled','');
-			$('#SMARTLOCK').prop('checked',false);
-			//$('#ACTIVITY_TRIGGER').attr('disabled','');
-			//$('#ACTIVITY_TRIGGER').prop('checked',false);
-			$('#THERMOSTAT').attr('disabled','');
-			$('#THERMOSTAT').prop('checked',false);
-		} else if (o & !p & !c) {
-			$('#LIGHT').removeAttr('disabled');
-			$('#SWITCH').removeAttr('disabled');
-			$('#SMARTPLUG').removeAttr('disabled');
-			$('#ACTIVITY_TRIGGER').removeAttr('disabled');
-			$('#SMARTLOCK').attr('disabled','');
-			$('#SMARTLOCK').prop('checked',false);
-		} else if (l) {
-			console.log("lock");
-			$('#SMARTLOCK').removeAttr('disabled');
-			$('#LIGHT').attr('disabled','');
-			$('#LIGHT').prop('checked',false);
-			$('#SWITCH').attr('disabled','');
-			$('#SWITCH').prop('checked',false);
-			$('#SMARTPLUG').attr('disabled','');
-			$('#SMARTPLUG').prop('checked',false);
-			$('#ACTIVITY_TRIGGER').attr('disabled','');
-			$('#ACTIVITY_TRIGGER').prop('checked',false);
-			$('#THERMOSTAT').attr('disabled','');
-			$('#THERMOSTAT').prop('checked',false);
-		} else if ((o & t) || t) {
-			$('#THERMOSTAT').removeAttr('disabled');
-			$('#LIGHT').attr('disabled','');
-			$('#LIGHT').prop('checked',false);
-			$('#SWITCH').attr('disabled','');
-			$('#SWITCH').prop('checked',false);
-			$('#SMARTPLUG').attr('disabled','');
-			$('#SMARTPLUG').prop('checked',false);
-			$('#ACTIVITY_TRIGGER').attr('disabled','');
-			$('#ACTIVITY_TRIGGER').prop('checked',false);
-			$('#SMARTLOCK').attr('disabled','');
-			$('#SMARTLOCK').prop('checked',false);
-		} else {
-			$('#LIGHT').removeAttr('disabled');
-			$('#LIGHT').prop('checked',false);
-			$('#SWITCH').removeAttr('disabled');
-			$('#SWITCH').prop('checked',false);
-			$('#SMARTPLUG').removeAttr('disabled');
-			$('#SMARTPLUG').prop('checked',false);
-			$('#ACTIVITY_TRIGGER').removeAttr('disabled');
-			$('#ACTIVITY_TRIGGER').prop('checked',false);
-			$('#SMARTLOCK').removeAttr('disabled');
-			$('#SMARTLOCK').prop('checked',false);
-			$('#THERMOSTAT').removeAttr('disabled');
-			$('#THERMOSTAT').prop('checked',false);
-		}
-
-		
 	}
 
 	var devices = {};

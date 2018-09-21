@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var AutoIncrement = require('mongoose-sequence');
+var AutoIncrement = require('mongoose-sequence')(mongoose);
 
 var Topics = new Schema({
 	_id: Number,

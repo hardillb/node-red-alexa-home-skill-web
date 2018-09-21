@@ -10,28 +10,23 @@ server.grant(oauth2orize.grant.code({
 	OAuth.GrantCode.findOne({application: application, user: user},function(error,grant){
 		if (!error && grant) {
 			done(null,grant.code);
+			//console.log("Existing grant:", grant);
 		} else if (!error) {
 			var grant = new OAuth.GrantCode({
 				application: application,
 				user: user,
 				scope: ares.scope
 			});
+			//console.log("New grant:  ", grant)
 			grant.save(function(error) {
 				done(error, error ? null : grant.code);
 			});
 		} else {
+			console.log("Grant error!")
 			done(error,null);
 		}
 	});
 
-	// var grant = new OAuth.GrantCode({
-	// 	application: application,
-	// 	user: user,
-	// 	scope: ares.scope
-	// });
-	// grant.save(function(error) {
-	// 	done(error, error ? null : grant.code);
-	// });
 }));
 
 server.exchange(oauth2orize.exchange.code({
@@ -46,7 +41,7 @@ server.exchange(oauth2orize.exchange.code({
 						if (refreshToken){
 							var expires = Math.round((token.expires - (new Date().getTime()))/1000);
 							done(null,token.token, refreshToken.token,{token_type: 'Bearer', expires_in: expires});
-							console.log("sent expires_in: " + expires);
+							//console.log("sent expires_in: " + expires);
 						} else {
 							// Shouldn't get here unless there is an error as there
 							// should be a refresh token if there is an access token
@@ -60,6 +55,8 @@ server.exchange(oauth2orize.exchange.code({
 						grant: grant,
 						scope: grant.scope
 					});
+
+					//console.log("Creating new token: ", token)
 
 					token.save(function(error){
 						var expires = Math.round((token.expires - (new Date().getTime()))/1000);

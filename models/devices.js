@@ -1,16 +1,15 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var AutoIncrement = require('mongoose-sequence');
+var AutoIncrement = require('mongoose-sequence')(mongoose);
 
 var Devices = new Schema({
     username: String,
-    applianceId: Number,
+    endpointId: Number,
     friendlyName: String,
-    friendlyDescription: String,
-    isReachable: Boolean,
-    actions: [String],
-    applianceTypes: [String],
-    additionalApplianceDetails: {
+    description: String,
+    capabilities: [],
+    displayCategories: [String],
+    cookie: {
     	extraDetail1: String,
     	extraDetail2: String,
     	extraDetail3: String,
@@ -18,6 +17,6 @@ var Devices = new Schema({
     }
 });
 
-Devices.plugin(AutoIncrement, {inc_field: 'applianceId'});
+Devices.plugin(AutoIncrement, {inc_field: 'endpointId'});
 
 module.exports = mongoose.model('Devices', Devices);

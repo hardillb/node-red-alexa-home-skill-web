@@ -2,11 +2,11 @@
   <div class="container main-content">
     <h1>Connect with <%= application.title %></h1>
     <form action="/auth/finish" method="post">
-        <input type="hidden" name="transaction_id" value="<%= transaction_id %>">
-        <input type="hidden" name="response_type" value="<%= response_type %>">
-        <input type="hidden" name="client_id" value="<%= application.oauth_id %>">
-        <input type="hidden" name="auth_url" value="<%= decodeURIComponent(currentURL) %>">
-        <input type="hidden" name="scope" value="<%= scope.join(',') %>">
+        <input name="transaction_id" value="<%= transaction_id %>">
+        <input name="response_type" value="<%= response_type %>">
+        <input name="client_id" value="<%= application.oauth_id %>">
+        <input name="auth_url" value="<%= decodeURIComponent(currentURL) %>">
+        <input name="scope" value="<%= scope.join(',') %>">
 
         <div class="">
             <p><%= application.title %> requires permission to:</p>

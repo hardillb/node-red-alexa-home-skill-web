@@ -12,33 +12,38 @@ var session = require('express-session');
 var passport = require('passport');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-var Measurement = require('./googleMeasurement.js');
 var cookieParser = require('cookie-parser');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
-
-
 var oauthServer = require('./oauth');
+//var Measurement = require('./googleMeasurement.js');
 
-var port = (process.env.VCAP_APP_PORT || process.env.PORT || 3000);
-var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
-var mongo_url = (process.env.MONGO_URL || 'mongodb://localhost/users');
-
+// NodeJS App Settings
+var port = (process.env.PORT || 3000);
+var host = ('0.0.0.0');
+// MongoDB Settings
+var mongo_host = (process.env.MONGO_HOST || undefined);
+var mongo_port = (process.env.MONGO_PORT || undefined);
+var mongo_user = (process.env.MONGO_USER || undefined);
+var mongo_password = (process.env.MONGO_PASSWORD || undefined);
+// MQTT Settings
 var mqtt_url = (process.env.MQTT_URL || 'mqtt://localhost:1883');
 var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 console.log(mqtt_url);
 
-var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
-var measurement = new Measurement(googleAnalyicsTID);
+//var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
+//var measurement = new Measurement(googleAnalyicsTID);
 
 var mqttClient;
 
 var mqttOptions = {
-	reconnectPeriod: 3000,
+	connectTimeout: 30 * 1000,
+	reconnectPeriod: 1000,
 	keepAlive: 10,
 	clean: true,
+	resubscribe: true,
 	clientId: 'webApp_' + Math.random().toString(16).substr(2, 8)
 };
 
@@ -50,43 +55,32 @@ if (mqtt_user) {
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
+	console.log("MQTT connect error");
 });
 
 mqttClient.on('reconnect', function(){
-
+	console.log("MQTT reconnect");
 });
 
 mqttClient.on('connect', function(){
+	console.log("MQTT connected")
 	mqttClient.subscribe('response/#');
 });
 
-
-if (process.env.VCAP_SERVICES) {
-	var services = JSON.parse(process.env.VCAP_SERVICES);
-
-	for (serviceName in services) {
-		if (serviceName.match('^mongo')) {
-			var creds = services[serviceName][0]['credentials'];
-			mongo_url = creds.url;
-		} else {
-			console.log("no database found in vcap_services");
-		}
-	}
+// Use ENV-based/ undefined Mongo URL
+if (!mongo_host) {mongo_host = "localhost"}
+if (!mongo_port) {mongo_port = "27017"}
+if (!mongo_user && !mongo_password) {
+	console.log("No MONGO_USER/ MONGO_PASS env variables")
+	mongo_url = "mongodb://" + mongo_host + ":" + mongo_port + "/users";
+	console.log(mongo_url)
 }
-
-console.log(mongo_url);
+else {
+	mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
+	console.log(mongo_url)
+}
+		
 mongoose.Promise = global.Promise;
-var mongoose_options = {
-	server: {
-		auto_reconnect:true,
-		autoReconnect: true,
-		reconnectTries: Number.MAX_VALUE,
-		reconnectInterval: 1000,
-		socketOptions: {
-			autoReconnect: true
-		}
-	}
-};
 var mongoose_connection = mongoose.connection;
 
 mongoose_connection.on('connecting', function() {
@@ -114,7 +108,16 @@ mongoose_connection.on('disconnected', function() {
 	console.log('MongoDB disconnected!');
 });
 
-mongoose.connect(mongo_url, mongoose_options);
+// Fixes in relation to: https://github.com/Automattic/mongoose/issues/6922#issue-354147871
+mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
+
+mongoose.connect(mongo_url, {
+		useNewUrlParser: true,
+		autoReconnect: true,
+		reconnectTries: Number.MAX_VALUE,
+		reconnectInterval: 1000
+});
 
 var Account = require('./models/account');
 var oauthModels = require('./models/oauth');
@@ -122,12 +125,11 @@ var Devices = require('./models/devices');
 var Topics = require('./models/topics');
 var LostPassword = require('./models/lostPassword');
 
-
+// Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){
 	if (!error && !account) {
 		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1}),
 			mqtt_password, function(err, account){
-
 			var topics = new Topics({topics: [
 					'command/' +account.username+'/#', 
 					'presence/' + account.username + '/#',
@@ -135,16 +137,12 @@ Account.findOne({username: mqtt_user}, function(error, account){
 				]});
 			topics.save(function(err){
 				if (!err){
-
 					var s = Buffer.from(account.salt, 'hex').toString('base64');
 					var h = Buffer.from(account.hash, 'hex').toString(('base64'));
-
 					var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
-
-					Account.update(
+					Account.updateOne(
 						{username: account.username}, 
 						{$set: {mqttPass: mqttPass, topics: topics._id}}, 
-						{ multi: false },
 						function(err, count){
 							if (err) {
 								console.log(err);
@@ -155,7 +153,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			});
 		});
 	} else {
-		console.log("MQTT account already exists");
+		console.log("Superuser MQTT account already exists");
 	}
 });
 
@@ -180,8 +178,6 @@ var accessLogStream = rfs('access.log', {
   maxFiles: 30,
   path: logDirectory
 });
-
-
 
 var app = express();
 
@@ -236,13 +232,13 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 			console.log("missing grant token: %j", token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
-			// console.log("Token is GOOD!");
+			//console.log("Token is GOOD!");
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
-			// console.log("TOKEN PROBLEM");
+			//console.log("TOKEN PROBLEM");
 			done(null, false);
 		} else {
-			// console.log("TOKEN PROBLEM 2");
+			//console.log("TOKEN PROBLEM 2");
 			done(error);
 		}
 	});
@@ -322,16 +318,12 @@ app.post('/newuser', function(req,res){
 			]});
 		topics.save(function(err){
 			if (!err){
-
 				var s = Buffer.from(account.salt, 'hex').toString('base64');
 				var h = Buffer.from(account.hash, 'hex').toString(('base64'));
-
 				var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
-
-				Account.update(
+				Account.updateOne(
 					{username: account.username}, 
 					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
-					{ multi: false },
 					function(err, count){
 						if (err) {
 							console.log(err);
@@ -343,12 +335,12 @@ app.post('/newuser', function(req,res){
 
 		passport.authenticate('local')(req, res, function () {
 			console.log("created new user %s", req.body.username);
-			measurement.send({
-				t:'event', 
-				ec:'System', 
-				ea: 'NewUser',
-				uid: req.body.username
-			});
+			//measurement.send({
+			//	t:'event', 
+			//	ec:'System', 
+			//	ea: 'NewUser',
+			//	uid: req.body.username
+			//});
             res.status(201).send();
         });
 
@@ -426,7 +418,7 @@ app.post('/lostPassword', function(req, res, next){
 					//console.log(lostPassword.uuid);
 					//console.log(lostPassword.user.username);
 					var body = mailer.buildLostPasswordBody(lostPassword.uuid, lostPassword.user.username);
-					mailer.send(email, 'alexa-node-red@hardill.me.uk', 'Password Reset for Alexa Node-RED', body.text, body.html);
+					mailer.send(email, 'no-reply@cb-net.co.uk', 'Password Reset for Node-Red-Alexa-Smart-Home-v3', body.text, body.html);
 				});
 			} else {
 				res.status(404).send("No user found with that email address");
@@ -435,31 +427,39 @@ app.post('/lostPassword', function(req, res, next){
 	});
 });
 
+// Oauth related code, some help here in getting this working: https://github.com/hardillb/alexa-oauth-test
+// See README.md for Alexa Skill Authentication settings.
+
+// Authorization URI
 app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI, done) {
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
 			for (var i = 0; i < application.domains.length; i++) {
+				console.log("Checking redirectURI against defined service domain: " + application.domains[i])
 				if (uri.host == application.domains[i] || (uri.protocol == application.domains[i] && uri.protocol != 'http' && uri.protocol != 'https')) {
 					match = true;
+					console.log("Found service definition associated with redirecURI: " + redirectURI);
 					break;
 				}
 			}
 			if (match && redirectURI && redirectURI.length > 0) {
 				done(null, application, redirectURI);
 			} else {
-				done(new Error("You must supply a redirect_uri that is a domain or url scheme owned by your app."), false);
+				done(new Error("Could not find service definition associated with redirectURI: " + redirectURI), false);
 			}
 		} else if (!error) {
-			done(new Error("There is no app with the client_id you supplied."), false);
+			done(new Error("No serevice definition associated with oauth client_id: " + applicationID), false);
 		} else {
 			done(error);
 		}
 	});
+	
+// Oauth Scopes
 }),function(req,res){
 	var scopeMap = {
 		// ... display strings for all scope variables ...
-		access_devices: 'access you devices',
+		access_devices: 'access your devices',
 		create_devices: 'create new devices'
 	};
 
@@ -485,13 +485,13 @@ app.post('/auth/finish',function(req,res,next) {
 		passport.authenticate('local', {
 			session: false
 		}, function(error,user,info){
-			//console.log("/auth/finish authenting");
+			//console.log("/auth/finish authenticating");
 			if (user) {
-				//console.log(user.username);
+				console.log("Authenticated: " + user.username);
 				req.user = user;
 				next();
 			} else if (!error){
-				//console.log("not authed");
+				console.log("Not Authenticated");
 				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
 			}
@@ -502,6 +502,7 @@ app.post('/auth/finish',function(req,res,next) {
 	done(null, { scope: req.oauth2.req.scope });
 }));
 
+// Access Token URI
 app.post('/auth/exchange',function(req,res,next){
 	var appID = req.body['client_id'];
 	var appSecret = req.body['client_secret'];
@@ -511,7 +512,7 @@ app.post('/auth/exchange',function(req,res,next){
 			req.appl = application;
 			next();
 		} else if (!error) {
-			error = new Error("There was no application with the Application ID and Secret you provided.");
+			error = new Error("Could not find service definition associated with applicationID: " + appID + " or secret: " + appSecret);
 			next(error);
 		} else {
 			next(error);
@@ -519,17 +520,19 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
+
+// Discover devices, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
 app.get('/api/v1/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 
 		//console.log("all good, doing discover devices");
-		measurement.send({
-			t:'event', 
-			ec:'discover', 
-			ea: req.body.header ? req.body.header.name : "Node-RED",
-			uid: req.user.username
-		});
+		//measurement.send({
+		//	t:'event', 
+		//	ec:'discover', 
+		//	ea: req.body.header ? req.body.header.name : "Node-RED",
+		//	uid: req.user.username
+		//});
 
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
@@ -538,16 +541,14 @@ app.get('/api/v1/devices',
 				for (var i=0; i< data.length; i++) {
 					var dev = {};
 					dev.friendlyName = data[i].friendlyName;
-					dev.friendlyDescription = data[i].friendlyDescription;
-					dev.applianceId = "" + data[i].applianceId;
-					dev.isReachable = data[i].isReachable;
-					dev.actions = data[i].actions;
-					dev.applianceTypes = data[i].applianceTypes;
-					dev.additionalApplianceDetails = data[i].additionalApplianceDetails;
-					dev.modelName = "Node-RED Endpoint";
-					dev.version = "0.0.1";
+					dev.description = data[i].description;
+					dev.endpointId = "" + data[i].endpointId;
+					// Call replaceCapability to replace placeholder capabilities
+					dev.capabilities = replaceCapability(data[i].capabilities);
+					dev.displayCategories = data[i].displayCategories;
+					dev.cookie = data[i].cookie;
+					dev.version = "0.0.2";
 					dev.manufacturerName = "Node-RED"
-
 					devs.push(dev);
 				}
 				//console.log(devs)
@@ -557,11 +558,138 @@ app.get('/api/v1/devices',
 	}
 );
 
+// Alexa discovery response related-capabilties, function replaces 'placeholders' stored under device.capabilities
+function replaceCapability(capability) {
+	//console.log(capability)
+	// PowerController
+	if(capability == "PowerController") {
+		return [{
+			"type": "AlexaInterface",
+			"interface": "Alexa.PowerController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "powerState"
+				}],
+				"proactivelyReported": false,
+				"retrievable": false
+				}
+			}];
+	}
+
+	// PlaybackController
+	if(capability == "PlaybackController") {
+		return [{
+			"type": "AlexaInterface",
+			"interface": "Alexa.PlaybackController",
+			"version": "3",
+			"supportedOperations" : ["Play", "Pause", "Stop"]
+			}];
+	}
+
+	// StepSpeaker
+	if(capability == "StepSpeaker") {
+		return [{
+			"type": "AlexaInterface",
+			"interface": "Alexa.StepSpeaker",
+			"version": "3",
+			"properties":{
+				"supported":[{
+					  "name":"volume"
+				   },
+				   {
+					  "name":"muted"
+				   }
+				]}
+			}];
+	}
+
+	// ThermostatController
+	// if(capability == "ThermostatController")  {
+	// 	return [{
+	// 			"type": "AlexaInterface",
+	// 			"interface": "Alexa.ThermostatController",
+	// 			"version": "3", 
+	// 			"properties": {
+	// 				"supported": [{
+	// 						"name": "targetSetpoint"
+	// 					},
+	// 					{
+	// 						"name": "lowerSetpoint"
+	// 					},
+	// 					{
+	// 						"name": "upperSetpoint"
+	// 					},
+	// 					{
+	// 						"name": "thermostatMode"
+	// 					}
+	// 				],
+	// 				"proactivelyReported": false,
+	// 				"retrievable": false
+	// 			}
+	// 	}];
+	// }
+	// LightController
+	// if(capability == "LightController")  {
+	// 	return [{ 
+	// 			"type": "AlexaInterface",
+	// 			"interface": "Alexa.PowerController",
+	// 			"version": "3",
+	// 			"properties": {
+	// 				"supported": [{
+	// 					"name": "powerState"
+	// 				}],
+	// 				"proactivelyReported": false,
+	// 				"retrievable": false
+	// 			}
+	// 		},
+	// 		{
+	// 			"type": "AlexaInterface",
+	// 			"interface": "Alexa.ColorController",
+	// 			"version": "3",
+	// 			"properties": {
+	// 				"supported": [{
+	// 					"name": "color"
+	// 				}],
+	// 				"proactivelyReported": false,
+	// 				"retrievable": false
+	// 			}
+	// 		},
+	// 		{
+	// 			"type": "AlexaInterface",
+	// 			"interface": "Alexa.ColorTemperatureController",
+	// 			"version": "3",
+	// 			"properties": {
+	// 				"supported": [{
+	// 					"name": "colorTemperatureInKelvin"
+	// 				}],
+	// 				"proactivelyReported": false,
+	// 				"retrievable": false
+	// 			}
+	// 		},
+	// 		{
+	// 			"type": "AlexaInterface",
+	// 			"interface": "Alexa.BrightnessController",
+	// 			"version": "3",
+	// 			"properties": {
+	// 				"supported": [{
+	// 					"name": "brightness"
+	// 				}],
+	// 				"proactivelyReported": false,
+	// 				"retrievable": false
+	// 			}
+	// 		}
+	// 	]};
+};
+
 var onGoingCommands = {};
 
+// Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	if (topic.startsWith('response/')){
+		console.log("Acknowledged MQTT response")
 		var payload = JSON.parse(message.toString());
+		//console.log("response payload", payload)
 		var waiting = onGoingCommands[payload.messageId];
 		if (waiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
@@ -569,9 +697,11 @@ mqttClient.on('message',function(topic,message){
 				waiting.res.status(200);
 				if (payload.extra) {
 					//console.log("sending extra");
+					console.log("Sent succesfull HTTP response, with extra MQTT data.")
 					waiting.res.send(payload.extra);
 				} else {
 					//console.log("not sending extra");
+					console.log("Sent succesfull HTTP response, no extra MQTT data.")
 					waiting.res.send({});
 				}
 			} else {
@@ -585,34 +715,38 @@ mqttClient.on('message',function(topic,message){
 			}
 			delete onGoingCommands[payload.messageId];
 			// should really parse uid out of topic
-			measurement.send({
-				t:'event', 
-				ec:'command', 
-				ea: 'complete',
-				uid: waiting.user
-			});
+			//measurement.send({
+			//	t:'event', 
+			//	ec:'command', 
+			//	ea: 'complete',
+			//	uid: waiting.user
+			//});
 		}
+	}
+	else {
+		console.log("Unhandled MQTT via on message event handler", topic, message);
 	}
 });
 
+// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
 var timeout = setInterval(function(){
 	var now = Date.now();
 	var keys = Object.keys(onGoingCommands);
 	for (key in keys){
 		var waiting = onGoingCommands[keys[key]];
-		//console.log(keys[key]);
+		console.log(keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
-				//console.log("timed out");
+				console.log("timed out");
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
-				measurement.send({
-					t:'event', 
-					ec:'command', 
-					ea: 'timeout',
-					uid: waiting.user
-				});
+				//measurement.send({
+				//	t:'event', 
+				//	ec:'command', 
+				//	ea: 'timeout',
+				//	uid: waiting.user
+				//});
 			}
 		}
 	}
@@ -622,27 +756,36 @@ app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		//console.log(req.user.username);
-		//console.log(req.body);
-		measurement.send({
-			e:'event', 
-			ec:'command', 
-			ea: req.body.header.name,
-			uid: req.user.username
-		});
-		var topic = "command/" +req.user.username + "/" + req.body.payload.appliance.applianceId;
-		delete req.body.payload.accessToken;
+		//console.log(req);
+		//measurement.send({
+		//	e:'event', 
+		//	ec:'command', 
+		//	ea: req.body.directive.header.name,
+		//	uid: req.user.username
+		//
+		//});
+		var topic = "command/" +req.user.username + "/" + req.body.directive.endpoint.endpointId;
+		//console.log("topic", topic)
+		delete req.body.directive.header.correlationToken;
+		delete req.body.directive.endpoint.scope.token;
+		//console.log(req.body)
 		var message = JSON.stringify(req.body);
+		console.log("message",message)
 		try{
 			mqttClient.publish(topic,message);
+			console.log("Published MQTT command!")
 		} catch (err) {
-
+			console.log("Error publishing MQTT command!")
 		}
 		var command = {
 			user: req.user.username,
 			res: res,
 			timestamp: Date.now()
 		};
-		onGoingCommands[req.body.header.messageId] = command;
+
+		// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above)
+		// Expect timeout is associated with requirement for NodeRed flow? Assume this is awaiting acknowledge from NodeRed node
+		onGoingCommands[req.body.directive.header.messageId] = command;
 	}
 );
 
@@ -695,9 +838,9 @@ app.post('/device/:dev_id',
 						res.status(500);
 						res.send(err);
 					} else {
-						data.friendlyDescription = device.friendlyDescription;
-						data.actions = device.actions;
-						data.applianceTypes = device.applianceTypes;
+						data.description = device.description;
+						data.capabilities = device.capabilities;
+						data.displayCategories = device.displayCategories;
 						data.save(function(err, d){
 							res.status(201);
 							res.send(d);
@@ -713,7 +856,7 @@ app.delete('/device/:dev_id',
 		var user = req.user.username;
 		var id = req.params.dev_id;
 		console.log(id);
-		Devices.remove({_id: id, username: user},
+		Devices.deleteOne({_id: id, username: user},
 			function(err) {
 				if (err) {
 					console.log(err);
@@ -732,10 +875,10 @@ app.post('/api/v1/devices',
 		var devices = req.body;
 		if (typeof devices == 'object' && Array.isArray(devices)) {
 			for (var i=0; i<devices.lenght; i++) {
-				var applianceId = devices[i].applianceId;
-				Devices.update({
+				var endpointId = devices[i].endpointId;
+				Devices.updateOne({
 						username: req.user, 
-						applianceId: applianceId
+						endpointId: endpointId
 					},
 					devices[i],
 					{
@@ -755,7 +898,7 @@ app.get('/admin',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username == mqtt_user) {
-			Account.count({},function(err, count){
+			Account.countDocuments({},function(err, count){
 				res.render('pages/admin',{user:req.user, userCount: count});
 			});
 		} else {
@@ -805,7 +948,6 @@ app.put('/services',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username == mqtt_user) {
-			
 			var application = oauthModels.Application(req.body);
 			application.save(function(err, application){
 				if (!err) {
@@ -868,7 +1010,4 @@ server.listen(port, host, function(){
 	setTimeout(function(){
 		
 	},5000);
-	
-	
-	
 });
