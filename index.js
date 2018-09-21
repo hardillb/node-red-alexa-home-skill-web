@@ -191,8 +191,10 @@ app.use(flash());
 // Moved from express.session to connect-mongo
 app.use(session({
 	store: new mongoStore({
-		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
+		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions"
 	}),
+	resave: true,
+	saveUninitialized: true
 	secret: 'ihytsrf334'
 }));
 
