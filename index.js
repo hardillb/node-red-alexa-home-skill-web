@@ -20,18 +20,36 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 //var Measurement = require('./googleMeasurement.js');
 
+// Validate CRITICAL environment variables passed to container
+if (!process.env.WEB_HOSTNAME || !process.env.MONGO_USER || !process.env.MONGO_PASSWORD || !process.env.MQTT_USER || !process.env.MQTT_PASSWORD ) {
+	console.log("ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER and MQTT_PASSWORD environment variables.")
+	process.exit()
+}
+
+if (!process.env.MONGO_HOST || !process.env.MQTT_URL ) {
+	console.log("WARNING: using DNS_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
+}
+
+if (!process.env.MAIL_SERVER || !process.env.MAIL_USER || !process.env.MAIL_PASSWORD ) {
+	console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
+}
+
+// Service-wide Settings
+var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
 // NodeJS App Settings
 var port = (process.env.PORT || 3000);
 var host = ('0.0.0.0');
+var certKey = "/etc/letsencrypt/live/" + dnsHostname + "/privkey.pem";
+var certChain = "/etc/letsencrypt/live/" + dnsHostname + "/chain.pem";
 // MongoDB Settings
-var mongo_host = (process.env.MONGO_HOST || undefined);
-var mongo_port = (process.env.MONGO_PORT || undefined);
 var mongo_user = (process.env.MONGO_USER || undefined);
 var mongo_password = (process.env.MONGO_PASSWORD || undefined);
+var mongo_host = (process.env.MONGO_HOST || dnsHostname);
+var mongo_port = (process.env.MONGO_PORT || "27017");
 // MQTT Settings
-var mqtt_url = (process.env.MQTT_URL || 'mqtt://localhost:1883');
 var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
+var mqtt_url = (process.env.MQTT_URL || "mqtt://" + dnsHostname + ":1883");
 console.log(mqtt_url);
 
 //var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
@@ -68,19 +86,9 @@ mqttClient.on('connect', function(){
 	mqttClient.subscribe('response/#');
 });
 
-// Use ENV-based/ undefined Mongo URL
-if (!mongo_host) {mongo_host = "localhost"}
-if (!mongo_port) {mongo_port = "27017"}
-if (!mongo_user && !mongo_password) {
-	console.log("No MONGO_USER/ MONGO_PASS env variables")
-	mongo_url = "mongodb://" + mongo_host + ":" + mongo_port + "/users";
-	console.log(mongo_url)
-}
-else {
-	mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-	console.log(mongo_url)
-}
-		
+// Connect to Mongo Instance
+mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
+console.log(mongo_url)
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
@@ -1007,15 +1015,22 @@ app.delete('/service/:id',
 			});
 });
 
-var server = http.Server(app);
+// Create HTTPS Server Instance
+var options = {
+	key: fs.readFileSync(certKey),
+	cert: fs.readFileSync(certChain)
+};
+server = https.createServer(options, app);
+
+// Moved to HTTPS-only
+/* var server = http.Server(app);
 if (app_id.match(/^https:\/\/localhost:/)) {
 	var options = {
 		key: fs.readFileSync('server.key'),
 		cert: fs.readFileSync('server.crt')
 	};
 	server = https.createServer(options, app);
-} 
-
+}  */
 
 server.listen(port, host, function(){
 	console.log('App listening on  %s:%d!', host, port);
