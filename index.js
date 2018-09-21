@@ -194,7 +194,7 @@ app.use(session({
 		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions"
 	}),
 	resave: true,
-	saveUninitialized: true
+	saveUninitialized: true,
 	secret: 'ihytsrf334'
 }));
 
