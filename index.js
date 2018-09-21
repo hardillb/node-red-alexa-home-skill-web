@@ -40,7 +40,7 @@ var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
 var port = (process.env.PORT || 3000);
 var host = ('0.0.0.0');
 var certKey = "/etc/letsencrypt/live/" + dnsHostname + "/privkey.pem";
-var certChain = "/etc/letsencrypt/live/" + dnsHostname + "/chain.pem";
+var certChain = "/etc/letsencrypt/live/" + dnsHostname + "/fullchain.pem";
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER || undefined);
 var mongo_password = (process.env.MONGO_PASSWORD || undefined);
