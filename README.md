@@ -9,7 +9,9 @@ Note there are 3 component parts to this service:
 * An Amazon Lambda function (github repo link to follow for this fork)
 * A Node-Red contrib (github repo link to follow for this fork)
 
-Based **heavily** on Ben Hardill's Alexa Smart Home API v2 skill:
+At present *you* must deploy these component parts and update as outlined below. I'm working on hosting this in AWS shortly!
+
+This project is based **extensively** on Ben Hardill's Alexa Smart Home API v2 project:
 * https://github.com/hardillb/node-red-alexa-home-skill-web
 * https://github.com/hardillb/node-red-alexa-home-skill-lambda
 * https://github.com/hardillb/node-red-alexa-home-skill-web
