@@ -8,7 +8,7 @@ var https = require('https');
 var flash = require('connect-flash');
 var morgan = require('morgan');
 var express = require('express');
-var session = require('express-session');
+// var session = require('express-session');
 var passport = require('passport');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
@@ -17,6 +17,7 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
+var session = require('session-mongoose')(express)
 //var Measurement = require('./googleMeasurement.js');
 
 // NodeJS App Settings
@@ -186,7 +187,20 @@ app.enable('trust proxy');
 app.use(morgan("combined", {stream: accessLogStream}));
 app.use(cookieParser(cookieSecret));
 app.use(flash());
-app.use(session({
+
+app.use(
+	express.session({
+		store: new SessionStore({
+			url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + '/sessions',
+			interval: 1200000
+		  }),
+		  cookie: { maxAge: 1200000 },
+		  secret: 'ihytsrf334'
+	})
+);
+
+// express.session not supported in production
+/* app.use(session({
   // genid: function(req) {
   //   return genuuid() // use UUIDs for session IDs
   // },
@@ -196,7 +210,8 @@ app.use(session({
   cookie: {
   	//secure: true
   }
-}));
+})); */
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
