@@ -107,13 +107,18 @@ sudo docker build -t mosquitto-auth:0.1 -f mosquitto.dockerfile .
 ```
 Then start the container:
 ```
-sudo docker create --name mosquitto mosquitto-auth:0.1
+sudo docker create --name mosquitto -p 1883:1883 mosquitto-auth:0.1
 ```
+
+Again, this assumes you will proxy MQTT via NGINX/ similar with TLS offload.
 
 ## NodeJS WebApp Container
 A customer container is created using [nodejs-webapp.dockerfile](nodejs-webapp.dockerfile)
 ```
-sudo docker build -t nr-alexav3-webb:0.1 -f nodejs-webapp.dockerfile .
+mkdir nodejs-webapp
+cd nodejs-webapp/
+git clone https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
+sudo docker build -t nr-alexav3-web:0.1 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
@@ -130,6 +135,7 @@ export MAIL_PASSWORD=<password>
 
 sudo docker create \
 --name nr-alexav3-webb \
+-p 3000:3000 \
 -e MQTT_URL=$MQTT_URL
 -e MQTT_USER=$MQTT_USER
 -e MQTT_PASSWORD=$MQTT_PASSWORD
