@@ -8,7 +8,8 @@ var https = require('https');
 var flash = require('connect-flash');
 var morgan = require('morgan');
 var express = require('express');
-// var session = require('express-session');
+const session = require('express-session');
+const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
@@ -17,7 +18,6 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
-var session = require('session-mongoose')(express)
 //var Measurement = require('./googleMeasurement.js');
 
 // NodeJS App Settings
@@ -188,16 +188,13 @@ app.use(morgan("combined", {stream: accessLogStream}));
 app.use(cookieParser(cookieSecret));
 app.use(flash());
 
-app.use(
-	express.session({
-		store: new SessionStore({
-			url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + '/sessions',
-			interval: 1200000
-		  }),
-		  cookie: { maxAge: 1200000 },
-		  secret: 'ihytsrf334'
-	})
-);
+// Moved from express.session to connect-mongo
+app.use(session({
+	store: new mongoStore({
+		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
+	}),
+	secret: 'ihytsrf334'
+}));
 
 // express.session not supported in production
 /* app.use(session({
