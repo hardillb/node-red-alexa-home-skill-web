@@ -22,6 +22,7 @@ To "migrate" from this service to v3 see section title **Service Migration**.
 | Layer | Product | Description |
 |---------|-------|-----------|
 |Database|Mongodb|users db contains all application data|
+|Database|Mongodb|sessions db contains all webapp session data|
 |Application|Mosquitto MQTT|With mosquitto-auth-plug|
 |Application|Passport Authentication|Providing OAuth w/ Amazon for account linking|
 |Application|AWS Lambda Function|Skill Endpoint|
@@ -46,11 +47,27 @@ Collections under Mongodb users database:
 
 A NodeRed flow MUST be configured in order for Alexa commands to receive acknowledgement, i.e. you will get "Sorry, <device> is not responding."
 
+## Docker Containers
+MongoDB and Mosquitto container names are **criticial** for deployment to be successful. Containers reside on a user defined docker network which provides DNS resolution via container name.
+
+|Container Name|Service|Ports|
+|---|---|---|
+|mongodb|MongoDB Server|TCP 27017|
+|mosquitto|Mopsquitto Server|TCP 1883:1883*, 8338:8338|
+|nr-alexav3-web|Node.JS App|TCP443:3000|
+
+\* *Note that 1883 is only available within hosting environment, 8338 is only available via Internet-based devices.
+
 ## Service Accounts
 WebApp mongodb account:
 * **user home database**: user
 * **account**: node-red-alexa
 * **role**: readWrite on users db
+
+WebApp mongodb account:
+* **user home database**: user
+* **account**: node-red-alexa
+* **role**: dbOwenr on sessions db
 
 MQTT mongodb account:
 * **user home database**: admin
@@ -131,6 +148,25 @@ certonly \
 A customer container is created using [mosquitto.dockerfile](mosquitto.dockerfile)
 ```
 sudo docker build -t mosquitto-auth:0.1 -f mosquitto.dockerfile .
+sudo mkdir -p /var/docker/mosquitto/config/conf.d
+sudo mkdir -p /var/docker/mosquitto/data
+
+cd /var/docker/mosquitto/config
+wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5bd8408762581fe6/raw/9a9fd7790e4edb5f0129e9a5ff0bd7449b43dffd/mosquitto.conf
+
+cd /var/docker/mosquitto/config/conf.d/
+wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/88b69fd7392612d4be968501747c138e54391fe4/node-red-alexa-smart-home-v3.conf
+
+export DNS_HOSTNAME=<IP/ hostname yused for SSL Certs>
+export MONGO_SERVER=mongodb
+export MQTTUSER=<username>
+export MQTTPASSWORD=<password>
+
+sudo sed -i "s/<mongo-server>/$MONGO_SERVER/g" node-red-alexa-smart-home-v3.conf
+sudo sed -i "s/<user>/$MQTTUSER/g" node-red-alexa-smart-home-v3.conf
+sudo sed -i "s/<password>/$MQTTPASSWORD/g" node-red-alexa-smart-home-v3.conf
+sudo sed -i "s/<dns-hostname>/$DNS_HOSTNAME/g" node-red-alexa-smart-home-v3.conf
+
 ```
 Then start the container:
 ```
@@ -139,6 +175,8 @@ sudo docker create --name mosquitto \
 -p 1883:1883 \
 -p 8883:8883 \
 -v /var/docker/ssl:/etc/letsencrypt \
+-v /var/docker/mosquitto/config:/mosquitto/config \
+-v /var/docker/mosquitto/data:/mosquitto/data \
 mosquitto-auth:0.1
 ```
 
