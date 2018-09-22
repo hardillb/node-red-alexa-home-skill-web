@@ -601,7 +601,6 @@ function replaceCapability(capability) {
 
 	// PlaybackController w/ PowerController
 	if(capability == "PlaybackPowerController") {
-		console.log(capability)
 		return [{
 			"type": "AlexaInterface",
 			"interface": "Alexa.PowerController",
