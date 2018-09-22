@@ -1,9 +1,11 @@
 # Node Red Alexa Home Skill v3
-An Alexa Smart Home API v3 Skill for use with Node Red - enables the following Alexa native skills:
+An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination* of the following Alexa native skills:
 * Speaker (Step at time of writing)
 * Playback Control (Play, Pause, Stop)
-* Playback and Power Control (Play, Pause, Stop plus On/ Off)
 * Power Control (On/ Off)
+* Scene Control
+
+\* *Scene Control cannot co-exist with other capabilities.*
 
 Note there are 3 component parts to this service:
 * This Web Application/ Associated Databases, Authentication and MQTT services

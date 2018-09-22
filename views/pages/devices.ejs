@@ -40,13 +40,16 @@
 		<fieldset>
 			<legend>Capabilities</legend>
 			<fieldset class="action" id="capabilityType">
-				<label for="PowerController"> Power Control </label>
-				<input title="Power Control" type="checkbox" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
-				<br />
 				<label for="PlaybackController"> Playback Control </label>
 				<input title="Playback Control" type="checkbox" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
 				<br />
-				<label for="StepSpeaker"> Speaker Control</label>
+				<label for="PowerController"> Power Control </label>
+				<input title="Power Control" type="checkbox" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
+				<br />
+				<label for="SceneController"> Scene Control</label>
+				<input title="Scene Control" type="checkbox" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
+				<br />
+				<label for="StepSpeaker"> Speaker Control </label>
 				<input title="Step Speaker Control" type="checkbox" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
 			</fieldset>
 			<!-- -->
@@ -54,14 +57,17 @@
 		<fieldset>
 			<legend>Alexa App Icon</legend>
 			<fieldset class="action" id="applicationType">
+				<label for="ACTIVITY_TRIGGER">Activity/ Scene: </label>
+				<input type="checkbox" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" disabled="true">
+				<br />
 				<label for="SWITCH">Smart Switch: </label>
 				<input type="checkbox" id="SWITCH" name="appType" value="SWITCH" disabled="true">
 				<br />
-				<label for="TV">TV: </label>
-				<input type="checkbox" id="TV" name="appType" value="TV" disabled="true">
-				<br />
 				<label for="SPEAKER">Speaker: </label>
 				<input type="checkbox" id="SPEAKER" name="appType" value="SPEAKER" disabled="true">
+				<br />
+				<label for="TV">TV: </label>
+				<input type="checkbox" id="TV" name="appType" value="TV" disabled="true">
 			</fieldset>
 		</fieldset>
 	</div>
@@ -225,40 +231,43 @@
 
 	// Place restrictions here - i.e. StepVolume/ PlaybackControl can't go with ThermostatControl
 	function checkCapability(check) {
+		var scene = $('#SceneController').prop('checked');
 		var power = $('#PowerController').prop('checked');
 		var playback = $('#PlaybackController').prop('checked');
 		var stepSpeaker = $('#StepSpeaker').prop('checked');
 
-		// Check at least a Capability is Checked
-		if (!power & !playback & !stepSpeaker) {
-			alert("Please select one device capability!");
+		// Add else if here with restrictions
+		if (scene && power || scene && playback || scene && stepSpeaker) {
+			alert("Activity/ Scene selected, this must be the only capability!");
 			return false;
 		}
-		// Add else if here with restrictions
-		/* $('#PowerController').prop('checked', false);
-			$('#PlaybackController').prop('checked', false);
-			$('#PlaybackPowerController').prop('checked', false);
-			$('#StepSpeaker').prop('checked', false);
-			$('#SWITCH').prop('checked', false)
-			$('#TV').prop('checked', false)
-			$('#SPEAKER').prop('checked', false) */
 		else {
+			if (scene) {
+				$('#ACTIVITY_TRIGGER').prop('checked', true);
+				$('#SWITCH').prop('checked', false);
+				$('#TV').prop('checked', false);
+				$('#SPEAKER').prop('checked', false);
+			}
 			if (power) {
+				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#SWITCH').prop('checked', true);
 				$('#TV').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 			}
-			else if (playback || playbackPower) {
-				$('#SWITCH').prop('checked', false)
-				$('#TV').prop('checked', true)
-				$('#SPEAKER').prop('checked', false)
-			}
 			else if (stepSpeaker) {
+				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#SWITCH').prop('checked', false)
 				$('#TV').prop('checked', false)
 				$('#SPEAKER').prop('checked', true)
 			}
+			else if (playback) {
+				$('#ACTIVITY_TRIGGER').prop('checked', false);
+				$('#SWITCH').prop('checked', false)
+				$('#TV').prop('checked', true)
+				$('#SPEAKER').prop('checked', false)
+			}
 			else {
+				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#SWITCH').prop('checked', false)
 				$('#TV').prop('checked', false)
 				$('#SPEAKER').prop('checked', false)

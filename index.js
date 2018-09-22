@@ -591,10 +591,6 @@ app.get('/api/v1/devices',
 function replaceCapability(capability) {
 	// console.log(capability)
 	// PowerController
-
-	var capabilities = undefined;
-
-	// Change this to build capability object, not immediately return
 	if(capability == "PowerController") {
 		return {
 			"type": "AlexaInterface",
@@ -657,6 +653,16 @@ function replaceCapability(capability) {
 				   }
 				]}
 			};
+	}
+
+	// SceneController 
+	if(capability == "SceneController ") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.SceneController",
+			"version" : "3",
+			"supportsDeactivation" : false
+		  };
 	}
 
 	// ThermostatController
