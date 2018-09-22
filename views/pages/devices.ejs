@@ -43,6 +43,9 @@
 				<label for="PowerController"> Power Control </label>
 				<input title="Power Control" type="checkbox" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
 				<br />
+				<label for="PlaybackPowerController"> Playback and Power Control </label>
+				<input title="Playback Power Control" type="checkbox" name="capabilities" id="PlaybackPowerController" value="PlaybackPowerController" onclick='checkCapability(this)'>
+				<br />
 				<label for="PlaybackController"> Playback Control </label>
 				<input title="Playback Control" type="checkbox" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
 				<br />
@@ -226,13 +229,15 @@
 	function checkCapability(check) {
 		var power = $('#PowerController').prop('checked');
 		var playback = $('#PlaybackController').prop('checked');
+		var playbackPower = $('#PlaybackPowerController').prop('checked');
 		var stepSpeaker = $('#StepSpeaker').prop('checked');
 
 		// Ensure only one device type checked
-		if (power & playback || power & stepSpeaker || playback & stepSpeaker ) {
+		if (power & playback || power & stepSpeaker || playback & stepSpeaker || power & playbackPower || playback & playbackPower || stepSpeaker & playbackPower ) {
 			alert("Please select one device type!");
 			$('#PowerController').prop('checked', false);
 			$('#PlaybackController').prop('checked', false);
+			$('#PlaybackPowerController').prop('checked', false);
 			$('#StepSpeaker').prop('checked', false);
 			$('#SWITCH').prop('checked', false)
 			$('#TV').prop('checked', false)
@@ -245,7 +250,7 @@
 				$('#TV').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 			}
-			else if (playback) {
+			else if (playback || playbackPower) {
 				$('#SWITCH').prop('checked', false)
 				$('#TV').prop('checked', true)
 				$('#SPEAKER').prop('checked', false)
