@@ -6,15 +6,17 @@ An Alexa Smart Home API v3 Skill for use with Node Red - enables the following A
 
 Note there are 3 component parts to this service:
 * This Web Application/ Associated Databases, Authentication and MQTT services
-* An Amazon Lambda function (github repo link to follow for this fork)
-* A Node-Red contrib (github repo link to follow for this fork)
+* An [Amazon Lambda](https://github.com/coldfire84/node-red-alexa-home-skill-v3-lambda) function
+* A [Node-Red contrib](https://github.com/coldfire84/node-red-contrib-alexa-home-skill-v3)
 
-At present *you* must deploy these component parts and update as outlined below. I'm working on hosting this in AWS shortly!
+At present this skill is pre-production, but I can extend it to you (alternatively deploy the component parts!).
 
 This project is based **extensively** on Ben Hardill's Alexa Smart Home API v2 project:
 * https://github.com/hardillb/node-red-alexa-home-skill-web
 * https://github.com/hardillb/node-red-alexa-home-skill-lambda
 * https://github.com/hardillb/node-red-alexa-home-skill-web
+
+To "migrate" from this service to v3 see section title **Service Migration**.
 
 # Service Architecture
 | Layer | Product | Description |
@@ -42,8 +44,6 @@ Collections under Mongodb users database:
 
 \* *Username/ email address and salted/ hashed password.*
 
-It is assumed that MQTT will be behind a reverse proxy using TLS offload.
-
 A NodeRed flow MUST be configured in order for Alexa commands to receive acknowledgement, i.e. you will get "Sorry, <device> is not responding."
 
 ## Service Accounts
@@ -64,6 +64,11 @@ Alexa Skill --> Lambda -->
 
 # Environment Build
 
+## Create Docker Network
+```
+sudo docker network create nr-alexav3
+```
+
 ## MongoDB Container/ Account Creation
 Docker image is used for mongo, with ```auth``` enabled.
 
@@ -72,8 +77,8 @@ Required user accounts are created automatically via docker-entrypoint-initdb.d 
 sudo mkdir -p /var/docker/mongodb/docker-entrypoint-initdb.d
 sudo mkdir -p /var/docker/mongodb/etc
 sudo mkdir -p /var/docker/mongodb/data
-
 cd /var/docker/mongodb/docker-entrypoint-initdb.d
+
 export MONGOADMIN=<username>
 export MONGOPASSWORD=<password>
 export MQTTUSER=<username>
@@ -81,7 +86,8 @@ export MQTTPASSWORD=<password>
 export WEBUSER=<username>
 export WEBPASSWORD=<password>
 
-sudo wget -O mongodb-accounts.sh https://gist.github.com/coldfire84/93ae246f145ef09da682ee3a8e297ac8/raw/fb8c0f8e3f8294fa1333ae216322df9a58579778/mongodb-accounts.sh
+sudo wget -O mongodb-accounts.sh https://gist.github.com/coldfire84/93ae246f145ef09da682ee3a8e297ac8/raw/7b66fc4c4821703b85902c85b9e9a31dc875b066/mongodb-accounts.sh
+sudo chmod +x mongodb-accounts.sh
 
 sudo sed -i "s|<mongo-admin-user>|$MONGOADMIN|g" mongodb-accounts.sh
 sudo sed -i "s|<mongo-admin-password>|$MONGOPASSWORD|g" mongodb-accounts.sh
@@ -101,7 +107,26 @@ mongo
 
 sudo docker start mongod
 ```
+## Certificate
+We will use the same SSL certificate to protect the NodeJS and MQTT services.
 
+Ensure that your hosting solution has HTTPS connectivity enabled.
+
+We'll use certbot to request a free certificate:
+```
+sudo docker run -it --rm \
+--name letsencrypt \
+--p 80:80 -p 443:443 \
+-v "/var/docker/ssl/:/etc/letsencrypt" \
+certbot/certbot \
+certonly \
+--preferred-challenges http \
+--standalone \
+--agree-tos \
+--renew-by-default \
+-d <FQDN of web app> \
+--email <your email address>
+```
 ## Mosquitto Container
 A customer container is created using [mosquitto.dockerfile](mosquitto.dockerfile)
 ```
@@ -109,10 +134,13 @@ sudo docker build -t mosquitto-auth:0.1 -f mosquitto.dockerfile .
 ```
 Then start the container:
 ```
-sudo docker create --name mosquitto -p 1883:1883 mosquitto-auth:0.1
+sudo docker create --name mosquitto \
+--network nr-alexav3 \
+-p 1883:1883 \
+-p 8883:8883 \
+-v /var/docker/ssl:/etc/letsencrypt \
+mosquitto-auth:0.1
 ```
-
-Again, this assumes you will proxy MQTT via NGINX/ similar with TLS offload.
 
 ## NodeJS WebApp Container
 A customer container is created using [nodejs-webapp.dockerfile](nodejs-webapp.dockerfile)
@@ -124,6 +152,7 @@ sudo docker build -t nr-alexav3-web:0.1 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
+export WEB_HOSTNAME=<hostname/IP>
 export MQTT_URL=mqtt://<hostname/IP>
 export MQTT_USER=<username>
 export MQTT_PASSWORD=<password>
@@ -137,7 +166,8 @@ export MAIL_PASSWORD=<password>
 
 sudo docker create \
 --name nr-alexav3-webb \
--p 3000:3000 \
+-p 443:3000 \
+-v /var/docker/ssl:/etc/letsencrypt \
 -e MQTT_URL=$MQTT_URL
 -e MQTT_USER=$MQTT_USER
 -e MQTT_PASSWORD=$MQTT_PASSWORD
@@ -165,18 +195,20 @@ Note it is assumed this web-app will be reverse proxied, i.e. HTTPS (NGINX) --->
 |MAIL_USER|Mail server user account|
 |MAIL_PASSWORD|Mail Server password|
 
-## DNS/ Firewall/ HTTPS/ TLS
-Decide where you'll host this web service, configure necessary DNS, firewall and certificate activites.
+## Create and Configure Lambda Function
+Create a new AWS Lambda function in either of:
+* eu-west-1
+* us-east-1
 
-# Running the Service
+Upload [index.js](https://github.com/coldfire84/node-red-alexa-home-skill-v3-lambda/blob/master/index.js) from the [node-red-alexa-home-skill-v3-lambda](https://github.com/coldfire84/node-red-alexa-home-skill-v3-lambda) repo.
 
-## Dockerize NodeJS Web App
-// Info to follow
+Set options as below:
+* **Runtime**: Node.js 6.10
+* **Handler**: index.handler
 
-## Configure Lambda Instance
-// Info to follow
+From the top right of the Lambda console, copy the "ARN", i.e. arn:aws:lambda:eu-west-1:<number>:function:node-red-alexa-smart-home-v3-lambda - you will need this for the Alexa skill definition.
 
-## Configure Alexa Skill
+## Create and Configure the Alexa Skill
 * Authorization URI: https://<hostname>/auth/start
 * Access Token URI: https://<hostname>/auth/exchange
 * Client ID: is generated by system automatically on creating a new service via https://<hostname>/admin/services (client id starts at 1, is auto incremented)
@@ -185,6 +217,9 @@ Decide where you'll host this web service, configure necessary DNS, firewall and
 * Client Authentication Scheme: Credentials in request body
 * Scopes: access_devices and create_devices
 * Domain List: <hostname used to publish web service>
+
+## DNS/ Firewall/ HTTPS/ TLS
+Decide where you'll host this web service, configure necessary DNS, firewall and certificate activities.
 
 # Management
 
