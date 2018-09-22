@@ -570,8 +570,8 @@ app.get('/api/v1/devices',
 
 					// Handle multiple capabilities
 					dev.capabilities = [];
-					data[i].capabilities.forEach(function(this){
-						dev.capabilities.push(replaceCapability(this.value))
+					data[i].capabilities.forEach(function(capability){
+						dev.capabilities.push(replaceCapability(capability.value))
 					});
 
 					dev.displayCategories = data[i].displayCategories;
