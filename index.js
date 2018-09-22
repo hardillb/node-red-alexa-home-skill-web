@@ -580,7 +580,7 @@ app.get('/api/v1/devices',
 					dev.manufacturerName = "Node-RED"
 					devs.push(dev);
 				}
-				console.log(devs)
+				//console.log(devs)
 				res.send(devs);
 			}	
 		});
