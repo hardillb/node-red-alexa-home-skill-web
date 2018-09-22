@@ -582,7 +582,7 @@ app.get('/api/v1/devices',
 
 // Alexa discovery response related-capabilties, function replaces 'placeholders' stored under device.capabilities
 function replaceCapability(capability) {
-	//console.log(capability)
+	console.log(capability)
 	// PowerController
 	if(capability == "PowerController") {
 		return [{
@@ -596,6 +596,28 @@ function replaceCapability(capability) {
 				"proactivelyReported": false,
 				"retrievable": false
 				}
+			}];
+	}
+
+	// PlaybackController w/ PowerController
+	if(capability == "PlaybackPowerController") {
+		return [{
+			"type": "AlexaInterface",
+			"interface": "Alexa.PowerController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "powerState"
+				}],
+				"proactivelyReported": false,
+				"retrievable": false
+				}
+			},
+			{
+			"type": "AlexaInterface",
+			"interface": "Alexa.PlaybackController",
+			"version": "3",
+			"supportedOperations" : ["Play", "Pause", "Stop"]
 			}];
 	}
 
