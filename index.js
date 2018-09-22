@@ -582,7 +582,7 @@ app.get('/api/v1/devices',
 
 // Alexa discovery response related-capabilties, function replaces 'placeholders' stored under device.capabilities
 function replaceCapability(capability) {
-	console.log(capability)
+	// console.log(capability)
 	// PowerController
 	if(capability == "PowerController") {
 		return [{
@@ -601,6 +601,7 @@ function replaceCapability(capability) {
 
 	// PlaybackController w/ PowerController
 	if(capability == "PlaybackPowerController") {
+		console.log(capability)
 		return [{
 			"type": "AlexaInterface",
 			"interface": "Alexa.PowerController",
