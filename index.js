@@ -590,6 +590,31 @@ app.get('/api/v1/devices',
 // Alexa discovery response related-capabilties, function replaces 'placeholders' stored under device.capabilities
 function replaceCapability(capability) {
 	// console.log(capability)
+
+	// InputController, pre-defined 4x HDMI inputs and phono
+	if(capability == "InputController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.InputController",
+			"version": "3",
+			"inputs": [{
+				"name": "HDMI1"
+			  },
+			  {
+				"name": "HDMI2"
+			  },
+			  {
+				"name": "HDMI3"
+			  },
+			  {
+				"name": "HDMI4"
+			  },
+			  {
+				"name": "phono"
+			  }
+			]};
+	}
+
 	// PowerController
 	if(capability == "PowerController") {
 		return {
