@@ -239,6 +239,9 @@
 		// Add else if here with restrictions
 		if (scene && power || scene && playback || scene && stepSpeaker) {
 			alert("Activity/ Scene selected, this must be the only capability!");
+			$('#PowerController').prop('checked', false);
+			$('#PlaybackController').prop('checked', false);
+			$('#StepSpeaker').prop('checked', false);
 			return false;
 		}
 		else {
