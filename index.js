@@ -566,14 +566,21 @@ app.get('/api/v1/devices',
 					dev.description = data[i].description;
 					dev.endpointId = "" + data[i].endpointId;
 					// Call replaceCapability to replace placeholder capabilities
-					dev.capabilities = replaceCapability(data[i].capabilities);
+					// dev.capabilities = replaceCapability(data[i].capabilities);
+
+					// Handle multiple capabilities
+					dev.capabilities = [];
+					data[i].capabilities.forEach(function(this){
+						dev.capabilities.push(replaceCapability(this.value))
+					});
+
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
 					dev.version = "0.0.2";
 					dev.manufacturerName = "Node-RED"
 					devs.push(dev);
 				}
-				//console.log(devs)
+				console.log(devs)
 				res.send(devs);
 			}	
 		});
@@ -584,6 +591,10 @@ app.get('/api/v1/devices',
 function replaceCapability(capability) {
 	// console.log(capability)
 	// PowerController
+
+	var capabilities = undefined;
+
+	// Change this to build capability object, not immediately return
 	if(capability == "PowerController") {
 		return [{
 			"type": "AlexaInterface",

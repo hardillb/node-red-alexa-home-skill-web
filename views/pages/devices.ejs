@@ -43,9 +43,6 @@
 				<label for="PowerController"> Power Control </label>
 				<input title="Power Control" type="checkbox" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
 				<br />
-				<label for="PlaybackPowerController"> Playback & Power Control </label>
-				<input title="Playback Power Control" type="checkbox" name="capabilities" id="PlaybackPowerController" value="PlaybackPowerController" onclick='checkCapability(this)'>
-				<br />
 				<label for="PlaybackController"> Playback Control </label>
 				<input title="Playback Control" type="checkbox" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
 				<br />
@@ -226,24 +223,25 @@
 		}
 	}
 
+	// Place restrictions here - i.e. StepVolume/ PlaybackControl can't go with ThermostatControl
 	function checkCapability(check) {
 		var power = $('#PowerController').prop('checked');
 		var playback = $('#PlaybackController').prop('checked');
-		var playbackPower = $('#PlaybackPowerController').prop('checked');
 		var stepSpeaker = $('#StepSpeaker').prop('checked');
 
-		// Ensure only one device type checked
-		if (power & playback || power & stepSpeaker || playback & stepSpeaker || power & playbackPower || playback & playbackPower || stepSpeaker & playbackPower ) {
-			alert("Please select one device type!");
-			$('#PowerController').prop('checked', false);
+		// Check at least a Capability is Checked
+		if (!power & !playback & !stepSpeaker) {
+			alert("Please select one device capability!");
+			return false;
+		}
+		// Add else if here with restrictions
+		/* $('#PowerController').prop('checked', false);
 			$('#PlaybackController').prop('checked', false);
 			$('#PlaybackPowerController').prop('checked', false);
 			$('#StepSpeaker').prop('checked', false);
 			$('#SWITCH').prop('checked', false)
 			$('#TV').prop('checked', false)
-			$('#SPEAKER').prop('checked', false)
-			return false;
-		}
+			$('#SPEAKER').prop('checked', false) */
 		else {
 			if (power) {
 				$('#SWITCH').prop('checked', true);
