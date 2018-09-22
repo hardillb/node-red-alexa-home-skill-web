@@ -656,7 +656,7 @@ function replaceCapability(capability) {
 	}
 
 	// SceneController 
-	if(capability == "SceneController ") {
+	if(capability == "SceneController") {
 		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.SceneController",
