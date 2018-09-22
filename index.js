@@ -596,7 +596,7 @@ function replaceCapability(capability) {
 
 	// Change this to build capability object, not immediately return
 	if(capability == "PowerController") {
-		return [{
+		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.PowerController",
 			"version": "3",
@@ -607,12 +607,12 @@ function replaceCapability(capability) {
 				"proactivelyReported": false,
 				"retrievable": false
 				}
-			}];
+			};
 	}
 
 	// PlaybackController w/ PowerController
 	if(capability == "PlaybackPowerController") {
-		return [{
+		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.PowerController",
 			"version": "3",
@@ -629,22 +629,22 @@ function replaceCapability(capability) {
 			"interface": "Alexa.PlaybackController",
 			"version": "3",
 			"supportedOperations" : ["Play", "Pause", "Stop"]
-			}];
+			};
 	}
 
 	// PlaybackController
 	if(capability == "PlaybackController") {
-		return [{
+		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.PlaybackController",
 			"version": "3",
 			"supportedOperations" : ["Play", "Pause", "Stop"]
-			}];
+			};
 	}
 
 	// StepSpeaker
 	if(capability == "StepSpeaker") {
-		return [{
+		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.StepSpeaker",
 			"version": "3",
@@ -656,7 +656,7 @@ function replaceCapability(capability) {
 					  "name":"muted"
 				   }
 				]}
-			}];
+			};
 	}
 
 	// ThermostatController
