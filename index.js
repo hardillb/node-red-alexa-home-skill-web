@@ -36,6 +36,7 @@ if (process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWOR
 
 // Service-wide Settings
 var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
+var nonProd = (process.env.NONPROD || undefined);
 // NodeJS App Settings
 var port = (process.env.PORT || 3000);
 var host = ('0.0.0.0');
@@ -51,7 +52,9 @@ var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 var mqtt_url = (process.env.MQTT_URL || "mqtt://" + dnsHostname + ":1883");
 console.log(mqtt_url);
-
+// Express Settings
+var app_id = 'http://localhost:' + port;
+var cookieSecret = 'ihytsrf334';
 //var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
 //var measurement = new Measurement(googleAnalyicsTID);
 
@@ -166,17 +169,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 	}
 });
 
-var app_id = 'http://localhost:' + port;
 
-if (process.env.VCAP_APPLICATION) {
-	var application = JSON.parse(process.env.VCAP_APPLICATION);
-
-	var app_uri = application['application_uris'][0];
-
-	app_id = 'https://' + app_uri;
-}
-
-var cookieSecret = 'ihytsrf334';
 
 var logDirectory = path.join(__dirname, 'log');
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
@@ -1091,22 +1084,17 @@ app.delete('/service/:id',
 			});
 });
 
-// Create HTTPS Server Instance
-var options = {
-	key: fs.readFileSync(certKey),
-	cert: fs.readFileSync(certChain)
-};
-server = https.createServer(options, app);
-
-// Moved to HTTPS-only
-/* var server = http.Server(app);
-if (app_id.match(/^https:\/\/localhost:/)) {
+// Create HTTPS Server Instance unless NONPROD env var exists
+if (!nonProd) {
 	var options = {
-		key: fs.readFileSync('server.key'),
-		cert: fs.readFileSync('server.crt')
+		key: fs.readFileSync(certKey),
+		cert: fs.readFileSync(certChain)
 	};
-	server = https.createServer(options, app);
-}  */
+	var server = https.createServer(options, app);
+}
+else {
+	var server = http.Server(app);
+}
 
 server.listen(port, host, function(){
 	console.log('App listening on  %s:%d!', host, port);
