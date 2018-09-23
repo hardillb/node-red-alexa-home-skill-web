@@ -701,7 +701,7 @@ function replaceCapability(capability) {
 
 	// ThermostatController - SinglePoint
 	if(capability == "ThermostatController")  {
-		return [{
+		return {
 			"type": "AlexaInterface",
             "interface": "Alexa.ThermostatController",
             "version": "3",
@@ -724,7 +724,7 @@ function replaceCapability(capability) {
                 "AUTO"
               ]
 			}
-		}];
+		};
 	}
 			
 	// LightController
