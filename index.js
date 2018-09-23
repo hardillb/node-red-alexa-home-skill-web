@@ -611,6 +611,15 @@ function replaceCapability(capability) {
 			  },
 			  {
 				"name": "phono"
+			  },
+			  {
+				"name": "audio1"
+			  },
+			  {
+				"name": "audio2"
+			  },
+			  {
+				"name": "chromecast"
 			  }
 			]};
 	}

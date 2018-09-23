@@ -4,7 +4,7 @@ An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination
 * Playback Control (Play, Pause, Stop)
 * Power Control (On/ Off)
 * Scene Control
-* Input Control (pre-defined HDMI1,HDMI2,HDMI3,HDMI4,phono)
+* Input Control (pre-defined HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast")
 
 \* *Scene Control cannot co-exist with other capabilities.*
 
