@@ -1,12 +1,13 @@
 # Node Red Alexa Home Skill v3
 An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination* of the following Alexa native skills:
-* Speaker (Step at time of writing)
+* Input Control (pre-defined HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast")
 * Playback Control (Play, Pause, Stop)
 * Power Control (On/ Off)
 * Scene Control
-* Input Control (pre-defined HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast")
+* Speaker (Step at time of writing)
+* Thermostats Control (Single setpoint only)
 
-\* *Scene Control cannot co-exist with other capabilities.*
+\* *Scene Control and Thermostat Control cannot co-exist with other capabilities.*
 
 Note there are 3 component parts to this service:
 * This Web Application/ Associated Databases, Authentication and MQTT services
