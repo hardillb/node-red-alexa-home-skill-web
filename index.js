@@ -699,31 +699,34 @@ function replaceCapability(capability) {
 		  };
 	}
 
-	// ThermostatController
-	// if(capability == "ThermostatController")  {
-	// 	return [{
-	// 			"type": "AlexaInterface",
-	// 			"interface": "Alexa.ThermostatController",
-	// 			"version": "3", 
-	// 			"properties": {
-	// 				"supported": [{
-	// 						"name": "targetSetpoint"
-	// 					},
-	// 					{
-	// 						"name": "lowerSetpoint"
-	// 					},
-	// 					{
-	// 						"name": "upperSetpoint"
-	// 					},
-	// 					{
-	// 						"name": "thermostatMode"
-	// 					}
-	// 				],
-	// 				"proactivelyReported": false,
-	// 				"retrievable": false
-	// 			}
-	// 	}];
-	// }
+	// ThermostatController - SinglePoint
+	if(capability == "ThermostatController")  {
+		return [{
+			"type": "AlexaInterface",
+            "interface": "Alexa.ThermostatController",
+            "version": "3",
+            "properties": {
+              "supported": [{
+                  "name": "targetSetpoint"
+                },
+                {
+                  "name": "thermostatMode"
+                }
+              ],
+			  "proactivelyReported": false,
+			  "retrievable": false
+            },
+            "configuration": {
+              "supportsScheduling": true,
+              "supportedModes": [
+                "HEAT",
+                "COOL",
+                "AUTO"
+              ]
+			}
+		}];
+	}
+			
 	// LightController
 	// if(capability == "LightController")  {
 	// 	return [{ 
