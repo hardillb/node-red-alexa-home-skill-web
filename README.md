@@ -1,11 +1,14 @@
 # Node Red Alexa Home Skill v3
 An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination* of the following Alexa native skills:
-* Input Control (pre-defined HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast")
-* Playback Control (Play, Pause, Stop)
-* Power Control (On/ Off)
-* Scene Control
-* Speaker (Step at time of writing)
-* Thermostats Control (Single setpoint only)
+
+|Alexa Interface|Supported Controls|Example Usage|Useful Links|
+|--------|----------|-------------|
+|Input Control|HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast"|Yamaha Music Cast Amplifier|[node-red-contrib-avr-yamaha](https://flows.nodered.org/node/node-red-contrib-avr-yamaha)|
+|Playback Control|Play, Pause, Stop|Kodi RPC|Http Response Node with [Kodi RPC Commands](https://kodi.wiki/view/JSON-RPC_API/Examples)|
+|Power Control|On, Off|MQTT Out|Any MQTT-enabled switch, Socket etc|
+|Scene Control|Turn On|Multiple|String together a number of nodes for your scene, i.e. lighting, TV on, ACR on|
+|Speaker (Step)|+/- volume|Yamaha Music Cast Amplifier|[node-red-contrib-avr-yamaha](https://flows.nodered.org/node/node-red-contrib-avr-yamaha)|
+|Thermostats Control (Single setpoint only)|Set specific temp, increase/ decrease|Any MQTT connected thermostat/HVAC|-|
 
 \* *Scene Control and Thermostat Control cannot co-exist with other capabilities.*
 
