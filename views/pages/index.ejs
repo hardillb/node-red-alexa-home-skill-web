@@ -1,9 +1,57 @@
 <% include ../fragments/header.ejs %>
   <div class="container main-content">
     <h1>Node-RED-Home-Skill-v3</h1>
-    <p>This site is the registration point for using the node-red-contrib-alexa-home-skill 
-    <a href="http://nodered.org">Node-RED</a> module.</p>
 
-    <p>Revised, v3-compatible version of original skill</p>
+    <p>Welcome to registration point the Home Skill API <b>version 3</b> bridge for <a href="http://nodered.org">Node-RED</a>.
+         
+    <p>Using this "bridge" you can control a variety of endpoints, as outlined below: </p> 
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Alexa Interface</th>
+          <th scope="col">Supported Controls</th>
+          <th scope="col">Example Usage</th>
+          <th scope="col">Example Commands</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Input Control</th>
+          <td>HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast"</td>
+          <td>Yamaha Music Cast Amplifier</td>
+          <td>"Alexa, change AV Receivber to input HDMI1"</td>
+        </tr>
+        <tr>
+          <th scope="row">Playback Control</th>
+          <td>Play, Pause, Stop</td>
+          <td>Kodi RPC</td>
+          <td>"Alexa, (pause | play | stop) Kitchen TV"</td>
+        </tr>
+        <tr>
+          <th scope="row">Power Control</th>
+          <td>On/ Off</td>
+          <td>Any MQTT enabled smart-switch</td>
+          <td>"Alexa, turn (on | off) Kitchen Light"</td>
+        </tr>
+        <tr>
+          <th scope="row">Scene Control</th>
+          <td>On/ Off</td>
+          <td>Any MQTT enabled smart-switch</td>
+          <td>"Alexa, turn on Movie Night"</td>
+        </tr>
+        <tr>
+          <th scope="row">Speaker (Step) Control</th>
+          <td>On/ Off</td>
+          <td>Yamaha Music Cast Amplifier</td>
+          <td>"Alexa, (increase | decrease) volume on AV Receiver"</td>
+        </tr>
+        <tr>
+          <th scope="row">Thermostat Control (Single Point)</th>
+          <td>On/ Off</td>
+          <td>Any Thermostat endpoint in Node-Red</td>
+          <td>"Alexa, set Thermostat to 22 degrees", "Alexa, make it (warmer | cooler) in here"</td>
+        </tr>
+      </tbody>
+    </table>
 </div>
 <% include ../fragments/footer.ejs %>
