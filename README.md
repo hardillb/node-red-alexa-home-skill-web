@@ -36,6 +36,7 @@ To "migrate" from this service to v3 see section title **Service Migration**.
 |Application|AWS Lambda Function|Skill Endpoint|
 |Web|NodeJS App|Provides web front end/ API endpoints for Lambda Function|
 |Web|Node-Red Add-on|For acknowledgement of Alexa Commands/ integration into flows|
+|Web|NGINX|Reverse Proxy for NodeJS Application|
 
 Collections under Mongodb users database:
 
@@ -62,7 +63,8 @@ MongoDB and Mosquitto container names are **criticial** for deployment to be suc
 |---|---|---|
 |mongodb|MongoDB Server|TCP 27017|
 |mosquitto|Mopsquitto Server|TCP 1883:1883*, 8338:8338|
-|nr-alexav3-web|Node.JS App|TCP443:3000|
+|nr-alexav3-web|Node.JS App|TCP 3000:3000|
+|nginx|NGINX Proxy|TCP 443:443, 80:80|
 
 \* *Note that 1883 is only available within hosting environment, 8338 is only available via Internet-based devices.
 
@@ -240,6 +242,46 @@ Note it is assumed this web-app will be reverse proxied, i.e. HTTPS (NGINX) --->
 |MAIL_SERVER|Mail server for sending out lost password/ reset emails|
 |MAIL_USER|Mail server user account|
 |MAIL_PASSWORD|Mail Server password|
+
+## Nginx 
+
+```
+cd ~
+mkdir ngix
+git clone https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
+
+sudo mkdir -p /var/docker/nginx/conf.d
+sudo mkdir -p /var/docker/nginx/stream_conf.d
+sudo mkdir -p /var/docker/nginx/includes
+sudo mkdir -p /var/docker/nginx/www
+
+# Get Config Files
+wget -O /var/docker/nginx/conf.d/default.conf 
+https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/default.conf
+
+wget -O /var/docker/nginx/includes/header.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/header.conf
+
+wget -O /var/docker/nginx/includes/letsencrypt.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/letsencrypt.conf
+
+wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/nr-alexav3.cb-net.co.uk.conf
+
+wget -O /var/docker/nginx/includes/restrictions.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/restrictions.conf
+
+wget -O /var/docker/nginx/includes/ssl-params.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/ssl-params.conf
+
+if [ ! -f /var/docker/ssl/dhparams.pem ]; then
+    sudo openssl dhparam -out /var/docker/ssl/dhparams.pem 2048
+fi
+
+sudo docker run --net nr-alexav3 --name nginx -p 80:80 -p 443:443 \
+-v /var/docker/nginx/conf.d/:/etc/nginx/conf.d/ \
+-v /var/docker/nginx/stream_conf.d/:/etc/nginx/stream_conf.d/ \
+-v /var/docker/ssl:/etc/nginx/ssl/ \
+-v /var/docker/nginx/includes:/etc/nginx/includes/ \
+-v /var/docker/nginx/www/:/var/www \
+--restart always \
+-d nginx
+```
 
 ## Create and Configure Lambda Function
 Create a new AWS Lambda function in either of:
