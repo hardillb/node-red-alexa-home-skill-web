@@ -15,28 +15,33 @@
         <li>Configure Flows within Node-Red</li>
       </ol>
 
-      <h2>Example Device Definition</h2>
+      <h2>Example Device Definitions</h2>
       <p>You can declare a variety of devices, such as those illustrated below:</p>
       <p><img class="action" src="/images/DevicesExample.png" title="DevicesExample"></p>
-
+      <br>
       <h2>Example Flows</h2>
       The Nodes provide a simple way to interact with your existing/ new flows to control an array of devices such as those
       available via MQTT and HTTP.
-    
+      <br>
       <h3>Power Controller</h3>
       <p>This flow shows a simple Power Controller example for a Smart Light Switch, this can be used to switch a device on and off.</p>
       <p><img class="action" src="/images/PowerControllerExample.png" title="PowerControllerExample"></p>
-      
+
+      <pre>
+          [{"id":"7d82331b.e1985c","type":"alexa-smart-home-v3","z":"26494ddc.9b6052","conf":"bfd0fcf4.bc90e","device":"1","acknowledge":true,"name":"Desk Light","topic":"","x":180,"y":200,"wires":[["34a6fe17.fddad2"]]},{"id":"34a6fe17.fddad2","type":"switch","z":"26494ddc.9b6052","name":"switch msg.command TurnOn/ TurnOff","property":"command","propertyType":"msg","rules":[{"t":"eq","v":"TurnOn","vt":"str"},{"t":"eq","v":"TurnOff","vt":"str"}],"checkall":"true","repair":false,"outputs":2,"x":450,"y":200,"wires":[["7253b174.1ca8e"],["873da36d.42892"]]},{"id":"7253b174.1ca8e","type":"change","z":"26494ddc.9b6052","name":"set msg.payload to ON","rules":[{"t":"set","p":"payload","pt":"msg","to":"ON","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":780,"y":180,"wires":[["a71e00dd.6d326"]]},{"id":"873da36d.42892","type":"change","z":"26494ddc.9b6052","name":"set msg.payload to OFF","rules":[{"t":"set","p":"payload","pt":"msg","to":"OFF","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":790,"y":220,"wires":[["a71e00dd.6d326"]]},{"id":"a71e00dd.6d326","type":"mqtt out","z":"26494ddc.9b6052","name":"Change Main Light Gang-2 Power Status","topic":"cmnd/sonoff-t1-1/power2","qos":"0","retain":"false","broker":"b6672662.6651a8","x":1120,"y":200,"wires":[]},{"id":"bb6d52a1.90f3b","type":"tls-config","z":"","name":"Server Certificate Only","cert":"","key":"","ca":"","certname":"","keyname":"","caname":"","verifyservercert":true}]
+      </pre>
+
+      <br>
       <h3>Playback Controller</h3>
       <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client).</p>
       <p><img class="action" src="/images/PlaybackControllerExample.png" title="PlaybackControllerExample"></p>
-
+      <br>
       <h3>Input Controller</h3>
       <p>This flow shows a simple Input Controller example for a Yamaha Musiccast AV Receiver (using Yamaha AVR Nodes as endpoint).</p>
       <p><img class="action" src="/images/InputControllerExample.png" title="InputkControllerExample"></p>
-
+      <br>
       <h2>Response Handling</h2>
-      <p>By default nodes will automatyically acknowledge any request vai the Skill API. This means that <b>irrespective of whether 
+      <p>By default nodes will automatically acknowledge any request via the Skill API. This means that <b>irrespective of whether 
         the flow generates the desired outcome Alexa will respond as if it has.</b></p>
 
       <p>In the case of the Thermostat Controller interface I even use the target temperature/ measurement unit from the original
@@ -48,10 +53,10 @@
         timeout message.</p>
       
       <p><img class="action" src="/images/AutoAcknowledge.png" title="AutoAcknowledge"></p>
-
+      <br>
       <h3>Alexa Smart Home v3 Response Node</h3>
       <p>This node is for if you want to have more control over the response sent back to the Alexa service.</p>
-      
+      <br>
       <h4><b>Response Node Unused Functionality</b></h4>
       <p>It is possible to use the "<b>payload.extra</b>" value to post information back from 
         Node-Red > Web Service > Alexa Smart Skill.</p>
