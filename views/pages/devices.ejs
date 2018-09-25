@@ -1,198 +1,219 @@
 <% include ../fragments/header.ejs %>
 	<div class="container main-content">
-		<h1>Devices</h1>
-		<div class="deviceHeader">
-			<div style="width:200px; float:left" ><strong>Name</strong></div>
-			<div style="width:400px; float:left"><strong>Description</strong></div>
-			<div class="deviceCapabilities"><strong>Capabilities</strong></div>
+		<h1>Devices for User: <%= user.username %></h1>
+		<div class="row">
+			<div class="col-sm"><strong>Name</strong></div>
+			<div class="col-sm"><strong>Description</strong></div>
+			<div class="col-sm"><strong>Capabilities</strong></div>
 		</div>
 		<% devices.forEach(function(device){ %>
-		<div class="deviceRow">
-			<div class="device">
-			<div class="deviceName"><%= device.friendlyName %></div>
-			<div class="deviceDescription"><%= device.description %></div>
-			<div class="deviceActions">
-				<% device.capabilities.forEach(function(action){ %>
-					<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
-				<% }); %>
+		<div class="devrow">
+			<div class="row">
+				<div class="col-sm"><%= device.friendlyName %></div>
+				<div class="col-sm"><%= device.description %></div>
+				<div class="col-sm">
+					<% device.capabilities.forEach(function(action){ %>
+						<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
+					<% }); %>
+				</div>
 			</div>
-			</div>
-			<div>
-			<button onclick="edit('<%= device._id %>')">Edit</button>
-			<button onclick="deleteDevice('<%= device._id%>')">Delete</button>
+			<div class="row" style="padding-left: 15px">
+				<div>
+					<button type="button" class="btn btn-secondary" onclick="edit('<%= device._id %>')">Edit</button>
+					<button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id%>')">Delete</button>
+				</div>
 			</div>
 		</div>
 		<% }); %>
 		<div style="padding-top: 10px;">
-			<button onclick="addDevice();">Add Device</button>
+			<button type="button" class="btn btn-secondary" onclick="addDevice();">Add Device</button>
 		</div>
 		<p>After making any changes remember to ask Alexa to update devices it knows about by saying 
       "Alexa, discover devices"</p>
 	</div>
 
-	<div id="dialog" hidden>
-		<input id="devID" type="hidden">
-		<label for="friendlyName">Name: </label>
-		<input id="friendlyName" type="text">
-		<label for="description">Description: </label>
-		<br>
-		<textarea id="description" rows="2" style="width: 95%"></textarea>
-		<fieldset>
-			<legend>Capabilities</legend>
-			<fieldset class="action" id="capabilityType">
-				<label for="InputController"> Input Control </label>
-				<input title="Input Control" type="checkbox" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
-				<br />
-				<label for="PlaybackController"> Playback Control </label>
-				<input title="Playback Control" type="checkbox" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
-				<br />
-				<label for="PowerController"> Power Control </label>
-				<input title="Power Control" type="checkbox" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
-				<br />
-				<label for="SceneController"> Activity/ Scene </label>
-				<input title="Scene Control" type="checkbox" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
-				<br />
-				<label for="StepSpeaker"> Speaker Control </label>
-				<input title="Step Speaker Control" type="checkbox" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
-				<br />
-				<label for="ThermostatController"> Thermostat (1-Point)</label>
-				<input title="Thermostat Control" type="checkbox" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
-			</fieldset>
-			<!-- -->
-		</fieldset>
-		<fieldset>
-			<legend>Alexa App Icon</legend>
-			<fieldset class="action" id="applicationType">
-				<label for="ACTIVITY_TRIGGER">Activity/ Scene: </label>
-				<input type="checkbox" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" disabled="true">
-				<br />
-				<label for="SWITCH">Smart Switch: </label>
-				<input type="checkbox" id="SWITCH" name="appType" value="SWITCH" disabled="true">
-				<br />
-				<label for="SPEAKER">Speaker: </label>
-				<input type="checkbox" id="SPEAKER" name="appType" value="SPEAKER" disabled="true">
-				<br />
-				<label for="TV">TV: </label>
-				<input type="checkbox" id="TV" name="appType" value="TV" disabled="true">
-				<br />
-				<label for="THERMOSTAT">Thermostat: </label>
-				<input type="checkbox" id="THERMOSTAT" name="appType" value="THERMOSTAT" disabled="true">
-			</fieldset>
-		</fieldset>
+	<!-- Modal -->
+	<div class="modal fade" id="newDeviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <h5 class="modal-title" id="newDeviceModalTitle">Add Device</h5>
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<input id="devID" type="hidden">
+					<label for="friendlyName">Name: </label>
+					<input id="friendlyName" class="form-control" type="text">
+					<br>
+					<label for="description">Description: </label>
+					<br>
+					<textarea id="description" class="form-control"></textarea>
+				</div>
+				<!-- <fieldset class="action" id="capabilityType"> -->
+				<div class="row" align="justify">
+				<div class="col-sm">
+				<fieldset class="form-group" id="capabilityType">
+						<legend>Capabilities</legend>
+						<div class="form-check">
+								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="InputController"> Input Control </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Playback Control" type="checkbox" class="form-check-input" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="PlaybackController"> Playback Control </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Power Control" type="checkbox" class="form-check-input" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="PowerController"> Power Control </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Scene Control" type="checkbox" class="form-check-input" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="SceneController"> Activity/ Scene </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="StepSpeaker"> Speaker Control </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point)</label>
+						</div>
+				</fieldset>
+				</div>
+				<div class="col-sm">
+				<fieldset class="form-group">
+						<legend>Alexa App Icon</legend>
+						<!-- <fieldset class="action" id="capabilityType"> -->
+						<div class="form-check">
+							<input type="checkbox" class="form-check-input" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" disabled="true">
+							<label class="form-check-label" for="ACTIVITY_TRIGGER">Activity/ Scene: </label>
+							<br />
+						</div>
+						<div class="form-check">
+							<input type="checkbox" class="form-check-input" id="SWITCH" name="appType" value="SWITCH" disabled="true">
+							<label class="form-check-label" for="SWITCH">Smart Switch: </label>
+							<br />
+						</div>
+						<div class="form-check">
+							<input type="checkbox" class="form-check-input" id="SPEAKER" name="appType" value="SPEAKER" disabled="true">
+							<label class="form-check-label" for="SPEAKER">Speaker: </label>
+							<br />
+						</div>
+						<div class="form-check">
+							<input type="checkbox" class="form-check-input" id="TV" name="appType" value="TV" disabled="true">
+							<label class="form-check-label" for="TV">TV: </label>
+							<br />
+						</div>
+						<div class="form-check">
+							<input type="checkbox" class="form-check-input" id="THERMOSTAT" name="appType" value="THERMOSTAT" disabled="true">
+							<label class="form-check-label" for="THERMOSTAT">Thermostat: </label>
+						</div>
+				</fieldset>
+				</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			  <button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button>
+			</div>
+		  </div>
+		</div>
 	</div>
-	
-	<script>
-	$( "#dialog" ).dialog({
-		autoOpen: false,
-		dragable: false,
-		modal: true,
-		position: {
-			my: "center",
-			at: "center",
-			of: window,
-			using: function( pos ) {
-				$(this).css("top", '55px');
-				$(this).css("left", pos.left);
-	        }
-		},
-		title: "Add New Device",
-		dialogClass: "no-close",
-		buttons: [
-			{
-				text: "OK",
-				click: function(){
-					var devID = $('#devID').val();
-					if ( devID === "") {
-						var device = {
-							capabilities: [],
-							displayCategories: []
-						};
-						device.friendlyName = $('#friendlyName').val();
-						device.description = $('#description').val();
-						$('input[name=capabilities]').each(function(index){
-							if (this.checked) {
-								device.capabilities.push(this.value);
-							}
-						});
-						$('input[name=appType]').each(function(index){
-							if (this.checked) {
-								device.displayCategories.push(this.value);
-							}
-						});
-						console.log(device);
-						if (device.friendlyName && device.description && device.capabilities.length > 0) {
-							$.ajax({
-								url:"/devices",
-								type: 'PUT',
-								data: JSON.stringify(device),
-								contentType: "application/json",
-								success: function(data){
-									console.log("put response");
-									console.log(data);
-									//reload
-									document.location.reload();
-								},
-								dataType   : 'json'
-							}).fail(function(){
-								alert("failed to create device");
-							});
-							$(this).dialog( "close" );
-						} else {
-							alert("Name or desciption can not be empty and at least one action is needed");
-						}
-					} else {
-						var device = devices[devID];
-						device.description = $('#description').val();
-						device.capabilities = [];
-						$('input[name=capabilities]').each(function(index){
-							if (this.checked) {
-								device.capabilities.push(this.value);
-							}
-						});
-						device.displayCategories = [];
-						$('input[name=appType]').each(function(index){
-							if (this.checked) {
-								device.displayCategories.push(this.value);
-							}
-						});
-						if (device.friendlyName && 
-							device.description && 
-							device.capabilities.length > 0) {
-							//post update
-							$.ajax({
-								url: '/device/' + device._id,
-								type: 'POST',
-								data: JSON.stringify(device),
-								contentType: "application/json",
-								success: function(data){
-									console.log("post response");
-									console.log(data);
-									//reload
-									document.location.reload();
-								},
-							});
-							console.log(device);
-							$(this).dialog("close");
-						} else {
-							alert("Name or desciption can not be empty and at least one action is needed");
-						}
-					}
-				}				
-			},
-			{
-				text: "Cancel",
-				click: function() {
-					clearDevice();
-					$(this).dialog( "close" );
-				}
-			}
-		]
-	});
 
+	<script>
+	function saveDevice() {
+		var devID = $('#devID').val();
+		if ( devID === "") {
+			var device = {
+				capabilities: [],
+				displayCategories: []
+			};
+			device.friendlyName = $('#friendlyName').val();
+			device.description = $('#description').val();
+			$('input[name=capabilities]').each(function(index){
+				if (this.checked) {
+					device.capabilities.push(this.value);
+				}
+			});
+			$('input[name=appType]').each(function(index){
+				if (this.checked) {
+					device.displayCategories.push(this.value);
+				}
+			});
+			console.log(device);
+			if (device.friendlyName && device.description && device.capabilities.length > 0) {
+				console.log("ajax put next");
+				$.ajax({
+					url:"/devices",
+					type: 'PUT',
+					data: JSON.stringify(device),
+					dataType: 'json',
+					contentType: "application/json",
+					success: function(data){
+						console.log("put response");
+						console.log(data);
+						//reload
+						document.location.reload();
+						console.log("reload page");
+					}
+				}).fail(function(){
+					alert("failed to create device");
+				});
+			} else {
+				alert("Name or desciption can not be empty and at least one action is needed");
+			}
+		} else {
+			var device = devices[devID];
+			device.description = $('#description').val();
+			device.capabilities = [];
+			$('input[name=capabilities]').each(function(index){
+				if (this.checked) {
+					device.capabilities.push(this.value);
+				}
+			});
+			device.displayCategories = [];
+			$('input[name=appType]').each(function(index){
+				if (this.checked) {
+					device.displayCategories.push(this.value);
+				}
+			});
+			if (device.friendlyName && 
+				device.description && 
+				device.capabilities.length > 0) {
+				//post update
+				$.ajax({
+					url: '/device/' + device._id,
+					type: 'POST',
+					data: JSON.stringify(device),
+					dataType: 'json',
+					contentType: "application/json",
+					success: function(data){
+						console.log("post response");
+						console.log(data);
+						//reload
+						document.location.reload();
+					},
+				});
+				console.log(device);
+			} else {
+				alert("Name or desciption can not be empty and at least one action is needed");
+			}
+		}
+	}
+	
 	function addDevice() {
 		clearDevice();
 		checkCapability();
-		$("#dialog").dialog("open");
+		$("#newDeviceModal").modal();
+		//$("#dialog").dialog("open");
 	}
 
 	function clearDevice() {
@@ -210,7 +231,7 @@
 
 	function edit(id) {
 		clearDevice();
-		$("#dialog").dialog("open");
+		$("#newDeviceModal").modal();
 		var device = devices[id];
 		$('#devID').val(device._id);
 		$('#friendlyName').val(device.friendlyName);

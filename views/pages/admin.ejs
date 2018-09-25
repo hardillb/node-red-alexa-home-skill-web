@@ -1,12 +1,15 @@
 <% include ../fragments/header.ejs %>
   <div class="container main-content">
     <h1>Admin</h1>
-    
     <h2>Services</h2>
-    <a href="/admin/services">here</a>
-
+    <p>Use Service page to define OAuth endpoints such as the Amazon Skill authentication endpoint.</p>
+    <!-- <a href="/admin/services">here</a> -->
+    <button type="button" class="btn btn-secondary" onclick="javascript:window.location='/admin/services'"">Define OAuth Services</button>
+    <br>
+    <br>
     <h2>Users - <%= userCount %></h2>
-    <a href="/admin/users">here</a>
-
-  </div
+    <p>Use Users page to view defined users.</p>
+    <!-- <a href="/admin/users">here</a> -->
+    <button type="button" class="btn btn-secondary" onclick="javascript:window.location='/admin/users'">View Users</button>
+  </div>
 <% include ../fragments/footer.ejs %>

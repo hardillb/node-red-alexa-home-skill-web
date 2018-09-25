@@ -1,111 +1,115 @@
 <% include ../fragments/header.ejs %>
 <div class="container main-content">
   <h1>Services</h1>
-  <div class="serviceHeader" >
-    <div class="serviceTitle"><strong>Title</strong></div>
-    <div class="serviceId"><strong>oauth_id</strong></div>
-    <div class="serviceSecret"><strong>oauth_secret</strong></div>
-    <div class="serviceDomains"><strong>domains</strong></div>
+  <!-- <div class="serviceHeader" > -->
+  <div class="row">
+    <div class="col-sm"><strong>Title</strong></div>
+    <div class="col-sm"><strong>oauth_id</strong></div>
+    <div class="col-sm"><strong>oauth_secret</strong></div>
+    <div class="col-sm"><strong>domains</strong></div>
   </div>
 
   <% services.forEach(function(service){ %>
-    <div class="service">
-      <div class="serviceTitle"><%= service.title %></div>
-      <div class="serviceId"><%= service.oauth_id %></div>
-      <div class="serviceSecret"><%= service.oauth_secret %></div>
-      <div class="serviceDomains"><%= service.domains.join(',') %></div>
-      <button onclick="edit('<%= service._id %>')">Edit</button>
-      <button onclick="deleteService('<%= service._id%>')">Delete</button>
+    <div class="row">
+      <div class="col-sm"><%= service.title %></div>
+      <div class="col-sm"><%= service.oauth_id %></div>
+      <div class="col-sm"><%= service.oauth_secret %></div>
+      <div class="col-sm"><%= service.domains.join(',') %></div>
+      <button class="btn btn-secondary" onclick="edit('<%= service._id %>')">Edit</button>
+      <button class="btn btn-secondary" style="padding-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button>
     </div>
   <% }); %>
 
 
   <div style="padding-top: 10px;">
-    <button onclick="addService();">New Service</button>
+    <button class="btn btn-primary" onclick="addService();">New Service</button>
   </div>
 </div>
 
-  <div id="dialog" hidden>
-    <input id="servID" type="hidden">
-    <label for="title">Title: </label>
-    <input id="title" type="text">
-    <label for="secret">Secret: </label>
-    <input id="secret" type="text">
-    <fieldset>
-      <legend>Domains (Comma Separated)</legend>
-      <textarea id="domains"></textarea>
-    </fieldset>
+	<!-- Modal -->
+	<div class="modal fade" id="newServiceModal" tabindex="-1" role="dialog" aria-labelledby="newServiceModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="newServiceModal">New OAuth Service Endpoint</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input class="form-control" id="servID" type="hidden">
+            <label for="title">Title: </label>
+            <input class="form-control" id="title" type="text">
+            <label for="secret">Secret: </label>
+            <input class="form-control" id="secret" type="text">
+            <fieldset>
+              <legend>Domains (Comma Separated)</legend>
+              <textarea class="form-control" id="domains"></textarea>
+            </fieldset>
+          </div>
+          <div class="modal-footer">
+              <div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick='saveService()'>Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
-
   <script>
-  $( "#dialog" ).dialog({
-    autoOpen: false,
-    title: "Add New Service",
-    dialogClass: "no-close",
-    buttons: [
-      {
-        text:"OK",
-        click: function() {
-          var servID = $('#servID').val();
-          if (servID === "") {
-            var service = {};
-            service.title = $('#title').val();
-            service.oauth_secret = $('#secret').val();
-            service.domains = $('#domains').val().split(',');
-            console.log(service);
-            $.ajax({
-              url: '/services',
-              type: 'PUT',
-              data: JSON.stringify(service),
-              contentType: "application/json",
-              success: function(data){
-                console.log("put response");
-                console.log(data);
-                //reload
-                document.location.reload();
-              },
-              dataType   : 'json'
-            }).fail(function(){
 
-            });
-            $(this).dialog( "close" );
-          } else {
-            var service = services[servID];
-            service.title = $('#title').val();
-            service.oauth_secret = $('#secret').val();
-            service.domains = $('#domains').val().split(',');
-            $.ajax({
-              url: '/service/' + servID,
-              type: 'POST',
-              data: JSON.stringify(service),
-              contentType: "application/json",
-              success: function(data){
-                console.log("post response");
-                console.log(data);
-                //reload
-                document.location.reload();
-              },
-              dataType   : 'json'
-            }).fail(function(){
+  function saveService() {
+    var servID = $('#servID').val();
+    if (servID === "") {
+      var service = {};
+      service.title = $('#title').val();
+      service.oauth_secret = $('#secret').val();
+      service.domains = $('#domains').val().split(',');
+      console.log(service);
+      $.ajax({
+        url: '/services',
+        type: 'PUT',
+        data: JSON.stringify(service),
+        contentType: "application/json",
+        success: function(data){
+          console.log("put response");
+          console.log(data);
+          //reload
+          document.location.reload();
+        },
+        dataType   : 'json'
+      }).fail(function(){
 
-            });
-            $(this).dialog( "close" );
-          }
-        }
-      },
-      {
-        text: "Cancel",
-        click: function(){
-          clearService();
-          $(this).dialog( "close" );
-        }
-      }
-    ]
-  });
+      });
+      //$(this).dialog( "close" );
+    } else {
+      var service = services[servID];
+      service.title = $('#title').val();
+      service.oauth_secret = $('#secret').val();
+      service.domains = $('#domains').val().split(',');
+      $.ajax({
+        url: '/service/' + servID,
+        type: 'POST',
+        data: JSON.stringify(service),
+        contentType: "application/json",
+        success: function(data){
+          console.log("post response");
+          console.log(data);
+          //reload
+          document.location.reload();
+        },
+        dataType   : 'json'
+      }).fail(function(){
+
+      });
+      //$(this).dialog( "close" );
+    }
+  }
 
   function addService() {
     clearService();
-    $("#dialog").dialog("open");
+    $("#newServiceModal").modal();
+    //$("#dialog").dialog("open");
   }
 
   function clearService(){
@@ -143,4 +147,5 @@
     services[service._id] = service;
   });
   </script>
+  </div>
 <% include ../fragments/footer.ejs %>

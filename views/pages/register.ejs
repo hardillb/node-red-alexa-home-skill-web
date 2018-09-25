@@ -1,154 +1,74 @@
 <% include ../fragments/header.ejs %>
   <div class="container main-content">
-    <div id="register">
-      <label style="width: 75px" for="username">Username:</label>
-      <input type="text" onchange="validate()" id="username"/>
-      <span>(can contain any utf-8 chars except /, + or # and must not start with $)</span>
-      <div id="usrValid" class="pwq"></div>
-      <label style="width: 75px" for="email">Email:</label>
-      <input type="email" id="email"/>
-      <span>(will only be used to send password resets and notices about the running of the service)</span>
-      <br>
-      <label style="width: 75px" for="password">Password:</label>
-      <input type="password" id="password"/>
-      <div id="pwq" class="pwq"></div>
-      
-      <p>Please enter password again</p>
-      <label style="width: 75px" for="passwordAgain">Password:</label>
-      <input type="password" id="passwordAgain"/>
-      <div id="pwm" class="pwq"></div>
-      <br>
-      <button id="registerButton">Register</button>
-      <script type="text/javascript" src="js/zxcvbn.js"></script>
+      <!-- <div id="register"> -->
+        <!-- <form class="form-register" id="form-register" onsubmit="submitUser()"> -->
+        <form class="form-register" id="form-register">
+            <h1 class="h3 mb-3 font-weight-normal">Register for an Account</h1>
+            <label for="username" class="sr-only">Username</label>
+            <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required autofocus title="a-z, A-Z, 0-9 characters and be 5-15 chars.">
+            <small id="usernameHelpBlock" class="form-text text-muted">Username must only include a-z, A-Z, 0-9 characters and be 5-15 chars.</small>
+            <br>
+            <label for="email" class="sr-only">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="Email Address" required autofocus title="Email address.">
+            <br>
+            <br>
+            <label for="password" class="sr-only">Password</label>
+            <input type="password" id="password" name="password" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" placeholder="Password" required title="Minimum 10, maximum 32 chars.">
+            <small id="passwordHelpBlock" class="form-text text-muted">Password must 10-32 chars.</small>
+            <br>
+            <label for="verify" class="sr-only">Re-enter Password</label>
+            <input type="password" id="verify" name="verify" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" placeholder="Re-enter Password" required title="Re-enter Password">
+            <br>
+            <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Register</button>
+        </form>
+      <!--  </div> -->
+      <!--  <script type="text/javascript" src="js/zxcvbn.js"></script> -->
+
       <script type="application/javascript">
+        var password = document.getElementById("password")
+        var verify = document.getElementById("verify");
+        password.onchange = validatePassword;
+        verify.onkeyup = validatePassword;
 
-        var user = document.getElementById('username');
-        var userChange = function(){
-          var u = user.value.trim();
-          if (u.length != 0) {
-            if (u.indexOf('#') != -1 || 
-                u.indexOf('+') != -1 || 
-                u.indexOf('/') != -1 ||
-                u.indexOf('$') == 0) {
-              document.getElementById('usrValid').style.background = 'red';
-              document.getElementById('usrValid').innerHTML = 'invalid';
-            } else {
-              document.getElementById('usrValid').style.background = 'white';
-              document.getElementById('usrValid').innerHTML = '';
+        $("#form-register").submit(function(e) {
+            e.preventDefault();
+          // Username validation built-into input box
+          var username = $('#username').val().trim();
+          var password = $('#password').val().trim();
+          var verify = $('#verify').val().trim();
+          var email = $('#email').val().trim();
+          // Build Submit Paramaters
+          var params = "username=" + encodeURIComponent(username)
+          + "&password=" + encodeURIComponent(password)
+          + "&email=" + encodeURIComponent(email);
+
+          // Post update
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/newUser',true);
+          xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+          xhr.onreadystatechange = function () {
+            if( xhr.readyState == 4 && xhr.status == 201) {
+              console.log("Created new user")
+              //new user created
+              window.location.href = "/";
+            } else if (xhr.readyState == 4 && xhr.status == 400) {
+              //show error
+              alert(xhr.responseText);
             }
-          } else {
-            document.getElementById('usrValid').style.background = 'white';
-            document.getElementById('usrValid').innerHTML = '';
-          }
-        }
-        user.addEventListener('keyup',userChange);
-        user.addEventListener('change',userChange);
-
-        var first = document.getElementById('password');
-        var pwChange = function(){
-          var val = document.getElementById('password').value;
-          if (val.length != 0) {
-            var pwQuality = zxcvbn(val);
-            switch (pwQuality.score) {
-              case 0:
-                //break;
-              case 1:
-                //break;
-              case 2:
-                document.getElementById('pwq').style.background = 'red';
-                document.getElementById('pwq').innerHTML = "weak";
-                break;
-              case 3:
-                //break;
-              case 4:
-                document.getElementById('pwq').style.background = 'green';
-                document.getElementById('pwq').innerHTML = "strong";
-                break;
+            else {
+              console.log("Response:", xhr.status, xhr.readyState, xhr.responseText)
             }
+          }
+          xhr.send(params);
+        });
+
+        function validatePassword(){
+          if(password.value != verify.value) {
+            verify.setCustomValidity("Passwords Don't Match");
           } else {
-            document.getElementById('pwq').style.background = 'white';
-            document.getElementById('pwq').innerHTML = "";
-          }
-        };
-        first.addEventListener('keyup', pwChange);
-        first.addEventListener('change', pwChange);
-
-        var again = document.getElementById('passwordAgain');
-
-        var pwMatch = function(){
-          if (first.value.length != 0) {
-            if (again.value == first.value) {
-              document.getElementById('pwm').style.background = 'green';
-              document.getElementById('pwm').innerHTML = "match";
-            } else {
-              document.getElementById('pwm').style.background = 'red';
-              document.getElementById('pwm').innerHTML = "different";
-            }
-          } else {
-            document.getElementById('pwm').style.background = 'white';
-            document.getElementById('pwm').innerHTML = "";
-          }
-        };
-        again.addEventListener('keyup', pwMatch);
-        again.addEventListener('change', pwMatch);
-
-      	var xhr = new XMLHttpRequest();
-      	var button = document.getElementById('registerButton');
-      	button.onclick = function(){
-      		var username = document.getElementById('username').value.trim();
-      		var password = document.getElementById('password').value.trim();
-          var passwordAgain = document.getElementById('passwordAgain').value;
-
-          if (username.length < 1) {
-            alert("Please enter a valid username");
-            return;
-          }
-
-          if (password !== passwordAgain) {
-            alert("Passwords don't match");
-            return;
-          }
-
-          if (password.length < 1) {
-            alert("Zero length passwords are note really a good idea");
-            return;
-          }
-
-          var email = document.getElementById('email').value;
-          //need to try validate the email address here:
-          if (email.indexOf('@') == -1) {
-            alert("Please enter a valid email address");
-            return;
-          }
-
-      		var params = "username=" + encodeURIComponent(username)
-            + "&password=" + encodeURIComponent(password)
-            + "&email=" + encodeURIComponent(email);
-      		xhr.open('POST', '/newUser',true);
-      		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-      		xhr.onreadystatechange = function () {
-      			if( xhr.readyState == 4 && xhr.status == 201) {
-      				//new user created
-      				window.location = '/';
-      			} else if (xhr.readyState == 4 && xhr.status == 400) {
-      				//show error
-      				alert(xhr.responseText);
-      			}
-      		}
-      		
-      		xhr.send(params);
-      	};
-
-        function validate() {
-          var data = $('#username').val();
-          console.log(data);
-          if (data.indexOf('/') > 0 || data.indexOf('#') > 0 || data.indexOf('+') > 0) {
-            alert("invalid username");
-          } else if (data.indexOf('$') == 0) {
-            alert("invalid username");
+            verify.setCustomValidity('');
           }
         }
       </script>
-    </div>
   </div>
 <% include ../fragments/footer.ejs %>
