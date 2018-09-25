@@ -3,7 +3,7 @@
     <div class="container main-content">
       <h1>Documentation</h1>
       <p>Welcome to the Node-RED Alexa Smart Home <b>v3</b> bridge documentation</p>
-    
+      <br>
       To get up and running you need to:
       <ol style="list-style-type:circle">
         <li>Request extension of the v3 skill to your amazon account</li>
@@ -14,7 +14,7 @@
         <li>Install <a href="https://github.com/coldfire84/node-red-contrib-alexa-home-skill-v3">Node-RED nodes for the bridge add-on</a></li>
         <li>Configure Flows within Node-Red</li>
       </ol>
-
+      <br>
       <h2>Example Device Definitions</h2>
       <p>You can declare a variety of devices, such as those illustrated below:</p>
       <p><img class="img-fluid" src="/images/DevicesExample.png" title="DevicesExample"></p>
@@ -26,26 +26,53 @@
       <br>
       <h3>Power Controller</h3>
       <p>This flow shows a simple Power Controller example for a Smart Light Switch, this can be used to switch a device on and off.</p>
+      <p>Invoke this controller using a command similar to <b>"Alexa, turn on Kitchen Light</b></p>
       <p><img class="img-fluid" src="/images/PowerControllerExample.png" title="PowerControllerExample"></p>
       <br>
       <p>You can import the Power Controller example:</p>
       <pre style="background-color:lightgrey;">[{"id":"7d82331b.e1985c","type":"alexa-smart-home-v3","z":"26494ddc.9b6052","conf":"bfd0fcf4.bc90e","device":"1","acknowledge":true,"name":"Desk Light","topic":"","x":180,"y":200,"wires":[["34a6fe17.fddad2"]]},{"id":"34a6fe17.fddad2","type":"switch","z":"26494ddc.9b6052","name":"switch msg.command TurnOn/ TurnOff","property":"command","propertyType":"msg","rules":[{"t":"eq","v":"TurnOn","vt":"str"},{"t":"eq","v":"TurnOff","vt":"str"}],"checkall":"true","repair":false,"outputs":2,"x":450,"y":200,"wires":[["7253b174.1ca8e"],["873da36d.42892"]]},{"id":"7253b174.1ca8e","type":"change","z":"26494ddc.9b6052","name":"set msg.payload to ON","rules":[{"t":"set","p":"payload","pt":"msg","to":"ON","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":780,"y":180,"wires":[["a71e00dd.6d326"]]},{"id":"873da36d.42892","type":"change","z":"26494ddc.9b6052","name":"set msg.payload to OFF","rules":[{"t":"set","p":"payload","pt":"msg","to":"OFF","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":790,"y":220,"wires":[["a71e00dd.6d326"]]},{"id":"a71e00dd.6d326","type":"mqtt out","z":"26494ddc.9b6052","name":"Change Main Light Gang-2 Power Status","topic":"cmnd/sonoff-t1-1/power2","qos":"0","retain":"false","broker":"b6672662.6651a8","x":1120,"y":200,"wires":[]},{"id":"bb6d52a1.90f3b","type":"tls-config","z":"","name":"Server Certificate Only","cert":"","key":"","ca":"","certname":"","keyname":"","caname":"","verifyservercert":true}]</pre>
       <br>
       <p>Example output from Power Controller interface:</p>
-
+      <pre style="background-color:lightgrey">
+          msg : Object
+          object
+          topic: ""
+          name: "Desk Light"
+          _messageId: "7bc14f51-7673-416b-8f10-ffefb25ba989"
+          _endpointId: "1"
+          _confId: "bfd0fcf4.bc90e"
+          command: "TurnOn"
+          extraInfo: object
+          payload: true
+          _msgid: "efef499a.f8c298"
+      </pre>
       <br>
       <h3>Playback Controller</h3>
       <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client).</p>
       <p>You must <a href="https://github.com/joshjowen/script.json-cec">install the json-cec plugin</a> on your KODI client for this flow to work.</p>
+      <p>Invoke this controller using a command similar to <b>"Alexa, pause Kitchen TV</b></p>
       <p><img class="img-fluid" src="/images/PlaybackControllerExample.png" title="PlaybackControllerExample"></p>
       <br>
       <p>You can import the Playback Controller example:</p>
       <pre style="background-color:lightgrey;">[{"id":"519d45a2.45356c","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Power On","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Addons.ExecuteAddon\",\"params\":{\"addonid\":\"script.json-cec\",\"params\":{\"command\":\"activate\"}},\"id\":1}","tls":"","x":750,"y":660,"wires":[[]]},{"id":"f2ec1012.29ae2","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Power Off","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Addons.ExecuteAddon\",\"params\":{\"addonid\":\"script.json-cec\",\"params\":{\"command\":\"standby\"}},\"id\":1}","tls":"","x":1130,"y":700,"wires":[[]]},{"id":"f99e0eb9.00291","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Stop","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.Stop\",\"params\":{\"playerid\":1},\"id\":1}","tls":"","x":730,"y":700,"wires":[["eb1ffd69.c955b"]]},{"id":"eb1ffd69.c955b","type":"delay","z":"affa0b92.8813b8","name":"","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","nbRateUnits":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"x":940,"y":700,"wires":[["f2ec1012.29ae2"]]},{"id":"7379f6e7.023b28","type":"comment","z":"affa0b92.8813b8","name":"Uses HDMI CEC to Turn on TV","info":"","x":770,"y":620,"wires":[]},{"id":"a917b54d.a91138","type":"switch","z":"affa0b92.8813b8","name":"switch msg.command","property":"command","propertyType":"msg","rules":[{"t":"eq","v":"TurnOn","vt":"str"},{"t":"eq","v":"TurnOff","vt":"str"},{"t":"eq","v":"Pause","vt":"str"},{"t":"eq","v":"Play","vt":"str"},{"t":"eq","v":"Stop","vt":"str"}],"checkall":"true","repair":false,"outputs":5,"x":360,"y":720,"wires":[["519d45a2.45356c"],["f99e0eb9.00291"],["393cc3e.680103c"],["393cc3e.680103c"],["42be5f30.30ed5"]]},{"id":"133b1547.a2447b","type":"alexa-smart-home-v3","z":"affa0b92.8813b8","conf":"bfd0fcf4.bc90e","device":"10","acknowledge":true,"name":"Bedroom TV","topic":"","x":150,"y":720,"wires":[["a917b54d.a91138"]]},{"id":"393cc3e.680103c","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi PlayPause","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.PlayPause\",\"params\":{\"playerid\":1},\"id\":1}","tls":"","x":750,"y":740,"wires":[[]]},{"id":"42be5f30.30ed5","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Stop","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.Stop\",\"params\":{\"playerid\":1},\"id\":1}","tls":"","x":730,"y":780,"wires":[[]]}]</pre>
       <br>
+      <pre style="background-color:lightgrey">
+          msg : Object
+          object
+          topic: ""
+          name: "Bedroom TV"
+          _messageId: "10454b3c-a81a-4974-8955-ce79d7e0145b"
+          _endpointId: "10"
+          _confId: "bfd0fcf4.bc90e"
+          command: "Pause"
+          extraInfo: object
+          empty
+          _msgid: "c2a49e61.ba55f"
+      </pre>
       <h3>Input Controller</h3>
       <p>This flow shows a simple Input Controller example for a Yamaha Musiccast AV Receiver (using Yamaha AVR Nodes as endpoint).</p>
       <p>You must also install/ use the <a href="https://www.npmjs.com/package/node-red-contrib-avr-yamaha">Yamaha AVR Node-Red nodes.</a></p>
-      <p>Invoke this controller using a command similar to <b>"Alexa, on Lounge AMP change input to HDMI1</b></p>
+      <p>Invoke this controller using a command similar to <b>"Alexa, on Lounge Amp change input to HDMI1</b></p>
       <p><img class="img-fluid" src="/images/InputControllerExample.png" title="InputkControllerExample"></p>
       <br>
       <p>You can import the Input Controller example:</p>
@@ -69,19 +96,19 @@
       <h2>Response Handling</h2>
       <p>By default nodes will automatically acknowledge any request via the Skill API. This means that <b>irrespective of whether 
         the flow generates the desired outcome Alexa will respond as if it has.</b></p>
-
+      <br>
       <p>In the case of the Thermostat Controller interface I even use the target temperature/ measurement unit from the original
         request directly in the response.</p>
-        
+      <br>
       <p>You can change this by disabling the "Auto Acknowledge" option and using a Alexa Smart Home v3 Response Node.</p>
-      
+      <br>
       <p>Any responses <b>must</b> be sent within <b>2 seconds</b> of the incoming request or the service will respond to Alexa with a 
         timeout message.</p>
-      
       <p><img class="img-fluid" src="/images/AutoAcknowledge.png" title="AutoAcknowledge"></p>
       <br>
       <h3>Alexa Smart Home v3 Response Node</h3>
       <p>This node is for if you want to have more control over the response sent back to the Alexa service.</p>
+      <br>
       <br>
       <h4><b>Response Node Unused Functionality</b></h4>
       <p>It is possible to use the "<b>payload.extra</b>" value to post information back from 
