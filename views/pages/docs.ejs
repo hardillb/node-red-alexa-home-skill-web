@@ -11,7 +11,7 @@
         <li>Link the skill with your amazon account</li>
         <li>Define devices on the bridge <a target="_blank" href="/devices">here</a></li>
         <li>Discover devices in the Alexa App/ using the "Alexa, discover devices" voice command</li>
-        <li>Install <a href="https://github.com/coldfire84/node-red-contrib-alexa-home-skill-v3">nodes for the bridge add-on</a></li>
+        <li>Install <a href="https://github.com/coldfire84/node-red-contrib-alexa-home-skill-v3">Node-RED nodes for the bridge add-on</a></li>
         <li>Configure Flows within Node-Red</li>
       </ol>
 
@@ -23,12 +23,16 @@
       The Nodes provide a simple way to interact with your existing/ new flows to control an array of devices such as those
       available via MQTT and HTTP.
       <br>
+      <br>
       <h3>Power Controller</h3>
       <p>This flow shows a simple Power Controller example for a Smart Light Switch, this can be used to switch a device on and off.</p>
       <p><img class="img-fluid" src="/images/PowerControllerExample.png" title="PowerControllerExample"></p>
       <br>
       <p>You can import the Power Controller example:</p>
       <pre class="pre-scrollable" style="background-color:lightgrey;">[{"id":"7d82331b.e1985c","type":"alexa-smart-home-v3","z":"26494ddc.9b6052","conf":"bfd0fcf4.bc90e","device":"1","acknowledge":true,"name":"Desk Light","topic":"","x":180,"y":200,"wires":[["34a6fe17.fddad2"]]},{"id":"34a6fe17.fddad2","type":"switch","z":"26494ddc.9b6052","name":"switch msg.command TurnOn/ TurnOff","property":"command","propertyType":"msg","rules":[{"t":"eq","v":"TurnOn","vt":"str"},{"t":"eq","v":"TurnOff","vt":"str"}],"checkall":"true","repair":false,"outputs":2,"x":450,"y":200,"wires":[["7253b174.1ca8e"],["873da36d.42892"]]},{"id":"7253b174.1ca8e","type":"change","z":"26494ddc.9b6052","name":"set msg.payload to ON","rules":[{"t":"set","p":"payload","pt":"msg","to":"ON","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":780,"y":180,"wires":[["a71e00dd.6d326"]]},{"id":"873da36d.42892","type":"change","z":"26494ddc.9b6052","name":"set msg.payload to OFF","rules":[{"t":"set","p":"payload","pt":"msg","to":"OFF","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":790,"y":220,"wires":[["a71e00dd.6d326"]]},{"id":"a71e00dd.6d326","type":"mqtt out","z":"26494ddc.9b6052","name":"Change Main Light Gang-2 Power Status","topic":"cmnd/sonoff-t1-1/power2","qos":"0","retain":"false","broker":"b6672662.6651a8","x":1120,"y":200,"wires":[]},{"id":"bb6d52a1.90f3b","type":"tls-config","z":"","name":"Server Certificate Only","cert":"","key":"","ca":"","certname":"","keyname":"","caname":"","verifyservercert":true}]</pre>
+      <br>
+      <p>Example output from Power Controller interface:</p>
+
       <br>
       <h3>Playback Controller</h3>
       <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client).</p>
@@ -41,11 +45,27 @@
       <h3>Input Controller</h3>
       <p>This flow shows a simple Input Controller example for a Yamaha Musiccast AV Receiver (using Yamaha AVR Nodes as endpoint).</p>
       <p>You must also install/ use the <a href="https://www.npmjs.com/package/node-red-contrib-avr-yamaha">Yamaha AVR Node-Red nodes.</a></p>
+      <p>Invoke this controller using a command similar to <b>"Alexa, on Lounge AMP change input to HDMI1</b></p>
       <p><img class="img-fluid" src="/images/InputControllerExample.png" title="InputkControllerExample"></p>
       <br>
       <p>You can import the Input Controller example:</p>
       <pre class="pre-scrollable" style="background-color:lightgrey;">[{"id":"b2e5a71f.ce6948","type":"alexa-smart-home-v3","z":"affa0b92.8813b8","conf":"bfd0fcf4.bc90e","device":"8","acknowledge":true,"name":"AV Receiver","topic":"","x":130,"y":100,"wires":[["b1cb891c.e1d0a8"]]},{"id":"78b9e3f4.f9401c","type":"AVR-Yamaha-put","z":"affa0b92.8813b8","device":"d15a41e7.73539","name":"Set AVR to Input Payload","topic":"Main_Zone.Input.Input_Sel","payload":"","x":670,"y":100,"wires":[[]]},{"id":"b1cb891c.e1d0a8","type":"change","z":"affa0b92.8813b8","name":"Remove spaces from payload","rules":[{"t":"change","p":"payload","pt":"msg","from":" ","fromt":"str","to":"","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":390,"y":100,"wires":[["78b9e3f4.f9401c"]]},{"id":"d15a41e7.73539","type":"avr-yamaha","z":"","name":"Lounge AV Receiver","address":"0.0.0.0","port":"","debug":false}]</pre>
       <br>
+      <p>Output from this contoller is as follows:</p>
+      <pre class=pre-scrollable style="background-color: :lightgrey">
+          msg : Object
+          object
+          topic: ""
+          name: "Lounge Amp"
+          _messageId: "082d9440-9e69-4c4a-a492-720db37da339"
+          _endpointId: "14"
+          _confId: "bfd0fcf4.bc90e"
+          command: "SelectInput"
+          extraInfo: object
+          empty
+          payload: "HDMI 1"
+          _msgid: "71af9d0d.762dc4"
+      </pre>
       <h2>Response Handling</h2>
       <p>By default nodes will automatically acknowledge any request via the Skill API. This means that <b>irrespective of whether 
         the flow generates the desired outcome Alexa will respond as if it has.</b></p>
