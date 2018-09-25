@@ -46,7 +46,6 @@
           payload: true
           _msgid: "efef499a.f8c298"
       </pre>
-      <br>
       <h3>Playback Controller</h3>
       <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client).</p>
       <p>You must <a href="https://github.com/joshjowen/script.json-cec">install the json-cec plugin</a> on your KODI client for this flow to work.</p>
@@ -56,6 +55,7 @@
       <p>You can import the Playback Controller example:</p>
       <pre style="background-color:lightgrey;">[{"id":"519d45a2.45356c","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Power On","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Addons.ExecuteAddon\",\"params\":{\"addonid\":\"script.json-cec\",\"params\":{\"command\":\"activate\"}},\"id\":1}","tls":"","x":750,"y":660,"wires":[[]]},{"id":"f2ec1012.29ae2","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Power Off","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Addons.ExecuteAddon\",\"params\":{\"addonid\":\"script.json-cec\",\"params\":{\"command\":\"standby\"}},\"id\":1}","tls":"","x":1130,"y":700,"wires":[[]]},{"id":"f99e0eb9.00291","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Stop","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.Stop\",\"params\":{\"playerid\":1},\"id\":1}","tls":"","x":730,"y":700,"wires":[["eb1ffd69.c955b"]]},{"id":"eb1ffd69.c955b","type":"delay","z":"affa0b92.8813b8","name":"","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","nbRateUnits":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"x":940,"y":700,"wires":[["f2ec1012.29ae2"]]},{"id":"7379f6e7.023b28","type":"comment","z":"affa0b92.8813b8","name":"Uses HDMI CEC to Turn on TV","info":"","x":770,"y":620,"wires":[]},{"id":"a917b54d.a91138","type":"switch","z":"affa0b92.8813b8","name":"switch msg.command","property":"command","propertyType":"msg","rules":[{"t":"eq","v":"TurnOn","vt":"str"},{"t":"eq","v":"TurnOff","vt":"str"},{"t":"eq","v":"Pause","vt":"str"},{"t":"eq","v":"Play","vt":"str"},{"t":"eq","v":"Stop","vt":"str"}],"checkall":"true","repair":false,"outputs":5,"x":360,"y":720,"wires":[["519d45a2.45356c"],["f99e0eb9.00291"],["393cc3e.680103c"],["393cc3e.680103c"],["42be5f30.30ed5"]]},{"id":"133b1547.a2447b","type":"alexa-smart-home-v3","z":"affa0b92.8813b8","conf":"bfd0fcf4.bc90e","device":"10","acknowledge":true,"name":"Bedroom TV","topic":"","x":150,"y":720,"wires":[["a917b54d.a91138"]]},{"id":"393cc3e.680103c","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi PlayPause","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.PlayPause\",\"params\":{\"playerid\":1},\"id\":1}","tls":"","x":750,"y":740,"wires":[[]]},{"id":"42be5f30.30ed5","type":"http request","z":"affa0b92.8813b8","name":"Bedroom Kodi Stop","method":"GET","ret":"txt","url":"http://<ip-address-of-kodi-client>:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.Stop\",\"params\":{\"playerid\":1},\"id\":1}","tls":"","x":730,"y":780,"wires":[[]]}]</pre>
       <br>
+      <p>Example output from Playback Controller interface:</p>
       <pre style="background-color:lightgrey">
           msg : Object
           object
@@ -72,18 +72,18 @@
       <h3>Input Controller</h3>
       <p>This flow shows a simple Input Controller example for a Yamaha Musiccast AV Receiver (using Yamaha AVR Nodes as endpoint).</p>
       <p>You must also install/ use the <a href="https://www.npmjs.com/package/node-red-contrib-avr-yamaha">Yamaha AVR Node-Red nodes.</a></p>
-      <p>Invoke this controller using a command similar to <b>"Alexa, on Lounge Amp change input to HDMI1</b></p>
+      <p>Invoke this controller using a command similar to <b>"Alexa, on AV Receiver change input to HDMI1</b></p>
       <p><img class="img-fluid" src="/images/InputControllerExample.png" title="InputkControllerExample"></p>
       <br>
       <p>You can import the Input Controller example:</p>
       <pre style="background-color:lightgrey;">[{"id":"b2e5a71f.ce6948","type":"alexa-smart-home-v3","z":"affa0b92.8813b8","conf":"bfd0fcf4.bc90e","device":"8","acknowledge":true,"name":"AV Receiver","topic":"","x":130,"y":100,"wires":[["b1cb891c.e1d0a8"]]},{"id":"78b9e3f4.f9401c","type":"AVR-Yamaha-put","z":"affa0b92.8813b8","device":"d15a41e7.73539","name":"Set AVR to Input Payload","topic":"Main_Zone.Input.Input_Sel","payload":"","x":670,"y":100,"wires":[[]]},{"id":"b1cb891c.e1d0a8","type":"change","z":"affa0b92.8813b8","name":"Remove spaces from payload","rules":[{"t":"change","p":"payload","pt":"msg","from":" ","fromt":"str","to":"","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":390,"y":100,"wires":[["78b9e3f4.f9401c"]]},{"id":"d15a41e7.73539","type":"avr-yamaha","z":"","name":"Lounge AV Receiver","address":"0.0.0.0","port":"","debug":false}]</pre>
       <br>
-      <p>Output from this contoller is as follows:</p>
+      <p>Output from Input Contoller interface:</p>
       <pre style="background-color:lightgrey">
           msg : Object
           object
           topic: ""
-          name: "Lounge Amp"
+          name: "AV Receiver"
           _messageId: "082d9440-9e69-4c4a-a492-720db37da339"
           _endpointId: "14"
           _confId: "bfd0fcf4.bc90e"
@@ -92,6 +92,40 @@
           empty
           payload: "HDMI 1"
           _msgid: "71af9d0d.762dc4"
+      </pre>
+      <h3>StepSpeaker Controller</h3>
+      <p>Invoke this controller using a command similar to <b>"Alexa, lower the volume on AV Receiver</b></p>
+      <p>Output from StepSepeaker Contoller interface:</p>
+      <pre style="background-color:lightgrey">
+          msg : Object
+          object
+          topic: ""
+          name: "Bedroom TV"
+          _messageId: "08d1378f-bc96-4899-9aab-bf5f1e6eb089"
+          _endpointId: "10"
+          _confId: "bfd0fcf4.bc90e"
+          command: "AdjustVolume"
+          extraInfo: object
+          empty
+          payload: 10
+          _msgid: "aeaa5986.c81298
+      </pre>
+      <h3>Thermostat Controller</h3>
+      <p>Invoke this controller using a command similar to <b>"Alexa, set Thermostat to 22 degrees</b></p>
+      <p>Output from Thermostat Contoller interface:</p>
+      <pre style="background-color:lightgrey">
+          msg : Object
+          object
+          topic: ""
+          name: "Thermostat"
+          _messageId: "ec66ba42-7d4f-43b5-ad70-7d5ee98fac34"
+          _endpointId: "9"
+          _confId: "bfd0fcf4.bc90e"
+          command: "SetTargetTemperature"
+          extraInfo: object
+          payload: 22
+          temperatureScale: "CELSIUS"
+          _msgid: "9bcd4c32.e6b2d"
       </pre>
       <h2>Response Handling</h2>
       <p>By default nodes will automatically acknowledge any request via the Skill API. This means that <b>irrespective of whether 
