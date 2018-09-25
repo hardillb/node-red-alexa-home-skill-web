@@ -4,7 +4,16 @@
 
     <p>Welcome to registration point the Home Skill API <b>version 3</b> bridge for <a href="http://nodered.org">Node-RED</a>.
          
-    <p>Using this "bridge" you can control a variety of endpoints, as outlined below: </p> 
+    <p>Using this "bridge" you can control a variety of endpoints, as outlined below.</p>
+
+    <p>Useful target nodes for this skill include:</p>
+    <ul>
+      <li><a href="https://www.npmjs.com/package/node-red-contrib-chromecast">Chromecast</a></li>
+      <li><a href="https://www.npmjs.com/package/node-red-contrib-avr-yamaha">Yamaha AV Receiver</a></li>
+      <li>Built-In MQTT Send</li>
+      <li>Built-In HTTP Request (use with KODI RPC for example)</li>
+    </ul>
+
     <table class="table table-striped">
       <thead>
         <tr>
@@ -24,14 +33,14 @@
         <tr>
           <th scope="row">Playback Control</th>
           <td>Play, Pause, Stop</td>
-          <td>Kodi RPC</td>
+          <td>Kodi RPC (including Plex Addon control)</td>
           <td>"Alexa, (pause | play | stop) Kitchen TV"</td>
         </tr>
         <tr>
           <th scope="row">Power Control</th>
           <td>On/ Off</td>
-          <td>Any MQTT enabled smart-switch</td>
-          <td>"Alexa, turn (on | off) Kitchen Light"</td>
+          <td>Any MQTT enabled smart-switch/ plug, KODI RPC (w/ HDMI CEC)</td>
+          <td>"Alexa, turn (on | off) Kitchen Light", "Alexa, turn (on | off) Kitchen TV</td>
         </tr>
         <tr>
           <th scope="row">Scene Control</th>
