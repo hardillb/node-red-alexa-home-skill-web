@@ -1084,17 +1084,16 @@ app.delete('/service/:id',
 			});
 });
 
-// Create HTTPS Server Instance unless NONPROD env var exists
-if (!nonProd) {
-	var options = {
-		key: fs.readFileSync(certKey),
-		cert: fs.readFileSync(certChain)
-	};
-	var server = https.createServer(options, app);
-}
-else {
-	var server = http.Server(app);
-}
+// Create HTTPS Server
+// var options = {
+// 	key: fs.readFileSync(certKey),
+// 	cert: fs.readFileSync(certChain)
+// };
+// var server = https.createServer(options, app);
+
+// Create HTTP Server, to be proxied
+var server = http.Server(app);
+
 
 server.listen(port, host, function(){
 	console.log('App listening on  %s:%d!', host, port);
