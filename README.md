@@ -27,8 +27,9 @@ This project is based **extensively** on Ben Hardill's Alexa Smart Home API v2 p
 With the main changes being:
 * Upgrade to Alexa Home Skill API v3 (enables Play, Pause, Stop, Volume etc. control)
 * Web app/ site upgrade to Bootstrap v4 (with *minor* UI changes)
-* All NodeJS pre-reqs being upgraded to vCurrent
-* Remeditaion of various, depreciated NodeJS/ Mongoose functions
+* All NodeJS web-app pre-reqs being upgraded to vCurrent
+* Remediation of various, depreciated NodeJS/ Mongoose functions
+* Move to Monodb Sessions vs Express Sessions
 
 # Service Architecture
 | Layer | Product | Description |
@@ -54,7 +55,7 @@ Collections under Mongodb users database:
 |grantcodes||
 |lostpasswords||
 |refreshtokens||
-|topics||
+|topics|Contains user MQTT topics used with mosquitto-auth-plug|
 
 \* *Username/ email address and salted/ hashed password.*
 
@@ -81,7 +82,7 @@ WebApp mongodb account:
 WebApp mongodb account:
 * **user home database**: user
 * **account**: node-red-alexa
-* **role**: dbOwenr on sessions db
+* **role**: dbOwner on sessions db
 
 MQTT mongodb account:
 * **user home database**: admin
@@ -218,19 +219,19 @@ export MAIL_PASSWORD=<password>
 
 sudo docker create \
 --name nr-alexav3-webb \
--p 443:3000 \
+-p 3000:3000 \
 -v /var/docker/ssl:/etc/letsencrypt \
 -e MQTT_URL=$MQTT_URL
 -e MQTT_USER=$MQTT_USER
 -e MQTT_PASSWORD=$MQTT_PASSWORD
 -e MONGO_HOST=$MONGO_HOST
--e MONGO_PORT=$
+-e MONGO_PORT=$MONGO_PORT
 -e MONGO_USER=$MONGO_USER
 -e MONGO_PASSWORD=$MONGO_PASSWORD
 -e MAIL_SERVER=$MAIL_SERVER
 -e MAIL_USER=$MAIL_USER
 -e MAIL_PASSWORD=$MAIL_PASSWORD
-nr-alexav3-webb:0.1
+nr-alexav3-webb:0.2
 ```
 Note it is assumed this web-app will be reverse proxied, i.e. HTTPS (NGINX) ---> 3000 (NodeJS)
 
@@ -377,10 +378,10 @@ Modify views/pages/devices.ejs checkCapability function to include necessary log
 
 Create 60x40 icon, with the same name as capability checkbox id/ value.
 
-Update nodejs server via git pull/ restart nodejs application.
+Update NodeJS server via git pull/ restart NodeJS application.
 
 ### Node-Red-Contrib Changes
-Review     function alexaHome(n), specifically switch statement:
+Review function alexaHome(n), specifically switch statement:
 ```
 // Needs expanding based on additional applications
 switch(message.directive.header.name){
@@ -427,7 +428,7 @@ show collections
 ```
 db.changeUserPassword("<username>", "<new password>")
 ```
-### Rmemove Mongodb User
+### Remove Mongodb User
 ```
 use admin
 db.dropUser("mqtt-user")
