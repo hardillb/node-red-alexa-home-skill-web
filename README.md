@@ -25,7 +25,7 @@ This project is based **extensively** on Ben Hardill's Alexa Smart Home API v2 p
 * https://github.com/hardillb/node-red-alexa-home-skill-web
 
 With the main changes being:
-* Upgrade to Alexa Shome Skill API v3 (enables Play, Pause, Stop, Volume etc. control)
+* Upgrade to Alexa Home Skill API v3 (enables Play, Pause, Stop, Volume etc. control)
 * Web app/ site upgrade to Bootstrap v4 (with *minor* UI changes)
 * All NodeJS pre-reqs being upgraded to vCurrent
 * Remeditaion of various, depreciated NodeJS/ Mongoose functions
