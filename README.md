@@ -24,7 +24,11 @@ This project is based **extensively** on Ben Hardill's Alexa Smart Home API v2 p
 * https://github.com/hardillb/node-red-alexa-home-skill-lambda
 * https://github.com/hardillb/node-red-alexa-home-skill-web
 
-To "migrate" from this service to v3 see section title **Service Migration**.
+With the main changes being:
+* Upgrade to Alexa Shome Skill API v3 (enables Play, Pause, Stop, Volume etc. control)
+* Web app/ site upgrade to Bootstrap v4 (with *minor* UI changes)
+* All NodeJS pre-reqs being upgraded to vCurrent
+* Remeditaion of various, depreciated NodeJS/ Mongoose functions
 
 # Service Architecture
 | Layer | Product | Description |
@@ -116,12 +120,12 @@ export WEBPASSWORD=<password>
 sudo wget -O mongodb-accounts.sh https://gist.github.com/coldfire84/93ae246f145ef09da682ee3a8e297ac8/raw/7b66fc4c4821703b85902c85b9e9a31dc875b066/mongodb-accounts.sh
 sudo chmod +x mongodb-accounts.sh
 
-sudo sed -i "s|<mongo-admin-user>|$MONGOADMIN|g" mongodb-accounts.sh
-sudo sed -i "s|<mongo-admin-password>|$MONGOPASSWORD|g" mongodb-accounts.sh
-sudo sed -i "s|<web-app-user>|$WEBUSER|g" mongodb-accounts.sh
-sudo sed -i "s|<web-app-password>|$WEBPASSWORD|g" mongodb-accounts.sh
-sudo sed -i "s|<mqtt-user>|$MQTTUSER|g" mongodb-accounts.sh
-sudo sed -i "s|<mqtt-password>|$MQTTPASSWORD|g" mongodb-accounts.sh
+sudo sed -i "s|<mongo-admin-user>|$MONGO_ADMIN|g" mongodb-accounts.sh
+sudo sed -i "s|<mongo-admin-password>|$MONGO_PASSWORD|g" mongodb-accounts.sh
+sudo sed -i "s|<web-app-user>|$WEB_USER|g" mongodb-accounts.sh
+sudo sed -i "s|<web-app-password>|$WEB_PASSWORD|g" mongodb-accounts.sh
+sudo sed -i "s|<mqtt-user>|$MQTT_USER|g" mongodb-accounts.sh
+sudo sed -i "s|<mqtt-password>|$MQTT_PASSWORD|g" mongodb-accounts.sh
 
 sudo docker create \
 --name mongodb -p 27017:27017 \
