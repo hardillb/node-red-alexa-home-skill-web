@@ -6,7 +6,7 @@ var nodemailer = require('nodemailer');
 var smtpOptions = {
 	host: process.env.MAIL_SERVER,
 	port: 587,
-	secure: false,
+	secure: true,
 	auth: {
 		user: process.env.MAIL_USER,
 		pass: process.env.MAIL_PASSWORD

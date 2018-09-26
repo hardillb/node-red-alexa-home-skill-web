@@ -51,7 +51,6 @@ var mongo_port = (process.env.MONGO_PORT || "27017");
 var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 var mqtt_url = (process.env.MQTT_URL || "mqtt://" + dnsHostname + ":1883");
-console.log(mqtt_url);
 // Express Settings
 var app_id = 'http://localhost:' + port;
 var cookieSecret = 'ihytsrf334';
@@ -74,50 +73,51 @@ if (mqtt_user) {
 	mqttOptions.password = mqtt_password;
 }
 
+console.log("INFO: Connecting to MQTT server: ", mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
-	console.log("MQTT connect error");
+	console.log("ERROR: MQTT connect error");
 });
 
 mqttClient.on('reconnect', function(){
-	console.log("MQTT reconnect");
+	console.log("WARNING: MQTT reconnect");
 });
 
 mqttClient.on('connect', function(){
-	console.log("MQTT connected")
+	console.log("INFO: MQTT connected")
 	mqttClient.subscribe('response/#');
 });
 
 // Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-console.log(mongo_url)
+console.log("INFO: Connecting to MongoDB server:", mongo_host + ":" + mongo_port + "/users")
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
 mongoose_connection.on('connecting', function() {
-	console.log('connecting to MongoDB...');
+	console.log('INFO: Connecting to MongoDB...');
 });
 
 mongoose_connection.on('error', function(error) {
-	console.error('Error in MongoDb connection: ' + error);
+	console.error('ERROR: MongoDB connection: ' + error);
 	//mongoose.disconnect();
 });
 
 mongoose_connection.on('connected', function() {
-    console.log('MongoDB connected!');
+    console.log('INFO: MongoDB connected!');
 });
   
 mongoose_connection.once('open', function() {
-    console.log('MongoDB connection opened!');
+    console.log('INFO: MongoDB connection opened!');
 });
 
 mongoose_connection.on('reconnected', function () {
-    console.log('MongoDB reconnected!');
+    console.log('INFO: MongoDB reconnected!');
 });
 
 mongoose_connection.on('disconnected', function() {
-	console.log('MongoDB disconnected!');
+	console.log('WARNING: MongoDB disconnected!');
 });
 
 // Fixes in relation to: https://github.com/Automattic/mongoose/issues/6922#issue-354147871
@@ -165,7 +165,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			});
 		});
 	} else {
-		console.log("Superuser MQTT account already exists");
+		console.log("INFO: Superuser MQTT account already exists");
 	}
 });
 
@@ -244,7 +244,7 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			console.log("missing grant token: %j", token);
+			console.log("ERROR: Missing grant token: %j", token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
 			//console.log("Token is GOOD!");
@@ -322,7 +322,7 @@ app.get('/newuser', function(req,res){
 app.post('/newuser', function(req,res){
 	Account.register(new Account({ username : req.body.username, email: req.body.email, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
-			console.log(err);
+			console.log("ERROR: New user cretaion error: ", err);
 			return res.status(400).send(err.message);
 		}
 
@@ -341,7 +341,7 @@ app.post('/newuser', function(req,res){
 					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 					function(err, count){
 						if (err) {
-							console.log(err);
+							console.log("ERROR: New user creation error updating MQTT info: ", err);
 						}
 					}
 				);
@@ -349,7 +349,7 @@ app.post('/newuser', function(req,res){
 		});
 
 		passport.authenticate('local')(req, res, function () {
-			console.log("created new user %s", req.body.username);
+			console.log("INFO: Created new user %s", req.body.username);
 			//measurement.send({
 			//	t:'event', 
 			//	ec:'System', 
@@ -372,7 +372,7 @@ app.get('/changePassword/:key',function(req, res, next){
 					lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
-					console.log(err);
+					console.log("ERROR: Password reset failed: ", err);
 					res.redirect('/');
 				}
 			})
@@ -399,14 +399,15 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						//console.log("Chagned %s's password", u.username);
 						res.status(200).send();
 					} else {
-						console.log("Error changing %s's password", u.username);
-						console.log(error);
+						console.log("ERROR: Unable to change password for: ", u.username);
+						console.log("ERROR: ", error);
 						res.status(400).send("Problem setting new password");
 					}
 				});
 			});
 		} else {
-			console.log(err);
+			console.log("ERROR: Unable to change password for user, user not found", req.user.username);
+			console.log("ERROR: ", err);
 			res.status(400).send("Problem setting new password");
 		}
 	});
@@ -451,20 +452,20 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
 			for (var i = 0; i < application.domains.length; i++) {
-				console.log("Checking redirectURI against defined service domain: " + application.domains[i])
+				console.log("INFO: Checking OAuth redirectURI against defined service domain: ", application.domains[i])
 				if (uri.host == application.domains[i] || (uri.protocol == application.domains[i] && uri.protocol != 'http' && uri.protocol != 'https')) {
 					match = true;
-					console.log("Found service definition associated with redirecURI: " + redirectURI);
+					console.log("INFO: Found Service definition associated with redirecURI: ", redirectURI);
 					break;
 				}
 			}
 			if (match && redirectURI && redirectURI.length > 0) {
 				done(null, application, redirectURI);
 			} else {
-				done(new Error("Could not find service definition associated with redirectURI: " + redirectURI), false);
+				done(new Error("ERROR: Could not find service definition associated with redirectURI: ", redirectURI), false);
 			}
 		} else if (!error) {
-			done(new Error("No serevice definition associated with oauth client_id: " + applicationID), false);
+			done(new Error("ERROR: No serevice definition associated with oauth client_id: ", applicationID), false);
 		} else {
 			done(error);
 		}
@@ -502,11 +503,11 @@ app.post('/auth/finish',function(req,res,next) {
 		}, function(error,user,info){
 			//console.log("/auth/finish authenticating");
 			if (user) {
-				console.log("Authenticated: " + user.username);
+				console.log("INFO: Authenticated: " + user.username);
 				req.user = user;
 				next();
 			} else if (!error){
-				console.log("Not Authenticated");
+				console.log("WARNING: Not Authenticated");
 				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
 			}
@@ -527,7 +528,7 @@ app.post('/auth/exchange',function(req,res,next){
 			req.appl = application;
 			next();
 		} else if (!error) {
-			error = new Error("Could not find service definition associated with applicationID: " + appID + " or secret: " + appSecret);
+			error = new Error("ERROR: Could not find service definition associated with applicationID: " + appID + " or secret: " + appSecret);
 			next(error);
 		} else {
 			next(error);
@@ -829,7 +830,7 @@ var timeout = setInterval(function(){
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
-				console.log("timed out");
+				console.log("ERROR: MQTT command timed out/ unacknowledged");
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
