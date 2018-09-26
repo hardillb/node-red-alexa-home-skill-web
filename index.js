@@ -434,7 +434,7 @@ app.post('/lostPassword', function(req, res, next){
 					//console.log(lostPassword.uuid);
 					//console.log(lostPassword.user.username);
 					var body = mailer.buildLostPasswordBody(lostPassword.uuid, lostPassword.user.username);
-					mailer.send(email, 'no-reply@cb-net.co.uk', 'Password Reset for Node-Red-Alexa-Smart-Home-v3', body.text, body.html);
+					mailer.send(email, 'nr-alexav3@cb-net.co.uk', 'Password Reset for Node-Red-Alexa-Smart-Home-v3', body.text, body.html);
 				});
 			} else {
 				res.status(404).send("No user found with that email address");

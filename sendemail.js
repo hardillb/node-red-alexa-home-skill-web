@@ -5,7 +5,7 @@ var nodemailer = require('nodemailer');
 
 var smtpOptions = {
 	host: process.env.MAIL_SERVER,
-	port: 587,
+	port: 465,
 	secure: true,
 	auth: {
 		user: process.env.MAIL_USER,
@@ -46,7 +46,12 @@ Mailer.prototype.send = function send(to, from, subject, text, html){
 		html: html
 	};
 
-	transporter.sendMail(message);
+	transporter.sendMail(message, function(error, info){
+		if(error){
+			return console.log("ERROR: Unable to send email ",error);
+		}
+		console.log('INFO: EMail sent: ', info.response);
+	});
 }
 
 Mailer.prototype.buildLostPasswordBody = function buildLostBody(uuid, userid){
