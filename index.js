@@ -91,7 +91,7 @@ mqttClient.on('connect', function(){
 
 // Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-console.log("INFO: Connecting to MongoDB server:", mongo_host + ":" + mongo_port + "/users")
+console.log("INFO: Connecting to MongoDB server: mongodb://", mongo_host + ":" + mongo_port + "/users")
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
@@ -856,7 +856,7 @@ app.post('/api/v1/command',
 		//	uid: req.user.username
 		//
 		//});
-		var topic = "command/" +req.user.username + "/" + req.body.directive.endpoint.endpointId;
+		var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 		//console.log("topic", topic)
 		delete req.body.directive.header.correlationToken;
 		delete req.body.directive.endpoint.scope.token;
@@ -865,9 +865,9 @@ app.post('/api/v1/command',
 		console.log("message",message)
 		try{
 			mqttClient.publish(topic,message);
-			console.log("Published MQTT command!")
+			console.log("INFO: Published MQTT command for user: ", req.user.username)
 		} catch (err) {
-			console.log("Error publishing MQTT command!")
+			console.log("ERROR: Failed to publish MQTT command for user: ", req.user.username)
 		}
 		var command = {
 			user: req.user.username,
