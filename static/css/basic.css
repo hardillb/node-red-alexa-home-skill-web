@@ -42,21 +42,30 @@
 .serviceDomains {
 }
 
+.form-lostPassword {
+	width: 100%;
+	max-width: 330px;
+	padding: 15px;
+	margin: auto;
+}
+
 .form-register {
 	width: 100%;
 	max-width: 440px;
 	padding: 15px;
 	margin: auto;
-  }
+}
+
 .form-register .checkbox {
 font-weight: 400;
 }
+
 .form-register .form-control {
-position: relative;
-box-sizing: border-box;
-height: auto;
-padding: 10px;
-font-size: 16px;
+	position: relative;
+	box-sizing: border-box;
+	height: auto;
+	padding: 10px;
+	font-size: 16px;
 }
 
 .form-signin {
@@ -64,27 +73,29 @@ font-size: 16px;
 	max-width: 330px;
 	padding: 15px;
 	margin: auto;
-	}
-.form-signin .checkbox {
-font-weight: 400;
 }
+
+.form-signin .checkbox {
+	font-weight: 400;
+}
+
 .form-signin .form-control {
-position: relative;
-box-sizing: border-box;
-height: auto;
-padding: 10px;
-font-size: 16px;
+	position: relative;
+	box-sizing: border-box;
+	height: auto;
+	padding: 10px;
+	font-size: 16px;
 }
 .form-signin .form-control:focus {
-z-index: 2;
+	z-index: 2;
 }
 .form-signin input[type="username"] {
-margin-bottom: -1px;
-border-bottom-right-radius: 0;
-border-bottom-left-radius: 0;
+	margin-bottom: -1px;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
 }
 .form-signin input[type="password"] {
-margin-bottom: 10px;
-border-top-left-radius: 0;
-border-top-right-radius: 0;
+	margin-bottom: 10px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
