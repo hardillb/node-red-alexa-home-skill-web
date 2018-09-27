@@ -29,7 +29,7 @@ With the main changes being:
 * Web app/ site upgrade to Bootstrap v4 (with *minor* UI changes)
 * All NodeJS web-app pre-reqs being upgraded to vCurrent
 * Remediation of various, depreciated NodeJS/ Mongoose functions
-* Move to Monodb Sessions vs Express Sessions
+* Move to MongoDB Sessions vs Express Sessions
 
 # Service Architecture
 | Layer | Product | Description |
@@ -62,7 +62,7 @@ Collections under Mongodb users database:
 A NodeRed flow MUST be configured in order for Alexa commands to receive acknowledgement, i.e. you will get "Sorry, <device> is not responding."
 
 ## Docker Containers
-MongoDB and Mosquitto container names are **criticial** for deployment to be successful. Containers reside on a user defined docker network which provides DNS resolution via container name.
+MongoDB and Mosquitto container names are **critical** for deployment to be successful. Containers reside on a user defined docker network which provides DNS resolution via container name.
 
 |Container Name|Service|Ports|
 |---|---|---|
@@ -172,7 +172,7 @@ wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5bd840
 cd /var/docker/mosquitto/config/conf.d/
 wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/88b69fd7392612d4be968501747c138e54391fe4/node-red-alexa-smart-home-v3.conf
 
-export DNS_HOSTNAME=<IP/ hostname yused for SSL Certs>
+export DNS_HOSTNAME=<IP/ hostname used for SSL Certs>
 export MONGO_SERVER=mongodb
 export MQTTUSER=<username>
 export MQTTPASSWORD=<password>
@@ -424,11 +424,11 @@ use users
 show collections
 ```
 
-## Change Mongodb User Password
+## Change MongoDB User Password
 ```
 db.changeUserPassword("<username>", "<new password>")
 ```
-### Remove Mongodb User
+### Remove MongoDB User
 ```
 use admin
 db.dropUser("mqtt-user")
