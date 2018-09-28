@@ -314,7 +314,7 @@ function ensureAuthenticated(req,res,next) {
 }
 
 app.get('/newuser', function(req,res){
-	res.render('pages/register',{user: req.user});
+	res.render('pages/register',{user: req.user, register: true});
 });
 
 app.post('/newuser', function(req,res){
