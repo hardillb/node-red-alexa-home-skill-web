@@ -58,6 +58,21 @@
 				<fieldset class="form-group" id="capabilityType">
 						<legend>Capabilities</legend>
 						<div class="form-check">
+								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="BrightnessController"> Brightness Control </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="ColorController"> Color Control </label>
+							<br />
+						</div>
+						<div class="form-check">
+								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="ColorTemperatureController"> Color Temperature Control </label>
+							<br />
+						</div>
+						<div class="form-check">
 								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
 							<label class="form-check-label" for="InputController"> Input Control </label>
 							<br />
@@ -266,6 +281,9 @@
 
 	// Place restrictions here - i.e. StepVolume/ PlaybackControl can't go with ThermostatControl/ SceneControl
 	function checkCapability(check) {
+		var brightness = $('#BrightnessController').prop('checked');
+		var color = $('#ColorController').prop('checked');
+		var colorTemperature = $('#ColorTemperatureController').prop('checked');
 		var input = $('#InputController').prop('checked');
 		var scene = $('#SceneController').prop('checked');
 		var power = $('#PowerController').prop('checked');
@@ -276,15 +294,18 @@
 		// Add else if here with restrictions
 		if (scene && power || scene && playback || scene && stepSpeaker || scene && input || scene && thermostat) {
 			alert("Activity/ Scene selected, this must be the only capability!");
+			$('#ACTIVITY_TRIGGER').prop('checked', true);
 			$('#InputController').prop('checked', false);
 			$('#PowerController').prop('checked', false);
 			$('#PlaybackController').prop('checked', false);
 			$('#StepSpeaker').prop('checked', false);
-			$('#ACTIVITY_TRIGGER').prop('checked', true);
 			$('#SWITCH').prop('checked', false);
 			$('#TV').prop('checked', false);
 			$('#SPEAKER').prop('checked', false);
 			$('#THERMOSTAT').prop('checked', false);
+			$('#BrightnessController').prop('checked', false);
+			$('#ColorController').prop('checked', false);
+			$('#ColorTemperatureController').prop('checked', false);
 			return false;
 		}
 		else if (thermostat && power || thermostat && playback || thermostat && stepSpeaker || thermostat && input) {
@@ -298,6 +319,9 @@
 			$('#TV').prop('checked', false);
 			$('#SPEAKER').prop('checked', false);
 			$('#THERMOSTAT').prop('checked', true);
+			$('#BrightnessController').prop('checked', false);
+			$('#ColorController').prop('checked', false);
+			$('#ColorTemperatureController').prop('checked', false);
 			return false;
 		}
 		else {

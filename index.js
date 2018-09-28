@@ -720,57 +720,53 @@ function replaceCapability(capability) {
 		};
 	}
 			
-	// LightController
-	// if(capability == "LightController")  {
-	// 	return [{ 
-	// 			"type": "AlexaInterface",
-	// 			"interface": "Alexa.PowerController",
-	// 			"version": "3",
-	// 			"properties": {
-	// 				"supported": [{
-	// 					"name": "powerState"
-	// 				}],
-	// 				"proactivelyReported": false,
-	// 				"retrievable": false
-	// 			}
-	// 		},
-	// 		{
-	// 			"type": "AlexaInterface",
-	// 			"interface": "Alexa.ColorController",
-	// 			"version": "3",
-	// 			"properties": {
-	// 				"supported": [{
-	// 					"name": "color"
-	// 				}],
-	// 				"proactivelyReported": false,
-	// 				"retrievable": false
-	// 			}
-	// 		},
-	// 		{
-	// 			"type": "AlexaInterface",
-	// 			"interface": "Alexa.ColorTemperatureController",
-	// 			"version": "3",
-	// 			"properties": {
-	// 				"supported": [{
-	// 					"name": "colorTemperatureInKelvin"
-	// 				}],
-	// 				"proactivelyReported": false,
-	// 				"retrievable": false
-	// 			}
-	// 		},
-	// 		{
-	// 			"type": "AlexaInterface",
-	// 			"interface": "Alexa.BrightnessController",
-	// 			"version": "3",
-	// 			"properties": {
-	// 				"supported": [{
-	// 					"name": "brightness"
-	// 				}],
-	// 				"proactivelyReported": false,
-	// 				"retrievable": false
-	// 			}
-	// 		}
-	// 	]};
+	// ColorController
+	if(capability == "ColorController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "color"
+					}],
+					"proactivelyReported": false,
+					"retrievable": false
+				}
+			};
+	}
+	
+	// ColorTemperatureController
+	if(capability == "ColorTemperatureController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorTemperatureController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "colorTemperatureInKelvin"
+					}],
+					"proactivelyReported": false,
+					"retrievable": false
+				}
+			};
+	}
+
+	// BrightnessController
+	if(capability == "BrightnessController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.BrightnessController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "brightness"
+					}],
+					"proactivelyReported": false,
+					"retrievable": false
+				}
+			};
+	}
 };
 
 var onGoingCommands = {};
