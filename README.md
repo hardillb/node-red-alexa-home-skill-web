@@ -208,6 +208,7 @@ Then start the container:
 export WEB_HOSTNAME=<hostname/IP>
 export MQTT_URL=mqtt://<hostname/IP>
 export MQTT_USER=<username>
+export MQTT_PORT=<port>
 export MQTT_PASSWORD=<password>
 export MONGO_HOST=<hostname/IP>
 export MONGO_PORT=<port>
@@ -221,16 +222,17 @@ sudo docker create \
 --name nr-alexav3-webb \
 -p 3000:3000 \
 -v /var/docker/ssl:/etc/letsencrypt \
--e MQTT_URL=$MQTT_URL
--e MQTT_USER=$MQTT_USER
--e MQTT_PASSWORD=$MQTT_PASSWORD
--e MONGO_HOST=$MONGO_HOST
--e MONGO_PORT=$MONGO_PORT
--e MONGO_USER=$MONGO_USER
--e MONGO_PASSWORD=$MONGO_PASSWORD
--e MAIL_SERVER=$MAIL_SERVER
--e MAIL_USER=$MAIL_USER
--e MAIL_PASSWORD=$MAIL_PASSWORD
+-e MQTT_URL=$MQTT_URL \
+-e MQTT_PORT=$MQTT_PORT \
+-e MQTT_USER=$MQTT_USER \
+-e MQTT_PASSWORD=$MQTT_PASSWORD \
+-e MONGO_HOST=$MONGO_HOST \
+-e MONGO_PORT=$MONGO_PORT \
+-e MONGO_USER=$MONGO_USER \
+-e MONGO_PASSWORD=$MONGO_PASSWORD \
+-e MAIL_SERVER=$MAIL_SERVER \
+-e MAIL_USER=$MAIL_USER \
+-e MAIL_PASSWORD=$MAIL_PASSWORD \
 nr-alexav3-webb:0.2
 ```
 Note it is assumed this web-app will be reverse proxied, i.e. HTTPS (NGINX) ---> 3000 (NodeJS)
