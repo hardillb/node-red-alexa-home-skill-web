@@ -268,7 +268,7 @@ app.get('/about', function(req,res){
 });
 
 app.get('/privacy', function(req,res){
-	res.render('pages/privacy', {user: req.user, about: true});
+	res.render('pages/privacy', {user: req.user, privacy: true});
 });
 
 app.get('/login', function(req,res){
