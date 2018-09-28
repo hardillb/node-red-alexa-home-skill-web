@@ -1098,7 +1098,7 @@ var server = http.Server(app);
 
 
 server.listen(port, host, function(){
-	log2console("INFO", "App listening on: " + host + port);
+	log2console("INFO", "App listening on: " + host + ":" + port);
 	log2console("INFO", "App_ID -> " + app_id);
 
 	setTimeout(function(){
