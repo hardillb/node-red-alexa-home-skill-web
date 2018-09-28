@@ -22,16 +22,19 @@ var oauthServer = require('./oauth');
 
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.WEB_HOSTNAME && process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
-	console.log("ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables.")
+	log2console("CRITICAL","You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables.")
+	// console.log("[" + Date().toISOString() + "]" + "ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables.")
 	process.exit()
 }
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
-	console.log("WARNING: using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
+	log2console("WARNING","Using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
+	//console.log("WARNING: using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
 }
 // Warn on not supply of MAIL username/ password/ server
 if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
-	console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
+	log2console("WARNING","No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
+	//console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
 }
 
 // NodeJS App Settings
@@ -69,7 +72,8 @@ if (mqtt_user) {
 	mqttOptions.password = mqtt_password;
 }
 
-console.log("INFO: Connecting to MQTT server: " + mqtt_url);
+log2console("INFO", "Connecting to MQTT server: " + mqtt_url);
+//console.log("INFO: Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
@@ -1104,3 +1108,9 @@ server.listen(port, host, function(){
 		
 	},5000);
 });
+
+function log2console(severity,message) {
+	var dt = new Date().toISOString();
+	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
+	console.log(prefixStr, message)
+};
