@@ -94,32 +94,32 @@
 						<!-- <fieldset class="action" id="capabilityType"> -->
 						<div class="form-check">
 							<input type="radio" class="form-check-input" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER">
-							<label class="form-check-label" for="ACTIVITY_TRIGGER">Activity/ Scene: </label>
+							<label class="form-check-label" for="ACTIVITY_TRIGGER">Activity/ Scene </label>
 							<br />
 						</div>
 						<div class="form-check">
 								<input type="radio" class="form-check-input" id="LIGHT" name="appType" value="LIGHT">
-								<label class="form-check-label" for="LIGHT">Light: </label>
+								<label class="form-check-label" for="LIGHT">Light </label>
 								<br />
 							</div>
 						<div class="form-check">
 							<input type="radio" class="form-check-input" id="SWITCH" name="appType" value="SWITCH">
-							<label class="form-check-label" for="SWITCH">Smart Switch: </label>
+							<label class="form-check-label" for="SWITCH">Smart Switch </label>
 							<br />
 						</div>
 						<div class="form-check">
 							<input type="radio" class="form-check-input" id="SPEAKER" name="appType" value="SPEAKER">
-							<label class="form-check-label" for="SPEAKER">Speaker: </label>
+							<label class="form-check-label" for="SPEAKER">Speaker </label>
 							<br />
 						</div>
 						<div class="form-check">
 							<input type="radio" class="form-check-input" id="TV" name="appType" value="TV">
-							<label class="form-check-label" for="TV">TV: </label>
+							<label class="form-check-label" for="TV">TV </label>
 							<br />
 						</div>
 						<div class="form-check">
 							<input type="radio" class="form-check-input" id="THERMOSTAT" name="appType" value="THERMOSTAT">
-							<label class="form-check-label" for="THERMOSTAT">Thermostat: </label>
+							<label class="form-check-label" for="THERMOSTAT">Thermostat </label>
 						</div>
 				</fieldset>
 				</div>
@@ -136,6 +136,7 @@
 	<script>
 	function saveDevice() {
 		var devID = $('#devID').val();
+		// Add New Device
 		if ( devID === "") {
 			var device = {
 				capabilities: [],
@@ -176,6 +177,7 @@
 				alert("Name or desciption can not be empty and at least one action is needed");
 			}
 		} else {
+			// Modify Existing Device
 			var device = devices[devID];
 			device.description = $('#description').val();
 			device.capabilities = [];
@@ -190,9 +192,7 @@
 					device.displayCategories.push(this.value);
 				}
 			});
-			if (device.friendlyName && 
-				device.description && 
-				device.capabilities.length > 0) {
+			if (device.friendlyName && device.description && device.capabilities.length > 0) {
 				//post update
 				$.ajax({
 					url: '/device/' + device._id,
@@ -248,7 +248,7 @@
 		device.displayCategories.forEach(function(type){
 			$('#' + type).prop('checked',true);
 		});
-		checkCapability();
+		//checkCapability();
 	}
 
 	function deleteDevice(id) {
