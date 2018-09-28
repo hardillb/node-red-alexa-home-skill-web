@@ -272,7 +272,7 @@ app.get('/privacy', function(req,res){
 });
 
 app.get('/login', function(req,res){
-	res.render('pages/login',{user: req.user, message: req.flash('error')});
+	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
 
 app.get('/logout', function(req,res){
