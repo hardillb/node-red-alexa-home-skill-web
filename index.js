@@ -941,11 +941,11 @@ app.delete('/device/:dev_id',
 	function(req,res){
 		var user = req.user.username;
 		var id = req.params.dev_id;
-		console.log(id);
+		console.log("INFO: Deleted device id: " + id + " for user: " + req.user.username);
 		Devices.deleteOne({_id: id, username: user},
 			function(err) {
 				if (err) {
-					console.log(err);
+					console.log("ERROR: Unable to delete device id: " + id + " for user: " + req.user.username, err);
 					res.status(500);
 					res.send(err);
 				} else {
