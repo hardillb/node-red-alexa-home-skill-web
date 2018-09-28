@@ -20,19 +20,19 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 //var Measurement = require('./googleMeasurement.js');
 
-/* // Validate CRITICAL environment variables passed to container
-if (process.env.WEB_HOSTNAME && process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD ) {
-	console.log("ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER and MQTT_PASSWORD environment variables.")
+// Validate CRITICAL environment variables passed to container
+if (!(process.env.WEB_HOSTNAME && process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
+	console.log("ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables.")
 	process.exit()
 }
-
-if (process.env.MONGO_HOST && process.env.MQTT_URL ) {
-	console.log("WARNING: using DNS_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
+// Warn on not supply of MONGO/ MQTT host names
+if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
+	console.log("WARNING: using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
 }
-
-if (process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD ) {
+// Warn on not supply of MAIL username/ password/ server
+if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
 	console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
-} */
+}
 
 // Service-wide Settings
 var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
@@ -50,7 +50,8 @@ var mongo_port = (process.env.MONGO_PORT || "27017");
 // MQTT Settings
 var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
-var mqtt_url = (process.env.MQTT_URL || "mqtt://" + dnsHostname + ":1883");
+var mqtt_port = (process.env.MQTT_PORT || "1883");
+var mqtt_url = (process.env.MQTT_URL || "mqtt://" + dnsHostname + ":" + mqtt_port);
 // Express Settings
 var app_id = 'http://localhost:' + port;
 var cookieSecret = 'ihytsrf334';
