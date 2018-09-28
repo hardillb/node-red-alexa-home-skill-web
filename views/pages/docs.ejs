@@ -397,7 +397,7 @@ return msg; </pre>
       <p>The applianceResponseTimestamp can be the set to the last time the sensor was polled or in this case just set to the current time. </p>
       <p>For Lock device support, both the SetLockState and GetLockState can be answered with a <i>msg.extra.lockState</i> of either "LOCKED" 
       or "UNLOCKED" as follows:</p>
-      <pre>msg.payload = {
+      <pre>msg.extra = {
     lockState: "LOCKED"
 };
 msg.paylaod = true;
