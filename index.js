@@ -22,19 +22,16 @@ var oauthServer = require('./oauth');
 
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.WEB_HOSTNAME && process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
-	log2console("CRITICAL","You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables.")
-	// console.log("[" + Date().toISOString() + "]" + "ERROR: You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables.")
+	log2console("CRITICAL","You MUST supply WEB_HOSTNAME, MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
 	process.exit()
 }
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
-	log2console("WARNING","Using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
-	//console.log("WARNING: using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied.")
+	log2console("WARNING","Using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
 }
 // Warn on not supply of MAIL username/ password/ server
 if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
-	log2console("WARNING","No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
-	//console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
+	log2console("WARNING","No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors");
 }
 
 // NodeJS App Settings
@@ -73,51 +70,50 @@ if (mqtt_user) {
 }
 
 log2console("INFO", "Connecting to MQTT server: " + mqtt_url);
-//console.log("INFO: Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
-	console.log("ERROR: MQTT connect error");
+	log2console("ERROR", "MQTT connect error");
 });
 
 mqttClient.on('reconnect', function(){
-	console.log("WARNING: MQTT reconnect");
+	log2console("WARNING", "MQTT reconnect event");
 });
 
 mqttClient.on('connect', function(){
-	console.log("INFO: MQTT connected")
+	log2console("INFO", "MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
 });
 
 // Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-console.log("INFO: Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users")
+log2console("INFO", "Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
 mongoose_connection.on('connecting', function() {
-	console.log('INFO: Connecting to MongoDB...');
+	log2console("INFO", "Connecting to MongoDB...");
 });
 
 mongoose_connection.on('error', function(error) {
-	console.error('ERROR: MongoDB connection: ' + error);
+	log2console("ERROR: MongoDB connection: " + error);
 	//mongoose.disconnect();
 });
 
 mongoose_connection.on('connected', function() {
-    console.log('INFO: MongoDB connected!');
+    log2console("INFO", "MongoDB connected!");
 });
   
 mongoose_connection.once('open', function() {
-    console.log('INFO: MongoDB connection opened!');
+    log2console("INFO", "MongoDB connection opened!");
 });
 
 mongoose_connection.on('reconnected', function () {
-    console.log('INFO: MongoDB reconnected!');
+    log2console("INFO", "MongoDB reconnected!");
 });
 
 mongoose_connection.on('disconnected', function() {
-	console.log('WARNING: MongoDB disconnected!');
+	log2console("WARNING", "MongoDB disconnected!");
 });
 
 // Fixes in relation to: https://github.com/Automattic/mongoose/issues/6922#issue-354147871
@@ -157,7 +153,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 						{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 						function(err, count){
 							if (err) {
-								console.log(err);
+								log2console("ERROR", err);
 							}
 						}
 					);
@@ -165,7 +161,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			});
 		});
 	} else {
-		console.log("INFO: Superuser MQTT account already exists");
+		log2console("INFO", "Superuser MQTT account, " + mqtt_user + " already exists");
 	}
 });
 
@@ -242,7 +238,7 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			console.log("ERROR: Missing grant token: %j", token);
+			log2console("ERROR", "Missing grant token:" + token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
 			//console.log("Token is GOOD!");
@@ -324,7 +320,7 @@ app.get('/newuser', function(req,res){
 app.post('/newuser', function(req,res){
 	Account.register(new Account({ username : req.body.username, email: req.body.email, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
-			console.log("ERROR: New user cretaion error: ", err);
+			log2console("ERROR", "New user cretaion error: " + err);
 			return res.status(400).send(err.message);
 		}
 
@@ -343,7 +339,7 @@ app.post('/newuser', function(req,res){
 					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 					function(err, count){
 						if (err) {
-							console.log("ERROR: New user creation error updating MQTT info: ", err);
+							log2console("ERROR" , "New user creation error updating MQTT info: " + err);
 						}
 					}
 				);
@@ -351,7 +347,7 @@ app.post('/newuser', function(req,res){
 		});
 
 		passport.authenticate('local')(req, res, function () {
-			console.log("INFO: Created new user %s", req.body.username);
+			log2console("INFO", "Created new user " + req.body.username);
 			//measurement.send({
 			//	t:'event', 
 			//	ec:'System', 
@@ -374,7 +370,8 @@ app.get('/changePassword/:key',function(req, res, next){
 					lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
-					console.log("ERROR: Password reset failed: ", err);
+					log2console("ERROR", "Password reset failed for user: " + lostPassword.user);
+					log2console("DEBUG", err);
 					res.redirect('/');
 				}
 			})
@@ -401,15 +398,15 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						//console.log("Chagned %s's password", u.username);
 						res.status(200).send();
 					} else {
-						console.log("ERROR: Unable to change password for: ", u.username);
-						console.log("ERROR: ", error);
+						log2console("ERROR", "Unable to change password for: " + u.username);
+						log2console("DEBUG", error);
 						res.status(400).send("Problem setting new password");
 					}
 				});
 			});
 		} else {
-			console.log("ERROR: Unable to change password for user, user not found", req.user.username);
-			console.log("ERROR: ", err);
+			log2console("ERROR", "Unable to change password for user, user not found: " + req.user.username);
+			log2console("DEBUG: ", err);
 			res.status(400).send("Problem setting new password");
 		}
 	});
@@ -454,10 +451,10 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
 			for (var i = 0; i < application.domains.length; i++) {
-				console.log("INFO: Checking OAuth redirectURI against defined service domain: ", application.domains[i])
+				log2console("INFO", "Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
 				if (uri.host == application.domains[i] || (uri.protocol == application.domains[i] && uri.protocol != 'http' && uri.protocol != 'https')) {
 					match = true;
-					console.log("INFO: Found Service definition associated with redirecURI: ", redirectURI);
+					log2console("INFO", "Found Service definition associated with redirecURI: " + redirectURI);
 					break;
 				}
 			}
@@ -505,11 +502,11 @@ app.post('/auth/finish',function(req,res,next) {
 		}, function(error,user,info){
 			//console.log("/auth/finish authenticating");
 			if (user) {
-				console.log("INFO: Authenticated: " + user.username);
+				log2console("INFO", "Authenticated: " + user.username);
 				req.user = user;
 				next();
 			} else if (!error){
-				console.log("WARNING: Not Authenticated");
+				log2console("WARNING", "Not Authenticated");
 				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
 			}
@@ -781,7 +778,7 @@ var onGoingCommands = {};
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	if (topic.startsWith('response/')){
-		console.log("Acknowledged MQTT response")
+		log2console("INFO", "Acknowledged MQTT response for topic: " + topic);
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var waiting = onGoingCommands[payload.messageId];
@@ -791,11 +788,11 @@ mqttClient.on('message',function(topic,message){
 				waiting.res.status(200);
 				if (payload.extra) {
 					//console.log("sending extra");
-					console.log("Sent succesfull HTTP response, with extra MQTT data.")
+					log2console("INFO", "Sent succesfull HTTP response, with extra MQTT data.");
 					waiting.res.send(payload.extra);
 				} else {
 					//console.log("not sending extra");
-					console.log("Sent succesfull HTTP response, no extra MQTT data.")
+					log2console("INFO", "Sent succesfull HTTP response, no extra MQTT data.");
 					waiting.res.send({});
 				}
 			} else {
@@ -818,7 +815,7 @@ mqttClient.on('message',function(topic,message){
 		}
 	}
 	else {
-		console.log("Unhandled MQTT via on message event handler", topic, message);
+		log2console("DEBUG", "Unhandled MQTT via on message event handler: " + topic + message);
 	}
 });
 
@@ -828,11 +825,11 @@ var timeout = setInterval(function(){
 	var keys = Object.keys(onGoingCommands);
 	for (key in keys){
 		var waiting = onGoingCommands[keys[key]];
-		console.log(keys[key]);
+		log2console("INFO", "Queued MQTT message: " + keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
-				console.log("ERROR: MQTT command timed out/ unacknowledged");
+				log2console("ERROR", "MQTT command timed out/ unacknowledged: " + keys[key]);
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
@@ -864,12 +861,12 @@ app.post('/api/v1/command',
 		delete req.body.directive.endpoint.scope.token;
 		//console.log(req.body)
 		var message = JSON.stringify(req.body);
-		console.log("message",message)
+		log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
 		try{
 			mqttClient.publish(topic,message);
-			console.log("INFO: Published MQTT command for user: ", req.user.username)
+			log2console("INFO", "Published MQTT command for user: " + req.user.username);
 		} catch (err) {
-			console.log("ERROR: Failed to publish MQTT command for user: ", req.user.username)
+			log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
 		}
 		var command = {
 			user: req.user.username,
@@ -949,11 +946,11 @@ app.delete('/device/:dev_id',
 	function(req,res){
 		var user = req.user.username;
 		var id = req.params.dev_id;
-		console.log("INFO: Deleted device id: " + id + " for user: " + req.user.username);
+		log2console("INFO", "Deleted device id: " + id + " for user: " + req.user.username);
 		Devices.deleteOne({_id: id, username: user},
 			function(err) {
 				if (err) {
-					console.log("ERROR: Unable to delete device id: " + id + " for user: " + req.user.username, err);
+					log2console("ERROR", "Unable to delete device id: " + id + " for user: " + req.user.username, err);
 					res.status(500);
 					res.send(err);
 				} else {
@@ -1101,8 +1098,8 @@ var server = http.Server(app);
 
 
 server.listen(port, host, function(){
-	console.log('App listening on  %s:%d!', host, port);
-	console.log("App_ID -> %s", app_id);
+	log2console("INFO", "App listening on: " + host + port);
+	log2console("INFO", "App_ID -> " + app_id);
 
 	setTimeout(function(){
 		
@@ -1112,5 +1109,5 @@ server.listen(port, host, function(){
 function log2console(severity,message) {
 	var dt = new Date().toISOString();
 	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
-	console.log(prefixStr, message)
+	console.log(prefixStr, message);
 };
