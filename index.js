@@ -34,24 +34,19 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 	console.log("WARNING: no MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors.")
 }
 
-// Service-wide Settings
-var dnsHostname = (process.env.WEB_HOSTNAME || undefined);
-var nonProd = (process.env.NONPROD || undefined);
 // NodeJS App Settings
 var port = (process.env.PORT || 3000);
 var host = ('0.0.0.0');
-var certKey = "/etc/letsencrypt/live/" + dnsHostname + "/privkey.pem";
-var certChain = "/etc/letsencrypt/live/" + dnsHostname + "/fullchain.pem";
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER || undefined);
 var mongo_password = (process.env.MONGO_PASSWORD || undefined);
-var mongo_host = (process.env.MONGO_HOST || dnsHostname);
+var mongo_host = (process.env.MONGO_HOST || "mongodb");
 var mongo_port = (process.env.MONGO_PORT || "27017");
 // MQTT Settings
 var mqtt_user = (process.env.MQTT_USER || undefined);
 var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
-var mqtt_url = (process.env.MQTT_URL || "mqtt://" + dnsHostname + ":" + mqtt_port);
+var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Express Settings
 var app_id = 'http://localhost:' + port;
 var cookieSecret = 'ihytsrf334';
@@ -74,7 +69,7 @@ if (mqtt_user) {
 	mqttOptions.password = mqtt_password;
 }
 
-console.log("INFO: Connecting to MQTT server: ", mqtt_url);
+console.log("INFO: Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
@@ -92,7 +87,7 @@ mqttClient.on('connect', function(){
 
 // Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-console.log("INFO: Connecting to MongoDB server: mongodb://", mongo_host + ":" + mongo_port + "/users")
+console.log("INFO: Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users")
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
@@ -169,8 +164,6 @@ Account.findOne({username: mqtt_user}, function(error, account){
 		console.log("INFO: Superuser MQTT account already exists");
 	}
 });
-
-
 
 var logDirectory = path.join(__dirname, 'log');
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
@@ -1087,6 +1080,8 @@ app.delete('/service/:id',
 });
 
 // Create HTTPS Server
+//var certKey = "/etc/letsencrypt/live/" + process.env.WEB_HOSTNAME + "/privkey.pem";
+//var certChain = "/etc/letsencrypt/live/" + process.env.WEB_HOSTNAME + "/fullchain.pem";
 // var options = {
 // 	key: fs.readFileSync(certKey),
 // 	cert: fs.readFileSync(certChain)
