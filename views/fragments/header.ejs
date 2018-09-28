@@ -24,6 +24,7 @@
                 <li <% if (locals.home) {%>class="active"<% } %>><a class="nav-link" href="/">Home</a></li>
                 <li <% if (locals.docs) {%>class="active"<% } %>><a class="nav-link" href="/docs">Documentation</a></li>
                 <li <% if (locals.about) {%>class="active"<% } %>><a class="nav-link" href="/about">About</a></li>
+                <li <% if (local.privacy) {%>class="active"<% } %>><a class="nav-link" href="/privacy">Privacy</a></li>
                 <% if (user) { %>
                   <% if (user.superuser) { %>
                   <li><a class="nav-link" href="/admin/services">OAuth Services</a></li>
