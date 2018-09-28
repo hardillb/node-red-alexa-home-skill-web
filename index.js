@@ -267,6 +267,10 @@ app.get('/about', function(req,res){
 	res.render('pages/about', {user: req.user, about: true});
 });
 
+app.get('/privacy', function(req,res){
+	res.render('pages/privacy', {user: req.user, about: true});
+});
+
 app.get('/login', function(req,res){
 	res.render('pages/login',{user: req.user, message: req.flash('error')});
 });
