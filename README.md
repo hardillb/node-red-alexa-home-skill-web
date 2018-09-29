@@ -3,6 +3,9 @@ An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination
 
 |Alexa Interface|Supported Controls|Example Usage|Useful Links|
 |--------|----------|-------------|-------------|
+|Brightness Control|0-100%, increase, reduce, dim|MQTT Out|Any MQTT-enabled bulb/ smart light|
+|Color Control|Red, Green, Blue, Purple, Yellow etc.|MQTT Out|Any MQTT-enabled bulb/ smart light|
+|Color Temperature Control|Warm, Warm White, Incandescent, Soft White, White, Daylight, Daylight White, Cool, Cool White|MQTT Out|Any MQTT-enabled bulb/ smart light|
 |Input Control|HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast"|Yamaha Music Cast Amplifier|[node-red-contrib-avr-yamaha](https://flows.nodered.org/node/node-red-contrib-avr-yamaha)|
 |Playback Control|Play, Pause, Stop|Kodi RPC|Http Response Node with [Kodi RPC Commands](https://kodi.wiki/view/JSON-RPC_API/Examples)|
 |Power Control|On, Off|MQTT Out|Any MQTT-enabled switch, Socket etc|
