@@ -767,6 +767,24 @@ function replaceCapability(capability) {
 				}
 			};
 	}
+
+	// LockController
+	if(capability == "LockController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.LockController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "lockState"
+					}],
+					"proactivelyReported": false,
+					"retrievable": false
+				}
+			};
+	}
+
+
 };
 
 var onGoingCommands = {};
