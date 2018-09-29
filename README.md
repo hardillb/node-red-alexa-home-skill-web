@@ -129,12 +129,12 @@ sudo mkdir -p /var/docker/mongodb/etc
 sudo mkdir -p /var/docker/mongodb/data
 cd /var/docker/mongodb/docker-entrypoint-initdb.d
 
-export MONGOADMIN=<username>
-export MONGOPASSWORD=<password>
-export MQTTUSER=<username>
-export MQTTPASSWORD=<password>
-export WEBUSER=<username>
-export WEBPASSWORD=<password>
+export MONGO_ADMIN=<username>
+export MONGO_PASSWORD=<password>
+export MQTT_USER=<username>
+export MQTT_PASSWORD=<password>
+export WEB_USER=<username>
+export WEB_PASSWORD=<password>
 
 sudo wget -O mongodb-accounts.sh https://gist.github.com/coldfire84/93ae246f145ef09da682ee3a8e297ac8/raw/7b66fc4c4821703b85902c85b9e9a31dc875b066/mongodb-accounts.sh
 sudo chmod +x mongodb-accounts.sh
@@ -148,8 +148,8 @@ sudo sed -i "s|<mqtt-password>|$MQTT_PASSWORD|g" mongodb-accounts.sh
 
 sudo docker create \
 --name mongodb -p 27017:27017 \
--e MONGO_INITDB_ROOT_USERNAME=$MONGOADMIN \
--e MONGO_INITDB_ROOT_PASSWORD=$MONGOPASSWORD \
+-e MONGO_INITDB_ROOT_USERNAME=$MONGO_ADMIN \
+-e MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD \
 -v /var/docker/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/ \
 -v /var/docker/mongodb/etc/:/etc/mongo/ \
 -v /var/docker/mongodb/data/:/data/db/ \
@@ -211,7 +211,7 @@ cd /var/docker/mosquitto/config/conf.d/
 sudo wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/88b69fd7392612d4be968501747c138e54391fe4/node-red-alexa-smart-home-v3.conf
 
 export MQTT_DNS_HOSTNAME=<IP/ hostname used for SSL Certs>
-export MONGO_SERVER=mongodb
+export MONGO_SERVER=<mongodb container name>
 export MQTT_USER=<username>
 export MQTT_PASSWORD=<password>
 
@@ -243,11 +243,11 @@ sudo docker build -t nr-alexav3-web:0.1 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
-export MQTT_URL=mqtt://<hostname/IP>
+export MQTT_URL=mqtt://<mqtt docker container name>
 export MQTT_USER=<username>
 export MQTT_PORT=<port>
 export MQTT_PASSWORD=<password>
-export MONGO_HOST=<hostname/IP>
+export MONGO_HOST=<mongodb docker container name>
 export MONGO_PORT=<port>
 export MONGO_USER=<username>
 export MONGO_PASSWORD=<password>
@@ -392,9 +392,47 @@ Decide where you'll host this web service, configure necessary DNS, firewall and
 
 # Management
 
-## Renewing LetsEncrypt Certificates
-The commands can be added to a crontab script and must be executed every 3 months at **the latest**.
+## Backup of MongoDB
+MongoDB stores usernames, oauth keys, device definitions, user MQTT topics etc. 
+
+Every other component is throw-away and can be recreated as above.
+
 ```
+sudo mkdir -p /var/docker/dropbox-uploader
+Browse to: https://www.dropbox.com/developers/apps/info/g862o2ksqwcijuz
+Generate API key
+
+docker run -it --rm -v /var/docker/dropbox-uploader:/config peez/dropbox-uploader
+
+mkdir ~/scripts/
+cd ~/scripts
+
+wget -O backup-mongodb.sh https://gist.github.com/coldfire84/81c3239c9fb477d64a166418f209871d/raw/d7c9d94403dc62d818886a8e42b616331a792103/backup-mongodb.sh
+
+export MONGO_ADMIN=<username>
+export MONGO_PASSWORD=<password>
+sudo sed -i "s/<mongo-admin>/$MONGO_ADMIN/g" ~/scripts/backup-mongodb.sh
+sudo sed -i "s/<password>/$MONGO_PASSWORD/g" ~/scripts/backup-mongodb.sh
+
+sudo crontab -e
+
+# Add
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+SHELL=/bin/bash
+00 23 * * * /home/<username>/scripts/backup-mongodb.sh > /home/<username>/scripts/backup-mongodb.log
+```
+
+## Renewing LetsEncrypt Certificates
+The commands are added to a crontab script and must be executed every 3 months at **the latest**.
+```
+sudo vi ~/scripts/cert-renew.sh
+```
+
+Paste the code below into the script, changing instances of <FQDN of web app>, <FQDN of MQTT instance>, <username> and  <email address>:
+
+```
+#!/bin/bash
+
 docker run -it --rm --name letsencrypt \
 -v "/var/docker/ssl:/etc/letsencrypt" \
 --volumes-from nginx certbot/certbot certonly \
@@ -412,8 +450,11 @@ docker run -it --rm --name letsencrypt \
 --webroot-path /var/www \
 --agree-tos \
 --renew-by-default \
--d <FQDN of web app> \
+-d <FQDN of MQTT instance> \
 --email <email address>
+
+sudo crontab -e
+0 1 1 * * /home/<username>/scripts/cert-renew.sh > /home/<username>/scripts/cert-renew.log 
 ```
 
 ## Adding Support for Alexa Device Type
