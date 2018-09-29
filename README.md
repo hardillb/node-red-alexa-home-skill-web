@@ -35,6 +35,14 @@ With the main changes being:
 * Move to MongoDB Sessions vs Express Sessions
 
 # Service Architecture
+The service has two external endpoints:
+* A WebApp running on TCP 443/ HTTPS: nr-alexav3.cb-net.co.uk
+* An MQTT server running on TCP 8883: mq-alexav3.cb-net.co.uk
+
+All WebApp traffic passes via Cloud Flare.
+
+(Internal) communication between the WebApp and MQTT server is via TCP 1883. All external communication is encrypted.
+
 | Layer | Product | Description |
 |---------|-------|-----------|
 |Database|Mongodb|users db contains all application data|
@@ -98,6 +106,9 @@ Alexa Skill --> Lambda -->
 * Command: Web App --> MQTT (Cmd) --> Node Red Add-In --> MQTT (Ack)--> Web App --> Lambda --> Alexa Skill
 
 # Environment Build
+Note, **you do not need to build/ host your own environment to consume this service**. 
+
+Follow [these instructions](https://nr-alexav3.cb-net.co.uk/docs) to get up and running.
 
 ## Install Docker CE
 For Ubuntu 18.04 follow this [Digital Ocean guide.](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04)
@@ -147,11 +158,11 @@ mongo
 sudo docker start mongod
 ```
 ## Certificate
-We will use the same SSL certificate to protect the NodeJS and MQTT services.
+We will use the same SSL certificate to protect the NodeJS and MQTT services. Ensure that, before running these commands, your hosting solution has HTTPS connectivity enabled.
 
-Ensure that your hosting solution has HTTPS connectivity enabled.
+Note also that once the service is up and running these commands will not function due to port conflicts with NGINX. See the section on Certificate Renewal for the correct commands.
 
-We'll use certbot to request a free certificate:
+We'll use certbot to request a free certificate for the Web App:
 ```
 sudo mkdir -p /var/docker/ssl
 sudo docker run -it --rm \
@@ -167,6 +178,23 @@ certonly \
 -d <FQDN of web app> \
 --email <your email address>
 ```
+
+We'll also use certbot to request a free certificate for MQTT (these are split to use CloudFlare for HTTP/HTTPS):
+```
+sudo docker run -it --rm \
+--name letsencrypt \
+-p 80:80 -p 443:443 \
+-v "/var/docker/ssl/:/etc/letsencrypt" \
+certbot/certbot \
+certonly \
+--preferred-challenges http \
+--standalone \
+--agree-tos \
+--renew-by-default \
+-d <FQDN of web app> \
+--email <your email address>
+```
+
 ## Mosquitto Container
 A custom container is created using [mosquitto.dockerfile](mosquitto.dockerfile)
 ```
@@ -181,15 +209,15 @@ sudo wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5
 cd /var/docker/mosquitto/config/conf.d/
 sudo wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/88b69fd7392612d4be968501747c138e54391fe4/node-red-alexa-smart-home-v3.conf
 
-export DNS_HOSTNAME=<IP/ hostname used for SSL Certs>
+export MQTT_DNS_HOSTNAME=<IP/ hostname used for SSL Certs>
 export MONGO_SERVER=mongodb
-export MQTTUSER=<username>
-export MQTTPASSWORD=<password>
+export MQTT_USER=<username>
+export MQTT_PASSWORD=<password>
 
 sudo sed -i "s/<mongo-server>/$MONGO_SERVER/g" node-red-alexa-smart-home-v3.conf
-sudo sed -i "s/<user>/$MQTTUSER/g" node-red-alexa-smart-home-v3.conf
-sudo sed -i "s/<password>/$MQTTPASSWORD/g" node-red-alexa-smart-home-v3.conf
-sudo sed -i "s/<dns-hostname>/$DNS_HOSTNAME/g" node-red-alexa-smart-home-v3.conf
+sudo sed -i "s/<user>/$MQTT_USER/g" node-red-alexa-smart-home-v3.conf
+sudo sed -i "s/<password>/$MQTT_PASSWORD/g" node-red-alexa-smart-home-v3.conf
+sudo sed -i "s/<dns-hostname>/$MQTT_DNS_HOSTNAME/g" node-red-alexa-smart-home-v3.conf
 
 ```
 Then start the container:
@@ -285,6 +313,8 @@ sudo wget -O /var/docker/nginx/includes/restrictions.conf https://gist.github.co
 
 sudo wget -O /var/docker/nginx/includes/ssl-params.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/ssl-params.conf
 
+sudo wget -O /var/docker/nginx/conf.d/mq-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/381c83aa65cae05f2b728be270c5818f37aa0023/mq-alexav3.cb-net.co.uk.conf
+
 if [ ! -f /var/docker/ssl/dhparams.pem ]; then
     sudo openssl dhparam -out /var/docker/ssl/dhparams.pem 2048
 fi
@@ -354,6 +384,30 @@ From the top right of the Lambda console, copy the "ARN", i.e. arn:aws:lambda:eu
 Decide where you'll host this web service, configure necessary DNS, firewall and certificate activities.
 
 # Management
+
+## Renewing LetsEncrypt Certificates
+The commands can be added to a crontab script and must be executed every 3 months at **the latest**.
+```
+docker run -it --rm --name letsencrypt \
+-v "/var/docker/ssl:/etc/letsencrypt" \
+--volumes-from nginx certbot/certbot certonly \
+--webroot \
+--webroot-path /var/www \
+--agree-tos \
+--renew-by-default \
+-d <FQDN of web app> \
+--email <email address>
+ 
+docker run -it --rm --name letsencrypt \
+-v "/var/docker/ssl:/etc/letsencrypt" \
+--volumes-from nginx certbot/certbot certonly \
+--webroot \
+--webroot-path /var/www \
+--agree-tos \
+--renew-by-default \
+-d <FQDN of web app> \
+--email <email address>
+```
 
 ## Adding Support for Alexa Device Type
 
