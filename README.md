@@ -242,7 +242,6 @@ sudo docker build -t nr-alexav3-web:0.1 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
-export WEB_HOSTNAME=<hostname/IP>
 export MQTT_URL=mqtt://<hostname/IP>
 export MQTT_USER=<username>
 export MQTT_PORT=<port>
@@ -300,6 +299,9 @@ sudo mkdir -p /var/docker/nginx/stream_conf.d
 sudo mkdir -p /var/docker/nginx/includes
 sudo mkdir -p /var/docker/nginx/www
 
+export WEB_HOSTNAME=<external FQDN of web app>
+export MQTT_DNS_HOSTNAME=<external FDQN of MQTT service>
+
 # Get Config Files
 sudo wget -O /var/docker/nginx/conf.d/default.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/default.conf
 
@@ -307,13 +309,17 @@ sudo wget -O /var/docker/nginx/includes/header.conf https://gist.github.com/cold
 
 sudo wget -O /var/docker/nginx/includes/letsencrypt.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/letsencrypt.conf
 
-sudo wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/nr-alexav3.cb-net.co.uk.conf
+sudo wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/c234985e379a08c7836282b7efaff8669368dc41/nr-alexav3.cb-net.co.uk.conf
 
 sudo wget -O /var/docker/nginx/includes/restrictions.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/restrictions.conf
 
 sudo wget -O /var/docker/nginx/includes/ssl-params.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/ssl-params.conf
 
-sudo wget -O /var/docker/nginx/conf.d/mq-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/381c83aa65cae05f2b728be270c5818f37aa0023/mq-alexav3.cb-net.co.uk.conf
+sudo wget -O /var/docker/nginx/conf.d/mq-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/c234985e379a08c7836282b7efaff8669368dc41/mq-alexav3.cb-net.co.uk.conf
+
+sudo sed -i "s/<web-dns-name>/$WEB_HOSTNAME/g" /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf
+sudo sed -i "s/<web-dns-name>/$WEB_HOSTNAME/g" /var/docker/nginx/conf.d/mq-alexav3.cb-net.co.uk.conf
+sudo sed -i "s/<mq-dns-name>/$MQTT_DNS_HOSTNAME/g" /var/docker/nginx/conf.d/mq-alexav3.cb-net.co.uk.conf
 
 if [ ! -f /var/docker/ssl/dhparams.pem ]; then
     sudo openssl dhparam -out /var/docker/ssl/dhparams.pem 2048
@@ -354,7 +360,7 @@ protocol=cloudflare
 login=<cloudflare username>
 password=<cloudflare global API key>
 zone=<DNS zone>
-<FQDN of service>
+<FQDN of web service>, <FQDN of MQTT service>
 ```
 
 ## Create and Configure Lambda Function
