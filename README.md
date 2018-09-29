@@ -99,6 +99,9 @@ Alexa Skill --> Lambda -->
 
 # Environment Build
 
+## Install Docker CE
+For Ubuntu 18.04 follow this [Digital Ocean guide.](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04)
+
 ## Create Docker Network
 ```
 sudo docker network create nr-alexav3
@@ -138,6 +141,7 @@ sudo docker create \
 -v /var/docker/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/ \
 -v /var/docker/mongodb/etc/:/etc/mongo/ \
 -v /var/docker/mongodb/data/:/data/db/ \
+-v /var/docker/backup:/backup/ \
 mongo
 
 sudo docker start mongod
@@ -149,9 +153,10 @@ Ensure that your hosting solution has HTTPS connectivity enabled.
 
 We'll use certbot to request a free certificate:
 ```
+sudo mkdir -p /var/docker/ssl
 sudo docker run -it --rm \
 --name letsencrypt \
---p 80:80 -p 443:443 \
+-p 80:80 -p 443:443 \
 -v "/var/docker/ssl/:/etc/letsencrypt" \
 certbot/certbot \
 certonly \
@@ -163,17 +168,18 @@ certonly \
 --email <your email address>
 ```
 ## Mosquitto Container
-A customer container is created using [mosquitto.dockerfile](mosquitto.dockerfile)
+A custom container is created using [mosquitto.dockerfile](mosquitto.dockerfile)
 ```
 sudo docker build -t mosquitto-auth:0.1 -f mosquitto.dockerfile .
 sudo mkdir -p /var/docker/mosquitto/config/conf.d
 sudo mkdir -p /var/docker/mosquitto/data
+sudo chown 101:root /var/docker/mosquitto/log/
 
 cd /var/docker/mosquitto/config
-wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5bd8408762581fe6/raw/9a9fd7790e4edb5f0129e9a5ff0bd7449b43dffd/mosquitto.conf
+sudo wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5bd8408762581fe6/raw/9a9fd7790e4edb5f0129e9a5ff0bd7449b43dffd/mosquitto.conf
 
 cd /var/docker/mosquitto/config/conf.d/
-wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/88b69fd7392612d4be968501747c138e54391fe4/node-red-alexa-smart-home-v3.conf
+sudo wget -O node-red-alexa-smart-home-v3.conf https://gist.github.com/coldfire84/51eb34808e2066f866e6cc26fe481fc0/raw/88b69fd7392612d4be968501747c138e54391fe4/node-red-alexa-smart-home-v3.conf
 
 export DNS_HOSTNAME=<IP/ hostname used for SSL Certs>
 export MONGO_SERVER=mongodb
@@ -257,7 +263,8 @@ Note it is assumed this web-app will be reverse proxied, i.e. HTTPS (NGINX) --->
 
 ```
 cd ~
-mkdir ngix
+mkdir nginx-build
+cd nginx-build
 git clone https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
 
 sudo mkdir -p /var/docker/nginx/conf.d
@@ -266,31 +273,58 @@ sudo mkdir -p /var/docker/nginx/includes
 sudo mkdir -p /var/docker/nginx/www
 
 # Get Config Files
-wget -O /var/docker/nginx/conf.d/default.conf 
-https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/default.conf
+sudo wget -O /var/docker/nginx/conf.d/default.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/default.conf
 
-wget -O /var/docker/nginx/includes/header.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/header.conf
+sudo wget -O /var/docker/nginx/includes/header.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/header.conf
 
-wget -O /var/docker/nginx/includes/letsencrypt.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/letsencrypt.conf
+sudo wget -O /var/docker/nginx/includes/letsencrypt.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/letsencrypt.conf
 
-wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/nr-alexav3.cb-net.co.uk.conf
+sudo wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/nr-alexav3.cb-net.co.uk.conf
 
-wget -O /var/docker/nginx/includes/restrictions.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/restrictions.conf
+sudo wget -O /var/docker/nginx/includes/restrictions.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/restrictions.conf
 
-wget -O /var/docker/nginx/includes/ssl-params.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/ssl-params.conf
+sudo wget -O /var/docker/nginx/includes/ssl-params.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/ssl-params.conf
 
 if [ ! -f /var/docker/ssl/dhparams.pem ]; then
     sudo openssl dhparam -out /var/docker/ssl/dhparams.pem 2048
 fi
 
-sudo docker run --net nr-alexav3 --name nginx -p 80:80 -p 443:443 \
+sudo docker create --net nr-alexav3 --name nginx -p 80:80 -p 443:443 \
 -v /var/docker/nginx/conf.d/:/etc/nginx/conf.d/ \
 -v /var/docker/nginx/stream_conf.d/:/etc/nginx/stream_conf.d/ \
 -v /var/docker/ssl:/etc/nginx/ssl/ \
 -v /var/docker/nginx/includes:/etc/nginx/includes/ \
 -v /var/docker/nginx/www/:/var/www \
 --restart always \
--d nginx
+nginx
+```
+
+## Dynamic DNS
+Depending on how/ where you deploy you may suffer from "ephemeral" IP addresses (i.e. on Google Cloud Platform). You can pay for a Static IP address, or use ddclient to update CloudFlare or similar services.
+
+```
+mkdir -p /var/docker/ddclient/config
+
+docker create \
+--name=ddclient \
+-v /var/docker/ddclient/config:/config \
+linuxserver/ddclient
+
+sudo vi /var/docker/ddclient/config/ddclient.conf
+
+##
+## Cloudflare (cloudflare.com)
+##
+daemon=300
+verbose=yes
+debug=yes
+use=web, web=ipinfo.io/ip
+ssl=yes
+protocol=cloudflare
+login=<cloudflare username>
+password=<cloudflare global API key>
+zone=<DNS zone>
+<FQDN of service>
 ```
 
 ## Create and Configure Lambda Function
@@ -438,6 +472,19 @@ db.changeUserPassword("<username>", "<new password>")
 use admin
 db.dropUser("mqtt-user")
 ```
+
+### Performing a MongoDB Restore
+* Create MongoDB Docker container as above, on new host.
+* Ensure that NodeJS web-app, Mosquitto Docker containers are not running 
+* Copy tgz file to new host, extract into a folder under /var/docker/backup
+* Start the MongoDB Docker container
+
+Execute the command below to restore the database to this new Docker container:
+
+```
+mongorestore --host localhost --port 27017 --username <admin username> --password <password> /backup/<backup folder name>
+```
+Once restored, you can now restart MongoDB Docker container, followed by the Mosquitto and NodeJS Docker containers.
 
 # Useful Links
 * https://gist.github.com/hardillb/0ce50250d40ff6fc3d623ddb5926ec4d
