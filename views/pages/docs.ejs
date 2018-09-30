@@ -6,13 +6,13 @@
       <br>
       To get up and running you need to:
       <ol style="list-style-type:circle">
-        <li><a href="mailto:node-red@cb-net.co.uk">Request extension of the v3 skill to your amazon account</a></li>
+        <li><a href="mailto:node-red@cb-net.co.uk">Request extension of the v3 skill to your Amazon account</a></li>
         <li><a target="_blank" href="/newuser">Create a bridge account</a> </li>
         <li>Link the skill with your amazon account via the Alexa App</li>
         <li>Define devices on the bridge <a target="_blank" href="/devices">here</a></li>
         <li>Discover devices in the Alexa App/ using the "Alexa, discover devices" voice command</li>
         <li>Install <a href="https://github.com/coldfire84/node-red-contrib-alexa-home-skill-v3">Node-RED nodes for the bridge add-on</a></li>
-        <li>Configure Flows within Node-Red</li>
+        <li>Configure Flows within Node-RED</li>
       </ol>
       <br>
       <p>You can also use devices defined with this service within <b>Alexa Groups</b> in order to benefit from <a href="https://www.smarthomereviewer.com/how-to-set-up-alexa-room-awareness/"><b>Room Awareness</b></a>.
@@ -20,14 +20,14 @@
       this can become confusing. Room Awareness is a simple, but effective smart home bonus!</p>
       <br>
       <h2>Migration from v2 Skill</h2>
-      <p> The Node-RED addon-ons/ nodes for the API version 2 and version 3 Home Skill can co-exist. This means you are able to try the nodes/ devices out alongside the API version 2 skill, 
+      <p> The Node-RED addon-ons/ nodes for the API version 2 and version 3 Home Skill can coexist. This means you are able to try the nodes/ devices out alongside the API version 2 skill, 
         prior to defining your devices.</p>
       <br>
       <p>A typical migration path would look like:</p>
       <ol>
         <li>Follow initial setup instructions above</li>
         <li>Test the v3 bridge performs as expected</li>
-        <li>Re-define your devices in the version 3 bridge</li>
+        <li>Redefine your devices in the version 3 bridge</li>
         <li>Assess v3 Node output/ impact to current flows</li>
         <li>Replace v2 Nodes with v3 Nodes, removing devices from the v2 bridge and the Alexa App</li>
       </ol>
@@ -88,14 +88,14 @@
       </pre>
       <h3>Input Controller</h3>
       <p>This flow shows a simple Input Controller example for a Yamaha Musiccast AV Receiver (using Yamaha AVR Nodes as endpoint).</p>
-      <p>You must also install/ use the <a href="https://www.npmjs.com/package/node-red-contrib-avr-yamaha">Yamaha AVR Node-Red nodes.</a></p>
+      <p>You must also install/ use the <a href="https://www.npmjs.com/package/node-red-contrib-avr-yamaha">Yamaha AVR Node-RED nodes.</a></p>
       <p>Invoke this controller using a command similar to <b>"Alexa, on AV Receiver change input to HDMI1"</b></p>
       <p><img class="img-fluid" src="/images/InputControllerExample.png" title="InputkControllerExample"></p>
       <br>
       <p>You can import the Input Controller example:</p>
       <pre style="background-color:lightgrey;">[{"id":"b2e5a71f.ce6948","type":"alexa-smart-home-v3","z":"affa0b92.8813b8","conf":"bfd0fcf4.bc90e","device":"8","acknowledge":true,"name":"AV Receiver","topic":"","x":130,"y":100,"wires":[["b1cb891c.e1d0a8"]]},{"id":"78b9e3f4.f9401c","type":"AVR-Yamaha-put","z":"affa0b92.8813b8","device":"d15a41e7.73539","name":"Set AVR to Input Payload","topic":"Main_Zone.Input.Input_Sel","payload":"","x":670,"y":100,"wires":[[]]},{"id":"b1cb891c.e1d0a8","type":"change","z":"affa0b92.8813b8","name":"Remove spaces from payload","rules":[{"t":"change","p":"payload","pt":"msg","from":" ","fromt":"str","to":"","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":390,"y":100,"wires":[["78b9e3f4.f9401c"]]},{"id":"d15a41e7.73539","type":"avr-yamaha","z":"","name":"Lounge AV Receiver","address":"0.0.0.0","port":"","debug":false}]</pre>
       <br>
-      <p>Output from Input Contoller interface:</p>
+      <p>Output from Input Conttoller interface:</p>
       <pre style="background-color:lightgrey">
           msg : Object
           object
@@ -112,7 +112,7 @@
       </pre>
       <h3>StepSpeaker Controller</h3>
       <p>Invoke this controller using a command similar to <b>"Alexa, lower the volume on AV Receiver"</b></p>
-      <p>Output from StepSepeaker Contoller interface:</p>
+      <p>Output from StepSepeaker Controller interface:</p>
       <pre style="background-color:lightgrey">
           msg : Object
           object
@@ -163,9 +163,9 @@
       <br>
       <h4><b>Response Node Unused Functionality</b></h4>
       <p>It is possible to use the "<b>payload.extra</b>" value to post information back from 
-        Node-Red > Web Service > Alexa Smart Skill.</p>
+        Node-RED > Web Service > Alexa Smart Skill.</p>
 
-      <p><b>At present this is not used across any of the capabilties.</b> This capability remains in place for future development.</p> 
+      <p><b>At present this is not used across any of the capabilities.</b> This capability remains in place for future development.</p> 
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
