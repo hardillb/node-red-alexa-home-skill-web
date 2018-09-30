@@ -19,6 +19,19 @@
       This enables commands such as "Alexa, turn on the <b>Lights</b>" vs "Alex, turn on the <b>Kitchen</b> Light" - sounds simple enough, but when every room has a smart switch/ light bulb
       this can become confusing. Room Awareness is a simple, but effective smart home bonus!</p>
       <br>
+      <h2>Migration from v2 Skill</h2>
+      <p> The Node-RED addon-ons/ nodes for the API version 2 and version 3 Home Skill can co-exist. This means you are able to try the nodes/ devices out alongside the API version 2 skill, 
+        prior to defining your devices.</p>
+      <br>
+      <p>A typical migration path would look like:</p>
+      <ol>
+        <li>Follow initial setup instructions above</li>
+        <li>Test the v3 bridge performs as expected</li>
+        <li>Re-define your devices in the version 3 bridge</li>
+        <li>Assess v3 Node output/ impact to current flows</li>
+        <li>Replace v2 Nodes with v3 Nodes, removing devices from the v2 bridge and the Alexa App</li>
+      </ol>
+      <br>
       <h2>Example Device Definitions</h2>
       <p>You can declare a variety of devices, such as those illustrated below:</p>
       <p><img class="img-fluid" src="/images/DevicesExample.png" title="DevicesExample"></p>
