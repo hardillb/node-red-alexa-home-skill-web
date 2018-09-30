@@ -128,6 +128,11 @@
 								<br />
 						</div>
 						<div class="form-check">
+								<input type="radio" class="form-check-input" id="SMARTPLUG" name="appType" value="SMARTPLUG">
+								<label class="form-check-label" for="SMARTPLUG">Smart Plug </label>
+								<br />
+							</div>
+						<div class="form-check">
 							<input type="radio" class="form-check-input" id="SWITCH" name="appType" value="SWITCH">
 							<label class="form-check-label" for="SWITCH">Smart Switch </label>
 							<br />
@@ -289,6 +294,7 @@
 		}
 	}
 
+
 	// Place restrictions here - i.e. StepVolume/ PlaybackControl can't go with ThermostatControl/ SceneControl
 	function checkCapability(check) {
 		var brightness = $('#BrightnessController').prop('checked');
@@ -309,6 +315,7 @@
 			$('#ACTIVITY_TRIGGER').prop('checked', true);
 			$('#LIGHT').prop('checked', false);
 			$('#SMARTLOCK').prop('checked', false);
+			$('#SMARTPLUG').prop('checked', false);
 			$('#SPEAKER').prop('checked', false);
 			$('#SWITCH').prop('checked', false);
 			$('#THERMOSTAT').prop('checked', false);
@@ -331,6 +338,7 @@
 			$('#ACTIVITY_TRIGGER').prop('checked', false);
 			$('#LIGHT').prop('checked', false);
 			$('#SMARTLOCK').prop('checked', false);
+			$('#SMARTPLUG').prop('checked', false);
 			$('#SPEAKER').prop('checked', false);
 			$('#SWITCH').prop('checked', false);
 			$('#THERMOSTAT').prop('checked', true);
@@ -353,6 +361,7 @@
 			$('#ACTIVITY_TRIGGER').prop('checked', false);
 			$('#LIGHT').prop('checked', false);
 			$('#SMARTLOCK').prop('checked', true);
+			$('#SMARTPLUG').prop('checked', false);
 			$('#SPEAKER').prop('checked', false);
 			$('#SWITCH').prop('checked', false);
 			$('#THERMOSTAT').prop('checked', false);
@@ -374,6 +383,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', false);
@@ -384,6 +394,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', true);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', false);
@@ -394,6 +405,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', true);
 				$('#THERMOSTAT').prop('checked', false);
@@ -404,6 +416,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', true);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', false);
@@ -414,6 +427,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', false);
@@ -424,6 +438,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', true);
@@ -434,6 +449,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', true);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', false);
@@ -444,6 +460,7 @@
 				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', false);
 				$('#SMARTLOCK').prop('checked', false);
+				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', false);
 				$('#THERMOSTAT').prop('checked', false);
