@@ -318,7 +318,7 @@ app.get('/newuser', function(req,res){
 });
 
 app.post('/newuser', function(req,res){
-	Account.register(new Account({ username : req.body.username, email: req.body.email, mqttPass: "foo" }), req.body.password, function(err, account) {
+	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
 			log2console("ERROR", "New user cretaion error: " + err);
 			return res.status(400).send(err.message);
