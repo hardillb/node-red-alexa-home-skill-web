@@ -9,6 +9,11 @@ var Devices = new Schema({
     description: String,
     capabilities: [],
     displayCategories: [String],
+    validRange: {
+        minimumValue: Number,
+        maximumValue: Number,
+        scale: String
+    },
     cookie: {
     	extraDetail1: String,
     	extraDetail2: String,
