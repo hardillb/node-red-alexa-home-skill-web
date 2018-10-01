@@ -801,7 +801,7 @@ mqttClient.on('message',function(topic,message){
 			if (payload.success) {
 				waiting.res.status(200);
 				if (payload.extra) {
-					//console.log("sending extra");
+					//console.log("sending contents from payload.extra");
 					log2console("INFO", "Sent succesfull HTTP response, with extra MQTT data.");
 					waiting.res.send(payload.extra);
 				} else {
@@ -878,7 +878,7 @@ app.post('/api/v1/command',
 		log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
 		try{
 			mqttClient.publish(topic,message);
-			log2console("INFO", "Published MQTT command for user: " + req.user.username);
+			log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
 		} catch (err) {
 			log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
 		}
