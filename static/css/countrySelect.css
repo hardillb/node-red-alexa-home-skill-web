@@ -1,6 +1,5 @@
 .country-select{
-	position:relative;
-	display:inline-block
+	position:relative
 }
 .country-select *{
 	-webkit-box-sizing:border-box;
