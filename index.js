@@ -325,10 +325,24 @@ app.post('/newuser', function(req,res){
 	log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 	if (country.statusCode == 200) {
 		log2console("DEBUG", JSON.stringify(country));
-		var jsonString = JSON.stringify(country);
+		//var jsonString = JSON.stringify(country);
 		//var jsonCountry = JSON.parse(jsonString);
-		log2console("DEBUG", "JSON Array: " + jsonString.data[0].region);
-		region = jsonString.data[0].region
+		log2console("DEBUG", "JSON Array: " + country.data[0].region);
+		region = country.data[0].region
+
+		for (i in country.data) {
+			consol.log(country.data[i].region);
+		}
+
+
+
+
+
+
+
+
+
+
 	}
 	else {
 		log2console("DEBUG", "User region lookup failed.");
