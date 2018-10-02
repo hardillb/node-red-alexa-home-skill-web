@@ -174,7 +174,8 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-				<button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button>
+				<button type="button" class="btn btn-primary" id="submit" type="submit" value="submit">Save</button>
+				<!-- <button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button> -->
 			</div>
 			</form>
 			</div>
@@ -183,6 +184,11 @@
 	</div>
 
 	<script>
+	$("#form-register").submit(function(e) {
+		e.preventDefault();
+		saveDevice()
+	});
+
 	function saveDevice() {
 		var devID = $('#devID').val();
 		// Add New Device
