@@ -14,6 +14,8 @@
             <br>
             <label for="country" class="sr-only">Country</label>
             <input type="text" id="country" class="form-control" required>
+            <label for="country_code">...and the selected country code will be updated here</label>
+            <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" placeholder="Selected country code will appear here" />
             <br>
             <label for="password" class="sr-only">Password</label>
             <input type="password" id="password" name="password" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" placeholder="Password" required title="Minimum 10, maximum 32 chars.">
