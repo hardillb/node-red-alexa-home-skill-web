@@ -44,6 +44,9 @@
           var verify = $('#verify').val().trim();
           var email = $('#email').val().trim();
           var country = $("#country_code").val().trim();
+          console.log("1", $("#country_code"))
+          console.log($("2","#country_code").val())
+          console.log($("3","#country_code").val().trim())
           // Build Submit Paramaters
           var params = "username=" + encodeURIComponent(username)
           + "&password=" + encodeURIComponent(password)
