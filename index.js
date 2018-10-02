@@ -363,7 +363,7 @@ app.post('/newuser', function(req,res){
 		});
 
 		passport.authenticate('local')(req, res, function () {
-			log2console("INFO", "Created new user " + req.body.username);
+			log2console("INFO", "Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
 			//measurement.send({
 			//	t:'event', 
 			//	ec:'System', 
