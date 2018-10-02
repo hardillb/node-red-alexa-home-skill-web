@@ -18,6 +18,7 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
+var countries = require('countries-api');
 //var Measurement = require('./googleMeasurement.js');
 
 // Validate CRITICAL environment variables passed to container
@@ -318,9 +319,16 @@ app.get('/newuser', function(req,res){
 });
 
 app.post('/newuser', function(req,res){
+	// Lookup Region for AWS Lambda/ Web API Skill Interaction
+	var response = countries.findByCountryCode(req.body.country);
+	if (response.statusCode == 200) {
+		log2console("DEBUG", "User region would be: " + response.data.region);
+	}
+	else {log2console("DEBUG", "User region lookup failed.")} 	// What to do if Region fails?
+
 	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
-			log2console("ERROR", "New user cretaion error: " + err);
+			log2console("ERROR", "New user creation error: " + err);
 			return res.status(400).send(err.message);
 		}
 

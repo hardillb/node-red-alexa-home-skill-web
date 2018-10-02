@@ -7,6 +7,7 @@ var Account = new Schema({
     password: String,
     email: String,
     country:String,
+    region: String,
     mqttPass: { type: String, default: '' },
     superuser: { type: Number, default: 0},
     topics: { type: Number},
