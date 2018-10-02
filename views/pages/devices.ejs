@@ -191,7 +191,7 @@
 	});
 
 	$("#ThermostatController").change(function(e) {
-		if (e.prop('checked') == false) {
+		if ( $(this).is(':checked') == false) {
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$('#CELCIUS').attr("disabled", "disabled"); 
@@ -206,7 +206,7 @@
 	});
 
 	$("#ColorController").change(function(e) {
-		if (e.prop('checked') == false) {
+		if ( $(this).is(':checked') == false ) {
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled"); 
 		}
