@@ -322,32 +322,16 @@ app.post('/newuser', function(req,res){
 	// Lookup Region for AWS Lambda/ Web API Skill Interaction
 	var country = countries.findByCountryCode(req.body.country.toUpperCase());
 	var region;
-	log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
+	// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 	if (country.statusCode == 200) {
-		log2console("DEBUG", JSON.stringify(country));
-		//var jsonString = JSON.stringify(country);
-		//var jsonCountry = JSON.parse(jsonString);
-		log2console("DEBUG", "JSON Array: " + country.data[0].region);
+		log2console("DEBUG", "User region: " + country.data[0].region);
+		// Use first array object region supplied via countries-api data
 		region = country.data[0].region
-
-		for (i in country.data) {
-			consol.log(country.data[i].region);
-		}
-
-
-
-
-
-
-
-
-
-
 	}
 	else {
 		log2console("DEBUG", "User region lookup failed.");
 		log2console("DEBUG", country);
-		region = country = "Unknown"
+		region = "Unknown"
 	} 
 
 	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
