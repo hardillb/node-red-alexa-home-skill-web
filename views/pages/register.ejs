@@ -13,7 +13,7 @@
             <br>
             <br>
             <label for="country" class="sr-only">Country</label>
-            <input type="text" id="country" class="form-control" required>
+            <input type="hidden" id="country_code" />
             <br>
             <label for="password" class="sr-only">Password</label>
             <input type="password" id="password" name="password" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" placeholder="Password" required title="Minimum 10, maximum 32 chars.">
@@ -29,6 +29,7 @@
 
       <script type="application/javascript">
         // Load CountrySelect
+        $("#country").countrySelect();
         var country = $("#country").countrySelect("getSelectedCountryData").iso2;
 
         var password = document.getElementById("password")
