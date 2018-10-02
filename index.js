@@ -323,7 +323,7 @@ app.post('/newuser', function(req,res){
 	console.log("Req:", req)
 	console.log("Req username:", req.body.username)
 	console.log("Req email:", req.body.email)
-	console.log("Req country:", reqbody.country)
+	console.log("Req country:", req.body.country)
 	var response = countries.findByCountryCode(req.body.country.toUpperCase());
 	log2console("DEBUG", "User country:", req.body.country);
 	if (response.statusCode == 200) {
