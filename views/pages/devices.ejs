@@ -234,30 +234,25 @@
 		var devID = $('#devID').val();
 		// Add New Device
 		if ( devID === "") {
-
 			var device = {
 				capabilities: [],
 				displayCategories: [],
 			};
-
 			device.friendlyName = $('#friendlyName').val();
 			device.description = $('#description').val();
 
 			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 				var scale;
-				
 				$('input[name=radioScale]').each(function(index){
 					if (this.checked) {
 						scale = this.value;
 					}
 				});
-
 				device.validRange = {
 						minimumValue: $('#minimumValue').val(),
 						maximumValue: $('#maximumValue').val(),
 						scale: scale
 					}
-
 			}
 
 			$('input[name=capabilities]').each(function(index){
@@ -271,7 +266,7 @@
 				}
 			});
 
-			console.log(device);
+			console.log("DEBUG" + "New device created: " + JSON.stringify(device));
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
 				console.log("ajax put next");
 				$.ajax({
