@@ -51,7 +51,7 @@
 					<br>
 					<label for="description">Description: </label>
 					<br>
-					<textarea id="description" class="form-control"></textarea>
+					<textarea id="description" class="form-control" required></textarea>
 				</div>
 				<!-- <fieldset class="action" id="capabilityType"> -->
 				<div class="row" align="justify">
@@ -110,13 +110,13 @@
 							<div>
 								<br>
 								<label for="minimumValue" class="sr-only">Min Value: </label>
-								<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,4}$" type="text">
+								<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
 								<br>
 								<label for="maximumValue" class="sr-only">Max Value: </label>
-								<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text">
+								<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
 							</div>
 							<div class="form-check form-check-inline" style="padding-left:5px;">
-								<input class="form-check-input" type="radio" name="radioScale" id="CELCIUS" value="Celcius">
+								<input class="form-check-input" type="radio" name="radioScale" id="CELCIUS" value="Celcius" disabled>
 								<br>
 								<label class="form-check-label" for="CELCIUS">°Celcius</label>
 							</div>
@@ -184,9 +184,36 @@
 	</div>
 
 	<script>
+	// Enable/ disable minimumValue/ maximumValue elements based on selected capability			
 	$("#form-device").submit(function(e) {
 		e.preventDefault();
 		saveDevice()
+	});
+
+	$("ThermostatController").change(function(e) {
+		if (e.prop('checked') == false) {
+			$('#maximumValue').attr("disabled", "disabled"); 
+			$('#minimumValue').attr("disabled", "disabled");
+			$('#CELCIUS').attr("disabled", "disabled"); 
+			$('#FARENHEIT').attr("disabled", "disabled"); 
+		}
+		else {
+			$('#maximumValue').removeAttr("disabled"); 
+			$('#minimumValue').removeAttr("disabled");
+			$('#CELCIUS').removeAttr("disabled");
+			$('#FARENHEIT').removeAttr("disabled"); 
+		}
+	});
+
+	$("ColorController").change(function(e) {
+		if (e.prop('checked') == false) {
+			$('#maximumValue').attr("disabled", "disabled"); 
+			$('#minimumValue').attr("disabled", "disabled"); 
+		}
+		else {
+			$('#maximumValue').removeAttr("disabled"); 
+			$('#minimumValue').removeAttr("disabled"); 
+		}
 	});
 
 	function saveDevice() {
