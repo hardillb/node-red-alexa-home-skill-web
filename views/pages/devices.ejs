@@ -184,35 +184,49 @@
 	</div>
 
 	<script>
-	// Enable/ disable minimumValue/ maximumValue elements based on selected capability			
+			
 	$("#form-device").submit(function(e) {
 		e.preventDefault();
 		saveDevice()
 	});
 
+	// Enable/ disable minimumValue/ maximumValue and scale elements
 	$("#ThermostatController").change(function(e) {
 		if ( $(this).is(':checked') == false) {
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$('#CELCIUS').attr("disabled", "disabled"); 
-			$('#FARENHEIT').attr("disabled", "disabled"); 
+			$('#FARENHEIT').attr("disabled", "disabled");
+			$("maximumValue").prop('required',false);
+			$("minimumValue").prop('required',false);
+			$("CELCIUS").prop('required',false);
+			$("FARENHEIT").prop('required',false);
 		}
 		else {
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
 			$('#CELCIUS').removeAttr("disabled");
-			$('#FARENHEIT').removeAttr("disabled"); 
+			$('#FARENHEIT').removeAttr("disabled");
+			$("maximumValue").prop('required',true);
+			$("minimumValue").prop('required',true);
+			$("CELCIUS").prop('required',true);
+			$("FARENHEIT").prop('required',true);
 		}
 	});
 
-	$("#ColorController").change(function(e) {
+	// Enable/ disable minimumValue/ maximumValue elements
+	$("#ColorTemperatureController").change(function(e) {
 		if ( $(this).is(':checked') == false ) {
 			$('#maximumValue').attr("disabled", "disabled"); 
-			$('#minimumValue').attr("disabled", "disabled"); 
+			$('#minimumValue').attr("disabled", "disabled");
+			$("maximumValue").prop('required',false);
+			$("minimumValue").prop('required',false);
 		}
 		else {
 			$('#maximumValue').removeAttr("disabled"); 
-			$('#minimumValue').removeAttr("disabled"); 
+			$('#minimumValue').removeAttr("disabled");
+			$("maximumValue").prop('required',true);
+			$("minimumValue").prop('required',true);
 		}
 	});
 
@@ -220,12 +234,24 @@
 		var devID = $('#devID').val();
 		// Add New Device
 		if ( devID === "") {
-			var device = {
-				capabilities: [],
-				displayCategories: []
-			};
 			device.friendlyName = $('#friendlyName').val();
 			device.description = $('#description').val();
+
+			var device = {
+				capabilities: [],
+				displayCategories: [],
+				validRange: {
+					minimumValue: $('#minimumValue').val(),
+					maximumValue: $('#maximumValue').val(),
+					scale: {}
+				}
+			};
+
+			$('input[name=radioScale]').each(function(index){
+				if (this.checked) {
+					device.scale.push(this.value);
+				}
+			});
 			$('input[name=capabilities]').each(function(index){
 				if (this.checked) {
 					device.capabilities.push(this.value);
@@ -236,6 +262,7 @@
 					device.displayCategories.push(this.value);
 				}
 			});
+
 			console.log(device);
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
 				console.log("ajax put next");
