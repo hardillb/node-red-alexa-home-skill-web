@@ -30,8 +30,6 @@
       <script type="application/javascript">
         // Load CountrySelect
         $("#country").countrySelect();
-        var country = $("#country").countrySelect("getSelectedCountryData").iso2;
-
         var password = document.getElementById("password")
         var verify = document.getElementById("verify");
         password.onchange = validatePassword;
@@ -44,7 +42,7 @@
           var password = $('#password').val().trim();
           var verify = $('#verify').val().trim();
           var email = $('#email').val().trim();
-          var country = $("#country_code").val().trim();
+          var country = $("#country").countrySelect("getSelectedCountryData").iso2;
           // Build Submit Paramaters
           var params = "username=" + encodeURIComponent(username)
           + "&password=" + encodeURIComponent(password)
