@@ -327,6 +327,8 @@ app.post('/newuser', function(req,res){
 		log2console("DEBUG", JSON.stringify(country));
 		var jsonString = JSON.stringify(country);
 		var jsonCountry = JSON.parse(jsonString);
+		log2console("DEBUG", "JSON String: " + jsonString);
+		log2console("DEBUG", "JSON Parsed: " + jsonCountry);
 		log2console("DEBUG", "User region: " + jsonCountry.data.region);
 		region = jsonCountry.data.region
 	}
