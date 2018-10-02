@@ -244,16 +244,20 @@
 			device.description = $('#description').val();
 
 			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				var scale;
+				
+				$('input[name=radioScale]').each(function(index){
+					if (this.checked) {
+						scale = this.value;
+					}
+				});
+
 				device.validRange = {
 						minimumValue: $('#minimumValue').val(),
 						maximumValue: $('#maximumValue').val(),
-						scale: {}
+						scale: scale
 					}
-				$('input[name=radioScale]').each(function(index){
-					if (this.checked) {
-						device.validRange.scale.push(this.value);
-					}
-				});
+
 			}
 
 			$('input[name=capabilities]').each(function(index){
