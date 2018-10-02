@@ -325,7 +325,7 @@ app.post('/newuser', function(req,res){
 	log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 	if (country.statusCode == 200) {
 		//log2console("DEBUG", response);
-		log2console("DEBUG", "User region: " + country.body.data.region);
+		log2console("DEBUG", "User region: " + country.data.region);
 		region = country.body.data.region
 	}
 	else {
