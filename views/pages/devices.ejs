@@ -121,7 +121,7 @@
 								<label class="form-check-label" for="CELCIUS">°Celcius</label>
 							</div>
 							<div class="form-check form-check-inline" style="padding-top: 10px;">
-								<input class="form-check-input" type="radio" name="radioScale" id="FARENHEIT" value="Farenheit">
+								<input class="form-check-input" type="radio" name="radioScale" id="FARENHEIT" value="Farenheit" disabled>
 								<label class="form-check-label" for="FARENHEIT">°Farenheit</label>
 							</div>
 						</fieldset>
@@ -190,7 +190,7 @@
 		saveDevice()
 	});
 
-	$("ThermostatController").change(function(e) {
+	$("#ThermostatController").change(function(e) {
 		if (e.prop('checked') == false) {
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
@@ -205,7 +205,7 @@
 		}
 	});
 
-	$("ColorController").change(function(e) {
+	$("#ColorController").change(function(e) {
 		if (e.prop('checked') == false) {
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled"); 
