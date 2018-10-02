@@ -43,6 +43,7 @@
 			  </button>
 			</div>
 			<div class="modal-body">
+				<form class="form-device" id="form-device">
 				<div class="form-group">
 					<input id="devID" type="hidden">
 					<label for="friendlyName">Name: </label>
@@ -54,79 +55,79 @@
 				</div>
 				<!-- <fieldset class="action" id="capabilityType"> -->
 				<div class="row" align="justify">
-				<div class="col-sm">
-				<fieldset class="form-group" id="capabilityType">
-						<legend>Capabilities</legend>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="BrightnessController"> Brightness Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="ColorController"> Color Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="ColorTemperatureController"> Color Temperature Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="InputController"> Input Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Lock Control" type="checkbox" class="form-check-input" name="capabilities" id="LockController" value="LockController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="LockController"> Lock Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Playback Control" type="checkbox" class="form-check-input" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="PlaybackController"> Playback Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Power Control" type="checkbox" class="form-check-input" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="PowerController"> Power Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Scene Control" type="checkbox" class="form-check-input" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="SceneController"> Activity/ Scene </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="StepSpeaker"> Speaker Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point) </label>
-						</div>
-						<div>
-							 <br>
-							<label for="minimumValue" class="sr-only">Min Value: </label>
-							<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,4}$" type="text">
-							<br>
-							<label for="maximumValue" class="sr-only">Max Value: </label>
-							<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text">
-						</div>
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="radioScale" id="CELCIUS" value="Celcius">
-							<br>
-							<label class="form-check-label" for="CELCIUS">°Celcius</label>
-						</div>
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="radioScale" id="FARENHEIT" value="Farenheit">
-							<label class="form-check-label" for="FARENHEIT">°Farenheit</label>
-						</div>
-				</fieldset>
-				</div>
-				<div class="col-sm">
-				<fieldset class="form-group">
+					<div class="col-sm">
+						<fieldset class="form-group" id="capabilityType">
+							<legend>Capabilities</legend>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="BrightnessController"> Brightness Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="ColorController"> Color Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="ColorTemperatureController"> Color Temperature Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="InputController"> Input Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Lock Control" type="checkbox" class="form-check-input" name="capabilities" id="LockController" value="LockController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="LockController"> Lock Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Playback Control" type="checkbox" class="form-check-input" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="PlaybackController"> Playback Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Power Control" type="checkbox" class="form-check-input" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="PowerController"> Power Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Scene Control" type="checkbox" class="form-check-input" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="SceneController"> Activity/ Scene </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="StepSpeaker"> Speaker Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point) </label>
+							</div>
+							<div>
+								<br>
+								<label for="minimumValue" class="sr-only">Min Value: </label>
+								<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,4}$" type="text">
+								<br>
+								<label for="maximumValue" class="sr-only">Max Value: </label>
+								<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text">
+							</div>
+							<div class="form-check form-check-inline" style="padding-left:5px;">
+								<input class="form-check-input" type="radio" name="radioScale" id="CELCIUS" value="Celcius">
+								<br>
+								<label class="form-check-label" for="CELCIUS">°Celcius</label>
+							</div>
+							<div class="form-check form-check-inline" style="padding-top: 10px;">
+								<input class="form-check-input" type="radio" name="radioScale" id="FARENHEIT" value="Farenheit">
+								<label class="form-check-label" for="FARENHEIT">°Farenheit</label>
+							</div>
+						</fieldset>
+					</div>
+					<div class="col-sm">
+					<fieldset class="form-group">
 						<legend>Alexa App Icon</legend>
 						<!-- <fieldset class="action" id="capabilityType"> -->
 						<div class="form-check">
@@ -168,13 +169,14 @@
 							<input type="radio" class="form-check-input" id="THERMOSTAT" name="appType" value="THERMOSTAT">
 							<label class="form-check-label" for="THERMOSTAT">Thermostat </label>
 						</div>
-				</fieldset>
-				</div>
+					</fieldset>
 				</div>
 			</div>
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			<button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button>
+			</form>
+			</div>
 			<div class="modal-footer">
-			  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-			  <button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button>
 			</div>
 		  </div>
 		</div>
