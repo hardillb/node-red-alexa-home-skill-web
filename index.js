@@ -324,7 +324,10 @@ app.post('/newuser', function(req,res){
 	if (response.statusCode == 200) {
 		log2console("DEBUG", "User region would be: " + response.data.region);
 	}
-	else {log2console("DEBUG", "User region lookup failed.")} 	// What to do if Region fails?
+	else {
+		log2console("DEBUG", "User region lookup failed.");
+		log2console("DEBUG", response);
+	} 	// What to do if Region fails?
 
 	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
