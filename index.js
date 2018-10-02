@@ -320,6 +320,7 @@ app.get('/newuser', function(req,res){
 
 app.post('/newuser', function(req,res){
 	// Lookup Region for AWS Lambda/ Web API Skill Interaction
+	console.log("Req:", req.body)
 	var response = countries.findByCountryCode(req.body.country);
 	log2console("DEBUG", "User country:", req.body.country);
 	if (response.statusCode == 200) {
