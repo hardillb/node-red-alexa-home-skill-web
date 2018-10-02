@@ -320,23 +320,21 @@ app.get('/newuser', function(req,res){
 
 app.post('/newuser', function(req,res){
 	// Lookup Region for AWS Lambda/ Web API Skill Interaction
-	//console.log("Req:", req)
-	console.log("Req username:", req.body.username)
-	console.log("Req email:", req.body.email)
-	console.log("Req country:", req.body.country)
 	var country = countries.findByCountryCode(req.body.country.toUpperCase());
+	var region;
 	log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 	if (country.statusCode == 200) {
-		log2console("DEBUG", response);
+		//log2console("DEBUG", response);
 		log2console("DEBUG", "User region: " + country.body.data.region);
-		country = country.body.data.region
+		region = country.body.data.region
 	}
 	else {
 		log2console("DEBUG", "User region lookup failed.");
 		log2console("DEBUG", response);
-	} 	country = "Unknown"
+		region = country = "Unknown"
+	} 
 
-	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: contry,  mqttPass: "foo" }), req.body.password, function(err, account) {
+	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
 			log2console("ERROR", "New user creation error: " + err);
 			return res.status(400).send(err.message);
