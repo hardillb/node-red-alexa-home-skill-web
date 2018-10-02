@@ -326,10 +326,10 @@ app.post('/newuser', function(req,res){
 	if (country.statusCode == 200) {
 		log2console("DEBUG", JSON.stringify(country));
 		var jsonString = JSON.stringify(country);
-		var jsonCountry = JSON.parse(jsonString.data);
+		var jsonCountry = JSON.parse(jsonString);
 		log2console("DEBUG", "JSON String: " + jsonString);
 		log2console("DEBUG", "JSON Parsed: " + jsonCountry);
-		log2console("DEBUG", "User region: " + jsonCountry.data.region);
+		log2console("DEBUG", "JSON Parsed: " + jsonCountry.data);
 		region = jsonCountry.data.region
 	}
 	else {
