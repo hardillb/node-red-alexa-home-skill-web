@@ -46,7 +46,7 @@
 				<div class="form-group">
 					<input id="devID" type="hidden">
 					<label for="friendlyName">Name: </label>
-					<input id="friendlyName" class="form-control" type="text">
+					<input id="friendlyName" class="form-control" type="text" required>
 					<br>
 					<label for="description">Description: </label>
 					<br>
@@ -105,6 +105,12 @@
 						<div class="form-check">
 								<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
 							<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point)</label>
+						</div>
+						<div>
+							<label for="minimumValue" class="sr-only">Min Value: </label>
+							<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,3}$" type="text">
+							<label for="maximumValue" class="sr-only">Max Value: </label>
+							<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,3}$" type="text">
 						</div>
 				</fieldset>
 				</div>

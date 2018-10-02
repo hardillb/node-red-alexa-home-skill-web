@@ -325,13 +325,13 @@ app.post('/newuser', function(req,res){
 	// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 	if (country.statusCode == 200) {
 		log2console("DEBUG", "User region: " + country.data[0].region);
-		// Use first array object region supplied via countries-api data
-		region = country.data[0].region
+		// Use first array object, should always be singular data object returned via countries-api
+		region = country.data[0].region;
 	}
 	else {
 		log2console("DEBUG", "User region lookup failed.");
 		log2console("DEBUG", country);
-		region = "Unknown"
+		region = "Unknown";
 	} 
 
 	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
