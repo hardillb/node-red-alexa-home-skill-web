@@ -324,19 +324,19 @@ app.post('/newuser', function(req,res){
 	console.log("Req username:", req.body.username)
 	console.log("Req email:", req.body.email)
 	console.log("Req country:", req.body.country)
-	var response = countries.findByCountryCode(req.body.country.toUpperCase());
+	var country = countries.findByCountryCode(req.body.country.toUpperCase());
 	log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
-	if (response.statusCode == 200) {
+	if (country.statusCode == 200) {
 		log2console("DEBUG", response);
-		//log2console("DEBUG", "User region would be: " + JSON.parse(response));
-		log2console("DEBUG", JSON.stringify(response));
+		log2console("DEBUG", "User region: " + country.body.data.region);
+		country = country.body.data.region
 	}
 	else {
 		log2console("DEBUG", "User region lookup failed.");
 		log2console("DEBUG", response);
-	} 	// What to do if Region fails?
+	} 	country = "Unknown"
 
-	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), mqttPass: "foo" }), req.body.password, function(err, account) {
+	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: contry,  mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
 			log2console("ERROR", "New user creation error: " + err);
 			return res.status(400).send(err.message);
