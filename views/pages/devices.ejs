@@ -376,6 +376,8 @@
 		$('input[name=radioScale]').each(function(index){
 			this.checked = false;
 		});
+		// Update Form Validation Requirements
+		$('#form-device').validator('update');
 	}
 
 	function edit(id) {
@@ -396,7 +398,6 @@
 		// Handle min/max and scale values
 		if (device.hasOwnProperty('validRange')) {
 			validRange = device.validRange;
-
 			if (validRange.hasOwnProperty('scale')) {
 				$('#Celcius').removeAttr("disabled");
 				$('#Farenheit').removeAttr("disabled");
@@ -407,14 +408,15 @@
 			if (validRange.hasOwnProperty('maximumValue')) {
 				$("maximumValue").prop('required',true);
 				$('#maximumValue').removeAttr("disabled"); 
-				$("#maximumValue").val(device.validRange.maximumValue);
+				$("#maximumValue").val(validRange.maximumValue);
 			}
 			if (validRange.hasOwnProperty('minimumValue')) {
 				$('#minimumValue').removeAttr("disabled");
 				$("minimumValue").prop('required',true);
-				$("#minimumValue").val(device.validRange.minimumValue);
+				$("#minimumValue").val(validRange.minimumValue);
 			}
-		//checkCapability();
+			// Update Form Validation Requirements
+			$('#form-device').validator('update');
 		}
 	}
 
