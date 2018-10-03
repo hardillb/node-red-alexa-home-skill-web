@@ -394,25 +394,29 @@
 		});
 
 		// Handle min/max and scale values
-		if (device.hasOwnProperty('validRange.scale')) {
-			device.validRange.scale.forEach(function(scale){
-				$('#' + scale).prop('checked',true);
-			});
-			$('#Celcius').removeAttr("disabled");
-			$('#Farenheit').removeAttr("disabled");
-			$("Celcius").prop('required',true);
-			$("Farenheit").prop('required',true);
-		}
-		if (device.hasOwnProperty('validRange.maximumValue')) {
-			$("#maximumValue").val(device.validRange.maximumValue);
-			$("maximumValue").prop('required',true);
-			$('#maximumValue').removeAttr("disabled"); 
-		}
-		if (device.hasOwnProperty('validRange.minimumValue')) {
-			$("#minimumValue").val(device.validRange.maximumValue);
-			$('#minimumValue').removeAttr("disabled");
-			$("minimumValue").prop('required',true);
-		}
+		if (device.hasOwnProperty('validRange')) {
+			validRange = device.ValidRange;
+
+			if (validRange.hasOwnProperty('scale')) {
+				$('#Celcius').removeAttr("disabled");
+				$('#Farenheit').removeAttr("disabled");
+				$("Celcius").prop('required',true);
+				$("Farenheit").prop('required',true);
+
+				device.validRange.scale.forEach(function(scale){
+					$('#' + scale).prop('checked',true);
+				});
+			}
+			if (validRange.hasOwnProperty('maximumValue')) {
+				$("maximumValue").prop('required',true);
+				$('#maximumValue').removeAttr("disabled"); 
+				$("#maximumValue").val(device.validRange.maximumValue);
+			}
+			if (validRange.hasOwnProperty('minimumValue')) {
+				$('#minimumValue').removeAttr("disabled");
+				$("minimumValue").prop('required',true);
+				$("#minimumValue").val(device.validRange.minimumValue);
+			}
 		//checkCapability();
 	}
 
