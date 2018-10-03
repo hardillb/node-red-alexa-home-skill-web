@@ -116,13 +116,13 @@
 								<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
 							</div>
 							<div class="form-check form-check-inline" style="padding-left:5px;">
-								<input class="form-check-input" type="radio" name="radioScale" id="CELCIUS" value="Celcius" disabled>
+								<input class="form-check-input" type="radio" name="radioScale" id="Celcius" value="Celcius" disabled>
 								<br>
-								<label class="form-check-label" for="CELCIUS">°Celcius</label>
+								<label class="form-check-label" for="Celcius">°Celcius</label>
 							</div>
 							<div class="form-check form-check-inline" style="padding-top: 10px;">
-								<input class="form-check-input" type="radio" name="radioScale" id="FARENHEIT" value="Farenheit" disabled>
-								<label class="form-check-label" for="FARENHEIT">°Farenheit</label>
+								<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
+								<label class="form-check-label" for="Farenheit">°Farenheit</label>
 							</div>
 						</fieldset>
 					</div>
@@ -248,6 +248,8 @@
 						scale = this.value;
 					}
 				});
+			}
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 				device.validRange = {
 						minimumValue: $('#minimumValue').val(),
 						maximumValue: $('#maximumValue').val(),
