@@ -890,11 +890,12 @@ app.post('/api/v1/command',
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
-				var message = JSON.stringify(req.body);
 				var validationStatus = true;
 
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
+
+				var message = JSON.stringify(req.body);
 				
 				log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
 
