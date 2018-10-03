@@ -402,10 +402,7 @@
 				$('#Farenheit').removeAttr("disabled");
 				$("Celcius").prop('required',true);
 				$("Farenheit").prop('required',true);
-
-				device.validRange.scale.forEach(function(scale){
-					$('#' + scale).prop('checked',true);
-				});
+				$('#' + scale).prop('checked',true);
 			}
 			if (validRange.hasOwnProperty('maximumValue')) {
 				$("maximumValue").prop('required',true);
