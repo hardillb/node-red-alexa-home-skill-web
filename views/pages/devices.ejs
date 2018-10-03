@@ -107,7 +107,7 @@
 									<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
 								<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point) </label>
 							</div>
-							<div>
+							<div id="validRangeOptions">
 								<br>
 								<label for="minimumValue" class="sr-only">Min Value: </label>
 								<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
@@ -115,7 +115,7 @@
 								<label for="maximumValue" class="sr-only">Max Value: </label>
 								<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
 							</div>
-							<div class="form-check form-check-inline" style="padding-left:5px;">
+							<div id="validRangeScaleOptions" class="form-check form-check-inline" style="padding-left:5px;">
 								<input class="form-check-input" type="radio" name="radioScale" id="Celcius" value="Celcius" disabled>
 								<br>
 								<label class="form-check-label" id="lblCelcius" for="Celcius">°Celcius</label>
@@ -193,12 +193,8 @@
 	// Enable/ disable minimumValue/ maximumValue and scale elements
 	$("#ThermostatController").change(function(e) {
 		if ( $(this).is(':checked') == false) {
-			$('#maximumValue').hide();
-			$('#minimumValue').hide();
-			$('#Farenheit').hide();
-			$('#Celcius').hide();
-			$('#lblFarenheit').hide();
-			$('#lblCelcius').hide();
+			$('#validRangeOptions').hide();
+			$('#validRangeScaleOptions').hide();
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$('#Celcius').attr("disabled", "disabled"); 
@@ -209,12 +205,8 @@
 			$("#Farenheit").prop('required',false);
 		}
 		else {
-			$('#maximumValue').show();
-			$('#minimumValue').show();
-			$('#Farenheit').show();
-			$('#Celcius').show();
-			$('#lblFarenheit').show();
-			$('#lblCelcius').show();
+			$('#validRangeOptions').show();
+			$('#validRangeScaleOptions').show();
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
 			$('#Celcius').removeAttr("disabled");
@@ -229,16 +221,14 @@
 	// Enable/ disable minimumValue/ maximumValue elements
 	$("#ColorTemperatureController").change(function(e) {
 		if ( $(this).is(':checked') == false ) {
-			$('#maximumValue').hide();
-			$('#minimumValue').hide();
+			$('#validRangeOptions').hide();
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$("#maximumValue").prop('required',false);
 			$("#minimumValue").prop('required',false);
 		}
 		else {
-			$('#maximumValue').show();
-			$('#minimumValue').show();
+			$('#validRangeOptions').show();
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
 			$("#maximumValue").prop('required',true);
@@ -376,12 +366,8 @@
 		$('input[name=appType]').each(function(index) {
 		  this.checked = false;
 		});
-		$('#maximumValue').hide();
-		$('#minimumValue').hide();
-		$('#Farenheit').hide();
-		$('#Celcius').hide();
-		$('#lblFarenheit').hide();
-		$('#lblCelcius').hide();
+		$('#validRangeOptions').hide();
+		$('#validRangeScaleOptions').hide();
 		$('#maximumValue').val(""); 
 		$('#minimumValue').val("");
 		$('#maximumValue').attr("disabled", "disabled"); 
@@ -417,10 +403,7 @@
 		if (device.hasOwnProperty('validRange')) {
 			validRange = device.validRange;
 			if (validRange.hasOwnProperty('scale')) {
-				$('#Farenheit').show();
-				$('#Celcius').show();
-				$('#lblFarenheit').show();
-				$('#lblCelcius').show();
+				$('#validRangeScaleOptions').show();
 				$('#Celcius').removeAttr("disabled");
 				$('#Farenheit').removeAttr("disabled");
 				$("#Celcius").prop('required',true);
@@ -428,13 +411,13 @@
 				$('#' + validRange.scale).prop('checked',true);
 			}
 			if (validRange.hasOwnProperty('maximumValue')) {
-				$('#maximumValue').show();
+				$('#validRangeOptions').show();
 				$("#maximumValue").prop('required',true);
 				$('#maximumValue').removeAttr("disabled"); 
 				$("#maximumValue").val(validRange.maximumValue);
 			}
 			if (validRange.hasOwnProperty('minimumValue')) {
-				$('#minimumValue').show();
+				$('#validRangeOptions').show();
 				$('#minimumValue').removeAttr("disabled");
 				$("#minimumValue").prop('required',true);
 				$("#minimumValue").val(validRange.minimumValue);
