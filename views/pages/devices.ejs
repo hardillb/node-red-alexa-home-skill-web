@@ -269,7 +269,6 @@
 			});
 
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
-				console.log("ajax put next");
 				$.ajax({
 					url:"/devices",
 					type: 'PUT',
@@ -277,11 +276,9 @@
 					dataType: 'json',
 					contentType: "application/json",
 					success: function(data){
-						console.log("put response");
-						console.log(data);
+						//console.log(data);
 						//reload
 						document.location.reload();
-						console.log("reload page");
 					}
 				}).fail(function(){
 					alert("failed to create device");
