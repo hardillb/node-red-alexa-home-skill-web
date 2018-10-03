@@ -294,7 +294,7 @@
 			// Modify Existing Device
 			var device = devices[devID];
 			device.description = $('#description').val();
-			
+
 			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 				var scale;
 				$('input[name=radioScale]').each(function(index){
@@ -343,6 +343,7 @@
 				alert("Name or desciption can not be empty and at least one action is needed");
 			}
 		}
+		//$('#newDeviceModal').hide();
 	}
 	
 	function addDevice() {
@@ -363,6 +364,8 @@
 		$('input[name=appType]').each(function(index) {
 		  this.checked = false;
 		});
+		$('#maximumValue').val(""); 
+		$('#minimumValue').val("");
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
 		$('#CELCIUS').attr("disabled", "disabled"); 
