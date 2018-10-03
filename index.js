@@ -885,6 +885,19 @@ app.post('/api/v1/command',
 		//	uid: req.user.username
 		//
 		//});
+
+		// Check validRange, no point in processing if directive values out of range
+		Devices.find({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
+			if (!err) {
+				if (device.hasOwnProperty('validRange')) {
+					console.log("INFO: Device validRange:" + JSON.stringify(devices.validRange));
+				}
+			}
+			else {
+				console.log("ERROR: Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+			}
+		});
+
 		var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 		//console.log("topic", topic)
 		delete req.body.directive.header.correlationToken;
