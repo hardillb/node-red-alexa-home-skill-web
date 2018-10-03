@@ -568,6 +568,7 @@ app.get('/api/v1/devices',
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
 			if (!error) {
+				log2console("INFO", "Running discovery for user:" + user);
 				var devs = [];
 				for (var i=0; i< data.length; i++) {
 					var dev = {};
@@ -886,41 +887,68 @@ app.post('/api/v1/command',
 		//
 		//});
 
-		// Check validRange, no point in processing if directive values out of range
+		// Check validRange, don't process if directive values are out of range
 		Devices.find({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
-				if (data.hasOwnProperty('validRange')) {
-					console.log("INFO: Device validRange:" + JSON.stringify(data.validRange));
+				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
+				//console.log("topic", topic)
+				delete req.body.directive.header.correlationToken;
+				delete req.body.directive.endpoint.scope.token;
+				//console.log(req.body)
+				var message = JSON.stringify(req.body);
+				log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
+
+				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
+					var maximumValue = data.validRange.maximumValue;
+					var minimumValue = data.validRange.minimumValue;
+					var scale = data.validRange.scale;
+					var targetSetpoint = req.body.directive.payload.targetSetpoint.value;
+					// Handle Temperature Out of Range
+					if (targetSetpoint < minimumValue || targetSetpoint > maximumValue) {
+						log2console("ERROR", "User: " + req.user.username + " requested temperature: " + targetSetpoint + " which is out of range: " + JSON.stringify(data.validRange));
+						// Using 416 Error code for Temperature Out of Range
+						res.status(416);
+						res.send(err);
+					}
+					else {
+						try{
+							mqttClient.publish(topic,message);
+							log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
+						} catch (err) {
+							log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
+						}
+						var command = {
+							user: req.user.username,
+							res: res,
+							timestamp: Date.now()
+						};
+				
+						// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above)
+						// Expect timeout is associated with requirement for NodeRed flow? Assume this is awaiting acknowledge from NodeRed node
+						onGoingCommands[req.body.directive.header.messageId] = command;
+					}
 				}
-				console.log("INFO: Device found during command execution:" + data);
+				else {
+					try{
+						mqttClient.publish(topic,message);
+						log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
+					} catch (err) {
+						log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
+					}
+					var command = {
+						user: req.user.username,
+						res: res,
+						timestamp: Date.now()
+					};
+					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above)
+					// Expect timeout is associated with requirement for NodeRed flow? Assume this is awaiting acknowledge from NodeRed node
+					onGoingCommands[req.body.directive.header.messageId] = command;
+				}
 			}
 			else {
-				console.log("ERROR: Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				log2console("ERROR", "Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
 			}
 		});
-
-		var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
-		//console.log("topic", topic)
-		delete req.body.directive.header.correlationToken;
-		delete req.body.directive.endpoint.scope.token;
-		//console.log(req.body)
-		var message = JSON.stringify(req.body);
-		log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
-		try{
-			mqttClient.publish(topic,message);
-			log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
-		} catch (err) {
-			log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
-		}
-		var command = {
-			user: req.user.username,
-			res: res,
-			timestamp: Date.now()
-		};
-
-		// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above)
-		// Expect timeout is associated with requirement for NodeRed flow? Assume this is awaiting acknowledge from NodeRed node
-		onGoingCommands[req.body.directive.header.messageId] = command;
 	}
 );
 
