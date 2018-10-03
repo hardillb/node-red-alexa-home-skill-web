@@ -294,6 +294,23 @@
 			// Modify Existing Device
 			var device = devices[devID];
 			device.description = $('#description').val();
+			
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				var scale;
+				$('input[name=radioScale]').each(function(index){
+					if (this.checked) {
+						scale = this.value;
+					}
+				});
+			}
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				device.validRange = {
+						minimumValue: $('#minimumValue').val(),
+						maximumValue: $('#maximumValue').val(),
+						scale: scale
+					}
+			}
+
 			device.capabilities = [];
 			$('input[name=capabilities]').each(function(index){
 				if (this.checked) {
