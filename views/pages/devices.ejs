@@ -109,11 +109,19 @@
 							</div>
 							<div id="validRangeOptions">
 								<br>
-								<label for="minimumValue" class="sr-only">Min Value: </label>
-								<input id="minimumValue" class="form-control" placeholder="Min Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+											<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>
+									</div>		
+									<input id="minimumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
+								</div>
 								<br>
-								<label for="maximumValue" class="sr-only">Max Value: </label>
-								<input id="maximumValue" class="form-control" placeholder="Max Value" pattern="^[0-9,_]{1,4}$" type="text" disabled>
+								<div class="input-group mb-3">
+										<div class="input-group-prepend">
+												<span class="input-group-text" id="inputGroup-sizing-default">Max Value (°/K)</span>
+										</div>		
+										<input id="maximumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
+								</div>
 							</div>
 							<div id="validRangeScaleOptions">
 								<div class="form-check form-check-inline" style="padding-left:5px;">
