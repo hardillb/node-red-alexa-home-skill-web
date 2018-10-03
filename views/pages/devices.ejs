@@ -373,12 +373,13 @@
 		});
 
 		// Handle min/max and scale values
-		device.validRange.scale.forEach(function(scale){
-			$('#' + scale).prop('checked',true);
-		});
-		$("maximumValue").val(device.validRange.maximumValue);
-		$("minimumValue").val(device.validRange.minimumValue);
-
+		if (device.hasOwnProperty('scale')) {
+			device.validRange.scale.forEach(function(scale){
+				$('#' + scale).prop('checked',true);
+			});
+		}
+		if (device.hasOwnProperty('maximumValue')) {$("#maximumValue").val(device.validRange.maximumValue)};
+		if (device.hasOwnProperty('minimumValue')) {$("#minimumValue").val(device.validRange.maximumValue)};
 		//checkCapability();
 	}
 
