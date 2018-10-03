@@ -417,6 +417,10 @@
 		if (device.hasOwnProperty('validRange')) {
 			validRange = device.validRange;
 			if (validRange.hasOwnProperty('scale')) {
+				$('#Farenheit').show();
+				$('#Celcius').show();
+				$('#lblFarenheit').show();
+				$('#lblCelcius').show();
 				$('#Celcius').removeAttr("disabled");
 				$('#Farenheit').removeAttr("disabled");
 				$("#Celcius").prop('required',true);
@@ -424,11 +428,13 @@
 				$('#' + validRange.scale).prop('checked',true);
 			}
 			if (validRange.hasOwnProperty('maximumValue')) {
+				$('#maximumValue').show();
 				$("#maximumValue").prop('required',true);
 				$('#maximumValue').removeAttr("disabled"); 
 				$("#maximumValue").val(validRange.maximumValue);
 			}
 			if (validRange.hasOwnProperty('minimumValue')) {
+				$('#minimumValue').show();
 				$('#minimumValue').removeAttr("disabled");
 				$("#minimumValue").prop('required',true);
 				$("#minimumValue").val(validRange.minimumValue);
