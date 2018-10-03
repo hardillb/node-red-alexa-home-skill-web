@@ -371,6 +371,14 @@
 		device.displayCategories.forEach(function(type){
 			$('#' + type).prop('checked',true);
 		});
+
+		// Handle min/max and scale values
+		device.validRange.scale.forEach(function(scale){
+			$('#' + scale).prop('checked',true);
+		});
+		$("maximumValue").val(device.validRange.maximumValue);
+		$("minimumValue").val(device.validRange.minimumValue);
+
 		//checkCapability();
 	}
 
