@@ -888,7 +888,7 @@ app.post('/api/v1/command',
 		//});
 
 		// Check validRange, don't process if directive values are out of range
-		Devices.find({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
+		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 				//console.log("topic", topic)
@@ -899,12 +899,9 @@ app.post('/api/v1/command',
 				log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
 
 				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
-					var maximumValue = data.validRange.maximumValue;
-					var minimumValue = data.validRange.minimumValue;
-					var scale = data.validRange.scale;
 					var targetSetpoint = req.body.directive.payload.targetSetpoint.value;
 					// Handle Temperature Out of Range
-					if (targetSetpoint < minimumValue || targetSetpoint > maximumValue) {
+					if (targetSetpoint < data.validRange.minimumValue || targetSetpoint > data.validRange.maximumValue) {
 						log2console("ERROR", "User: " + req.user.username + " requested temperature: " + targetSetpoint + " which is out of range: " + JSON.stringify(data.validRange));
 						// Using 416 Error code for Temperature Out of Range
 						res.status(416);
