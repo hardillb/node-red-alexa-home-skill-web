@@ -887,7 +887,6 @@ app.post('/api/v1/command',
 		//
 		//});
 
-		// Check validRange, don't process if directive values are out of range
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
@@ -898,14 +897,14 @@ app.post('/api/v1/command',
 				var message = JSON.stringify(req.body);
 				log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
 
+				// Check validRange, send 416 (Temperature Out of Range) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
 					var targetSetpoint = req.body.directive.payload.targetSetpoint.value;
 					// Handle Temperature Out of Range
 					if (targetSetpoint < data.validRange.minimumValue || targetSetpoint > data.validRange.maximumValue) {
-						log2console("ERROR", "User: " + req.user.username + " requested temperature: " + targetSetpoint + " which is out of range: " + JSON.stringify(data.validRange));
-						// Using 416 Error code for Temperature Out of Range
-						res.status(416);
-						res.send(err);
+						log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + targetSetpoint + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+						res.status(416).send();
+						//res.send(err);
 					}
 					else {
 						try{
@@ -920,8 +919,7 @@ app.post('/api/v1/command',
 							timestamp: Date.now()
 						};
 				
-						// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above)
-						// Expect timeout is associated with requirement for NodeRed flow? Assume this is awaiting acknowledge from NodeRed node
+						// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
 						onGoingCommands[req.body.directive.header.messageId] = command;
 					}
 				}
@@ -937,8 +935,7 @@ app.post('/api/v1/command',
 						res: res,
 						timestamp: Date.now()
 					};
-					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above)
-					// Expect timeout is associated with requirement for NodeRed flow? Assume this is awaiting acknowledge from NodeRed node
+					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
 					onGoingCommands[req.body.directive.header.messageId] = command;
 				}
 			}
