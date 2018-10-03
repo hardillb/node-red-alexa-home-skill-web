@@ -394,7 +394,7 @@
 		});
 
 		// Handle min/max and scale values
-		if (device.hasOwnProperty('scale')) {
+		if (device.hasOwnProperty('validRange.scale')) {
 			device.validRange.scale.forEach(function(scale){
 				$('#' + scale).prop('checked',true);
 			});
@@ -403,12 +403,12 @@
 			$("Celcius").prop('required',true);
 			$("Farenheit").prop('required',true);
 		}
-		if (device.hasOwnProperty('maximumValue')) {
+		if (device.hasOwnProperty('validRange.maximumValue')) {
 			$("#maximumValue").val(device.validRange.maximumValue);
 			$("maximumValue").prop('required',true);
 			$('#maximumValue').removeAttr("disabled"); 
 		}
-		if (device.hasOwnProperty('minimumValue')) {
+		if (device.hasOwnProperty('validRange.minimumValue')) {
 			$("#minimumValue").val(device.validRange.maximumValue);
 			$('#minimumValue').removeAttr("disabled");
 			$("minimumValue").prop('required',true);
