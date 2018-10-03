@@ -892,6 +892,7 @@ app.post('/api/v1/command',
 				if (data.hasOwnProperty('validRange')) {
 					console.log("INFO: Device validRange:" + JSON.stringify(data.validRange));
 				}
+				console.log("INFO: Device found during command execution:" + data);
 			}
 			else {
 				console.log("ERROR: Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
