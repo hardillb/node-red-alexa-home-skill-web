@@ -118,11 +118,11 @@
 							<div class="form-check form-check-inline" style="padding-left:5px;">
 								<input class="form-check-input" type="radio" name="radioScale" id="Celcius" value="Celcius" disabled>
 								<br>
-								<label class="form-check-label" for="Celcius">°Celcius</label>
+								<label class="form-check-label" id="lblCelcius" for="Celcius">°Celcius</label>
 							</div>
 							<div class="form-check form-check-inline" style="padding-top: 10px;">
 								<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
-								<label class="form-check-label" for="Farenheit">°Farenheit</label>
+								<label class="form-check-label" id="lblFarenheit" for="Farenheit">°Farenheit</label>
 							</div>
 						</fieldset>
 					</div>
@@ -197,6 +197,8 @@
 			$('#minimumValue').hide();
 			$('#Farenheit').hide();
 			$('#Celcius').hide();
+			$('#lblFarenheit').hide();
+			$('#lblCelcius').hide();
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$('#Celcius').attr("disabled", "disabled"); 
@@ -211,6 +213,8 @@
 			$('#minimumValue').show();
 			$('#Farenheit').show();
 			$('#Celcius').show();
+			$('#lblFarenheit').show();
+			$('#lblCelcius').show();
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
 			$('#Celcius').removeAttr("disabled");
@@ -376,6 +380,8 @@
 		$('#minimumValue').hide();
 		$('#Farenheit').hide();
 		$('#Celcius').hide();
+		$('#lblFarenheit').hide();
+		$('#lblCelcius').hide();
 		$('#maximumValue').val(""); 
 		$('#minimumValue').val("");
 		$('#maximumValue').attr("disabled", "disabled"); 
