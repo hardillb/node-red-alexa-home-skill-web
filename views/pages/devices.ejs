@@ -193,6 +193,10 @@
 	// Enable/ disable minimumValue/ maximumValue and scale elements
 	$("#ThermostatController").change(function(e) {
 		if ( $(this).is(':checked') == false) {
+			$('#maximumValue').hide();
+			$('#minimumValue').hide();
+			$('#Farenheit').hide();
+			$('#Celcius').hide();
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$('#Celcius').attr("disabled", "disabled"); 
@@ -203,6 +207,10 @@
 			$("#Farenheit").prop('required',false);
 		}
 		else {
+			$('#maximumValue').show();
+			$('#minimumValue').show();
+			$('#Farenheit').show();
+			$('#Celcius').show();
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
 			$('#Celcius').removeAttr("disabled");
@@ -217,12 +225,16 @@
 	// Enable/ disable minimumValue/ maximumValue elements
 	$("#ColorTemperatureController").change(function(e) {
 		if ( $(this).is(':checked') == false ) {
+			$('#maximumValue').hide();
+			$('#minimumValue').hide();
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
 			$("#maximumValue").prop('required',false);
 			$("#minimumValue").prop('required',false);
 		}
 		else {
+			$('#maximumValue').show();
+			$('#minimumValue').show();
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
 			$("#maximumValue").prop('required',true);
@@ -360,6 +372,10 @@
 		$('input[name=appType]').each(function(index) {
 		  this.checked = false;
 		});
+		$('#maximumValue').hide();
+		$('#minimumValue').hide();
+		$('#Farenheit').hide();
+		$('#Celcius').hide();
 		$('#maximumValue').val(""); 
 		$('#minimumValue').val("");
 		$('#maximumValue').attr("disabled", "disabled"); 
