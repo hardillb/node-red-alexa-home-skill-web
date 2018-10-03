@@ -18,6 +18,7 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
+var countries = require('countries-api');
 //var Measurement = require('./googleMeasurement.js');
 
 // Validate CRITICAL environment variables passed to container
@@ -318,9 +319,24 @@ app.get('/newuser', function(req,res){
 });
 
 app.post('/newuser', function(req,res){
-	Account.register(new Account({ username : req.body.username, email: req.body.email, mqttPass: "foo" }), req.body.password, function(err, account) {
+	// Lookup Region for AWS Lambda/ Web API Skill Interaction
+	var country = countries.findByCountryCode(req.body.country.toUpperCase());
+	var region;
+	// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
+	if (country.statusCode == 200) {
+		log2console("DEBUG", "User region: " + country.data[0].region);
+		// Use first array object, should always be singular data object returned via countries-api
+		region = country.data[0].region;
+	}
+	else {
+		log2console("DEBUG", "User region lookup failed.");
+		log2console("DEBUG", country);
+		region = "Unknown";
+	} 
+
+	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
-			log2console("ERROR", "New user cretaion error: " + err);
+			log2console("ERROR", "New user creation error: " + err);
 			return res.status(400).send(err.message);
 		}
 
@@ -347,7 +363,7 @@ app.post('/newuser', function(req,res){
 		});
 
 		passport.authenticate('local')(req, res, function () {
-			log2console("INFO", "Created new user " + req.body.username);
+			log2console("INFO", "Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
 			//measurement.send({
 			//	t:'event', 
 			//	ec:'System', 
@@ -869,6 +885,19 @@ app.post('/api/v1/command',
 		//	uid: req.user.username
 		//
 		//});
+
+		// Check validRange, no point in processing if directive values out of range
+		Devices.find({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
+			if (!err) {
+				if (device.hasOwnProperty('validRange')) {
+					console.log("INFO: Device validRange:" + JSON.stringify(devices.validRange));
+				}
+			}
+			else {
+				console.log("ERROR: Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+			}
+		});
+
 		var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 		//console.log("topic", topic)
 		delete req.body.directive.header.correlationToken;
@@ -922,6 +951,7 @@ app.put('/devices',
 			if (!err) {
 				res.status(201)
 				res.send(dev);
+				log2console("DEBUG", "New device created: " + JSON.stringify(dev));
 			} else {
 				res.status(500);
 				res.send(err);

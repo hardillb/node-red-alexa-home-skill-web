@@ -42,74 +42,101 @@
 				<span aria-hidden="true">&times;</span>
 			  </button>
 			</div>
+			<form class="form-device" id="form-device">
 			<div class="modal-body">
 				<div class="form-group">
 					<input id="devID" type="hidden">
 					<label for="friendlyName">Name: </label>
-					<input id="friendlyName" class="form-control" type="text">
+					<input id="friendlyName" class="form-control" type="text" required>
 					<br>
 					<label for="description">Description: </label>
 					<br>
-					<textarea id="description" class="form-control"></textarea>
+					<textarea id="description" class="form-control" required></textarea>
 				</div>
 				<!-- <fieldset class="action" id="capabilityType"> -->
 				<div class="row" align="justify">
-				<div class="col-sm">
-				<fieldset class="form-group" id="capabilityType">
-						<legend>Capabilities</legend>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="BrightnessController"> Brightness Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="ColorController"> Color Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="ColorTemperatureController"> Color Temperature Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="InputController"> Input Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Lock Control" type="checkbox" class="form-check-input" name="capabilities" id="LockController" value="LockController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="LockController"> Lock Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Playback Control" type="checkbox" class="form-check-input" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="PlaybackController"> Playback Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Power Control" type="checkbox" class="form-check-input" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="PowerController"> Power Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Scene Control" type="checkbox" class="form-check-input" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="SceneController"> Activity/ Scene </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="StepSpeaker"> Speaker Control </label>
-							<br />
-						</div>
-						<div class="form-check">
-								<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point)</label>
-						</div>
-				</fieldset>
-				</div>
-				<div class="col-sm">
-				<fieldset class="form-group">
+					<div class="col-sm">
+						<fieldset class="form-group" id="capabilityType">
+							<legend>Capabilities</legend>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="BrightnessController"> Brightness Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="ColorController"> Color Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="ColorTemperatureController"> Color Temperature Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="InputController"> Input Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Lock Control" type="checkbox" class="form-check-input" name="capabilities" id="LockController" value="LockController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="LockController"> Lock Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Playback Control" type="checkbox" class="form-check-input" name="capabilities" id="PlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="PlaybackController"> Playback Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Power Control" type="checkbox" class="form-check-input" name="capabilities" id="PowerController" value="PowerController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="PowerController"> Power Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Scene Control" type="checkbox" class="form-check-input" name="capabilities" id="SceneController" value="SceneController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="SceneController"> Activity/ Scene </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="StepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="StepSpeaker"> Speaker Control </label>
+								<br />
+							</div>
+							<div class="form-check">
+									<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
+								<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point) </label>
+							</div>
+							<div id="validRangeOptions">
+								<br>
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+											<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>
+									</div>		
+									<input id="minimumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
+								</div>
+								<div class="input-group mb-3">
+										<div class="input-group-prepend">
+												<span class="input-group-text" id="inputGroup-sizing-default">Max Value (°/K)</span>
+										</div>		
+										<input id="maximumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
+								</div>
+							</div>
+							<div id="validRangeScaleOptions">
+								<div class="form-check form-check-inline" style="padding-left:5px;">
+									<input class="form-check-input" type="radio" name="radioScale" id="Celcius" value="Celcius" disabled>
+									<br>
+									<label class="form-check-label" id="lblCelcius" for="Celcius">°Celcius</label>
+								</div>
+								<div class="form-check form-check-inline" style="padding-top: 10px;">
+									<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
+									<label class="form-check-label" id="lblFarenheit" for="Farenheit">°Farenheit</label>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+					<div class="col-sm">
+					<fieldset class="form-group">
 						<legend>Alexa App Icon</legend>
 						<!-- <fieldset class="action" id="capabilityType"> -->
 						<div class="form-check">
@@ -151,29 +178,100 @@
 							<input type="radio" class="form-check-input" id="THERMOSTAT" name="appType" value="THERMOSTAT">
 							<label class="form-check-label" for="THERMOSTAT">Thermostat </label>
 						</div>
-				</fieldset>
-				</div>
+					</fieldset>
 				</div>
 			</div>
 			<div class="modal-footer">
-			  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-			  <button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button class="btn btn-primary" id="submit" type="submit" value="submit">Save</button>
+				<!-- <button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button> -->
+			</div>
+			</form>
 			</div>
 		  </div>
 		</div>
 	</div>
 
 	<script>
+			
+	$("#form-device").submit(function(e) {
+		e.preventDefault();
+		saveDevice()
+	});
+
+	// Enable/ disable minimumValue/ maximumValue and scale elements
+	$("#ThermostatController").change(function(e) {
+		if ( $(this).is(':checked') == false) {
+			$('#validRangeOptions').hide();
+			$('#validRangeScaleOptions').hide();
+			$('#maximumValue').attr("disabled", "disabled"); 
+			$('#minimumValue').attr("disabled", "disabled");
+			$('#Celcius').attr("disabled", "disabled"); 
+			$('#Farenheit').attr("disabled", "disabled");
+			$("#maximumValue").prop('required',false);
+			$("#minimumValue").prop('required',false);
+			$("#Celcius").prop('required',false);
+			$("#Farenheit").prop('required',false);
+		}
+		else {
+			$('#validRangeOptions').show();
+			$('#validRangeScaleOptions').show();
+			$('#maximumValue').removeAttr("disabled"); 
+			$('#minimumValue').removeAttr("disabled");
+			$('#Celcius').removeAttr("disabled");
+			$('#Farenheit').removeAttr("disabled");
+			$("#maximumValue").prop('required',true);
+			$("#minimumValue").prop('required',true);
+			$("#Celcius").prop('required',true);
+			$("#Farenheit").prop('required',true);
+		}
+	});
+
+	// Enable/ disable minimumValue/ maximumValue elements
+	$("#ColorTemperatureController").change(function(e) {
+		if ( $(this).is(':checked') == false ) {
+			$('#validRangeOptions').hide();
+			$('#maximumValue').attr("disabled", "disabled"); 
+			$('#minimumValue').attr("disabled", "disabled");
+			$("#maximumValue").prop('required',false);
+			$("#minimumValue").prop('required',false);
+		}
+		else {
+			$('#validRangeOptions').show();
+			$('#maximumValue').removeAttr("disabled"); 
+			$('#minimumValue').removeAttr("disabled");
+			$("#maximumValue").prop('required',true);
+			$("#minimumValue").prop('required',true);
+		}
+	});
+
 	function saveDevice() {
 		var devID = $('#devID').val();
 		// Add New Device
 		if ( devID === "") {
 			var device = {
 				capabilities: [],
-				displayCategories: []
+				displayCategories: [],
 			};
 			device.friendlyName = $('#friendlyName').val();
 			device.description = $('#description').val();
+
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				var scale;
+				$('input[name=radioScale]').each(function(index){
+					if (this.checked) {
+						scale = this.value;
+					}
+				});
+			}
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				device.validRange = {
+						minimumValue: $('#minimumValue').val(),
+						maximumValue: $('#maximumValue').val(),
+						scale: scale
+					}
+			}
+
 			$('input[name=capabilities]').each(function(index){
 				if (this.checked) {
 					device.capabilities.push(this.value);
@@ -184,9 +282,8 @@
 					device.displayCategories.push(this.value);
 				}
 			});
-			console.log(device);
+
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
-				console.log("ajax put next");
 				$.ajax({
 					url:"/devices",
 					type: 'PUT',
@@ -194,11 +291,9 @@
 					dataType: 'json',
 					contentType: "application/json",
 					success: function(data){
-						console.log("put response");
-						console.log(data);
+						//console.log(data);
 						//reload
 						document.location.reload();
-						console.log("reload page");
 					}
 				}).fail(function(){
 					alert("failed to create device");
@@ -210,6 +305,23 @@
 			// Modify Existing Device
 			var device = devices[devID];
 			device.description = $('#description').val();
+
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				var scale;
+				$('input[name=radioScale]').each(function(index){
+					if (this.checked) {
+						scale = this.value;
+					}
+				});
+			}
+			if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+				device.validRange = {
+						minimumValue: $('#minimumValue').val(),
+						maximumValue: $('#maximumValue').val(),
+						scale: scale
+					}
+			}
+
 			device.capabilities = [];
 			$('input[name=capabilities]').each(function(index){
 				if (this.checked) {
@@ -231,17 +343,18 @@
 					dataType: 'json',
 					contentType: "application/json",
 					success: function(data){
-						console.log("post response");
-						console.log(data);
+						//console.log("post response");
+						//console.log(data);
 						//reload
 						document.location.reload();
 					},
 				});
-				console.log(device);
+				//console.log(device);
 			} else {
 				alert("Name or desciption can not be empty and at least one action is needed");
 			}
 		}
+		//$('#newDeviceModal').hide();
 	}
 	
 	function addDevice() {
@@ -262,6 +375,22 @@
 		$('input[name=appType]').each(function(index) {
 		  this.checked = false;
 		});
+		$('#validRangeOptions').hide();
+		$('#validRangeScaleOptions').hide();
+		$('#maximumValue').val(""); 
+		$('#minimumValue').val("");
+		$('#maximumValue').attr("disabled", "disabled"); 
+		$('#minimumValue').attr("disabled", "disabled");
+		$('#Celcius').attr("disabled", "disabled"); 
+		$('#Farenheit').attr("disabled", "disabled");
+		$("#maximumValue").prop('required',false);
+		$("#minimumValue").prop('required',false);
+		$("#Celcius").prop('required',false);
+		$("#Farenheit").prop('required',false);
+		$('input[name=radioScale]').each(function(index){
+			this.checked = false;
+		});
+		// Update Form Validation Requirements ??
 	}
 
 	function edit(id) {
@@ -278,7 +407,32 @@
 		device.displayCategories.forEach(function(type){
 			$('#' + type).prop('checked',true);
 		});
-		//checkCapability();
+
+		// Handle min/max and scale values
+		if (device.hasOwnProperty('validRange')) {
+			validRange = device.validRange;
+			if (validRange.hasOwnProperty('scale')) {
+				$('#validRangeScaleOptions').show();
+				$('#Celcius').removeAttr("disabled");
+				$('#Farenheit').removeAttr("disabled");
+				$("#Celcius").prop('required',true);
+				$("#Farenheit").prop('required',true);
+				$('#' + validRange.scale).prop('checked',true);
+			}
+			if (validRange.hasOwnProperty('maximumValue')) {
+				$('#validRangeOptions').show();
+				$("#maximumValue").prop('required',true);
+				$('#maximumValue').removeAttr("disabled"); 
+				$("#maximumValue").val(validRange.maximumValue);
+			}
+			if (validRange.hasOwnProperty('minimumValue')) {
+				$('#validRangeOptions').show();
+				$('#minimumValue').removeAttr("disabled");
+				$("#minimumValue").prop('required',true);
+				$("#minimumValue").val(validRange.minimumValue);
+			}
+			// Update Form Validation Requirements ??
+		}
 	}
 
 	function deleteDevice(id) {
