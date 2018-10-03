@@ -12,9 +12,10 @@ An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination
 |Power Control|On, Off|MQTT Out|Any MQTT-enabled switch, Socket etc|
 |Scene Control|Turn On|Multiple|String together a number of nodes for your scene, i.e. lighting, TV on, ACR on|
 |Speaker (Step)|+/- volume|Yamaha Music Cast Amplifier|[node-red-contrib-avr-yamaha](https://flows.nodered.org/node/node-red-contrib-avr-yamaha)|
-|Thermostats Control (Single setpoint only)|Set specific temp, increase/ decrease|MQTT Out|Any MQTT connected thermostat/HVAC|
+|Thermostats Control (Single setpoint only)|Set specific temp**, increase/ decrease|MQTT Out|Any MQTT connected thermostat/HVAC|
 
 \* *Scene Control and Thermostat Control cannot co-exist with other capabilities.*
+\*\* Min/ max temperature range set on Thermostat device at time of creation, bridge will not process commands outside of these values.
 
 Note there are 3 component parts to this service:
 * This Web Application/ Associated Databases, Authentication and MQTT services

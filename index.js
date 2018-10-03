@@ -28,7 +28,7 @@ if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_U
 }
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
-	log2console("WARNING","Using WEB_HOSTNAME for Mongodb and MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
+	log2console("WARNING","Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
 }
 // Warn on not supply of MAIL username/ password/ server
 if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
@@ -568,7 +568,7 @@ app.get('/api/v1/devices',
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
 			if (!error) {
-				log2console("INFO", "Running discovery for user:" + user);
+				log2console("INFO", "Running device discovery for user:" + user);
 				var devs = [];
 				for (var i=0; i< data.length; i++) {
 					var dev = {};
@@ -890,40 +890,37 @@ app.post('/api/v1/command',
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
-				//console.log("topic", topic)
+				var message = JSON.stringify(req.body);
+				var validationStatus = true;
+
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
-				//console.log(req.body)
-				var message = JSON.stringify(req.body);
+				
 				log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
 
-				// Check validRange, send 416 (Temperature Out of Range) response if values are out of range
-				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
-					var targetSetpoint = req.body.directive.payload.targetSetpoint.value;
-					// Handle Temperature Out of Range
-					if (targetSetpoint < data.validRange.minimumValue || targetSetpoint > data.validRange.maximumValue) {
-						log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + targetSetpoint + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
-						res.status(416).send();
-						//res.send(err);
-					}
-					else {
-						try{
-							mqttClient.publish(topic,message);
-							log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
-						} catch (err) {
-							log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
-						}
-						var command = {
-							user: req.user.username,
-							res: res,
-							timestamp: Date.now()
-						};
-				
-						// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
-						onGoingCommands[req.body.directive.header.messageId] = command;
+				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
+				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
+					var compare = req.body.directive.payload.colorTemperatureInKelvin;
+					// Handle Out of Range
+					if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
+						log2console("WARNING", "User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+						res.status(417).send();
+						validationStatus = false;
 					}
 				}
-				else {
+
+				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
+				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
+					var compare = req.body.directive.payload.targetSetpoint.value;
+					// Handle Temperature Out of Range
+					if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
+						log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+						res.status(416).send();
+						validationStatus = false;
+					}
+				}
+				
+				if (validationStatus) {
 					try{
 						mqttClient.publish(topic,message);
 						log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
@@ -935,12 +932,14 @@ app.post('/api/v1/command',
 						res: res,
 						timestamp: Date.now()
 					};
+			
 					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
 					onGoingCommands[req.body.directive.header.messageId] = command;
 				}
 			}
 			else {
 				log2console("ERROR", "Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				res.status(404).send();
 			}
 		});
 	}
