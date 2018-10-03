@@ -195,22 +195,22 @@
 		if ( $(this).is(':checked') == false) {
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
-			$('#CELCIUS').attr("disabled", "disabled"); 
-			$('#FARENHEIT').attr("disabled", "disabled");
+			$('#Celcius').attr("disabled", "disabled"); 
+			$('#Farenheit').attr("disabled", "disabled");
 			$("maximumValue").prop('required',false);
 			$("minimumValue").prop('required',false);
-			$("CELCIUS").prop('required',false);
-			$("FARENHEIT").prop('required',false);
+			$("Celcius").prop('required',false);
+			$("Farenheit").prop('required',false);
 		}
 		else {
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
-			$('#CELCIUS').removeAttr("disabled");
-			$('#FARENHEIT').removeAttr("disabled");
+			$('#Celcius').removeAttr("disabled");
+			$('#Farenheit').removeAttr("disabled");
 			$("maximumValue").prop('required',true);
 			$("minimumValue").prop('required',true);
-			$("CELCIUS").prop('required',true);
-			$("FARENHEIT").prop('required',true);
+			$("Celcius").prop('required',true);
+			$("Farenheit").prop('required',true);
 		}
 	});
 
@@ -268,7 +268,6 @@
 				}
 			});
 
-			console.log("DEBUG" + "New device created: " + JSON.stringify(device));
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
 				console.log("ajax put next");
 				$.ajax({
@@ -368,12 +367,12 @@
 		$('#minimumValue').val("");
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
-		$('#CELCIUS').attr("disabled", "disabled"); 
-		$('#FARENHEIT').attr("disabled", "disabled");
+		$('#Celcius').attr("disabled", "disabled"); 
+		$('#Farenheit').attr("disabled", "disabled");
 		$("maximumValue").prop('required',false);
 		$("minimumValue").prop('required',false);
-		$("CELCIUS").prop('required',false);
-		$("FARENHEIT").prop('required',false);
+		$("Celcius").prop('required',false);
+		$("Farenheit").prop('required',false);
 		$('input[name=radioScale]').each(function(index){
 			this.checked = false;
 		});
@@ -399,10 +398,10 @@
 			device.validRange.scale.forEach(function(scale){
 				$('#' + scale).prop('checked',true);
 			});
-			$('#CELCIUS').removeAttr("disabled");
-			$('#FARENHEIT').removeAttr("disabled");
-			$("CELCIUS").prop('required',true);
-			$("FARENHEIT").prop('required',true);
+			$('#Celcius').removeAttr("disabled");
+			$('#Farenheit').removeAttr("disabled");
+			$("Celcius").prop('required',true);
+			$("Farenheit").prop('required',true);
 		}
 		if (device.hasOwnProperty('maximumValue')) {
 			$("#maximumValue").val(device.validRange.maximumValue);

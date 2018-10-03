@@ -938,7 +938,7 @@ app.put('/devices',
 			if (!err) {
 				res.status(201)
 				res.send(dev);
-				console.log("DEBUG" + "New device created: " + JSON.stringify(dev));
+				log2console("DEBUG", "New device created: " + JSON.stringify(dev));
 			} else {
 				res.status(500);
 				res.send(err);
