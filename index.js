@@ -889,8 +889,8 @@ app.post('/api/v1/command',
 		// Check validRange, no point in processing if directive values out of range
 		Devices.find({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
-				if (devices.hasOwnProperty('validRange')) {
-					console.log("INFO: Device validRange:" + JSON.stringify(devices.validRange));
+				if (data.hasOwnProperty('validRange')) {
+					console.log("INFO: Device validRange:" + JSON.stringify(data.validRange));
 				}
 			}
 			else {
