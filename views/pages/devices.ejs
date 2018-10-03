@@ -402,7 +402,7 @@
 				$('#Farenheit').removeAttr("disabled");
 				$("Celcius").prop('required',true);
 				$("Farenheit").prop('required',true);
-				$('#' + scale).prop('checked',true);
+				$('#' + validRange.scale).prop('checked',true);
 			}
 			if (validRange.hasOwnProperty('maximumValue')) {
 				$("maximumValue").prop('required',true);
