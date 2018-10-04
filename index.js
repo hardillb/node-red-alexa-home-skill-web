@@ -886,7 +886,9 @@ app.post('/api/v1/command',
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				log2console("DEBUG", "Command received for device: " + JSON.stringify(data));
-				log2console("DEBUG", "Ddevice data object class: " + data.constructor.name);
+				log2console("DEBUG", "Device data object class: " + data.constructor.name);
+
+				var deviceJSON = JSON.parse(data);
 
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 				var validationStatus = true;
@@ -903,7 +905,7 @@ app.post('/api/v1/command',
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
 					// log2console("DEBUG", JSON.stringify(data))
 					// Handle Out of Range
-					if (data.hasOwnProperty('validRange')) {
+					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
 							log2console("WARNING", "User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
 							res.status(417).send();
@@ -918,7 +920,7 @@ app.post('/api/v1/command',
 					var compare = req.body.directive.payload.targetSetpoint.value;
 					// log2console("DEBUG", JSON.stringify(data))
 					// Handle Temperature Out of Range
-					if (data.hasOwnProperty('validRange')) {
+					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
 							log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
 							res.status(416).send();
