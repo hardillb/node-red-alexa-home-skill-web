@@ -816,20 +816,11 @@ mqttClient.on('message',function(topic,message){
 		if (waiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
-				waiting.res.status(200);
-				if (payload.extra) {
-					//console.log("sending contents from payload.extra");
-					log2console("INFO", "Sent succesfull HTTP response, with extra MQTT data.");
-					waiting.res.send(payload.extra);
-				} else {
-					//console.log("not sending extra");
-					log2console("INFO", "Sent succesfull HTTP response, no extra MQTT data.");
-					waiting.res.send({});
-				}
+				waiting.res.status(200).send();
+				log2console("INFO", "Sent succesfull MQTT command API response");				
 			} else {
-				//console.log("malfunction");
 				waiting.res.status(503).send();
-				
+				log2console("ERROR", "Malfunction on MQTT command API response");
 			}
 			delete onGoingCommands[payload.messageId];
 			// should really parse uid out of topic
@@ -904,7 +895,6 @@ app.post('/api/v1/command',
 				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
-					// log2console("DEBUG", JSON.stringify(data))
 					// Handle Out of Range
 					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
@@ -919,7 +909,6 @@ app.post('/api/v1/command',
 				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
 					var compare = req.body.directive.payload.targetSetpoint.value;
-					// log2console("DEBUG", JSON.stringify(data))
 					// Handle Temperature Out of Range
 					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {

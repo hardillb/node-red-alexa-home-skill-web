@@ -153,19 +153,14 @@
       <br>
       <p>You can change this by disabling the "Auto Acknowledge" option and using a Alexa Smart Home v3 Response Node.</p>
       <br>
-      <p>Any responses <b>must</b> be sent within <b>2 seconds</b> of the incoming request or the service will respond to Alexa with a 
-        timeout message.</p>
       <p><img class="img-fluid" src="/images/AutoAcknowledge.png" title="AutoAcknowledge"></p>
       <br>
       <h3>Alexa Smart Home v3 Response Node</h3>
-      <p>This node is for if you want to have more control over the response sent back to the Alexa service.</p>
+      <p>This node is for if you want to have more control success/ failure result back to Alexa Home Skill API.</p>
       <br>
-      <br>
-      <h4><b>Response Node Unused Functionality</b></h4>
-      <p>It is possible to use the "<b>payload.extra</b>" value to post information back from 
-        Node-RED > Web Service > Alexa Smart Skill.</p>
-
-      <p><b>At present this is not used across any of the capabilities.</b> This capability remains in place for future development.</p> 
+      <p>Add this node to your flow and ensure you set payload to <b>true</b> on success or <b>false</b> on failure. 
+        Any responses <b>must</b> be sent within <b>2 seconds</b> of the incoming request or the service will respond to Alexa with a 
+        timeout message.</p>
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
