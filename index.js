@@ -827,13 +827,9 @@ mqttClient.on('message',function(topic,message){
 					waiting.res.send({});
 				}
 			} else {
-				if (payload.extra && payload.extra.min) {
-					//console.log("out of range");
-					waiting.res.status(416).send(payload.extra);
-				} else {
-					//console.log("malfunction");
-					waiting.res.status(503).send();
-				}
+				//console.log("malfunction");
+				waiting.res.status(503).send();
+				
 			}
 			delete onGoingCommands[payload.messageId];
 			// should really parse uid out of topic

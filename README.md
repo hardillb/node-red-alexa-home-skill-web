@@ -5,7 +5,7 @@ An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination
 |--------|----------|-------------|-------------|
 |Brightness Control|0-100%, increase, reduce, dim|MQTT Out|Any MQTT-enabled bulb/ smart light|
 |Color Control|Red, Green, Blue, Purple, Yellow etc.|MQTT Out|Any MQTT-enabled bulb/ smart light|
-|Color Temperature Control|Warm, Warm White, Incandescent, Soft White, White, Daylight, Daylight White, Cool, Cool White|MQTT Out|Any MQTT-enabled bulb/ smart light|
+|Color Temperature Control|Warm, Warm White, Incandescent, Soft White, White, Daylight, Daylight White, Cool, Cool White***|MQTT Out|Any MQTT-enabled bulb/ smart light|
 |Input Control|HDMI1,HDMI2,HDMI3,HDMI4,phono,audio1,audio2 and "chromecast"|Yamaha Music Cast Amplifier|[node-red-contrib-avr-yamaha](https://flows.nodered.org/node/node-red-contrib-avr-yamaha)|
 |Lock Control|Lock, Unlock|MQTT Out|Any MQTT connected Lock|
 |Playback Control|Play, Pause, Stop|Kodi RPC|Http Response Node with [Kodi RPC Commands](https://kodi.wiki/view/JSON-RPC_API/Examples)|
@@ -15,7 +15,10 @@ An Alexa Smart Home API v3 Skill for use with Node Red - enables any combination
 |Thermostats Control (Single setpoint only)|Set specific temp**, increase/ decrease|MQTT Out|Any MQTT connected thermostat/HVAC|
 
 \* *Scene Control and Thermostat Control cannot co-exist with other capabilities.*
+
 \*\* Min/ max temperature range set on Thermostat device at time of creation, bridge will not process commands outside of these values.
+
+\*\*\* Color Temperature range set on device at creation (in Kelvin), bridge will not process commands outside of these values.
 
 Note there are 3 component parts to this service:
 * This Web Application/ Associated Databases, Authentication and MQTT services
