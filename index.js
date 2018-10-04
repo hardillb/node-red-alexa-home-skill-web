@@ -886,9 +886,9 @@ app.post('/api/v1/command',
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				log2console("DEBUG", "Command received for device: " + JSON.stringify(data));
-				log2console("DEBUG", "Device data object class: " + data.constructor.name);
+				//log2console("DEBUG", "Device data object class: " + data.constructor.name);
 
-				var deviceJSON = JSON.parse(data);
+				var deviceJSON = JSON.parse(JSON.stringify(data));
 
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 				var validationStatus = true;
