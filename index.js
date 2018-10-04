@@ -885,6 +885,8 @@ app.post('/api/v1/command',
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
+				log2console("DEBUG", "Command received for device: " + JSON.stringify(data))
+
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 				var validationStatus = true;
 
@@ -907,6 +909,7 @@ app.post('/api/v1/command',
 							validationStatus = false;
 						}
 					}
+					else {log2console("DEBUG", "Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
 				}
 
 				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
@@ -921,7 +924,7 @@ app.post('/api/v1/command',
 							validationStatus = false;
 						}
 					}
-
+					else {log2console("DEBUG", "Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
 				}
 				
 				if (validationStatus) {
