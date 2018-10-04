@@ -92,7 +92,7 @@ server.exchange(oauth2orize.exchange.code({
 server.exchange(oauth2orize.exchange.refreshToken({
 	userProperty: 'appl'
 }, function(application, token, scope, done){
-	console.log("Yay!");
+	//console.log("Yay, token refreshed!");
 	OAuth.RefreshToken.findOne({token: token}, function(error, refresh){
 		if (refresh && refresh.application == application.id) {
 			OAuth.GrantCode.findOne({},function(error, grant){

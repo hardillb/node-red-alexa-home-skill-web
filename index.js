@@ -898,24 +898,30 @@ app.post('/api/v1/command',
 				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
+					// log2console("DEBUG", JSON.stringify(data))
 					// Handle Out of Range
-					if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-						log2console("WARNING", "User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
-						res.status(417).send();
-						validationStatus = false;
+					if (data.hasOwnProperty('validRange')) {
+						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
+							log2console("WARNING", "User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+							res.status(417).send();
+							validationStatus = false;
+						}
 					}
 				}
 
 				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
 					var compare = req.body.directive.payload.targetSetpoint.value;
-					log2console("DEBUG", JSON.stringify(data))
+					// log2console("DEBUG", JSON.stringify(data))
 					// Handle Temperature Out of Range
-					if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-						log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
-						res.status(416).send();
-						validationStatus = false;
+					if (data.hasOwnProperty('validRange')) {
+						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
+							log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+							res.status(416).send();
+							validationStatus = false;
+						}
 					}
+
 				}
 				
 				if (validationStatus) {
