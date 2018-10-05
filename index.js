@@ -84,6 +84,8 @@ mqttClient.on('reconnect', function(){
 mqttClient.on('connect', function(){
 	log2console("INFO", "MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
+	log2console("INFO", "MQTT connected, subscribing to 'state/#'")
+	mqttClient.subscribe('response/#');
 });
 
 // Connect to Mongo Instance
@@ -470,7 +472,7 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 				log2console("INFO", "Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
 				if (uri.host == application.domains[i] || (uri.protocol == application.domains[i] && uri.protocol != 'http' && uri.protocol != 'https')) {
 					match = true;
-					log2console("INFO", "Found Service definition associated with redirecURI: " + redirectURI);
+					log2console("INFO", "Found Service definition associated with redirectURI: " + redirectURI);
 					break;
 				}
 			}
@@ -817,7 +819,7 @@ mqttClient.on('message',function(topic,message){
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				waiting.res.status(200).send();
-				log2console("INFO", "Sent succesfull MQTT command API response");				
+				log2console("INFO", "Sent succesful MQTT command API response");				
 			} else {
 				waiting.res.status(503).send();
 				log2console("ERROR", "Malfunction on MQTT command API response");
@@ -861,6 +863,31 @@ var timeout = setInterval(function(){
 	}
 },500);
 
+
+// API to process inbound request state, currently not used - in development
+app.post('api/v1/state',
+	passport.authenticate('bearer', { session: false }),
+	function(req,res,next){
+
+		// Identify device, we know who user is from request
+		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
+
+			// Plan - in relation to https://developer.amazon.com/docs/smarthome/state-reporting-for-a-smart-home-skill.html#report-state-when-alexa-requests-it
+				// Change MQTT topic from 'presence' (unused) to 'state' on new account setup/ MQTT super-user setup - DONE
+				// Create subscription on MQTT connect to state/# on service startup - DONE
+				// Update existing users, replacing presence with state in allowed/ ACL'd MQTT topics - DONE
+				// Create new Node Red node with device binding/ selection as per output for this skill to listen to MQTT events for a bridge-enabled device
+				// Extend devices schema to include a 'lastKnownState' object
+				// Store needed state data in MongoDB
+				// Use this API to query that stored state data on demand
+					// Use mqtt on message, add handler for 'state' similar to response handler
+				// Modify Lambda function to accept namespace Alexa namespace ReportState and query state via this API endpoint
+
+		});
+	}
+);
+
+// API to process/ execute inbound command
 app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
