@@ -141,7 +141,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			mqtt_password, function(err, account){
 			var topics = new Topics({topics: [
 					'command/' +account.username+'/#', 
-					'presence/' + account.username + '/#',
+					'state/' + account.username + '/#',
 					'response/' + account.username + '/#'
 				]});
 			topics.save(function(err){
@@ -342,7 +342,7 @@ app.post('/newuser', function(req,res){
 
 		var topics = new Topics({topics: [
 				'command/' + account.username +'/#', 
-				'presence/'+ account.username + '/#',
+				'state/'+ account.username + '/#',
 				'response/' + account.username + '/#'
 			]});
 		topics.save(function(err){
