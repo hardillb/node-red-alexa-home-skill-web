@@ -38,6 +38,7 @@ With the main changes being:
 * All NodeJS web-app pre-reqs being upgraded to vCurrent
 * Remediation of various, depreciated NodeJS/ Mongoose functions
 * Move to MongoDB Sessions vs Express Sessions
+* API-driven temperature/ value out of range errors
 
 # Service Architecture
 The service has two external endpoints:

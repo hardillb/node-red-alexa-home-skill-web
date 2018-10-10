@@ -41,6 +41,27 @@
       available via MQTT and HTTP.
       <br>
       <br>
+      <h3>Brightness Controller</h3>
+      <p>This flow shows a simple Brightness Controller example for a Smart Dimmer Switch/ Bulb, this can be used to switch a device on and off, plus control brightness.</p>
+      <p>Invoke this controller using a command similar to <b>"Alexa, set Bedroom Light to 50%" or "Alexa, dim Bedrrom Light"</b></p>
+      <p><img class="img-fluid" src="/images/BrightnessControllerExample.png" title="PowerControllerExample"></p>
+      <p>You can import the Brightness Controller example:</p>
+      <pre style="background-color:lightgrey;">[{"id":"2b763b50.43b514","type":"alexa-smart-home-v3","z":"affa0b92.8813b8","conf":"bfd0fcf4.bc90e","device":"29","acknowledge":true,"name":"Bedroom Light","topic":"","x":160,"y":760,"wires":[["523e5cc9.b92f94"]]},{"id":"523e5cc9.b92f94","type":"function","z":"affa0b92.8813b8","name":"Handle Power and Brightness Commands","func":"if (msg.command == \"TurnOn\" || msg.command == \"TurnOff\") {\n    msg.topic = \"cmnd/sonoff-ydm-1/POWER\"\n    return msg;\n}\nelse if (msg.command == \"SetBrightness\") {\n    msg.topic = \"cmnd/sonoff-ydm-1/Dimmer\"\n    return msg;\n}\nelse if (msg.command == \"AdjustBrightness\") {\n    if (msg.payload > 0) {\n        msg.topic = \"cmnd/sonoff-ydm-1/Dimmer\"\n        msg.payload = \"+\"\n        return msg;\n    }\n    else if (msg.payload < 0) {\n        msg.topic = \"cmnd/sonoff-ydm-1/Dimmer\"\n        msg.payload = \"-\"\n        return msg;\n    }\n}\n\n\n","outputs":1,"noerr":0,"x":460,"y":760,"wires":[["c84504cb.70e698"]]},{"id":"c84504cb.70e698","type":"mqtt out","z":"affa0b92.8813b8","name":"Change Main Light Power Status","topic":"","qos":"0","retain":"false","broker":"b6672662.6651a8","x":840,"y":760,"wires":[]},{"id":"b6672662.6651a8","type":"mqtt-broker","z":"","name":"","broker":"","port":"8883","tls":"bb6d52a1.90f3b","clientid":"node-red","usetls":true,"compatmode":true,"keepalive":"60","cleansession":true,"birthTopic":"","birthQos":"0","birthPayload":"","closeTopic":"","closeQos":"0","closePayload":"","willTopic":"","willQos":"0","willPayload":""},{"id":"bb6d52a1.90f3b","type":"tls-config","z":"","name":"Server Certificate Only","cert":"","key":"","ca":"","certname":"","keyname":"","caname":"","verifyservercert":true}]</pre>
+      <p>Example output for Brightness Controller:</p>
+      <pre style="background-color:lightgrey">
+            msg : Object
+            object
+            topic: ""
+            name: "Bedroom Light"
+            _messageId: "93831369-6a4f-4f47-b4bc-3eed85ae7355"
+            _endpointId: "29"
+            _confId: "bfd0fcf4.bc90e"
+            command: "AdjustBrightness"
+            extraInfo: object
+            empty
+            payload: 25
+            _msgid: "87dc2e04.f465a"
+      </pre>
       <h3>Power Controller</h3>
       <p>This flow shows a simple Power Controller example for a Smart Light Switch, this can be used to switch a device on and off.</p>
       <p>Invoke this controller using a command similar to <b>"Alexa, turn on Kitchen Light"</b></p>
