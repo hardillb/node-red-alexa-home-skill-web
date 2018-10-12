@@ -408,8 +408,12 @@
 			$('#' + type).prop('checked',true);
 		});
 
-		// Handle min/max and scale values
-		if (device.hasOwnProperty('validRange')) {
+		// ColorTemperatureController
+		var colorTemperature = $('#ColorTemperatureController').prop('checked');
+		var thermostat = $('#ThermostatController').prop('checked');
+
+		// Handle min/max and scale values, only show if ThermostatController or ColorTemperatureController
+		if (device.hasOwnProperty('validRange') && ( colorTemperature || thermostat ) ) {
 			validRange = device.validRange;
 			if (validRange.hasOwnProperty('scale')) {
 				$('#validRangeScaleOptions').show();
