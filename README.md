@@ -239,7 +239,7 @@ sudo docker create --name mosquitto \
 -v /var/docker/ssl:/etc/letsencrypt \
 -v /var/docker/mosquitto/config:/mosquitto/config \
 -v /var/docker/mosquitto/data:/mosquitto/data \
-mosquitto-auth:0.2
+mosquitto-auth:0.1
 ```
 
 ## NodeJS WebApp Container
@@ -248,7 +248,7 @@ A customer container is created using [nodejs-webapp.dockerfile](nodejs-webapp.d
 mkdir nodejs-webapp
 cd nodejs-webapp/
 git clone https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
-sudo docker build -t nr-alexav3-web:0.1 -f nodejs-webapp.dockerfile .
+sudo docker build -t nr-alexav3-web:0.2 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
