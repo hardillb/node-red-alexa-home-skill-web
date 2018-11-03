@@ -16,7 +16,7 @@
       <div class="col-sm"><%= service.oauth_secret %></div>
       <div class="col-sm"><%= service.domains.join(',') %></div>
       <button class="btn btn-secondary" onclick="edit('<%= service._id %>')">Edit</button>
-      <button class="btn btn-secondary" style="padding-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button>
+      <button class="btn btn-secondary" style="margin-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button>
     </div>
   <% }); %>
 
