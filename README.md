@@ -395,7 +395,7 @@ From the top right of the Lambda console, copy the "ARN", i.e. arn:aws:lambda:eu
 ## Configure Web Service OAuth
 * Browse to https://`<hostname>`/admin/services, create a new service using the same numerical secret above
 
-[!OAuth Service definition](/images/oAuthSvc.png)
+![OAuth Service definition](/images/oAuthSvc.png "Exmple OAuth Service")
 
 
 ## DNS/ Firewall/ HTTPS/ TLS
