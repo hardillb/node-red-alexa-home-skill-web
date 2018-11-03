@@ -393,6 +393,7 @@ From the top right of the Lambda console, copy the "ARN", i.e. arn:aws:lambda:eu
 * Domain List: `<hostname used to publish web service>`
 
 ## Configure Web Service OAuth
+* Browse to https://`<hostname>` and login to the Web Service using the credentials supplied in launching the Web App container via MONGO_USER and MONGO_PASSWORD
 * Browse to https://`<hostname>`/admin/services, create a new service using the same numerical secret above
 
 ![OAuth Service definition](/static/images/oAuthSvc.png "Exmple OAuth Service")
