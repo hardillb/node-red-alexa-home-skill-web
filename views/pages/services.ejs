@@ -120,7 +120,8 @@
 
   function edit(id) {
     clearService();
-    $("#dialog").dialog("open");
+    // $("#dialog").dialog("open");
+    $("#newServiceModal").modal();
     var service = services[id];
     console.log(service);
     $('#servID').val(service._id);
