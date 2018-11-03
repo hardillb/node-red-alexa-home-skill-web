@@ -239,7 +239,7 @@ sudo docker create --name mosquitto \
 -v /var/docker/ssl:/etc/letsencrypt \
 -v /var/docker/mosquitto/config:/mosquitto/config \
 -v /var/docker/mosquitto/data:/mosquitto/data \
-mosquitto-auth:0.1
+mosquitto-auth:0.2
 ```
 
 ## NodeJS WebApp Container
@@ -252,6 +252,7 @@ sudo docker build -t nr-alexav3-web:0.1 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
 ```
+export WEB_HOSTNAME=<fqdn of web service>
 export MQTT_URL=mqtt://<mqtt docker container name>
 export MQTT_USER=<username>
 export MQTT_PORT=<port>
@@ -268,6 +269,7 @@ sudo docker create \
 --name nr-alexav3-webb \
 -p 3000:3000 \
 -v /var/docker/ssl:/etc/letsencrypt \
+-e WEB_HOSTNAME=$WEB_HOSTNAME \
 -e MQTT_URL=$MQTT_URL \
 -e MQTT_PORT=$MQTT_PORT \
 -e MQTT_USER=$MQTT_USER \
