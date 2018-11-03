@@ -91,19 +91,18 @@ MongoDB and Mosquitto container names are **critical** for deployment to be succ
 \* *Note that 1883 is only available within hosting environment, 8338 is only available via Internet-based devices.
 
 ## Service Accounts
-WebApp mongodb account:
-* **user home database**: user
-* **account**: node-red-alexa
+Three MongoDB accounts are required for this service - these are all created using the scripts/ documentation below, do not create these accounts manually.
+
+WebApp users database account (to create/ read user objects):
+* **user home database**: users
 * **role**: readWrite on users db
 
-WebApp mongodb account:
-* **user home database**: user
-* **account**: node-red-alexa
+WebApp sessions database account (to create/ manage web sessions):
+* **user home database**: sessions
 * **role**: dbOwner on sessions db
 
-MQTT mongodb account:
+MQTT database account (used with mosquitto-auth-plug for mosquitto/ MQTT access):
 * **user home database**: admin
-* **account**: node-red-alexa
 * **role**: read on users db
 
 ## Data Flow
@@ -163,6 +162,11 @@ mongo
 
 sudo docker start mongod
 ```
+
+On first launch the init script should run, creating all of the required MongoDB users, as [outlined above.](https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/README.md#service-accounts)
+
+The credentials defined under WEB_USER/ WEB_PASSWORD are your superuser account, required for setting up OAuth in the Web Service.
+
 ## Certificate
 We will use the same SSL certificate to protect the NodeJS and MQTT services. Ensure that, before running these commands, your hosting solution has HTTPS connectivity enabled.
 
@@ -393,7 +397,7 @@ From the top right of the Lambda console, copy the "ARN", i.e. arn:aws:lambda:eu
 * Domain List: `<hostname used to publish web service>`
 
 ## Configure Web Service OAuth
-* Browse to https://`<hostname>` and login to the Web Service using the credentials supplied in launching the Web App container via MONGO_USER and MONGO_PASSWORD
+* Browse to https://`<hostname>` and login to the Web Service using the [credentials supplied in launching the Web App container via MONGO_USER and MONGO_PASSWORD](https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/README.md#nodejs-webapp-container)
 * Browse to https://`<hostname>`/admin/services, create a new service using the same numerical secret above
 
 ![OAuth Service definition](/static/images/oAuthSvc.png "Exmple OAuth Service")
