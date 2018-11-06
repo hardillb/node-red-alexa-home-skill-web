@@ -212,6 +212,7 @@ sudo docker build -t mosquitto-auth:0.1 -f mosquitto.dockerfile .
 sudo mkdir -p /var/docker/mosquitto/config/conf.d
 sudo mkdir -p /var/docker/mosquitto/data
 sudo chown 101:root /var/docker/mosquitto/log/
+sudo chown 101:root /var/docker/mosquitto/data/
 
 cd /var/docker/mosquitto/config
 sudo wget -O mosquitto.conf https://gist.github.com/coldfire84/9f497c131d80763f5bd8408762581fe6/raw/9a9fd7790e4edb5f0129e9a5ff0bd7449b43dffd/mosquitto.conf
