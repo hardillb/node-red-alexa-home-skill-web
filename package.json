@@ -36,6 +36,7 @@
     "querystring": "^0.2.0",
     "request": "^2.79.0",
     "rotating-file-stream": "^1.3.6",
+    "simple-node-logger": "^0.93.40",
     "uid2": "0.0.3"
   },
   "devDependencies": {

@@ -16,8 +16,17 @@ var Measurement = require('./googleMeasurement.js');
 var cookieParser = require('cookie-parser');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
+var SimpleNodeLogger = require('simple-node-logger');
 var PassportOAuthBearer = require('passport-http-bearer');
 
+var loggingOptions = {
+	logDirectory: 'log',
+	fileNamePattern:'debug-<DATE>.log',
+	timestampFormat:'YYYY-MM-DD HH:mm:ss.SSS',
+	dateFormat:'YYYY.MM.DD'
+};
+
+var logger = SimpleNodeLogger.createRollingFileLogger(loggingOptions);
 
 var oauthServer = require('./oauth');
 
@@ -147,6 +156,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 						{ multi: false },
 						function(err, count){
 							if (err) {
+								logger.info("error adding MQTT account\n", err);
 								console.log(err);
 							}
 						}
@@ -232,10 +242,10 @@ passport.deserializeUser(Account.deserializeUser());
 
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-		if (!error) {
-			// console.log("db token: " + token.active);
-			// console.log("db token.grant : " + token.grant.active);
-			// console.log("db token.user: " + token.user);
+		if (!error && token) {
+			logger.info("db token: ", token.active);
+			logger.info("db token.grant : ", token.grant.active);
+			logger.ifo("db token.user: ", token.user);
 		}
 		if (!error && token && token.active && token.grant.active && token.user) {
 			// console.log("Token is GOOD!");
@@ -313,6 +323,7 @@ app.get('/newuser', function(req,res){
 app.post('/newuser', function(req,res){
 	Account.register(new Account({ username : req.body.username, email: req.body.email, mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
+			logger.info("new user problem\n", err);
 			console.log(err);
 			return res.status(400).send(err.message);
 		}
@@ -344,6 +355,7 @@ app.post('/newuser', function(req,res){
 		});
 
 		passport.authenticate('local')(req, res, function () {
+			logger.info("created new user ", req.body.username);
 			console.log("created new user %s", req.body.username);
 			measurement.send({
 				t:'event', 
@@ -394,6 +406,7 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						//console.log("Chagned %s's password", u.username);
 						res.status(200).send();
 					} else {
+						logger.info("Error changing ", u.username, "'s password");
 						console.log("Error changing %s's password", u.username);
 						console.log(error);
 						res.status(400).send("Problem setting new password");
@@ -552,6 +565,7 @@ app.get('/api/v1/devices',
 
 					devs.push(dev);
 				}
+				logger.info(user , " discovering " , JSON.stringify(devs) );
 				//console.log(devs)
 				res.send(devs);
 			}	
