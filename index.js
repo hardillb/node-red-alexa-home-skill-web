@@ -245,7 +245,7 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 		if (!error && token) {
 			logger.info("db token: ", token.active);
 			logger.info("db token.grant : ", token.grant.active);
-			logger.ifo("db token.user: ", token.user);
+			logger.info("db token.user: ", token.user);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
 			// console.log("Token is GOOD!");
