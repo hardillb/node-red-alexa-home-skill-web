@@ -564,18 +564,15 @@ app.get('/api/v1/devices',
 					dev.friendlyName = data[i].friendlyName;
 					dev.description = data[i].description;
 					dev.endpointId = "" + data[i].endpointId;
-					// Call replaceCapability to replace placeholder capabilities
-					// dev.capabilities = replaceCapability(data[i].capabilities);
-
-					// Handle multiple capabilities
+					dev.reportState = data[i].reportState;
+					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
 					dev.capabilities = [];
 					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability))
+						dev.capabilities.push(replaceCapability(capability, dev.reportState))
 					});
-
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
-					dev.version = "0.0.2";
+					dev.version = "0.0.3";
 					dev.manufacturerName = "Node-RED"
 					devs.push(dev);
 				}
@@ -587,7 +584,7 @@ app.get('/api/v1/devices',
 );
 
 // Alexa discovery response related-capabilties, function replaces 'placeholders' stored under device.capabilities
-function replaceCapability(capability) {
+function replaceCapability(capability, reportState) {
 	// console.log(capability)
 
 	// InputController, pre-defined 4x HDMI inputs and phono
@@ -634,7 +631,7 @@ function replaceCapability(capability) {
 					"name": "powerState"
 				}],
 				"proactivelyReported": false,
-				"retrievable": false
+				"retrievable": reportState
 				}
 			};
 	}
@@ -650,7 +647,7 @@ function replaceCapability(capability) {
 					"name": "powerState"
 				}],
 				"proactivelyReported": false,
-				"retrievable": false
+				"retrievable": reportState
 				}
 			},
 			{
@@ -713,7 +710,7 @@ function replaceCapability(capability) {
                 }
               ],
 			  "proactivelyReported": false,
-			  "retrievable": false
+			  "retrievable": reportState
             },
             "configuration": {
               "supportsScheduling": true,
@@ -737,7 +734,7 @@ function replaceCapability(capability) {
 						"name": "color"
 					}],
 					"proactivelyReported": false,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -753,7 +750,7 @@ function replaceCapability(capability) {
 						"name": "colorTemperatureInKelvin"
 					}],
 					"proactivelyReported": false,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -769,7 +766,7 @@ function replaceCapability(capability) {
 						"name": "brightness"
 					}],
 					"proactivelyReported": false,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -785,7 +782,7 @@ function replaceCapability(capability) {
 						"name": "lockState"
 					}],
 					"proactivelyReported": false,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -801,14 +798,14 @@ mqttClient.on('message',function(topic,message){
 		log2console("INFO", "Acknowledged MQTT response for topic: " + topic);
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
-		var waiting = onGoingCommands[payload.messageId];
-		if (waiting) {
+		var commandWaiting = onGoingCommands[payload.messageId];
+		if (commandWaiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
-				waiting.res.status(200).send();
+				commandWaiting.res.status(200).send();
 				log2console("INFO", "Sent succesful MQTT command API response");				
 			} else {
-				waiting.res.status(503).send();
+				commandWaiting.res.status(503).send();
 				log2console("ERROR", "Malfunction on MQTT command API response");
 			}
 			delete onGoingCommands[payload.messageId];
@@ -822,11 +819,38 @@ mqttClient.on('message',function(topic,message){
 		}
 	}
 	else if (topic.startsWith('state/')){
-		// Add message to onGoingCommands
-		// Use messageId, capability and payload from MQTT message
-		// User username and endpointId from MQTT topic
-		// Update lastKnownState using updatestate(username, endpointId)
+		log2console("INFO", "Acknowledged MQTT state for topic: " + topic);
+		// Split topic/ get username and endpointId
+		var arrTopic = topic.split("/"); 
+		var username = arrTopic[1];
+		var endpointId = arrTopic[2];
+		// Payload will contain state attribute
+		var payload = JSON.parse(message.toString());
+		//console.log("response payload", payload)
+
+		// Call setstate to update attribute in mongodb
+		log2console("INFO","Calling setstate for user:" + username + " endpointId:" + endpointId);
+		log2console("INFO","setstate payload:" + payload);
+		setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
+
+		// Add message to onGoingCommands ??
+		var stateWaiting = onGoingCommands[payload.messageId];
+		if (stateWaiting) {
+			stateWaiting.res.status(200).send();
+			log2console("INFO", "Succesful MQTT state update for user:" + username + " device:" + endpointId);				
+		} else {
+			stateWaiting.res.status(503).send();
+			log2console("ERROR", "Malfunction on MQTT state update for user:" + username + " device:" + endpointId);
+		}
 		// If successful remove messageId from onGoingCommands
+		delete onGoingCommands[payload.messageId];
+		// should really parse uid out of topic
+		//measurement.send({
+		//	t:'event', 
+		//	ec:'command', 
+		//	ea: 'complete',
+		//	uid: waiting.user
+		//});
 	}
 	else {
 		log2console("DEBUG", "Unhandled MQTT via on message event handler: " + topic + message);
@@ -857,24 +881,188 @@ var timeout = setInterval(function(){
 	}
 },500);
 
-
-// Respond to Alexa Request for State, currently not used - in development
+// API to get device state from MongoDB
 app.get('/api/v1/getstate',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		// Identify device, we know who user is from request
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
-				// Convert "model" object class to JSON object so that properties are query-able
-				var deviceJSON = JSON.parse(JSON.stringify(data));
+				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
 				// Plan - in relation to https://developer.amazon.com/docs/smarthome/state-reporting-for-a-smart-home-skill.html#report-state-when-alexa-requests-it
-				// Use this API to query that stored lastKnownState data in MongoDB
-				// Modify Lambda function to accept namespace Alexa namespace ReportState and query state via this API endpoint
+				if (deviceJSON.hasOwnProperty('reportState')) {
+					if (deviceJSON.reportState = true) { // Only respond if device element 'reportState' is set to true
+						if (deviceJSON.hasOwnProperty('state')) {
+								// Inspect state element and build response based upon device type /state contents
+								// Will need to group multiple states into correct update format
+								var response = {};
+								response.context = {};
+								var properties= [];
+								var messageId = req.body.directive.header.messageId;
+								var endpointId = req.body.directive.endpoint.endpointId;
+								var correlationToken = req.body.directive.header.correlationToken;
+								deviceJSON.capabilities.forEach(function(capability) {
+									switch (capability)  {
+										case "BrightnessController":
+											// Return brightness percentage
+											if (deviceJSON.state.hasOwnProperty('brightness') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+														"namespace": "Alexa.BrightnessController",
+														"name": "brightness",
+														"value": deviceJSON.state.brightness,
+														"timeOfSample": deviceJSON.state.time,
+														"uncertaintyInMilliseconds": 1000
+													});
+											}
+											break;
+										case "ColorController":
+											// Return color
+											if (deviceJSON.state.hasOwnProperty('colorHue') && deviceJSON.state.hasOwnProperty('colorSaturation') && deviceJSON.state.hasOwnProperty('brightness') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+														"namespace": "Alexa.ColorController",
+														"name": "color",
+														"value": {
+															"hue": deviceJSON.state.colorHue,
+															"saturation": deviceJSON.state.colorSaturation,
+															"brightness": deviceJSON.state.brightness
+														},
+														"timeOfSample": deviceJSON.state.time,
+														"uncertaintyInMilliseconds": 1000
+														});
+												}
+											break;
+										case "ColorTemperatureController":
+											// Return color temperature
+											if (deviceJSON.state.hasOwnProperty('colorTemperature') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+														"namespace": "Alexa.ColorTemperatureController",
+														"name": "colorTemperatureInKelvin",
+														"value": deviceJSON.state.colorTemperature,
+														"timeOfSample": deviceJSON.state.time,
+														"uncertaintyInMilliseconds": 1000
+													});
+											}
+											break;
+										case "InputController":
+											// Return Input
+											if (deviceJSON.state.hasOwnProperty('input') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+														"namespace": "Alexa.InputController",
+														"name": "input",
+														"value": deviceJSON.state.input,
+														"timeOfSample": deviceJSON.state.time,
+														"uncertaintyInMilliseconds": 1000
+													});
+											}
+											break;
+										case "LockController":
+											// Return Lock State
+											if (deviceJSON.state.hasOwnProperty('lock') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+														"namespace": "Alexa.LockController",
+														"name": "lockState",
+														"value": deviceJSON.state.lock,
+														"timeOfSample": deviceJSON.state.time,
+														"uncertaintyInMilliseconds": 1000
+													});
+											}
+											break;
+										case "PlaybackController":
+											// Return Playback State - no reportable state as of November 2018
+											break;
+										case "PowerController":
+											// Return Power State
+											if (deviceJSON.state.hasOwnProperty('power') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+															"namespace": "Alexa.PowerController",
+															"name": "powerState",
+															"value": deviceJSON.state.power,
+															"timeOfSample": deviceJSON.state.time,
+															"uncertaintyInMilliseconds": 1000
+													});
+											}
+											break;
+										case "ThermostatController":
+											// Return Temperature
+											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('scale') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push =({
+														"namespace":"Alexa.ThermostatController",
+														"name":"targetSetpoint",
+														"value":{  
+															"value":deviceJSON.state.thermostatSetPoint,
+															"scale":deviceJSON.validRange.scale
+															},
+														"timeOfSample":deviceJSON.state.time,
+														"uncertaintyInMilliseconds":1000
+													});
+												properties.push =({
+														"namespace":"Alexa.ThermostatController",
+														"name":"thermostatMode",
+														"value":deviceJSON.state.thermostatMode,
+														"timeOfSample":deviceJSON.state.time,
+														"uncertaintyInMilliseconds":1000
+													});
+											}
+											break;
+									}
+								});
+								// Build RequestState Response
+								response.context.properties = properties;
+								response.event = {
+									"event":{  
+										"header":{  
+										"messageId":messageId,
+										"correlationToken":correlationToken,
+										"namespace":"Alexa",
+										"name":"StateReport",
+										"payloadVersion":"3"
+										},
+										"endpoint":{  
+										"endpointId":endpointId,
+										"cookie":{}
+										},
+										"payload":{}
+									}
+								}
+								// Send RequestState Response
+								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
+								log2console("INFO",JSON.stringify(response));
+								res.status(200).send(response);
+								}
+							else {
+								// Device has no state, return as such
+								log2console("WARNING","No state found for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
+								res.status(500).send();
+							}
+						}
+						// State reporting not enabled for device, send error code
+						else {
+							log2console("WARNING","State requested for user: " + req.user.username + " device: " + req.body.directive.endpoint.endpointId +  " but device state reporting disabled")
+							res.status(500).send();
+						}
+					}
+					// 'reportState' element missing on device, send error code
+					else {
+						log2console("WARNING", "User: " + req.user.username + " device: " + req.body.directive.endpoint.endpointId +  " has no reportState attribute, check MongoDB schema")
+						res.status(500).send();
+					}
+				}
+			else {
+				// Device not found
+				log2console("WARNING","No device found for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
+				res.status(500).send();
 			}
 		});
  	}
 );
 
+// API to set device state in MongoDB
+app.post('/api/v1/setstate',
+	passport.authenticate(['bearer', 'basic'], { session: false }),
+	function(req,res,next){
+	// do nothing, disused for now, may use along side command API 
+	}
+);
 
 // API to process/ execute inbound command
 app.post('/api/v1/command',
@@ -889,7 +1077,6 @@ app.post('/api/v1/command',
 		//	uid: req.user.username
 		//
 		//});
-
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				// Convert "model" object class to JSON object
@@ -901,7 +1088,7 @@ app.post('/api/v1/command',
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
 				
-				log2console("DEBUG", "Received MQTT command for user: " + req.user.username + " command: " + message);
+				log2console("DEBUG", "Received API command for user: " + req.user.username + " command: " + message);
 
 				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
@@ -1182,39 +1369,52 @@ server.listen(port, host, function(){
 	},5000);
 });
 
-// Called by MQTT on message, when topic starts with state/ 
-// Set device lastKnownState via Node-RED node, currently not used - in development
-function updatestate(username, endpointId) {
-	// Identify device, we know who user is from request
-	Devices.findOne({username:username, endpointId:endpointId}, function(err, data){
-		if (!err) {
-			// Convert "model" object class to JSON object
-			var deviceJSON = JSON.parse(JSON.stringify(data));
-			// Plan - in relation to https://developer.amazon.com/docs/smarthome/state-reporting-for-a-smart-home-skill.html#report-state-when-alexa-requests-it
-				// Needs to generate dateTime
-				// var dt = new Date().toISOString();
-				// Process MQTT state message generated by "development" branch node-red-contrib "state" node - subscription required to state/#
-				// Write state to device lastKnownState, based upon MQTT topic that includes username and endpointId
-				// Once done, state messages need to be set to retain
-				// MQTT ACLs updated already to allow write to state/<username>/endpointId
-				// Extend devices schema to include a 'lastKnownState' object, stored as:
-							// lastknownState {
-								// dtLastSeen : set as ISO date time
-								// BrightnessController : number, 0-100
-								// ColorController:
-									// hue, 
-									// saturation, 
-									// brightness
-								// ColorTemperatureController, number kelvin 0-10000
-								// InputController, string
-								// LockController
-								// PlaybackController
-								// PowerController
-								// StepSpeakerController
-								// ThermostatController
-							//}
-		}
-	});
+// Needs to be called by MQTT on message, when topic starts with state/ 
+// Sets device "state" Node-RED node, currently not used - in development
+function setstate(username, endpointId, payload) {
+	// Check payload has state property
+	if (payload.hasOwnProperty('state')) {
+		var dt = new Date().toISOString();
+		if (payload.state.hasOwnProperty('power')) {var power = payload.state.power};
+		if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
+		if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
+		if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
+		if (payload.state.hasOwnProperty('colortemperature')) {var colorTemperature = payload.state.colorTemperature};
+		if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
+		if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
+		if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
+		if (payload.state.hasOwnProperty('thermostatSetPoint')) {var thermostatSetPoint = payload.state.thermostatSetPoint};
+		if (payload.state.hasOwnProperty('thermostatMode')) {var thermostatMode = payload.state.thermostatMode};
+
+		// Build state attribute
+		var state = {
+			"time": dt,
+			"power": power,
+			"brightness": brightness,
+			"colorHue": colorHue,
+			"colorSaturation": colorSaturation,
+			"colorTemperature": colorTemperature,
+			"input": input,
+			"lock": lock,
+			"playback": playback,
+			"thermostatMode": thermostatMode,
+			"thermostatSetPoint" : thermostatSetPoint
+		};
+
+		// Identify device, save updated state attribute
+		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {"state" : state}, function(err, data){
+			if (!err) {
+				// var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
+				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
+			}
+			else {
+				log2console("WARNING","Unable to fine device for user: " + username + " endpointId:" + endpointId + ", state attribute update failed")
+			}
+		});
+	}
+	else {
+		log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!")
+	}
 }
 
 function log2console(severity,message) {

@@ -19,7 +19,9 @@ var Devices = new Schema({
     	extraDetail2: String,
     	extraDetail3: String,
     	extraDetail4: String
-    }
+    },
+    reportState: Boolean,
+    state: Schema.Types.Mixed
 });
 
 Devices.plugin(AutoIncrement, {inc_field: 'endpointId'});
