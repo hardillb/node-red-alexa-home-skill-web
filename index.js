@@ -1196,6 +1196,7 @@ app.post('/device/:dev_id',
 						data.description = device.description;
 						data.capabilities = device.capabilities;
 						data.displayCategories = device.displayCategories;
+						data.reportState = device.reportState;
 						data.save(function(err, d){
 							res.status(201);
 							res.send(d);
