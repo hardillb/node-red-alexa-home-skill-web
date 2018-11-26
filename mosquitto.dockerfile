@@ -30,12 +30,13 @@ RUN wget https://github.com/mongodb/mongo-c-driver/releases/download/1.13.0/mong
     && rm mongo-c-driver-1.13.0.tar.gz \
     && rm -rf mongo-c-driver-1.13.0
 
-# Compile and Install Mosquito-Auth-Plug
+# Compile and Install Mosquito-Auth-Plug, spocific commit version
 WORKDIR /usr/local/src
-RUN wget http://mosquitto.org/files/source/mosquitto-1.4.15.tar.gz \
+RUN wget https://mosquitto.org/files/source/mosquitto-1.4.15.tar.gz \ 
     && tar xvzf ./mosquitto-1.4.15.tar.gz \
     && git clone https://github.com/jpmens/mosquitto-auth-plug.git \
     && cd /usr/local/src/mosquitto-auth-plug \
+    && git checkout 4e7fe9aadbdf6bcf9571b38d293bc0c081dd063b \
     && cp config.mk.in config.mk \
     && sed -i "s|BACKEND_MONGO ?= no|BACKEND_MONGO ?= yes|g" config.mk \
     && sed -i "s|BACKEND_MYSQL ?= yes|BACKEND_MYSQL ?= no|g" config.mk \
