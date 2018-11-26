@@ -84,8 +84,8 @@ mqttClient.on('reconnect', function(){
 mqttClient.on('connect', function(){
 	log2console("INFO", "MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	// log2console("INFO", "MQTT connected, subscribing to 'state/#'")
-	// mqttClient.subscribe('state/#');
+	log2console("INFO", "MQTT connected, subscribing to 'state/#'")
+	mqttClient.subscribe('state/#');
 });
 
 // Connect to Mongo Instance
