@@ -179,6 +179,13 @@
 							<label class="form-check-label" for="THERMOSTAT">Thermostat </label>
 						</div>
 					</fieldset>
+					<fieldset class="form-group">
+						<legend>Alexa App State</legend>
+						<div class="form-check">
+							<input title="Report State" type="checkbox" class="form-check-input" name="boolReportState" id="ReportState" value="ReportState">
+							<label class="form-check-label" for="ReportState">Report State </label>
+						</div>
+					</fieldset>
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -283,6 +290,11 @@
 				}
 			});
 
+			if ($('#ReportState').prop('checked')) {
+				device.reportState = true;
+			}
+			else {device.reportState = false}
+
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
 				$.ajax({
 					url:"/devices",
@@ -334,6 +346,12 @@
 					device.displayCategories.push(this.value);
 				}
 			});
+
+			if ($('#ReportState').prop('checked')) {
+				device.reportState = true;
+			}
+			else {device.reportState = false}
+
 			if (device.friendlyName && device.description && device.capabilities.length > 0) {
 				//post update
 				$.ajax({
@@ -375,6 +393,7 @@
 		$('input[name=appType]').each(function(index) {
 		  this.checked = false;
 		});
+		$('#ReportState').prop('checked', false)
 		$('#validRangeOptions').hide();
 		$('#validRangeScaleOptions').hide();
 		$('#maximumValue').val(""); 
@@ -411,6 +430,12 @@
 		// ColorTemperatureController
 		var colorTemperature = $('#ColorTemperatureController').prop('checked');
 		var thermostat = $('#ThermostatController').prop('checked');
+
+		// reportState Boolean
+		if (device.hasOwnProperty('reportState')) {
+			if (device.reportState == true) {$('#ReportState').prop('checked', true)};
+			if (device.reportState == false) {$('#ReportState').prop('checked', false)};
+		}
 
 		// Handle min/max and scale values, only show if ThermostatController or ColorTemperatureController
 		if (device.hasOwnProperty('validRange') && ( colorTemperature || thermostat ) ) {
