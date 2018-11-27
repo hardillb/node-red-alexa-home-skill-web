@@ -826,7 +826,7 @@ mqttClient.on('message',function(topic,message){
 		var endpointId = arrTopic[2];
 		// Payload will contain state attribute
 		var payload = JSON.parse(message.toString());
-		console.log("State  payload", payload)
+		console.log("State payload", payload)
 
 		// Call setstate to update attribute in mongodb
 		log2console("INFO","Calling setstate for user:" + username + " endpointId:" + endpointId);
@@ -1374,9 +1374,9 @@ server.listen(port, host, function(){
 // Sets device "state" Node-RED node, currently not used - in development
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
-	log2console("INFO", "Payload pre JSON parse:" + payload)
-	payload = JSON.parse(payload)
-	log2console("INFO", "Payload post JSON parse:" + payload)
+	log2console("INFO", "Payload pre JSON parse:" + payload);
+	payload = JSON.parse(payload);
+	log2console("INFO", "Payload post JSON parse:" + payload);
 
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
