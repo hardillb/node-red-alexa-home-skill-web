@@ -836,11 +836,13 @@ mqttClient.on('message',function(topic,message){
 		// Add message to onGoingCommands ??
 		var stateWaiting = onGoingCommands[payload.messageId];
 		if (stateWaiting) {
-			stateWaiting.res.status(200).send();
-			log2console("INFO", "Succesful MQTT state update for user:" + username + " device:" + endpointId);				
-		} else {
-			stateWaiting.res.status(503).send();
-			log2console("ERROR", "Malfunction on MQTT state update for user:" + username + " device:" + endpointId);
+			if (payload.success) {
+				stateWaiting.res.status(200).send();
+				log2console("INFO", "Succesful MQTT state update for user:" + username + " device:" + endpointId);				
+			} else {
+				stateWaiting.res.status(503).send();
+				log2console("ERROR", "Malfunction on MQTT state update for user:" + username + " device:" + endpointId);
+			}
 		}
 		// If successful remove messageId from onGoingCommands
 		delete onGoingCommands[payload.messageId];
@@ -1374,9 +1376,7 @@ server.listen(port, host, function(){
 // Sets device "state" Node-RED node, currently not used - in development
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
-	log2console("INFO", "Payload pre JSON parse:" + payload);
-	payload = JSON.parse(JSON.stringify(payload));
-	log2console("INFO", "Payload post JSON parse:" + payload);
+	log2console("INFO", "Payload JSON stringify:" + JSON.stringify(payload));
 
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
