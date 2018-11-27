@@ -906,16 +906,8 @@ app.get('/api/v1/getstate/:dev_id',
 						if (deviceJSON.hasOwnProperty('state')) {
 								// Inspect state element and build response based upon device type /state contents
 								// Will need to group multiple states into correct update format
-								
 								var properties = [];
 								
-								// Moved to Lambda
-								var response = {};
-								response.context = {};
-								// var messageId = req.body.directive.header.messageId;
-								// var endpointId = req.body.directive.endpoint.endpointId;
-								// var correlationToken = req.body.directive.header.correlationToken;
-
 								deviceJSON.capabilities.forEach(function(capability) {
 									switch (capability)  {
 										case "BrightnessController":
@@ -1022,32 +1014,6 @@ app.get('/api/v1/getstate/:dev_id',
 											break;
 									}
 								});
-
-								// Moved to Lambda
-								// Build RequestState Response
-								response.context.properties = properties;
-								/*
-								response.event = {
-									"event":{  
-										"header":{  
-										"messageId":messageId,
-										"correlationToken":correlationToken,
-										"namespace":"Alexa",
-										"name":"StateReport",
-										"payloadVersion":"3"
-										},
-										"endpoint":{  
-										"endpointId":endpointId,
-										"cookie":{}
-										},
-										"payload":{}
-									}
-								} */
-
-								// Send RequestState Response
-								//log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
-								//log2console("INFO",JSON.stringify(response));
-								//res.status(200).send(response);
 
 								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + id)
 								log2console("INFO",JSON.stringify(response));
