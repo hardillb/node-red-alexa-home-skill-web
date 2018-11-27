@@ -826,10 +826,10 @@ mqttClient.on('message',function(topic,message){
 		var endpointId = arrTopic[2];
 		var messageJSON = JSON.parse(message);
 		console.log("MessageJSON", messageJSON)
-		var payloadJSON = messageJSON.payload;
-		console.log("PayloadJSON", payloadJSON)
-		var payload = JSON.parse(payloadJSON.toString());
+		var payload = messageJSON.payload;
 		console.log("Payload", payload)
+		//var payload = JSON.parse(payloadJSON.toString());
+		//console.log("Payload", payload)
 
 		// Call setstate to update attribute in mongodb
 		log2console("INFO","Calling setstate for user:" + username + " endpointId:" + endpointId);
