@@ -825,9 +825,9 @@ mqttClient.on('message',function(topic,message){
 		var username = arrTopic[1];
 		var endpointId = arrTopic[2];
 		var messageJSON = JSON.parse(message);
-		console.log("MessageJSON", payload)
+		console.log("MessageJSON", messageJSON)
 		var payloadJSON = messageJSON.payload;
-		console.log("PayloadJSON", payload)
+		console.log("PayloadJSON", payloadJSON)
 		var payload = JSON.parse(payloadJSON.toString());
 		console.log("Payload", payload)
 
