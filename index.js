@@ -825,7 +825,7 @@ mqttClient.on('message',function(topic,message){
 		var username = arrTopic[1];
 		var endpointId = arrTopic[2];
 		// Payload will contain state attribute
-		var payload = JSON.parse(message.toString());
+		var payload = JSON.parse(message.payload.toString());
 		console.log("State payload", payload)
 
 		// Call setstate to update attribute in mongodb
