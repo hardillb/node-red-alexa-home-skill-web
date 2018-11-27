@@ -988,6 +988,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "PowerController":
 											// Return Power State
 											if (deviceJSON.state.hasOwnProperty('power') && deviceJSON.state.hasOwnProperty('time')) {
+												log2console("INFO", "PowerController state 'power' and 'time' attributes found");
 												properties.push =({
 															"namespace": "Alexa.PowerController",
 															"name": "powerState",
