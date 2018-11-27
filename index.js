@@ -892,10 +892,7 @@ app.get('/api/v1/getstate/:dev_id',
 	function(req,res,next){
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
-
-		log2console("INFO", "getstate endpointId:" + id);
-		log2console("INFO", "getstate req.user.username:" + JSON.stringify(req.user.username));
-		log2console("INFO", "Running getstate for user:" + req.user.username + "device:" + id);
+		log2console("INFO", "Running getstate for user:" + req.user.username + "endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
@@ -1015,8 +1012,8 @@ app.get('/api/v1/getstate/:dev_id',
 									}
 								});
 
-								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + id)
-								log2console("INFO",JSON.stringify(response));
+								//log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + id)
+								//log2console("INFO",JSON.stringify(response));
 								res.status(200).json(properties);
 
 								}
