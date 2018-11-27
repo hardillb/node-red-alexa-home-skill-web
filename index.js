@@ -910,8 +910,8 @@ app.get('/api/v1/getstate/:dev_id',
 								var properties = [];
 								
 								// Moved to Lambda
-								//var response = {};
-								//response.context = {};
+								var response = {};
+								response.context = {};
 								// var messageId = req.body.directive.header.messageId;
 								// var endpointId = req.body.directive.endpoint.endpointId;
 								// var correlationToken = req.body.directive.header.correlationToken;
@@ -1025,7 +1025,8 @@ app.get('/api/v1/getstate/:dev_id',
 
 								// Moved to Lambda
 								// Build RequestState Response
-								/* response.context.properties = properties;
+								response.context.properties = properties;
+								/*
 								response.event = {
 									"event":{  
 										"header":{  
@@ -1050,7 +1051,7 @@ app.get('/api/v1/getstate/:dev_id',
 
 								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + id)
 								//log2console("INFO",JSON.stringify(properties));
-								res.status(200).json(properties);
+								res.status(200).send(response);
 
 								}
 							else {
