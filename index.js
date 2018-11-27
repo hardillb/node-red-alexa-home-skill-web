@@ -1375,7 +1375,7 @@ server.listen(port, host, function(){
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("INFO", "Payload pre JSON parse:" + payload);
-	payload = JSON.parse(payload);
+	payload = JSON.parse(JSON.stringify(payload));
 	log2console("INFO", "Payload post JSON parse:" + payload);
 
 	if (payload.hasOwnProperty('state')) {
