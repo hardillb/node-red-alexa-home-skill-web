@@ -921,7 +921,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "BrightnessController":
 											// Return brightness percentage
 											if (deviceJSON.state.hasOwnProperty('brightness') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push =({
+												properties.push({
 														"namespace": "Alexa.BrightnessController",
 														"name": "brightness",
 														"value": deviceJSON.state.brightness,
@@ -933,7 +933,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "ColorController":
 											// Return color
 											if (deviceJSON.state.hasOwnProperty('colorHue') && deviceJSON.state.hasOwnProperty('colorSaturation') && deviceJSON.state.hasOwnProperty('brightness') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push =({
+												properties.push({
 														"namespace": "Alexa.ColorController",
 														"name": "color",
 														"value": {
@@ -949,7 +949,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "ColorTemperatureController":
 											// Return color temperature
 											if (deviceJSON.state.hasOwnProperty('colorTemperature') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push =({
+												properties.push({
 														"namespace": "Alexa.ColorTemperatureController",
 														"name": "colorTemperatureInKelvin",
 														"value": deviceJSON.state.colorTemperature,
@@ -961,7 +961,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "InputController":
 											// Return Input
 											if (deviceJSON.state.hasOwnProperty('input') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push =({
+												properties.push({
 														"namespace": "Alexa.InputController",
 														"name": "input",
 														"value": deviceJSON.state.input,
@@ -973,7 +973,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "LockController":
 											// Return Lock State
 											if (deviceJSON.state.hasOwnProperty('lock') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push =({
+												properties.push({
 														"namespace": "Alexa.LockController",
 														"name": "lockState",
 														"value": deviceJSON.state.lock,
@@ -989,7 +989,7 @@ app.get('/api/v1/getstate/:dev_id',
 											// Return Power State
 											if (deviceJSON.state.hasOwnProperty('power') && deviceJSON.state.hasOwnProperty('time')) {
 												log2console("INFO", "PowerController state 'power' and 'time' attributes found");
-												properties.push =({
+												properties.push({
 															"namespace": "Alexa.PowerController",
 															"name": "powerState",
 															"value": deviceJSON.state.power,
@@ -1001,7 +1001,7 @@ app.get('/api/v1/getstate/:dev_id',
 										case "ThermostatController":
 											// Return Temperature
 											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('scale') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push =({
+												properties.push({
 														"namespace":"Alexa.ThermostatController",
 														"name":"targetSetpoint",
 														"value":{  
@@ -1011,7 +1011,7 @@ app.get('/api/v1/getstate/:dev_id',
 														"timeOfSample":deviceJSON.state.time,
 														"uncertaintyInMilliseconds":1000
 													});
-												properties.push =({
+												properties.push({
 														"namespace":"Alexa.ThermostatController",
 														"name":"thermostatMode",
 														"value":deviceJSON.state.thermostatMode,
