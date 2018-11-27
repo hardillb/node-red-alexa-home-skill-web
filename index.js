@@ -1374,6 +1374,10 @@ server.listen(port, host, function(){
 // Sets device "state" Node-RED node, currently not used - in development
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
+	log2console("INFO", "Payload pre JSON parse:" + payload)
+	payload = JSON.parse(payload)
+	log2console("INFO", "Payload post JSON parse:" + payload)
+
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
 		if (payload.state.hasOwnProperty('power')) {var power = payload.state.power};
