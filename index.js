@@ -1049,8 +1049,8 @@ app.get('/api/v1/getstate/:dev_id',
 								//res.status(200).send(response);
 
 								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + id)
-								log2console("INFO",JSON.stringify(properties));
-								res.status(200).send(properties);
+								//log2console("INFO",JSON.stringify(properties));
+								res.status(200).json(properties);
 
 								}
 							else {
