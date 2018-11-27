@@ -887,16 +887,18 @@ var timeout = setInterval(function(){
 },500);
 
 // API to get device state from MongoDB
-app.get('/api/v1/getstate',
+app.get('/api/v1/getstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		// Identify device, we know who user is from request
-		log2console("INFO", "getstate req.body:" + JSON.stringify(req.body));
+		var id = req.params.dev_id;
+
+		log2console("INFO", "getstate endpointId:" + id);
 		log2console("INFO", "getstate req.user.username:" + JSON.stringify(req.user.username));
-
-
-		log2console("INFO", "Running getstate for user:" + req.user.username + "device:" + req.body.directive.endpoint.endpointId);
-		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
+		
+		log2console("INFO", "Running getstate for user:" + req.user.username + "device:" + id);
+		
+		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
 				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
 				// Plan - in relation to https://developer.amazon.com/docs/smarthome/state-reporting-for-a-smart-home-skill.html#report-state-when-alexa-requests-it
