@@ -895,9 +895,8 @@ app.get('/api/v1/getstate/:dev_id',
 
 		log2console("INFO", "getstate endpointId:" + id);
 		log2console("INFO", "getstate req.user.username:" + JSON.stringify(req.user.username));
-		
 		log2console("INFO", "Running getstate for user:" + req.user.username + "device:" + id);
-		
+
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
 				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
@@ -907,12 +906,16 @@ app.get('/api/v1/getstate/:dev_id',
 						if (deviceJSON.hasOwnProperty('state')) {
 								// Inspect state element and build response based upon device type /state contents
 								// Will need to group multiple states into correct update format
-								var response = {};
-								response.context = {};
-								var properties= [];
-								var messageId = req.body.directive.header.messageId;
-								var endpointId = req.body.directive.endpoint.endpointId;
-								var correlationToken = req.body.directive.header.correlationToken;
+								
+								var properties = [];
+								
+								// Moved to Lambda
+								//var response = {};
+								//response.context = {};
+								// var messageId = req.body.directive.header.messageId;
+								// var endpointId = req.body.directive.endpoint.endpointId;
+								// var correlationToken = req.body.directive.header.correlationToken;
+
 								deviceJSON.capabilities.forEach(function(capability) {
 									switch (capability)  {
 										case "BrightnessController":
@@ -1018,8 +1021,10 @@ app.get('/api/v1/getstate/:dev_id',
 											break;
 									}
 								});
+
+								// Moved to Lambda
 								// Build RequestState Response
-								response.context.properties = properties;
+								/* response.context.properties = properties;
 								response.event = {
 									"event":{  
 										"header":{  
@@ -1035,11 +1040,17 @@ app.get('/api/v1/getstate/:dev_id',
 										},
 										"payload":{}
 									}
-								}
+								} */
+
 								// Send RequestState Response
-								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
-								log2console("INFO",JSON.stringify(response));
-								res.status(200).send(response);
+								//log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
+								//log2console("INFO",JSON.stringify(response));
+								//res.status(200).send(response);
+
+								log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + endpointId)
+								log2console("INFO",JSON.stringify(properties));
+								res.status(200).send(properties);
+
 								}
 							else {
 								// Device has no state, return as such
