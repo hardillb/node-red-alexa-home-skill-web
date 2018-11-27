@@ -891,7 +891,7 @@ app.get('/api/v1/getstate',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		// Identify device, we know who user is from request
-		log2console("INFO", "getstate req:" + req);
+		log2console("INFO", "getstate req:" + JSON.stringify(req));
 
 		log2console("INFO", "Running getstate for user:" + req.user.username + "device:" + req.body.directive.endpoint.endpointId);
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
