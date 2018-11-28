@@ -795,7 +795,7 @@ var onGoingCommands = {};
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	if (topic.startsWith('response/')){
-		log2console("INFO", "Acknowledged MQTT response for topic: " + topic);
+		log2console("INFO", "Received MQTT response message for topic: " + topic);
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
@@ -803,10 +803,10 @@ mqttClient.on('message',function(topic,message){
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				commandWaiting.res.status(200).send();
-				log2console("INFO", "Sent succesful MQTT command API response");				
+				log2console("INFO", "Sent successful MQTT Command API response");				
 			} else {
 				commandWaiting.res.status(503).send();
-				log2console("ERROR", "Malfunction on MQTT command API response");
+				log2console("ERROR", "Malfunction on MQTT Command API response");
 			}
 			delete onGoingCommands[payload.messageId];
 			// should really parse uid out of topic
@@ -825,7 +825,6 @@ mqttClient.on('message',function(topic,message){
 		var username = arrTopic[1];
 		var endpointId = arrTopic[2];
 		var messageJSON = JSON.parse(message);
-		log2console("DEBUG", "MessageJSON" + messageJSON)
 		var payload = messageJSON.payload;
 		// Call setstate to update attribute in mongodb
 		setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
@@ -1349,7 +1348,7 @@ server.listen(port, host, function(){
 // Sets device "state" Node-RED node, currently not used - in development
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
-	log2console("INFO", "Payload JSON stringify:" + JSON.stringify(payload));
+	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
 
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
