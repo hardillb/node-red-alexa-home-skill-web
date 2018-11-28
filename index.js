@@ -1364,50 +1364,28 @@ function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
 
+	var state = {}
+
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
-		if (payload.state.hasOwnProperty('power')) {var power = payload.state.power};
-		if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
-		if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
-		if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
-		if (payload.state.hasOwnProperty('colorTemperature')) {var colorTemperature = payload.state.colorTemperature};
-		if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
-		if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
-		if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
-		if (payload.state.hasOwnProperty('thermostatSetPoint')) {var thermostatSetPoint = payload.state.thermostatSetPoint};
-		if (payload.state.hasOwnProperty('thermostatMode')) {var thermostatMode = payload.state.thermostatMode};
+		state.time = dt;
+		if (payload.state.hasOwnProperty('power')) {state.power = payload.state.power};
+		if (payload.state.hasOwnProperty('brightness')) {state.brightness = payload.state.brightness};
+		if (payload.state.hasOwnProperty('colorHue')) {state.colorHue = payload.state.colorHue};
+		if (payload.state.hasOwnProperty('colorSaturation')) {state.colorSaturation = payload.state.colorSaturation};
+		if (payload.state.hasOwnProperty('colorTemperature')) {state.colorTemperature = payload.state.colorTemperature};
+		if (payload.state.hasOwnProperty('input')) {state.input = payload.state.input};
+		if (payload.state.hasOwnProperty('lock')) {state.lock = payload.state.lock};
+		if (payload.state.hasOwnProperty('playback')) {state.playback = payload.state.playback};
+		if (payload.state.hasOwnProperty('thermostatSetPoint')) {state.thermostatSetPoint = payload.state.thermostatSetPoint};
+		if (payload.state.hasOwnProperty('thermostatMode')) {state.thermostatMode = payload.state.thermostatMode};
 
 		// Build state attribute
-		var state = {
-			"time": dt,
-			"power": power,
-			"brightness": brightness,
-			"colorHue": colorHue,
-			"colorSaturation": colorSaturation,
-			"colorTemperature": colorTemperature,
-			"input": input,
-			"lock": lock,
-			"playback": playback,
-			"thermostatMode": thermostatMode,
-			"thermostatSetPoint" : thermostatSetPoint
-		};
 		log2console("INFO", "State: " + JSON.stringify(state));
 
-		// Identify device, specifically update state values individually
+		// Identify device, specifically update state values individually??
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-			"state" : { 
-				"time": dt,
-				"power": power,
-				"brightness": brightness,
-				"colorHue": colorHue,
-				"colorSaturation": colorSaturation,
-				"colorTemperature": colorTemperature,
-				"input": input,
-				"lock": lock,
-				"playback": playback,
-				"thermostatMode": thermostatMode,
-				"thermostatSetPoint" : thermostatSetPoint
-			}
+			"state" : state
 		}, function(err, data){
 			if (!err) {
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
