@@ -1378,7 +1378,7 @@ function setstate(username, endpointId, payload) {
 		if (payload.state.hasOwnProperty('thermostatMode')) {var thermostatMode = payload.state.thermostatMode};
 
 		// Build state attribute
-/* 		var state = {
+		var state = {
 			"time": dt,
 			"power": power,
 			"brightness": brightness,
@@ -1390,7 +1390,8 @@ function setstate(username, endpointId, payload) {
 			"playback": playback,
 			"thermostatMode": thermostatMode,
 			"thermostatSetPoint" : thermostatSetPoint
-		}; */
+		};
+		log2console("INFO", "State: " + JSON.stringify(state));
 
 		// Identify device, specifically update state values individually
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
