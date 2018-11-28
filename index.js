@@ -981,7 +981,7 @@ app.get('/api/v1/getstate/:dev_id',
 											break;
 										case "ThermostatController":
 											// Return Temperature
-											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('scale') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
+											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
 												properties.push({
 														"namespace":"Alexa.ThermostatController",
 														"name":"targetSetpoint",
