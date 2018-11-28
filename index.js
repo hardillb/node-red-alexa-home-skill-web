@@ -819,24 +819,17 @@ mqttClient.on('message',function(topic,message){
 		}
 	}
 	else if (topic.startsWith('state/')){
-		log2console("INFO", "Acknowledged MQTT state for topic: " + topic);
+		log2console("DEBUG", "Acknowledged MQTT state for topic: " + topic);
 		// Split topic/ get username and endpointId
 		var arrTopic = topic.split("/"); 
 		var username = arrTopic[1];
 		var endpointId = arrTopic[2];
 		var messageJSON = JSON.parse(message);
-		console.log("MessageJSON", messageJSON)
+		log2console("DEBUG", "MessageJSON" + messageJSON)
 		var payload = messageJSON.payload;
-		console.log("Payload", payload)
-		//var payload = JSON.parse(payloadJSON.toString());
-		//console.log("Payload", payload)
-
 		// Call setstate to update attribute in mongodb
-		log2console("INFO","Calling setstate for user:" + username + " endpointId:" + endpointId);
-		log2console("INFO","setstate payload:" + payload);
 		setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
-
-		// Add message to onGoingCommands ??
+		// Add message to onGoingCommands
 		var stateWaiting = onGoingCommands[payload.messageId];
 		if (stateWaiting) {
 			if (payload.success) {
@@ -892,7 +885,7 @@ app.get('/api/v1/getstate/:dev_id',
 	function(req,res,next){
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
-		log2console("INFO", "Running getstate for user:" + req.user.username + "endpointId:" + id);
+		log2console("INFO", "Received GetStet API request for user:" + req.user.username + " endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
@@ -1011,11 +1004,7 @@ app.get('/api/v1/getstate/:dev_id',
 											break;
 									}
 								});
-
-								//log2console("INFO","Found and sent state data for username: " + req.user.username + " endpointId:" + id)
-								//log2console("INFO",JSON.stringify(response));
 								res.status(200).json(properties);
-
 								}
 							else {
 								// Device has no state, return as such
@@ -1075,9 +1064,7 @@ app.post('/api/v1/command',
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
-				
-				log2console("DEBUG", "Received API command for user: " + req.user.username + " command: " + message);
-
+				log2console("DEBUG", "Received command API request for user: " + req.user.username + " command: " + message);
 				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
@@ -1395,7 +1382,6 @@ function setstate(username, endpointId, payload) {
 		// Identify device, save updated state attribute
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {"state" : state}, function(err, data){
 			if (!err) {
-				// var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
 			}
 			else {
