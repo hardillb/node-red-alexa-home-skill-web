@@ -1369,7 +1369,7 @@ function setstate(username, endpointId, payload) {
 
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
-		
+		state.time = dt;
 		if (payload.state.hasOwnProperty('power')) {
 			state.power = payload.state.power;
 			var power = payload.state.power;
@@ -1397,6 +1397,7 @@ function setstate(username, endpointId, payload) {
 		log2console("INFO", "State: " + JSON.stringify(state));
 
 		var stateFlatten = flatten(state);
+		log2console("DEBUG", "stateFlatten: " + stateFlatten);
 
 		/* //
 		state.time = dt;
