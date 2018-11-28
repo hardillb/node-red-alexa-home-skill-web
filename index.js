@@ -1001,19 +1001,21 @@ app.get('/api/v1/getstate/:dev_id',
 														"timeOfSample":deviceJSON.state.time,
 														"uncertaintyInMilliseconds":1000
 													});
-												properties.push({
-														"namespace": "Alexa.EndpointHealth",
-														"name": "connectivity",
-														"value": {
-														  "value": "OK"
-														},
-														"timeOfSample": deviceJSON.state.time,
-														"uncertaintyInMilliseconds": 0
-												});
 											}
 											break;
 									}
 								});
+								
+								properties.push({
+									"namespace": "Alexa.EndpointHealth",
+									"name": "connectivity",
+									"value": {
+									  "value": "OK"
+									},
+									"timeOfSample": deviceJSON.state.time,
+									"uncertaintyInMilliseconds": 0
+								});
+
 								res.status(200).json(properties);
 								}
 							else {
