@@ -1018,25 +1018,25 @@ app.get('/api/v1/getstate/:dev_id',
 								}
 							else {
 								// Device has no state, return as such
-								log2console("WARNING","No state found for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
+								log2console("WARNING","No state found for username: " + req.user.username + " endpointId:" + id);
 								res.status(500).send();
 							}
 						}
 						// State reporting not enabled for device, send error code
 						else {
-							log2console("WARNING","State requested for user: " + req.user.username + " device: " + req.body.directive.endpoint.endpointId +  " but device state reporting disabled")
+							log2console("WARNING","State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
 							res.status(500).send();
 						}
 					}
 					// 'reportState' element missing on device, send error code
 					else {
-						log2console("WARNING", "User: " + req.user.username + " device: " + req.body.directive.endpoint.endpointId +  " has no reportState attribute, check MongoDB schema")
+						log2console("WARNING", "User: " + req.user.username + " device: " + id +  " has no reportState attribute, check MongoDB schema");
 						res.status(500).send();
 					}
 				}
 			else {
 				// Device not found
-				log2console("WARNING","No device found for username: " + req.user.username + " endpointId:" + req.body.directive.endpoint.endpointId)
+				log2console("WARNING","No device found for username: " + req.user.username + " endpointId:" + id);
 				res.status(500).send();
 			}
 		});
