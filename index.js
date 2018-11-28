@@ -1368,7 +1368,7 @@ function setstate(username, endpointId, payload) {
 		if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
 		if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
 		if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
-		if (payload.state.hasOwnProperty('colortemperature')) {var colorTemperature = payload.state.colorTemperature};
+		if (payload.state.hasOwnProperty('colorTemperature')) {var colorTemperature = payload.state.colorTemperature};
 		if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
 		if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
 		if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
