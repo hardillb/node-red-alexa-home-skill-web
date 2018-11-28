@@ -1392,15 +1392,10 @@ function setstate(username, endpointId, payload) {
 
 		// Build state attribute
 		log2console("INFO", "State: " + JSON.stringify(state));
-
 		//var stateFlatten = flatten(state);
 
-		var stateFlatten = flatten({
-			state
-		});
-
-
-		log2console("DEBUG", "stateFlatten: " + stateFlatten);
+		flatten(state);
+		log2console("DEBUG", "stateFlatten: " + state);
 
 		/* //
 		state.time = dt;
@@ -1418,7 +1413,7 @@ function setstate(username, endpointId, payload) {
 
 		// Identify device, specifically update state values individually??
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-			"state.time" : dt, stateFlatten
+			"state.time" : dt, state
 		}, function(err, data){
 			if (!err) {
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
