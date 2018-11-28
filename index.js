@@ -1365,11 +1365,12 @@ function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
 
-	var state = {}
+	
 
 	if (payload.hasOwnProperty('state')) {
+		var state = {};
 		var dt = new Date().toISOString();
-		state.time = dt;
+		//state.time = dt;
 		if (payload.state.hasOwnProperty('power')) {
 			state.power = payload.state.power;
 			var power = payload.state.power;
@@ -1383,10 +1384,6 @@ function setstate(username, endpointId, payload) {
 		if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
 		if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
 		if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
-
-
-
-
 		if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
 		if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
 		if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
@@ -1396,8 +1393,14 @@ function setstate(username, endpointId, payload) {
 		// Build state attribute
 		log2console("INFO", "State: " + JSON.stringify(state));
 
-		var stateFlatten = flatten(state);
-		log2console("DEBUG", "stateFlatten: " + JSON.stringify(stateFlatten));
+		//var stateFlatten = flatten(state);
+
+		var stateFlatten = flatten({
+			state
+		});
+
+
+		log2console("DEBUG", "stateFlatten: " + stateFlatten);
 
 		/* //
 		state.time = dt;
@@ -1415,7 +1418,7 @@ function setstate(username, endpointId, payload) {
 
 		// Identify device, specifically update state values individually??
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-			stateFlatten
+			"state.time" : dt, stateFlatten
 		}, function(err, data){
 			if (!err) {
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
