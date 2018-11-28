@@ -984,7 +984,6 @@ app.get('/api/v1/getstate/:dev_id',
 											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
 												log2console("DEBUG", "ThermostatController state 'thermostatSetPoint': " + deviceJSON.state.thermostatSetPoint);
 												log2console("DEBUG", "ThermostatController state 'thermostatMode': " + deviceJSON.state.thermostatMode);
-
 												properties.push({
 														"namespace":"Alexa.ThermostatController",
 														"name":"targetSetpoint",
@@ -1002,6 +1001,15 @@ app.get('/api/v1/getstate/:dev_id',
 														"timeOfSample":deviceJSON.state.time,
 														"uncertaintyInMilliseconds":1000
 													});
+												properties.push({
+														"namespace": "Alexa.EndpointHealth",
+														"name": "connectivity",
+														"value": {
+														  "value": "OK"
+														},
+														"timeOfSample": deviceJSON.state.time,
+														"uncertaintyInMilliseconds": 0
+												});
 											}
 											break;
 									}
