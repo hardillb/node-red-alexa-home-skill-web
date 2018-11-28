@@ -890,7 +890,7 @@ app.get('/api/v1/getstate/:dev_id',
 			if (!err) {
 				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
 				// Plan - in relation to https://developer.amazon.com/docs/smarthome/state-reporting-for-a-smart-home-skill.html#report-state-when-alexa-requests-it
-				if (deviceJSON.hasOwnProperty('reportState')) {
+				if (deviceJSON && deviceJSON.hasOwnProperty('reportState')) {
 					if (deviceJSON.reportState = true) { // Only respond if device element 'reportState' is set to true
 						if (deviceJSON.hasOwnProperty('state')) {
 								// Inspect state element and build response based upon device type /state contents
@@ -1182,6 +1182,7 @@ app.post('/device/:dev_id',
 						data.capabilities = device.capabilities;
 						data.displayCategories = device.displayCategories;
 						data.reportState = device.reportState;
+						data.validRange = device.validRange;
 						data.save(function(err, d){
 							res.status(201);
 							res.send(d);
