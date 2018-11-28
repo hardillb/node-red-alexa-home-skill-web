@@ -1366,18 +1366,11 @@ function setstate(username, endpointId, payload) {
 
 	if (payload.hasOwnProperty('state')) {
 		var dt = new Date().toISOString();
-		if (payload.state.hasOwnProperty('power')) {
-			if (payload.state.power){var power = payload.state.power};
-		};
-
+		if (payload.state.hasOwnProperty('power')) {var power = payload.state.power};
 		if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
 		if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
 		if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
-
-		if (payload.state.hasOwnProperty('colorTemperature')) {
-			if (payload.state.colorTemperature){var colorTemperature = payload.state.colorTemperature};
-		};
-
+		if (payload.state.hasOwnProperty('colorTemperature')) {var colorTemperature = payload.state.colorTemperature};
 		if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
 		if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
 		if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
@@ -1385,7 +1378,7 @@ function setstate(username, endpointId, payload) {
 		if (payload.state.hasOwnProperty('thermostatMode')) {var thermostatMode = payload.state.thermostatMode};
 
 		// Build state attribute
-		var state = {
+/* 		var state = {
 			"time": dt,
 			"power": power,
 			"brightness": brightness,
@@ -1397,10 +1390,24 @@ function setstate(username, endpointId, payload) {
 			"playback": playback,
 			"thermostatMode": thermostatMode,
 			"thermostatSetPoint" : thermostatSetPoint
-		};
+		}; */
 
-		// Identify device, save updated state attribute
-		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {"state" : state}, function(err, data){
+		// Identify device, specifically update state values individually
+		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
+			"state" : { 
+				"time": dt,
+				"power": power,
+				"brightness": brightness,
+				"colorHue": colorHue,
+				"colorSaturation": colorSaturation,
+				"colorTemperature": colorTemperature,
+				"input": input,
+				"lock": lock,
+				"playback": playback,
+				"thermostatMode": thermostatMode,
+				"thermostatSetPoint" : thermostatSetPoint
+			}
+		}, function(err, data){
 			if (!err) {
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
 			}
