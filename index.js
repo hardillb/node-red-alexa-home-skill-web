@@ -1394,16 +1394,16 @@ function setstate(username, endpointId, payload) {
 		log2console("INFO", "State: " + JSON.stringify(state));
 		//var stateFlatten = flatten(state);
 
-		flatten(state);
-		log2console("DEBUG", "state, from object: " + state);
+		var state1 = flatten(state);
+		log2console("DEBUG", "state1, from object: " + state1);
 
-		flatten({
+		var state2 = flatten({
 			state: {
 				"power": power,
 				"colorTemperature" : colorTemperature
 			}
 		});
-		log2console("DEBUG", "state, manual object: " + state);
+		log2console("DEBUG", "state, manual object: " + state2);
 
 		/* //
 		state.time = dt;
