@@ -990,7 +990,7 @@ app.get('/api/v1/getstate/:dev_id',
 														"namespace":"Alexa.ThermostatController",
 														"name":"targetSetpoint",
 														"value":{  
-															"value":deviceJSON.state.thermostatSetPoint,
+															"value":deviceJSON.state.thermostatSetPoint.toFixed(1),
 															"scale":deviceJSON.validRange.scale.toUpperCase()
 															},
 														"timeOfSample":deviceJSON.state.time,
