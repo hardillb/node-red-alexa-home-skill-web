@@ -1395,7 +1395,15 @@ function setstate(username, endpointId, payload) {
 		//var stateFlatten = flatten(state);
 
 		flatten(state);
-		log2console("DEBUG", "stateFlatten: " + state);
+		log2console("DEBUG", "state, from object: " + state);
+
+		flatten({
+			state: {
+				"power": power,
+				"colorTemperature" : colorTemperature
+			}
+		});
+		log2console("DEBUG", "state, manual object: " + state);
 
 		/* //
 		state.time = dt;
