@@ -899,6 +899,7 @@ app.get('/api/v1/getstate/:dev_id',
 								var properties = [];
 								
 								deviceJSON.capabilities.forEach(function(capability) {
+									log2console("DEBUG", "ReportState capability: " + capability);
 									switch (capability)  {
 										case "BrightnessController":
 											// Return brightness percentage
