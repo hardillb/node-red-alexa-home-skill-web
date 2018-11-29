@@ -1415,8 +1415,9 @@ function setstate(username, endpointId, payload) {
 		"state.thermostatMode" : thermostatMode */
 
 		// Identify device, specifically update state values individually??
+		// "state.time" : dt,
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-			"state.time" : dt, strstateflat
+			 strstateflat
 		}, function(err, data){
 			if (!err) {
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
