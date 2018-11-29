@@ -991,7 +991,7 @@ app.get('/api/v1/getstate/:dev_id',
 														"name":"targetSetpoint",
 														"value":{  
 															"value":deviceJSON.state.thermostatSetPoint,
-															"scale":deviceJSON.validRange.scale
+															"scale":deviceJSON.validRange.scale.toUpperCase()
 															},
 														"timeOfSample":deviceJSON.state.time,
 														"uncertaintyInMilliseconds":1000
@@ -1386,7 +1386,7 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {dev.state.thermostatSetPoint = payload.state.thermostatSetPoint};
 				if (payload.state.hasOwnProperty('thermostatMode')) {dev.state.thermostatMode = payload.state.thermostatMode};
 
-				log2console("DEBUG", "Dev.state: " + JSON.stringify(dev.state));
+				log2console("DEBUG", "Enpoint state update: " + JSON.stringify(dev.state));
 
 				// Update state with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
