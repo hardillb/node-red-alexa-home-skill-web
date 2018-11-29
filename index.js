@@ -1368,16 +1368,18 @@ function setstate(username, endpointId, payload) {
 	
 
 	if (payload.hasOwnProperty('state')) {
-		var state = {};
+		var dev = {};
+		dev.state = {}
+
 		var dt = new Date().toISOString();
 		//state.time = dt;
 		if (payload.state.hasOwnProperty('power')) {
-			state.power = payload.state.power;
+			dev.state.power = payload.state.power;
 			var power = payload.state.power;
 		}
 
 		if (payload.state.hasOwnProperty('colorTemperature')) {
-			state.colorTemperature = payload.state.colorTemperature;
+			dev.state.colorTemperature = payload.state.colorTemperature;
 			var colorTemperature = payload.state.colorTemperature;
 		}
 
@@ -1391,10 +1393,10 @@ function setstate(username, endpointId, payload) {
 		if (payload.state.hasOwnProperty('thermostatMode')) {var hermostatMode = payload.state.thermostatMode};
 
 		// Build state attribute
-		log2console("INFO", "State: " + JSON.stringify(state));
+		log2console("INFO", "State: " + JSON.stringify(dev));
 		//var stateFlatten = flatten(state);
 
-		var stateflat = dot.dot(state, stateflat);
+		var stateflat = dot.dot(dev, stateflat);
 		log2console("DEBUG", "state1, from object: " + JSON.stringify(stateflat));
 
 		/* //
