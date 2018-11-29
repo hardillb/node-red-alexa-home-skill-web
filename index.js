@@ -1372,7 +1372,10 @@ function setstate(username, endpointId, payload) {
 				var dt = new Date().toISOString();
 				
 				// Check for device state element and create state object if does not exist on device
-				if (!dev.hasOwnProperty('state')) {
+				if (dev.hasOwnProperty('state')) {
+					// Property exist
+				} 
+				else {
 					log2console("DEBUG", "No state element found for endpointId: " + endpointId);
 					dev.state = {}
 				}
