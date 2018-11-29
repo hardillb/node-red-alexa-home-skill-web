@@ -1394,7 +1394,7 @@ function setstate(username, endpointId, payload) {
 		log2console("INFO", "State: " + JSON.stringify(state));
 		//var stateFlatten = flatten(state);
 
-		stateflat = dot.dot(state, stateflat);
+		var stateflat = dot.dot(state, stateflat);
 		log2console("DEBUG", "state1, from object: " + stateflat);
 
 		/* //
