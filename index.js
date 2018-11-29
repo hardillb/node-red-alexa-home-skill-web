@@ -885,7 +885,7 @@ app.get('/api/v1/getstate/:dev_id',
 	function(req,res,next){
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
-		log2console("INFO", "Received GetStet API request for user:" + req.user.username + " endpointId:" + id);
+		log2console("INFO", "Received GetState API request for user:" + req.user.username + " endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
@@ -1373,6 +1373,7 @@ function setstate(username, endpointId, payload) {
 				
 				// Check for device state element and create state object if does not exist on device
 				if (!dev.hasOwnProperty('state')) {
+					log2console("DEBUG", "No state element found for endpointId: " + endpointId);
 					dev.state = {}
 				}
 				
@@ -1387,6 +1388,7 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {dev.state.thermostatSetPoint = payload.state.thermostatSetPoint};
 				if (payload.state.hasOwnProperty('thermostatMode')) {dev.state.thermostatMode = payload.state.thermostatMode};
+
 				// Update state with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
