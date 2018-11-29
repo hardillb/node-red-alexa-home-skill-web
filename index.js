@@ -6,7 +6,7 @@ var path = require('path');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
-var flatten = require('flat');
+const flatten = require('flat');
 var morgan = require('morgan');
 var express = require('express');
 const session = require('express-session');
@@ -1397,14 +1397,6 @@ function setstate(username, endpointId, payload) {
 		var state1 = flatten(state);
 		log2console("DEBUG", "state1, from object: " + state1);
 
-		var state2 = flatten({
-			state: {
-				power: power,
-				colorTemperature : colorTemperature
-			}
-		});
-		log2console("DEBUG", "state2, manual object: " + state2);
-
 		/* //
 		state.time = dt;
 		"state.time" : dt, 
@@ -1421,7 +1413,7 @@ function setstate(username, endpointId, payload) {
 
 		// Identify device, specifically update state values individually??
 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-			"state.time" : dt, state
+			"state.time" : dt, state1
 		}, function(err, data){
 			if (!err) {
 				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
