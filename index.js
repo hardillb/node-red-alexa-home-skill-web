@@ -1365,27 +1365,19 @@ function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
 	if (payload.hasOwnProperty('state')) {
+		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
 			if (!error) {
 				var dt = new Date().toISOString();
+				
+				// Check for device state element and create state object if does not exist on device
+				if (!dev.hasOwnProperty('state')) {
+					dev.state = {}
+				}
+				
 				dev.state.time = dt;
-				if (payload.state.hasOwnProperty('power')) {
-					dev.state.power = payload.state.power;
-					//var power = payload.state.power;
-				}
-				if (payload.state.hasOwnProperty('colorTemperature')) {
-					dev.state.colorTemperature = payload.state.colorTemperature;
-					//var colorTemperature = payload.state.colorTemperature;
-				}
-				// if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
-				// if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
-				// if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
-				// if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
-				// if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
-				// if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
-				// if (payload.state.hasOwnProperty('thermostatSetPoint')) {var thermostatSetPoint = payload.state.thermostatSetPoint};
-				// if (payload.state.hasOwnProperty('thermostatMode')) {var hermostatMode = payload.state.thermostatMode};
-
+				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
+				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
 				if (payload.state.hasOwnProperty('colorHue')) {dev.state.colorHue = payload.state.colorHue};
 				if (payload.state.hasOwnProperty('colorSaturation')) {dev.state.colorSaturation = payload.state.colorSaturation};
@@ -1394,11 +1386,12 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {dev.state.thermostatSetPoint = payload.state.thermostatSetPoint};
 				if (payload.state.hasOwnProperty('thermostatMode')) {dev.state.thermostatMode = payload.state.thermostatMode};
-
+				// Update state with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
-						log2console("DEBUG", "Error updating stat for endpointId: " + endpointId);
+						log2console("DEBUG", "Error updating state for endpointId: " + endpointId);
 					}
+					else {log2console("DEBUG", "Updated state for endpointId: " + endpointId);}
 				});
 			}
 			else {
