@@ -6,7 +6,7 @@ var path = require('path');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
-const flatten = require('flat');
+var dot = require('dot-object');
 var morgan = require('morgan');
 var express = require('express');
 const session = require('express-session');
@@ -1394,8 +1394,8 @@ function setstate(username, endpointId, payload) {
 		log2console("INFO", "State: " + JSON.stringify(state));
 		//var stateFlatten = flatten(state);
 
-		var state1 = flatten(JSON.parse(state));
-		log2console("DEBUG", "state1, from object: " + state1);
+		stateflat = dot.dot(state, stateflat);
+		log2console("DEBUG", "state1, from object: " + stateflat);
 
 		/* //
 		state.time = dt;
