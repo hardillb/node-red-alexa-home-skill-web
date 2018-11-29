@@ -1397,9 +1397,8 @@ function setstate(username, endpointId, payload) {
 		//var stateFlatten = flatten(state);
 
 		var stateflat = dot.dot(dev, stateflat);
-		log2console("DEBUG", "stateflat, from object: " + JSON.stringify(stateflat));
-		strstateflat = JSON.stringify(stateflat);
-		log2console("DEBUG", "strstateflat, from object: " + strstateflat);
+		var strstateflat = JSON.stringify(stateflat);
+		log2console("DEBUG", "strstateflat, from object: " + strstateflat); // Can't pass an object to findOneAndUpdate, will overwrite all elements
 
 		/* //
 		state.time = dt;
