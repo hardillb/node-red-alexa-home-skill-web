@@ -1371,15 +1371,9 @@ function setstate(username, endpointId, payload) {
 			if (!error) {
 				var dt = new Date().toISOString();
 				
-				// Check for device state element and create state object if does not exist on device
-				if (dev.hasOwnProperty('state')) {
-					// Property exist
-				} 
-				else {
-					log2console("DEBUG", "No state element found for endpointId: " + endpointId);
-					dev.state = {}
-				}
-				
+				// Check for device state element and create state object if does not exist on device			
+				dev.state = dev.state || {};
+
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
