@@ -1364,41 +1364,60 @@ server.listen(port, host, function(){
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
-
-	
-
 	if (payload.hasOwnProperty('state')) {
-		var dev = {};
-		dev.state = {}
+		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
+			if (!error) {
+				var dt = new Date().toISOString();
+				dev.state.time = dt;
+				if (payload.state.hasOwnProperty('power')) {
+					dev.state.power = payload.state.power;
+					//var power = payload.state.power;
+				}
+				if (payload.state.hasOwnProperty('colorTemperature')) {
+					dev.state.colorTemperature = payload.state.colorTemperature;
+					//var colorTemperature = payload.state.colorTemperature;
+				}
+				// if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
+				// if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
+				// if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
+				// if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
+				// if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
+				// if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
+				// if (payload.state.hasOwnProperty('thermostatSetPoint')) {var thermostatSetPoint = payload.state.thermostatSetPoint};
+				// if (payload.state.hasOwnProperty('thermostatMode')) {var hermostatMode = payload.state.thermostatMode};
 
-		var dt = new Date().toISOString();
-		//state.time = dt;
-		if (payload.state.hasOwnProperty('power')) {
-			dev.state.power = payload.state.power;
-			var power = payload.state.power;
-		}
+				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
+				if (payload.state.hasOwnProperty('colorHue')) {dev.state.colorHue = payload.state.colorHue};
+				if (payload.state.hasOwnProperty('colorSaturation')) {dev.state.colorSaturation = payload.state.colorSaturation};
+				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
+				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
+				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
+				if (payload.state.hasOwnProperty('thermostatSetPoint')) {dev.state.thermostatSetPoint = payload.state.thermostatSetPoint};
+				if (payload.state.hasOwnProperty('thermostatMode')) {dev.state.thermostatMode = payload.state.thermostatMode};
 
-		if (payload.state.hasOwnProperty('colorTemperature')) {
-			dev.state.colorTemperature = payload.state.colorTemperature;
-			var colorTemperature = payload.state.colorTemperature;
-		}
-
-		if (payload.state.hasOwnProperty('brightness')) {var brightness = payload.state.brightness};
-		if (payload.state.hasOwnProperty('colorHue')) {var colorHue = payload.state.colorHue};
-		if (payload.state.hasOwnProperty('colorSaturation')) {var colorSaturation = payload.state.colorSaturation};
-		if (payload.state.hasOwnProperty('input')) {var input = payload.state.input};
-		if (payload.state.hasOwnProperty('lock')) {var lock = payload.state.lock};
-		if (payload.state.hasOwnProperty('playback')) {var playback = payload.state.playback};
-		if (payload.state.hasOwnProperty('thermostatSetPoint')) {var thermostatSetPoint = payload.state.thermostatSetPoint};
-		if (payload.state.hasOwnProperty('thermostatMode')) {var hermostatMode = payload.state.thermostatMode};
-
+				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
+					if (err) {
+						log2console("DEBUG", "Error updating stat for endpointId: " + endpointId);
+					}
+				});
+			}
+			else {
+				log2console("WARNING", "Unable to find enpointId: " + endpointId + " for username: " + username);
+			}
+		});
+	}
+	else {
+		log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!");
+	}
+		//if (payload.hasOwnProperty('state')) {
+		//var dev = {};
+		//dev.state = {}
 		// Build state attribute
-		log2console("INFO", "State: " + JSON.stringify(dev));
+		//log2console("INFO", "State: " + JSON.stringify(dev));
 		//var stateFlatten = flatten(state);
-
-		var stateflat = dot.dot(dev, stateflat);
-		var strstateflat = JSON.stringify(stateflat);
-		log2console("DEBUG", "strstateflat, from object: " + strstateflat); // Can't pass an object to findOneAndUpdate, will overwrite all elements
+		//var stateflat = dot.dot(dev, stateflat);
+		//var strstateflat = JSON.stringify(stateflat);
+		//log2console("DEBUG", "strstateflat, from object: " + strstateflat); // Can't pass an object to findOneAndUpdate, will overwrite all elements
 
 		/* //
 		state.time = dt;
@@ -1416,20 +1435,20 @@ function setstate(username, endpointId, payload) {
 
 		// Identify device, specifically update state values individually??
 		// "state.time" : dt,
-		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-			 strstateflat
-		}, function(err, data){
-			if (!err) {
-				log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
-			}
-			else {
-				log2console("WARNING","Unable to fine device for user: " + username + " endpointId:" + endpointId + ", state attribute update failed")
-			}
-		});
-	}
-	else {
-		log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!")
-	}
+	/* 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
+				strstateflat
+			}, function(err, data){
+				if (!err) {
+					log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
+				}
+				else {
+					log2console("WARNING","Unable to fine device for user: " + username + " endpointId:" + endpointId + ", state attribute update failed")
+				}
+			});
+		}
+		else {
+			log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!")
+		} */
 }
 
 function log2console(severity,message) {
