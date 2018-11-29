@@ -6,7 +6,7 @@ var path = require('path');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
-var flatten = require('flat');
+//var flatten = require('flat');
 var morgan = require('morgan');
 var express = require('express');
 const session = require('express-session');
@@ -1394,6 +1394,22 @@ function setstate(username, endpointId, payload) {
 		log2console("INFO", "State: " + JSON.stringify(state));
 		//var stateFlatten = flatten(state);
 
+
+		const flatten = (objectOrArray, prefix = '', formatter = (k) => ('.' + k)) => {
+			const nestElement = (prev, value, key) => (
+			  (value && typeof value === 'object')
+				? { ...prev, ...flatten(value, `${prefix}${formatter(key)}`, formatter) }
+				: { ...prev, ...{ [`${prefix}${formatter(key)}`]: value } });
+		  
+			return Array.isArray(objectOrArray)
+			  ? objectOrArray.reduce(nestElement, {})
+			  : Object.keys(objectOrArray).reduce(
+				(prev, element) => nestElement(prev, objectOrArray[element], element),
+				{},
+			  );
+		  };
+
+
 		var state1 = flatten(state);
 		log2console("DEBUG", "state1, from object: " + state1);
 
@@ -1403,7 +1419,7 @@ function setstate(username, endpointId, payload) {
 				"colorTemperature" : colorTemperature
 			}
 		});
-		log2console("DEBUG", "state, manual object: " + state2);
+		log2console("DEBUG", "state2, manual object: " + state2);
 
 		/* //
 		state.time = dt;
