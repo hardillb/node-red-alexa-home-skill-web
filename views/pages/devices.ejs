@@ -124,9 +124,9 @@
 							</div>
 							<div id="validRangeScaleOptions">
 								<div class="form-check form-check-inline" style="padding-left:5px;">
-									<input class="form-check-input" type="radio" name="radioScale" id="Celcius" value="Celcius" disabled>
+									<input class="form-check-input" type="radio" name="radioScale" id="Celsius" value="Celsius" disabled>
 									<br>
-									<label class="form-check-label" id="lblCelcius" for="Celcius">°Celcius</label>
+									<label class="form-check-label" id="lblCelsius" for="Celsius">°Celsius</label>
 								</div>
 								<div class="form-check form-check-inline" style="padding-top: 10px;">
 									<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
@@ -213,11 +213,11 @@
 			$('#validRangeScaleOptions').hide();
 			$('#maximumValue').attr("disabled", "disabled"); 
 			$('#minimumValue').attr("disabled", "disabled");
-			$('#Celcius').attr("disabled", "disabled"); 
+			$('#Celsius').attr("disabled", "disabled"); 
 			$('#Farenheit').attr("disabled", "disabled");
 			$("#maximumValue").prop('required',false);
 			$("#minimumValue").prop('required',false);
-			$("#Celcius").prop('required',false);
+			$("#Celsius").prop('required',false);
 			$("#Farenheit").prop('required',false);
 		}
 		else {
@@ -225,11 +225,11 @@
 			$('#validRangeScaleOptions').show();
 			$('#maximumValue').removeAttr("disabled"); 
 			$('#minimumValue').removeAttr("disabled");
-			$('#Celcius').removeAttr("disabled");
+			$('#Celsius').removeAttr("disabled");
 			$('#Farenheit').removeAttr("disabled");
 			$("#maximumValue").prop('required',true);
 			$("#minimumValue").prop('required',true);
-			$("#Celcius").prop('required',true);
+			$("#Celsius").prop('required',true);
 			$("#Farenheit").prop('required',true);
 		}
 	});
@@ -400,11 +400,11 @@
 		$('#minimumValue').val("");
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
-		$('#Celcius').attr("disabled", "disabled"); 
+		$('#Celsius').attr("disabled", "disabled"); 
 		$('#Farenheit').attr("disabled", "disabled");
 		$("#maximumValue").prop('required',false);
 		$("#minimumValue").prop('required',false);
-		$("#Celcius").prop('required',false);
+		$("#Celsius").prop('required',false);
 		$("#Farenheit").prop('required',false);
 		$('input[name=radioScale]').each(function(index){
 			this.checked = false;
@@ -442,9 +442,9 @@
 			validRange = device.validRange;
 			if (validRange.hasOwnProperty('scale')) {
 				$('#validRangeScaleOptions').show();
-				$('#Celcius').removeAttr("disabled");
+				$('#Celsius').removeAttr("disabled");
 				$('#Farenheit').removeAttr("disabled");
-				$("#Celcius").prop('required',true);
+				$("#Celsius").prop('required',true);
 				$("#Farenheit").prop('required',true);
 				$('#' + validRange.scale).prop('checked',true);
 			}
