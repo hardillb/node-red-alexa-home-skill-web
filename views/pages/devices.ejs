@@ -496,12 +496,12 @@
 			
 			$('#ACTIVITY_TRIGGER').prop('checked', true);
 			// Clear other capability/ type selections
-			$('input[name=appType]').each(function(index){if (this.id != "ACTIVITY_TRIGGER") {
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {
 					$('input[id^='+this+']').prop("checked", false)
 				}
 			});
 			
-			$('input[name=capabilities]').each(function(index){if (this.id != "SceneController"){
+			$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "SceneController"){
 				$('input[id^='+this+']').prop("checked", false)
 				}
 			});
