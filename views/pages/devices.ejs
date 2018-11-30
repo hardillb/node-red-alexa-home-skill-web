@@ -501,7 +501,10 @@
 				}
 			});
 			
-			$('input[name=capabilities]').each(function(index){if (!this.id == "SceneController"){$('input[id^='+this+']').prop("checked", false)}});
+			$('input[name=capabilities]').each(function(index){if (this.id != "SceneController"){
+				$('input[id^='+this+']').prop("checked", false)
+				}
+			});
 			return false;
 		}
 		else if (thermostat && power || thermostat && color || thermostat && colorTemperature || thermostat && input || thermostat && scene || thermostat && power || thermostat && playback || thermostat && stepSpeaker) {
