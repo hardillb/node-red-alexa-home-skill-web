@@ -6,7 +6,6 @@ var path = require('path');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
-var dot = require('dot-object');
 var morgan = require('morgan');
 var express = require('express');
 const session = require('express-session');
@@ -879,10 +878,20 @@ var timeout = setInterval(function(){
 	}
 },500);
 
-// API to get device state from MongoDB
+// API to get device state from MongoDB, used for device control/ review in Alexa App
 app.get('/api/v1/getstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
+		//console.log(req.user.username);
+		//console.log(req);
+		//measurement.send({
+		//	e:'event', 
+		//	ec:'command', 
+		//	ea: req.body.directive.header.name,
+		//	uid: req.user.username
+		//
+		//});
+
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
 		log2console("INFO", "Received GetState API request for user:" + req.user.username + " endpointId:" + id);
@@ -890,7 +899,6 @@ app.get('/api/v1/getstate/:dev_id',
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
 				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
-				// Plan - in relation to https://developer.amazon.com/docs/smarthome/state-reporting-for-a-smart-home-skill.html#report-state-when-alexa-requests-it
 				if (deviceJSON && deviceJSON.hasOwnProperty('reportState')) {
 					if (deviceJSON.reportState = true) { // Only respond if device element 'reportState' is set to true
 						if (deviceJSON.hasOwnProperty('state')) {
@@ -1028,8 +1036,20 @@ app.get('/api/v1/getstate/:dev_id',
 						}
 						// State reporting not enabled for device, send error code
 						else {
-							log2console("WARNING","State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
-							res.status(500).send();
+							log2console("DEBUG","State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
+							var properties = [];
+							properties.push({
+								"namespace": "Alexa.EndpointHealth",
+								"name": "connectivity",
+								"value": {
+								  "value": "OK"
+								},
+								"timeOfSample": deviceJSON.state.time,
+								"uncertaintyInMilliseconds": 0
+							});
+
+							//res.status(500).send();
+							res.status(200).json(properties);
 						}
 					}
 					// 'reportState' element missing on device, send error code
@@ -1051,7 +1071,7 @@ app.get('/api/v1/getstate/:dev_id',
 app.post('/api/v1/setstate',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-	// do nothing, disused for now, may use along side command API 
+		// do nothing, disused for now, may use along side command API 
 	}
 );
 
@@ -1360,8 +1380,7 @@ server.listen(port, host, function(){
 	},5000);
 });
 
-// Needs to be called by MQTT on message, when topic starts with state/ 
-// Sets device "state" Node-RED node, currently not used - in development
+// Sets device "state" element, requires correct Node-RED input node
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
@@ -1391,10 +1410,8 @@ function setstate(username, endpointId, payload) {
 						else {dev.state.thermostatMode = "HEAT"}
 					}
 				}
-
 				log2console("DEBUG", "Enpoint state update: " + JSON.stringify(dev.state));
-
-				// Update state with modified properties
+				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
 						log2console("DEBUG", "Error updating state for endpointId: " + endpointId);
@@ -1410,46 +1427,6 @@ function setstate(username, endpointId, payload) {
 	else {
 		log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!");
 	}
-		//if (payload.hasOwnProperty('state')) {
-		//var dev = {};
-		//dev.state = {}
-		// Build state attribute
-		//log2console("INFO", "State: " + JSON.stringify(dev));
-		//var stateFlatten = flatten(state);
-		//var stateflat = dot.dot(dev, stateflat);
-		//var strstateflat = JSON.stringify(stateflat);
-		//log2console("DEBUG", "strstateflat, from object: " + strstateflat); // Can't pass an object to findOneAndUpdate, will overwrite all elements
-
-		/* //
-		state.time = dt;
-		"state.time" : dt, 
-		"state.power" : power,
-		"state.brightness" : brightness,
-		"state.colorHue" : colorHue,
-		"state.colorSaturation" : colorSaturation,
-		"state.colorTemperature" : colorTemperature,
-		"state.input" : input,
-		"state.lock"  : lock,
-		"state.playback" : playback,
-		"state.thermostatSetPoint" : thermostatSetPoint,
-		"state.thermostatMode" : thermostatMode */
-
-		// Identify device, specifically update state values individually??
-		// "state.time" : dt,
-	/* 		Devices.findOneAndUpdate({username:username, endpointId:endpointId}, {
-				strstateflat
-			}, function(err, data){
-				if (!err) {
-					log2console("INFO","Found device for user: " + username + " endpointId:" + endpointId + ", state attribute updated")
-				}
-				else {
-					log2console("WARNING","Unable to fine device for user: " + username + " endpointId:" + endpointId + ", state attribute update failed")
-				}
-			});
-		}
-		else {
-			log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!")
-		} */
 }
 
 function log2console(severity,message) {

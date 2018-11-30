@@ -22,7 +22,6 @@
     "ejs": "^2.6.1",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
-    "dot-object": "^1.7.1",
     "mongoose": "^5.2.15",
     "mongoose-sequence": "^4.0.1",
     "connect-mongo": "^2.0.1",
