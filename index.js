@@ -1407,10 +1407,10 @@ function setstate(username, endpointId, payload) {
 						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference
 						if (dev.state.thermostatSetPoint < payload.state.thermostatSetPoint) {dev.state.thermostatMode = "HEAT"}
 						else if (dev.state.thermostatSetPoint > payload.state.thermostatSetPoint) {dev.state.thermostatMode = "COOL"}
-						else {dev.state.thermostatMode = "HEAT"}
 					}
+					else {dev.state.thermostatMode = "HEAT"}
 				}
-				log2console("DEBUG", "Enpoint state update: " + JSON.stringify(dev.state));
+				log2console("DEBUG", "Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
