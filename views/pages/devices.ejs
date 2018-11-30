@@ -496,14 +496,9 @@
 			
 			$('#ACTIVITY_TRIGGER').prop('checked', true);
 			// Clear other capability/ type selections
-			$('input[name=appType]').each(function(index){
-			if (!this.name == "ACTIVITY_TRIGGER") {
-				$('input[name=' + this.name + ']').prop('checked',false);
-			}});
-			$('input[name=capabilities]').each(function(index){
-			if (!this.name == "SceneController") {
-				$('input[name=' + this.name + ']').prop('checked',false);
-			}});
+			$('input[name=appType]').each(function(index){if (!this.id == "ACTIVITY_TRIGGER") {$('input[id=' + this.id + ']').prop('checked',false)}});
+			$('input[name=capabilities]').each(function(index){if (!this.id == "SceneController"){$('input[id=' + this.id + ']').prop('checked',false)}});
+			return false;
 		}
 		else if (thermostat && power || thermostat && color || thermostat && colorTemperature || thermostat && input || thermostat && scene || thermostat && power || thermostat && playback || thermostat && stepSpeaker) {
 			alert("Thermostat selected, this must be the only capability!");
