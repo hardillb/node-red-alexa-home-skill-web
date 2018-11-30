@@ -509,9 +509,9 @@
 		}
 		else if (lock) {
 			alert("Lock selected, this must be the only capability!");
-			$('#LOCK').prop('checked', true);
+			$('#SMARTLOCK').prop('checked', true);
 			// Clear other capability/ type selections
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTLOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "LockController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			return false;
 		}
@@ -538,7 +538,7 @@
 		else {
 			if (input) {
 				// Auto-select Activity (can be changed by user)
-				$('#TV').prop('checked', false);
+				$('#TV').prop('checked', true);
 				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			}
 			else if (scene) {
@@ -558,7 +558,7 @@
 			}
 			else if (playback) {
 				// Auto-select Activity (can be changed by user)
-				$('#TV').prop('checked', false);
+				$('#TV').prop('checked', true);
 				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			}
 			else {
