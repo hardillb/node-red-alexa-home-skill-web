@@ -1386,8 +1386,9 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference
-						if (dev.state.thermostatSetPoint < payload.state.thermostatSetPoint) {dev.state.thermostatSetPoint = "HEAT"};
-						if (dev.state.thermostatSetPoint > payload.state.thermostatSetPoint) {dev.state.thermostatSetPoint = "COOL"};
+						if (dev.state.thermostatSetPoint < payload.state.thermostatSetPoint) {dev.state.thermostatSetPoint = "HEAT"}
+						else if (dev.state.thermostatSetPoint > payload.state.thermostatSetPoint) {dev.state.thermostatSetPoint = "COOL"}
+						else {dev.state.thermostatSetPoint = "HEAT"}
 					}
 				}
 
