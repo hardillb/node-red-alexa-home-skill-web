@@ -493,17 +493,16 @@
 		// Add else if here with restrictions
 		if (scene && power || scene && color || scene && colorTemperature || scene && input || scene && power || scene && playback || scene && stepSpeaker) {
 			alert("Activity/ Scene selected, this must be the only capability!");
-
+			
 			$('#ACTIVITY_TRIGGER').prop('checked', true);
-			$('#SceneController').prop('checked', false);
-
+			// Clear other capability/ type selections
 			$('input[name=appType]').each(function(index){
 			if (!this.name == "ACTIVITY_TRIGGER") {
-				$('#' + this.name).prop('checked',true);
+				$('#' + this.name).prop('checked',false);
 			}});
 			$('input[name=capabilities]').each(function(index){
 			if (!this.name == "SceneController") {
-				$('#' + this.name).prop('checked',true);
+				$('#' + this.name).prop('checked',false);
 			}});
 		}
 		else if (thermostat && power || thermostat && color || thermostat && colorTemperature || thermostat && input || thermostat && scene || thermostat && power || thermostat && playback || thermostat && stepSpeaker) {
