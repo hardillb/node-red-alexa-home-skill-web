@@ -491,181 +491,77 @@
 		var thermostat = $('#ThermostatController').prop('checked');
 
 		// Add else if here with restrictions
-		if (scene && power || scene && color || scene && colorTemperature || scene && input || scene && power || scene && playback || scene && stepSpeaker) {
+		if (scene) {
 			alert("Activity/ Scene selected, this must be the only capability!");
-			
 			$('#ACTIVITY_TRIGGER').prop('checked', true);
 			// Clear other capability/ type selections
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-				}
-			});
-			
-			$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "SceneController"){
-				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-				}
-			});
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+			$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "SceneController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			return false;
 		}
-		else if (thermostat && power || thermostat && color || thermostat && colorTemperature || thermostat && input || thermostat && scene || thermostat && power || thermostat && playback || thermostat && stepSpeaker) {
+		else if (thermostat) {
 			alert("Thermostat selected, this must be the only capability!");
-			// Auto-select Activity
-			$('#ACTIVITY_TRIGGER').prop('checked', false);
-			$('#LIGHT').prop('checked', false);
-			$('#SMARTLOCK').prop('checked', false);
-			$('#SMARTPLUG').prop('checked', false);
-			$('#SPEAKER').prop('checked', false);
-			$('#SWITCH').prop('checked', false);
 			$('#THERMOSTAT').prop('checked', true);
-			$('#TV').prop('checked', false);
-			// De-select other Capabilities Activity
-			$('#BrightnessController').prop('checked', false);
-			$('#ColorController').prop('checked', false);
-			$('#ColorTemperatureController').prop('checked', false);
-			$('#InputController').prop('checked', false);
-			$('#LockController').prop('checked', false);
-			$('#PlaybackController').prop('checked', false);
-			$('#PowerController').prop('checked', false);
-			$('#SceneController').prop('checked', false);
-			$('#StepSpeaker').prop('checked', false);
+			// Clear other capability/ type selections
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "THERMOSTAT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+			$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "ThermostatController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			return false;
 		}
-		else if (lock && power || lock && color || lock && colorTemperature || lock && input || lock && scene || lock && power || lock && playback || lock && stepSpeaker || lock && thermostat) {
+		else if (lock) {
 			alert("Lock selected, this must be the only capability!");
-			// Auto-select Activity
-			$('#ACTIVITY_TRIGGER').prop('checked', false);
-			$('#LIGHT').prop('checked', false);
-			$('#SMARTLOCK').prop('checked', true);
-			$('#SMARTPLUG').prop('checked', false);
-			$('#SPEAKER').prop('checked', false);
-			$('#SWITCH').prop('checked', false);
-			$('#THERMOSTAT').prop('checked', false);
-			$('#TV').prop('checked', false);
-			// De-select other Capabilities Activity
-			$('#BrightnessController').prop('checked', false);
-			$('#ColorController').prop('checked', false);
-			$('#ColorTemperatureController').prop('checked', false);
-			$('#InputController').prop('checked', false);
-			$('#PlaybackController').prop('checked', false);
-			$('#PowerController').prop('checked', false);
-			$('#SceneController').prop('checked', false);
-			$('#StepSpeaker').prop('checked', false);
-			$('#ThermostatController').prop('checked', false);
+			$('#LOCK').prop('checked', true);
+			// Clear other capability/ type selections
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+			$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "LockController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			return false;
 		}
 		else {
 			if (input) {
 				// Auto-select Activity (can be changed by user)
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', true);
+				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+
 			}
 			else if (scene) {
 				// Auto-select Activity (can be changed by user)
 				$('#ACTIVITY_TRIGGER').prop('checked', true);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			}
 			else if (power) {
 				// Auto-select Activity (can be changed by user)
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
 				$('#SWITCH').prop('checked', true);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+
 			}
 			else if (colorTemperature) {
 				// Auto-select Activity (can be changed by user)
 				$('#PowerController').prop('checked', true);
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', true);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+
 			}
 			else if (color) {
 				// Auto-select Activity (can be changed by user)
 				$('#PowerController').prop('checked', true);
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', true);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			}
 			else if (brightness) {
 				// Auto-select Activity (can be changed by user)
 				$('#PowerController').prop('checked', true);
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
 				$('#LIGHT').prop('checked', true);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			}
 			else if (stepSpeaker) {
 				// Auto-select Activity (can be changed by user)
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
 				$('#SPEAKER').prop('checked', true);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+
 			}
 			else if (playback) {
 				// Auto-select Activity (can be changed by user)
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', true);
-			}
-			else if (thermostat) {
-				// Auto-select Activity (can be changed by user)
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', false);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', true);
 				$('#TV').prop('checked', false);
-			}
-			else if (lock) {
-				// Auto-select Activity (can be changed by user)
-				$('#ACTIVITY_TRIGGER').prop('checked', false);
-				$('#LIGHT').prop('checked', false);
-				$('#SMARTLOCK').prop('checked', true);
-				$('#SMARTPLUG').prop('checked', false);
-				$('#SPEAKER').prop('checked', false);
-				$('#SWITCH').prop('checked', false);
-				$('#THERMOSTAT').prop('checked', false);
-				$('#TV').prop('checked', false);
+				$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 			}
 			else {
 				// De-select ALL Activity
