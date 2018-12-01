@@ -106,9 +106,51 @@ MQTT database account (used with mosquitto-auth-plug for mosquitto/ MQTT access)
 * **role**: read on users db
 
 ## Data Flow
-Alexa Skill --> Lambda --> 
-* Discovery: Web App --> Lambda --> Alexa Skill
-* Command: Web App --> MQTT (Cmd) --> Node Red Add-In --> MQTT (Ack)--> Web App --> Lambda --> Alexa Skill
+* Discovery: Alexa Skill --> Lambda --> Web App --> Lambda --> Alexa Skill
+* Command: Alexa Skill --> Lambda --> Web App (Command API) --> MQTT (Command) --> Node-RED Add-In --> MQTT (Ack) --> Web App (Command API) --> Lambda --> Alexa Skill
+* Set State: Node-RED --> MQTT (State) --> Web App (Set State) --> MongoDB
+* Get State: Alexa Skill --> Lambda --> Web App (State API) --> Lambda
+
+# Upgrading to Release 0.4
+If you're using the hosted instance skip to "Re-install Node-RED Add-on" - that's all you'll need to do.
+
+If you deployed release 0.3 (which had no state reporting capability/ node) you need to update the database schema to support WebAPI version 0.4.
+
+In this release mosquitto/ mosquitto-auth plugin remain as-is from previous release.
+
+### Extend Mongo Schema
+The MongoDB Devices schema must be updated to support the "reportState" boolean element and the "state" mixed object:
+```
+sudo docker exec -it mongodb /bin/bash
+mongo mongodb://localhost --authenticationDatabase admin -u '\<admin user\>' -p '\<password\>'
+
+use users
+show collections
+
+db.devices.update({},
+{$set : {"state":{}}},
+{upsert:false,
+multi:true}) 
+
+db.devices.update({},
+{$set : {"reportState":false}},
+{upsert:false,
+multi:true}) 
+```
+### Web App/ API Upgrade
+The remaining changes are "back-end" NodeJS code changes that will be pulled when you refresh the service containers:
+1. Stop the nr-alexav3-web container
+2. Remove the nr-alexav3-web container
+3. Recreate the nr-alexav3-web container
+
+### Re-install Node-RED Add-on
+Pull files from GitHub, uninstall and re-install the add-on using the commands:
+```
+npm uninstall /cbnet-dev/alexa-smart-home-v3
+npm remove /cbnet-dev/alexa-smart-home-v3
+npm install /cbnet-dev/alexa-smart-home-v3
+```
+```Note, the add-on is not published in NPM.```
 
 # Environment Build
 Note, **you do not need to build/ host your own environment to consume this service**. 
@@ -476,60 +518,44 @@ sudo crontab -e
 0 1 1 * * /home/<username>/scripts/cert-renew.sh > /home/<username>/scripts/cert-renew.log 
 ```
 
-## Adding Support for Alexa Device Type
+## Adding Support for a New Alexa Device Type/ Capability
 
-### Lambda Function Changes
-Extend command directive to include new namespace (line 10+):
+### AWS Lambda Function Changes
+Extend command directive to include new namespace, look for:
 ```
-// Add options to include other directives
-else if (event.directive.header.namespace === 'Alexa.PowerController' || event.directive.header.namespace === 'Alexa.PlaybackController') {
-    command(event,context, callback);
+// Device-specific directives
 ```
-Modify the command function to include necessary response for namespace:
+Consider if there is any pre-evaluation you want to take place, such as comparing current vs new temperature, look for:
 ```
-// Build PowerController Response Context
-if (namespace == "Alexa.PowerController") {
-    if (name == "TurnOn") {var newState = "ON"};
-    if (name == "TurnOff") {var newState = "OFF"};
-    var contextResult = {
-        "properties": [{
-            "namespace": "Alexa.PowerController",
-            "name": "powerState",
-            "value": newState,
-            "timeOfSample": dt.toISOString(),
-            "uncertaintyInMilliseconds": 50
-        }]
-    };
-}
-
-// Build PlaybackController Response Context
-if (namespace == "Alexa.PlaybackController") {
-    var contextResult = {
-        "properties": []
-    };
-}
+// Pre-evaluation checks
 ```
-
+Modify the discover function to return the correct JSON code, as-per the Amazon specification, look for:
+```
+// Discover Function
+```
+Modify the command function to return the correct JSON code, as-per the Amazon specification, look for:
+```
+// Command Function
+```
 Update Lambda code/ save on AWS.
 
 ### Web Service Changes
-Modify replaceCapability function to include necessary discovery response, for example:
+
+#### index.js Changes
+Modify replaceCapability function to include necessary discovery response, look for:
 ```
-	if(capability == "PowerController") {
-		return [{
-			"type": "AlexaInterface",
-			"interface": "Alexa.PowerController",
-			"version": "3",
-			"properties": {
-				"supported": [{
-					"name": "powerState"
-				}],
-				"proactivelyReported": false,
-				"retrievable": false
-				}
-			}];
-	}
+// Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
 ```
+Modify setstate function to include required state/ payload attribute assignment, look for:
+```
+// Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
+```
+Modify getstate API endpoint, add correct State Report JSON based on short-hand capability stored in MongoDB look for:
+```
+// Get State API, gets device "state" element from MongoDB, used for device status review in Alexa App
+```
+
+#### Web Page/ File Changes
 Modify views/pages/devices.ejs to include new checkbox for category
 
 Modify views/pages/devices.ejs checkCapability function to include necessary logic to:
@@ -541,23 +567,27 @@ Create 60x40 icon, with the same name as capability checkbox id/ value.
 Update NodeJS server via git pull/ restart NodeJS application.
 
 ### Node-Red-Contrib Changes
-Review function alexaHome(n), specifically switch statement:
+Modify Command Node "command" function, specifically switch statements for directive names, look for:
 ```
-// Needs expanding based on additional applications
-switch(message.directive.header.name){
-    case "TurnOn":
-        // Power-on command
-        msg.payload = true;
-        break;
-    case "TurnOff":
-        // Power-off command
-        msg.payload = false;
-        break;
-    case "AdjustVolume":
-        // Volume adjustment command
-        msg.payload = message.directive.payload.volumeSteps;
-        break;
-}
+// Command Node Command Function
+```
+```Note that msg.payload should always contain the target state/ operation.```
+
+Update Config Node 'updateState' function to include new state payload element(s) as-per Amazon JSON specification, look for:
+```
+// Config Node Update State
+```
+Modify Set State Node function, look for:
+```
+// Set State Node On Input Function
+```
+You'll need to modify the Command Node payload assessment, look for:
+```
+// Handle AlexaHome output
+```
+Plus modify the general payload handler, look for:
+```
+// Set State Payload Handler
 ```
 
 ## MQTT

@@ -542,7 +542,7 @@ app.post('/auth/exchange',function(req,res,next){
 }, oauthServer.token(), oauthServer.errorHandler());
 
 
-// Discover devices, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
+// Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
 app.get('/api/v1/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -584,7 +584,7 @@ app.get('/api/v1/devices',
 	}
 );
 
-// Alexa discovery response related-capabilties, function replaces 'placeholders' stored under device.capabilities
+// Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
 function replaceCapability(capability, reportState) {
 	// console.log(capability)
 
@@ -879,7 +879,7 @@ var timeout = setInterval(function(){
 	}
 },500);
 
-// API to get device state from MongoDB, used for device control/ review in Alexa App
+// Get State API, gets device "state" element from MongoDB, used for device status review in Alexa App
 app.get('/api/v1/getstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -1377,7 +1377,7 @@ server.listen(port, host, function(){
 	},5000);
 });
 
-// Sets device "state" element, requires correct Node-RED input node
+// Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	log2console("DEBUG", "[State API] SetState payload:" + JSON.stringify(payload));
