@@ -1403,11 +1403,11 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
-					dev.state.thermostatSetPoint = payload.state.thermostatSetPoint;
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference
 						if (dev.state.thermostatSetPoint < payload.state.thermostatSetPoint) {dev.state.thermostatMode = "HEAT"}
 						else if (dev.state.thermostatSetPoint > payload.state.thermostatSetPoint) {dev.state.thermostatMode = "COOL"}
+						dev.state.thermostatSetPoint = payload.state.thermostatSetPoint;
 					}
 					else {dev.state.thermostatMode = "HEAT"}
 				}
