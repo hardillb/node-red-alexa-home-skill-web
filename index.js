@@ -1380,7 +1380,7 @@ server.listen(port, host, function(){
 // Sets device "state" element, requires correct Node-RED input node
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
-	log2console("INFO", "[State API] SetState payload:" + JSON.stringify(payload));
+	log2console("DEBUG", "[State API] SetState payload:" + JSON.stringify(payload));
 	if (payload.hasOwnProperty('state')) {
 		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
