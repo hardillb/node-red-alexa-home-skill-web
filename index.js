@@ -907,7 +907,6 @@ app.get('/api/v1/getstate/:dev_id',
 								var properties = [];
 								
 								deviceJSON.capabilities.forEach(function(capability) {
-									log2console("DEBUG", "ReportState capability: " + capability);
 									switch (capability)  {
 										case "BrightnessController":
 											// Return brightness percentage
@@ -979,7 +978,6 @@ app.get('/api/v1/getstate/:dev_id',
 										case "PowerController":
 											// Return Power State
 											if (deviceJSON.state.hasOwnProperty('power') && deviceJSON.state.hasOwnProperty('time')) {
-												log2console("DEBUG", "PowerController state 'power': " + deviceJSON.state.power);
 												properties.push({
 															"namespace": "Alexa.PowerController",
 															"name": "powerState",
@@ -992,8 +990,6 @@ app.get('/api/v1/getstate/:dev_id',
 										case "ThermostatController":
 											// Return Temperature
 											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
-												log2console("DEBUG", "ThermostatController state 'thermostatSetPoint': " + deviceJSON.state.thermostatSetPoint);
-												log2console("DEBUG", "ThermostatController state 'thermostatMode': " + deviceJSON.state.thermostatMode);
 												properties.push({
 														"namespace":"Alexa.ThermostatController",
 														"name":"targetSetpoint",
