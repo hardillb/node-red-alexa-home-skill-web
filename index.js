@@ -795,7 +795,7 @@ var onGoingCommands = {};
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	if (topic.startsWith('response/')){
-		log2console("INFO", "Received MQTT response message for topic: " + topic);
+		log2console("INFO", "Command API: Acknowledged MQTT response message for topic: " + topic);
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
@@ -803,10 +803,10 @@ mqttClient.on('message',function(topic,message){
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				commandWaiting.res.status(200).send();
-				log2console("INFO", "Sent successful MQTT Command API response");				
+				log2console("DEBUG", "Command API: Successful MQTT Command API response");				
 			} else {
 				commandWaiting.res.status(503).send();
-				log2console("ERROR", "Malfunction on MQTT Command API response");
+				log2console("ERROR", "Command API: Failed MQTT Command API response");
 			}
 			delete onGoingCommands[payload.messageId];
 			// should really parse uid out of topic
@@ -819,7 +819,7 @@ mqttClient.on('message',function(topic,message){
 		}
 	}
 	else if (topic.startsWith('state/')){
-		log2console("DEBUG", "Acknowledged MQTT state for topic: " + topic);
+		log2console("DEBUG", "State API: Acknowledged MQTT state for topic: " + topic);
 		// Split topic/ get username and endpointId
 		var arrTopic = topic.split("/"); 
 		var username = arrTopic[1];
@@ -833,10 +833,10 @@ mqttClient.on('message',function(topic,message){
 		if (stateWaiting) {
 			if (payload.success) {
 				stateWaiting.res.status(200).send();
-				log2console("INFO", "Succesful MQTT state update for user:" + username + " device:" + endpointId);				
+				log2console("INFO", "State API: Succesful MQTT state update for user:" + username + " device:" + endpointId);				
 			} else {
 				stateWaiting.res.status(503).send();
-				log2console("ERROR", "Malfunction on MQTT state update for user:" + username + " device:" + endpointId);
+				log2console("ERROR", "State API: Failed MQTT state update for user:" + username + " device:" + endpointId);
 			}
 		}
 		// If successful remove messageId from onGoingCommands
@@ -894,7 +894,7 @@ app.get('/api/v1/getstate/:dev_id',
 
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
-		log2console("INFO", "Received GetState API request for user:" + req.user.username + " endpointId:" + id);
+		log2console("DEBUG", "State API: Received GetState API request for user:" + req.user.username + " endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (!err) {
@@ -1026,13 +1026,13 @@ app.get('/api/v1/getstate/:dev_id',
 								}
 							else {
 								// Device has no state, return as such
-								log2console("WARNING","No state found for username: " + req.user.username + " endpointId:" + id);
+								log2console("WARNING","State API: No state found for username: " + req.user.username + " endpointId:" + id);
 								res.status(500).send();
 							}
 						}
 						// State reporting not enabled for device, send error code
 						else {
-							log2console("DEBUG","State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
+							log2console("DEBUG","State API: State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
 							var properties = [];
 							properties.push({
 								"namespace": "Alexa.EndpointHealth",
@@ -1050,13 +1050,13 @@ app.get('/api/v1/getstate/:dev_id',
 					}
 					// 'reportState' element missing on device, send error code
 					else {
-						log2console("WARNING", "User: " + req.user.username + " device: " + id +  " has no reportState attribute, check MongoDB schema");
+						log2console("WARNING", "State API: User: " + req.user.username + " device: " + id +  " has no reportState attribute, check MongoDB schema");
 						res.status(500).send();
 					}
 				}
 			else {
 				// Device not found
-				log2console("WARNING","No device found for username: " + req.user.username + " endpointId:" + id);
+				log2console("WARNING","State API: No device found for username: " + req.user.username + " endpointId:" + id);
 				res.status(500).send();
 			}
 		});
@@ -1094,19 +1094,19 @@ app.post('/api/v1/command',
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
-				log2console("DEBUG", "Received command API request for user: " + req.user.username + " command: " + message);
+				log2console("DEBUG", "Command API: Received command API request for user: " + req.user.username + " command: " + message);
 				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
 					// Handle Out of Range
 					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-							log2console("WARNING", "User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+							log2console("WARNING", "Command API: User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
 							res.status(417).send();
 							validationStatus = false;
 						}
 					}
-					else {log2console("DEBUG", "Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
+					else {log2console("DEBUG", "Command API: Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
 				}
 
 				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
@@ -1115,20 +1115,20 @@ app.post('/api/v1/command',
 					// Handle Temperature Out of Range
 					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-							log2console("WARNING", "User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+							log2console("WARNING", "Command API: User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
 							res.status(416).send();
 							validationStatus = false;
 						}
 					}
-					else {log2console("DEBUG", "Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
+					else {log2console("DEBUG", "Command API: Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
 				}
 				
 				if (validationStatus) {
 					try{
 						mqttClient.publish(topic,message);
-						log2console("INFO", "Published MQTT command for user: " + req.user.username + " topic: " + topic);
+						log2console("INFO", "Command API: Published MQTT command for user: " + req.user.username + " topic: " + topic);
 					} catch (err) {
-						log2console("ERROR", "Failed to publish MQTT command for user: " + req.user.username);
+						log2console("ERROR", "Command API: Failed to publish MQTT command for user: " + req.user.username);
 					}
 					var command = {
 						user: req.user.username,
@@ -1141,7 +1141,7 @@ app.post('/api/v1/command',
 				}
 			}
 			else {
-				log2console("ERROR", "Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				log2console("ERROR", "Command API: Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
 				res.status(404).send();
 			}
 		});
@@ -1379,7 +1379,7 @@ server.listen(port, host, function(){
 // Sets device "state" element, requires correct Node-RED input node
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
-	log2console("INFO", "SetState payload:" + JSON.stringify(payload));
+	log2console("INFO", "State API: SetState payload:" + JSON.stringify(payload));
 	if (payload.hasOwnProperty('state')) {
 		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
@@ -1407,22 +1407,22 @@ function setstate(username, endpointId, payload) {
 					}
 					else {dev.state.thermostatMode = "HEAT"}
 				}
-				log2console("DEBUG", "Endpoint state update: " + JSON.stringify(dev.state));
+				log2console("DEBUG", "State API: Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
-						log2console("DEBUG", "Error updating state for endpointId: " + endpointId);
+						log2console("DEBUG", "State API: Error updating state for endpointId: " + endpointId);
 					}
-					else {log2console("DEBUG", "Updated state for endpointId: " + endpointId);}
+					else {log2console("DEBUG", "State API: Updated state for endpointId: " + endpointId);}
 				});
 			}
 			else {
-				log2console("WARNING", "Unable to find enpointId: " + endpointId + " for username: " + username);
+				log2console("WARNING", "State API: Unable to find enpointId: " + endpointId + " for username: " + username);
 			}
 		});
 	}
 	else {
-		log2console("WARNING", "setstate called, but MQTT payload has no 'state' property!");
+		log2console("WARNING", "State API: setstate called, but MQTT payload has no 'state' property!");
 	}
 }
 
