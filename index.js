@@ -38,6 +38,7 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 // NodeJS App Settings
 var port = (process.env.PORT || 3000);
 var host = ('0.0.0.0');
+var debug = (process.env.ALEXA_DEBUG || false)
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER || undefined);
 var mongo_password = (process.env.MONGO_PASSWORD || undefined);
@@ -116,7 +117,7 @@ mongoose_connection.on('reconnected', function () {
 });
 
 mongoose_connection.on('disconnected', function() {
-	log2console("WARNING", "MongoDB disconnected!");
+	log2console("WARNING", "[Core] MongoDB disconnected!");
 });
 
 // Fixes in relation to: https://github.com/Automattic/mongoose/issues/6922#issue-354147871
@@ -850,7 +851,7 @@ mqttClient.on('message',function(topic,message){
 		//});
 	}
 	else {
-		log2console("DEBUG", "Unhandled MQTT via on message event handler: " + topic + message);
+		log2console("DEBUG", "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
 	}
 });
 
@@ -1368,8 +1369,8 @@ app.delete('/service/:id',
 var server = http.Server(app);
 
 server.listen(port, host, function(){
-	log2console("INFO", "App listening on: " + host + ":" + port);
-	log2console("INFO", "App_ID -> " + app_id);
+	log2console("INFO", "[Core] App listening on: " + host + ":" + port);
+	log2console("INFO", "[Core] App_ID -> " + app_id);
 
 	setTimeout(function(){
 		
@@ -1429,6 +1430,10 @@ function setstate(username, endpointId, payload) {
 function log2console(severity,message) {
 	var dt = new Date().toISOString();
 	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
-	console.log(prefixStr, message);
+	if (severity == "DEBUG" && debug)
+		console.log(prefixStr, message);
+	else if (severity != "DEBUG") {
+		console.log(prefixStr, message);
+	}
 };
 
