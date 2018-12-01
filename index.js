@@ -23,16 +23,16 @@ var countries = require('countries-api');
 
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
-	log2console("CRITICAL","You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
+	log2console("CRITICAL","[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
 	process.exit()
 }
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
-	log2console("WARNING","Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
+	log2console("WARNING","[Core] Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
 }
 // Warn on not supply of MAIL username/ password/ server
 if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
-	log2console("WARNING","No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors");
+	log2console("WARNING","[Core] No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors");
 }
 
 // NodeJS App Settings
@@ -70,49 +70,49 @@ if (mqtt_user) {
 	mqttOptions.password = mqtt_password;
 }
 
-log2console("INFO", "Connecting to MQTT server: " + mqtt_url);
+log2console("INFO", "[Core] Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
-	log2console("ERROR", "MQTT connect error");
+	log2console("ERROR", "[Core] MQTT connect error");
 });
 
 mqttClient.on('reconnect', function(){
-	log2console("WARNING", "MQTT reconnect event");
+	log2console("WARNING", "[Core] MQTT reconnect event");
 });
 
 mqttClient.on('connect', function(){
-	log2console("INFO", "MQTT connected, subscribing to 'response/#'")
+	log2console("INFO", "[Core] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	log2console("INFO", "MQTT connected, subscribing to 'state/#'")
+	log2console("INFO", "[Core] MQTT connected, subscribing to 'state/#'")
 	mqttClient.subscribe('state/#');
 });
 
 // Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-log2console("INFO", "Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
+log2console("INFO", "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
 mongoose_connection.on('connecting', function() {
-	log2console("INFO", "Connecting to MongoDB...");
+	log2console("INFO", "[Core] Connecting to MongoDB...");
 });
 
 mongoose_connection.on('error', function(error) {
-	log2console("ERROR: MongoDB connection: " + error);
+	log2console("ERROR", "[Core] MongoDB connection: " + error);
 	//mongoose.disconnect();
 });
 
 mongoose_connection.on('connected', function() {
-    log2console("INFO", "MongoDB connected!");
+    log2console("INFO", "[Core] MongoDB connected!");
 });
   
 mongoose_connection.once('open', function() {
-    log2console("INFO", "MongoDB connection opened!");
+    log2console("INFO", "[Core] MongoDB connection opened!");
 });
 
 mongoose_connection.on('reconnected', function () {
-    log2console("INFO", "MongoDB reconnected!");
+    log2console("INFO", "[Core] MongoDB reconnected!");
 });
 
 mongoose_connection.on('disconnected', function() {
@@ -164,7 +164,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			});
 		});
 	} else {
-		log2console("INFO", "Superuser MQTT account, " + mqtt_user + " already exists");
+		log2console("INFO", "[Core] Superuser MQTT account, " + mqtt_user + " already exists");
 	}
 });
 
@@ -228,7 +228,7 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			log2console("ERROR", "Missing grant token:" + token);
+			log2console("ERROR", "[Core] Missing grant token:" + token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
 			//console.log("Token is GOOD!");
