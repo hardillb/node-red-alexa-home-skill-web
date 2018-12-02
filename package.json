@@ -1,6 +1,6 @@
 {
   "name": "node-red-alexa-home-skill-v3",
-  "version": "0.0.4",
+  "version": "0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
