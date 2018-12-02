@@ -290,7 +290,7 @@ A customer container is created using [nodejs-webapp.dockerfile](nodejs-webapp.d
 ```
 mkdir nodejs-webapp
 cd nodejs-webapp/
-git clone https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
+git clone --single-branch -b release-0.4 https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
 sudo docker build -t nr-alexav3-web:0.2 -f nodejs-webapp.dockerfile .
 ```
 Then start the container:
@@ -347,7 +347,7 @@ Note it is assumed this web-app will be reverse proxied, i.e. HTTPS (NGINX) --->
 cd ~
 mkdir nginx-build
 cd nginx-build
-git clone https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
+git clone --single-branch -b release-0.4 https://github.com/coldfire84/node-red-alexa-home-skill-v3-web.git .
 
 sudo mkdir -p /var/docker/nginx/conf.d
 sudo mkdir -p /var/docker/nginx/stream_conf.d
