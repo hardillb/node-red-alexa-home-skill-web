@@ -820,7 +820,7 @@ mqttClient.on('message',function(topic,message){
 		}
 	}
 	else if (topic.startsWith('state/')){
-		log2console("DEBUG", "[State API] Acknowledged MQTT state for topic: " + topic);
+		log2console("INFO", "[State API] Acknowledged MQTT state message topic: " + topic);
 		// Split topic/ get username and endpointId
 		var arrTopic = topic.split("/"); 
 		var username = arrTopic[1];
@@ -833,11 +833,11 @@ mqttClient.on('message',function(topic,message){
 		var stateWaiting = onGoingCommands[payload.messageId];
 		if (stateWaiting) {
 			if (payload.success) {
+				log2console("INFO", "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
 				stateWaiting.res.status(200).send();
-				log2console("INFO", "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);				
 			} else {
-				stateWaiting.res.status(503).send();
 				log2console("ERROR", "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
+				stateWaiting.res.status(503).send();
 			}
 		}
 		// If successful remove messageId from onGoingCommands
