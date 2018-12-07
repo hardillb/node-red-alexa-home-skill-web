@@ -36,8 +36,8 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 }
 
 // NodeJS App Settings
-var port = (process.env.PORT || 3000);
-var host = ('0.0.0.0');
+var port = (process.env.VCAP_APP_PORT || 3000);
+var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var debug = (process.env.ALEXA_DEBUG || false)
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER || undefined);
@@ -50,7 +50,14 @@ var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Express Settings
-var app_id = 'http://localhost:' + port;
+if (process.env.VCAP_APPLICATION) {
+	var application = JSON.parse(process.env.VCAP_APPLICATION);
+	var app_uri = application['application_uris'][0];
+	app_id = 'https://' + app_uri;
+}
+else {
+	var app_id = 'http://localhost:' + port;
+}
 var cookieSecret = 'ihytsrf334';
 //var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
 //var measurement = new Measurement(googleAnalyicsTID);

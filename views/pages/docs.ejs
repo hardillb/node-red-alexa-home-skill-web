@@ -4,58 +4,10 @@
       <h1>Documentation</h1>
       <p>Welcome to the Node-RED Alexa Smart Home <b>v3</b> bridge documentation</p>
       <br>
-      To get up and running you need to:
-      <ol style="list-style-type:circle">
-        <li><a href="mailto:node-red@cb-net.co.uk">Request extension of the v3 skill to your Amazon account</a></li>
-        <li><a target="_blank" href="/newuser">Create a bridge account</a> </li>
-        <li>Link the skill with your amazon account via the Alexa App</li>
-        <li>Define devices on the bridge <a target="_blank" href="/devices">here</a></li>
-        <li>Discover devices in the Alexa App/ using the "Alexa, discover devices" voice command</li>
-        <li>Install <a href="https://github.com/coldfire84/node-red-contrib-alexa-home-skill-v3">Node-RED nodes for the bridge add-on</a></li>
-        <li>Configure Flows within Node-RED</li>
-      </ol>
-      <br>
-      <p>You can also use devices defined with this service within <b>Alexa Groups</b> in order to benefit from <a href="https://www.smarthomereviewer.com/how-to-set-up-alexa-room-awareness/"><b>Room Awareness</b></a>.
-      This enables commands such as "Alexa, turn on the <b>Lights</b>" vs "Alex, turn on the <b>Kitchen</b> Light" - sounds simple enough, but when every room has a smart switch/ light bulb
-      this can become confusing. Room Awareness is a simple, but effective smart home bonus!</p>
-      <br>
-      <h2>Migration from v2 Skill</h2>
-      <p> The Node-RED addon-ons/ nodes for the API version 2 and version 3 Home Skill can coexist. This means you are able to try the nodes/ devices out alongside the API version 2 skill, 
-        prior to defining your devices.</p>
-      <br>
-      <p>A typical migration path would look like:</p>
-      <ol>
-        <li>Follow initial setup instructions above</li>
-        <li>Test the v3 bridge performs as expected</li>
-        <li>Redefine your devices in the version 3 bridge</li>
-        <li>Assess v3 Node output/ impact to current flows</li>
-        <li>Replace v2 Nodes with v3 Nodes, removing devices from the v2 bridge and the Alexa App</li>
-      </ol>
-      <br>
-      <h2>Example Device Definitions</h2>
-      <p>You can declare a variety of devices, such as those illustrated below:</p>
-      <p><img class="img-fluid" src="/images/DevicesExample.png" title="DevicesExample"></p>
+      <p>To get up and running follow <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Use-the-Hosted-Instance'>these instructions.</a></p>
       <br>
       <h2>Example Flows</h2>
-      <p>You can view example flows in the <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Example-Flows'>GitHub Wiki</a>a for the service.</p>
-      <br>
-      <h2>Response Handling</h2>
-      <p>By default nodes will automatically acknowledge any request via the Skill API. This means that <b>irrespective of whether 
-        the flow generates the desired outcome Alexa will respond as if it has.</b></p>
-      <br>
-      <p>In the case of the Thermostat Controller interface I even use the target temperature/ measurement unit from the original
-        request directly in the response.</p>
-      <br>
-      <p>You can change this by disabling the "Auto Acknowledge" option and using a Alexa Smart Home v3 Response Node.</p>
-      <br>
-      <p><img class="img-fluid" src="/images/AutoAcknowledge.png" title="AutoAcknowledge"></p>
-      <br>
-      <h3>Alexa Smart Home v3 Response Node</h3>
-      <p>This node is for if you want to have more control success/ failure result back to Alexa Home Skill API.</p>
-      <br>
-      <p>Add this node to your flow and ensure you set payload to <b>true</b> on success or <b>false</b> on failure. 
-        Any responses <b>must</b> be sent within <b>2 seconds</b> of the incoming request or the service will respond to Alexa with a 
-        timeout message.</p>
+      <p>You can view example flows in the <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Example-Flows'>GitHub Wiki</a>a for the service.</p>     
     </div>
 </div>
 <% include ../fragments/footer.ejs %>
