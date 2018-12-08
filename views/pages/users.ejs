@@ -1,31 +1,32 @@
 <% include ../fragments/header.ejs %>
 	<div class="container main-content">
 		<h1>User Accounts</h1>
-		<div class="row">
-			<div class="col-sm"><strong>Username</strong></div>
-			<div class="col-sm"><strong>EMail Address</strong></div>
-			<div class="col-sm"><strong>Country</strong></div>
-			<div class="col-sm"><strong>Region</strong></div>
-			<div class="col-sm"><strong>Device Count</strong></div>
-		</div>
-		<% users.forEach(function(account){ %>
-		<div class="devrow">
-			<div class="row">
-				<div class="col-sm"><%= account.username %></div>
-				<div class="col-sm"><%= account.email %></div>
-				<div class="col-sm"><%= account.country %></div>
-				<div class="col-sm"><%= account.region %></div>
-				<div class="col-sm"><%= account.username %></div>
-			</div>
-			<div class="row" style="padding-left: 15px">
-				<div>
-					<button type="button" class="btn btn-secondary" onclick="edit('<%= account.username %>')">Edit</button>
-					<button type="button" class="btn btn-secondary" onclick="deleteUser('<%= account.username %>')">Delete</button>
-				</div>
-			</div>
-		</div>
-		<% }); %>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+				  <th scope="col">Username</th>
+				  <th scope="col">Email Address</th>
+				  <th scope="col">Country</th>
+				  <th scope="col">Region</th>
+				  <th scope="col">Edit</th>
+				  <th scope="col">Delete</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% users.forEach(function(account){ %>
+					<tr>
+						<th scope="row"><%= account.username %></th>
+						<td><%= account.email %></td>
+						<td><%= account.country %></td>
+						<td><%= account.region %></td>
+						<td><button type="button" class="btn btn-secondary" onclick="edit('<%= account.username %>')">Edit</button></td>
+						<td><button type="button" class="btn btn-secondary" onclick="deleteUser('<%= account.username %>')">Delete</button></td>
+					</tr>
+				<% }); %>
+			</tbody>
+		</table>
 	</div>
+	
 	<script>
 			
 	function saveDevice() {
