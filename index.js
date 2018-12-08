@@ -1302,6 +1302,16 @@ app.get('/admin/users',
 		}
 });
 
+app.get('/admin/users2',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) {
+			res.render('pages/users',{user:req.user, services: data});
+		} else {
+			res.status(401).send();
+		}
+});
+
 app.get('/admin/devices',
 	ensureAuthenticated,
 	function(req,res){
