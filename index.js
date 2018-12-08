@@ -1306,8 +1306,13 @@ app.get('/admin/users2',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			res.render('pages/users',{user:req.user, services: data});
-		} else {
+			Account.find({}, function(err, data){
+				if (!err) {
+					res.render('pages/users',{user:req.user, users: data});
+				}
+			});
+		}
+		else {
 			res.status(401).send();
 		}
 });
