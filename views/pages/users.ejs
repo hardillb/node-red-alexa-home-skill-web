@@ -117,13 +117,14 @@
 		var answer = confirm("Are you sure you want to delete this user account?");
 		if(answer) {
 			if(answer) {
-			 $.ajax({
-			 	url:"/account/" + username,
-			 	type: 'DELETE',
-			 	success: function(data){
-			 		document.location.reload();
-			 	}
-			 });
+				$.ajax({
+					url:"/account/" + username,
+					type: 'DELETE',
+					success: function(data){
+						document.location.reload();
+					}
+				});
+			}
 		}
 	}
 
