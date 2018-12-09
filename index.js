@@ -1280,11 +1280,11 @@ app.delete('/account/:user_id',
 
 			if (deleteAccount && deleteGrantCodes && deleteAccessTokens && deleteRefreshTokens) {
 				res.status(202);
-				res.send(err);
+				res.send();
 			}
 			else {
 				res.status(500);
-				res.send();
+				res.send(err);
 			}
 		}
 });
