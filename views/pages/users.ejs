@@ -108,6 +108,7 @@
 	
 	function editAccount(username) {
 		clearModal()
+		var account = users[username];
 		$('#username').prop('readonly', true);
 		$('#username').val(account.username);
 		$('#email').val(account.email);
