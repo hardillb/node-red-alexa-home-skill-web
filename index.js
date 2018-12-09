@@ -1279,7 +1279,7 @@ app.delete('/account/:user_id',
 				}
 			});
 
-			if (deleteAccount && deleteGrantCodes && deleteAccessTokens && deleteRefreshTokens) {
+			if (deleteAccount == true && deleteGrantCodes == true && deleteAccessTokens == true && deleteRefreshTokens == true) {
 				res.status(202);
 				res.send();
 			}
