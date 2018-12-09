@@ -1237,61 +1237,18 @@ app.delete('/account/:user_id',
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
 			// Multiple vars for each step of clean-up
-			var deleteAccount = false;
-			var deleteGrantCodes = false;
-			var deleteAccessTokens = false;
-			var deleteRefreshTokens = false;
 			var userId = req.params.user_id;
-
-			Account.deleteOne({_id: userId},function(err) {
-				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete user account: " + userId, err);
-				} else {
-					log2console("INFO", "[Admin] Deleted user account: " + userId);
-					deleteAccount = true;
-				}
+			const deleteAccount = Account.remove({_id: userId});
+			const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
+			const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
+			const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
+			Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
+				log2console("INFO", result);
+				res.status(202).json({message: 'deleted'});
+			}).catch(err => {
+				log2console("ERROR", err);
+				res.status(500).json({error: err});
 			});
-
-			oauthModels.GrantCode.deleteMany({user: userId}, function(err) {
-				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete Grant Codes for account: " + userId, err);
-				} else {
-					log2console("INFO", "[Admin] Deleted Grant Codes for user account: " + userId);
-					deleteGrantCodes = true;
-				}
-			});
-
-			oauthModels.AccessToken.deleteMany({user: userId}, function(err) {
-				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete Access Tokens for account: " + userId, err);
-				} else {
-					log2console("INFO", "[Admin] Deleted Access Tokens for user account: " + userId);
-					deleteAccessTokens = true;
-				}
-			});
-
-			oauthModels.RefreshToken.deleteMany({user: userId}, function(err) {
-				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete Refresh Tokens for account: " + userId, err);
-				} else {
-					log2console("INFO", "[Admin] Deleted Refresh Tokens for user account: " + userId);
-					deleteRefreshTokens = true;
-				}
-			});
-
-			log2console("INFO", "deleteAccount:" + deleteAccount);
-			log2console("INFO", "deleteGrantCodes:" + deleteGrantCodes);
-			log2console("INFO", "deleteAccessTokens:" + deleteAccessTokens);
-			log2console("INFO", "deleteRefreshTokens:" + deleteRefreshTokens);
-
-			if (deleteAccount == true && deleteGrantCodes == true && deleteAccessTokens == true && deleteRefreshTokens == true) {
-				res.status(202);
-				res.send();
-			}
-			else {
-				res.status(500);
-				res.send();
-			}
 		}
 });
 
