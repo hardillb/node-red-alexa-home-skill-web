@@ -118,7 +118,7 @@
 		$('#username').prop('readonly', true);
 		$('#username').val(account.username);
 		$('#email').val(account.email);
-		$('#country').val(account.country);
+		$("#country").countrySelect("selectCountry",account.country);
 		$("#userModal").modal();
 	}
 
