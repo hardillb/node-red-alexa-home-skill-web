@@ -122,9 +122,6 @@
 				$.ajax({
 					url:"/account/" + account.username,
 					type: 'DELETE',
-					data: JSON.stringify(account),
-					dataType: 'json',
-					contentType: "application/json",
 					success: function(data){
 						document.location.reload();
 					}

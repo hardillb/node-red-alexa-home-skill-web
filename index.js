@@ -1220,7 +1220,7 @@ app.post('/account/:username',
 						res.send(err);
 					} else {
 						data.email = req.body.email;
-						data.country = req.body.country;
+						data.country = req.body.country.toUpperCase();
 						data.region = region;
 						data.save(function(err, d){
 							res.status(201);
@@ -1235,7 +1235,7 @@ app.delete('/account/:username',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
-			var user = req.body.username;
+			var user = req.params.username;
 			Account.deleteOne({username: user},
 				function(err) {
 					if (err) {
