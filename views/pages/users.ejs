@@ -19,28 +19,113 @@
 						<td><%= account.email %></td>
 						<td><%= account.country %></td>
 						<td><%= account.region %></td>
-						<td><button type="button" class="btn btn-secondary" onclick="edit('<%= account.username %>')">Edit</button></td>
-						<td><button type="button" class="btn btn-secondary" onclick="deleteUser('<%= account.username %>')">Delete</button></td>
+						<td><button type="button" class="btn btn-secondary" onclick="editAccount('<%= account.username %>')">Edit</button></td>
+						<td><button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account.username %>')">Delete</button></td>
 					</tr>
 				<% }); %>
 			</tbody>
 		</table>
 	</div>
-	
+
+	<!-- Modal -->
+	<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="userModalTitle">Add User</h5>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>
+				<form class="form-user" id="form-user">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="username">Username: </label>
+						<input id="username" class="form-control" type="text" required>
+						<br>
+						<label for="email">Email Address: </label>
+						<br>
+						<textarea id="email" class="form-control" type="email" required></textarea>
+						<br>
+						<label for="country" class="sr-only">Country</label>
+						<input type="text" id="country" class="form-control" required>
+						<input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />
+					</div>
+				</div>
+				<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+						<button class="btn btn-primary" id="submit" type="submit" value="submit">Save</button>
+						<!-- <button type="button" class="btn btn-primary" onclick='saveDevice()'>Save</button> -->
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
 	<script>
-			
-	function saveDevice() {
-	}
+
+	$("#country").countrySelect();
 	
-	function edit(id) {
-		// Clear
-		// If modal, re-populate fields
+	$("#form-device").submit(function(e) {
+		e.preventDefault();
+		saveAccount()
+	});
+
+	function clearModal() {
+		$('#username').val("");
+		$('#email').val("");
+		$('#country').val("");
 	}
 
-	function deleteUser(username) {
-		var answer = confirm("Are you sure you want to delete this device?");
+	function saveAccount() {
+		var username = $('#username').val();
+		var account = users[username];
+		var country = $("#country_code").val().trim();
+		account.username = $('#username').val();
+		account.email = ('#email').val();
+		account.country = ('#country').val();
+
+		if (account.username && account.email && account.country) {
+				//post update
+						// $.ajax({
+						// 	url: '/device/' + device._id,
+						// 	type: 'POST',
+						// 	data: JSON.stringify(device),
+						// 	dataType: 'json',
+						// 	contentType: "application/json",
+						// 	success: function(data){
+						// 		//console.log("post response");
+						// 		//console.log(data);
+						// 		//reload
+						// 		document.location.reload();
+						// 	},
+						// });
+				// console.log(JSON.stringify(device));
+			} else {
+				alert("Ensure email address and country are set!");
+			}
+	}
+	
+	function editAccount(username) {
+		clearModal()
+		$('#username').prop('readonly', true);
+		$('#username').val(account.username);
+		$('#email').val(account.email);
+		$('#country').val(account.country);
+		$("#userModal").modal();
+	}
+
+	function deleteAccount(username) {
+		var answer = confirm("Are you sure you want to delete this user account?");
 		if(answer) {
-			// Dlete the user account
+			// if(answer) {
+			// $.ajax({
+			// 	url:"/device/" + id,
+			// 	type: 'DELETE',
+			// 	success: function(data){
+			// 		document.location.reload();
+			// 	}
+			// });
 		}
 	}
 
