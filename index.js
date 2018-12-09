@@ -1197,6 +1197,21 @@ app.post('/account/:username',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
+			// Lookup Region for AWS Lambda/ Web API Skill Interaction
+			var country = countries.findByCountryCode(req.body.country.toUpperCase());
+			var region;
+			// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
+			if (country.statusCode == 200) {
+				log2console("DEBUG", "User region: " + country.data[0].region);
+				// Use first array object, should always be singular data object returned via countries-api
+				region = country.data[0].region;
+			}
+			else {
+				log2console("DEBUG", "User region lookup failed.");
+				log2console("DEBUG", country);
+				region = "Unknown";
+			} 
+
 			var user = req.body.username;
 			Account.findOne({username: user},
 				function(err, data){
@@ -1204,8 +1219,9 @@ app.post('/account/:username',
 						res.status(500);
 						res.send(err);
 					} else {
-						data.email = account.email;
-						data.country = account.country;
+						data.email = req.body.email;
+						data.country = req.body.country;
+						data.region = region;
 						data.save(function(err, d){
 							res.status(201);
 							res.send(d);
