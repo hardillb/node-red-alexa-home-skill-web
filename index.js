@@ -1238,15 +1238,15 @@ app.delete('/account/:user_id',
 		if (req.user.username === mqtt_user) { // Check is admin user
 			// Multiple vars for each step of clean-up
 			var userId = req.params.user_id;
-			const deleteAccount = Account.remove({_id: userId});
+			const deleteAccount = Account.deleteOne({_id: userId});
 			const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
 			const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
 			const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
 			Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
-				log2console("INFO", result);
+				//log2console("INFO", result);
 				res.status(202).json({message: 'deleted'});
 			}).catch(err => {
-				log2console("ERROR", err);
+				log2console("ERROR", "[Admin] " + err);
 				res.status(500).json({error: err});
 			});
 		}
