@@ -1241,37 +1241,38 @@ app.delete('/account/:user_id',
 			var deleteGrantCodes = false;
 			var deleteAccessTokens = false;
 			var deleteRefreshTokens = false;
+			var userId = req.params.user_id;
 
-			Account.deleteOne({_id: req.params.user_id},function(err) {
+			Account.deleteOne({_id: userId},function(err) {
 				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete user account: " + req.params.user_id, err);
+					log2console("ERROR", "[Admin] Unable to delete user account: " + userId, err);
 				} else {
-					log2console("INFO", "[Admin] Deleted user account: " + req.params.user_id);
+					log2console("INFO", "[Admin] Deleted user account: " + userId);
 					deleteAccount = true;
 				}
 			});
 
-			oauthModels.GrantCode.deleteMany({user: req.params.user_id}, function(err) {
+			oauthModels.GrantCode.deleteMany({user: userId}, function(err) {
 				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete Grant Codes for account: " + req.params.user_id, err);
+					log2console("ERROR", "[Admin] Unable to delete Grant Codes for account: " + userId, err);
 				} else {
-					log2console("INFO", "[Admin] Deleted Grant Codes for user account: " + req.params.user_id);
+					log2console("INFO", "[Admin] Deleted Grant Codes for user account: " + userId);
 					deleteGrantCodes = true;
 				}
 			});
 
-			oauthModels.AccessToken.deleteMany({user: req.params.user_id}, function(err) {
+			oauthModels.AccessToken.deleteMany({user: userId}, function(err) {
 				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete Access Tokens for account: " + req.params.user_id, err);
+					log2console("ERROR", "[Admin] Unable to delete Access Tokens for account: " + userId, err);
 				} else {
-					log2console("INFO", "[Admin] Deleted Access Tokens for user account: " + req.params.user_id);
+					log2console("INFO", "[Admin] Deleted Access Tokens for user account: " + userId);
 					deleteAccessTokens = true;
 				}
 			});
 
-			oauthModels.RefreshToken.deleteMany({user: req.params.user_id}, function(err) {
+			oauthModels.RefreshToken.deleteMany({user: userId}, function(err) {
 				if (err) {
-					log2console("ERROR", "[Admin] Unable to delete Refresh Tokens for account: " + req.params.user_id, err);
+					log2console("ERROR", "[Admin] Unable to delete Refresh Tokens for account: " + userId, err);
 				} else {
 					log2console("INFO", "[Admin] Deleted Refresh Tokens for user account: " + req.params.user_id);
 					deleteRefreshTokens = true;
