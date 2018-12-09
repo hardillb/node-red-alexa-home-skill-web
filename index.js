@@ -1279,11 +1279,11 @@ app.delete('/account/:user_id',
 				}
 			});
 
-			log2console("DEBUG", "deleteAccount:" + deleteAccount);
-			log2console("DEBUG", "deleteGrantCodes:" + deleteGrantCodes);
-			log2console("DEBUG", "deleteAccessTokens:" + deleteAccessTokens);
-			log2console("DEBUG", "deleteRefreshTokens:" + deleteRefreshTokens);
-			
+			log2console("INFO", "deleteAccount:" + deleteAccount);
+			log2console("INFO", "deleteGrantCodes:" + deleteGrantCodes);
+			log2console("INFO", "deleteAccessTokens:" + deleteAccessTokens);
+			log2console("INFO", "deleteRefreshTokens:" + deleteRefreshTokens);
+
 			if (deleteAccount == true && deleteGrantCodes == true && deleteAccessTokens == true && deleteRefreshTokens == true) {
 				res.status(202);
 				res.send();
