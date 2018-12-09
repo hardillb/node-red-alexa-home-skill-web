@@ -113,7 +113,7 @@
 	
 	function editAccount(id) {
 		clearModal()
-		var account = users[username];
+		var account = users[id];
 		$('#userId').val(account._id);
 		$('#username').prop('readonly', true);
 		$('#username').val(account.username);
