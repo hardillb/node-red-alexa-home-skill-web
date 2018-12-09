@@ -1236,18 +1236,56 @@ app.delete('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
-			Account.deleteOne({_id: req.params.user_id},
-				function(err) {
-					if (err) {
-						log2console("ERROR", "[Admin] Unable to delete user account: " + req.params.user_id, err);
-						res.status(500);
-						res.send(err);
-					} else {
-						log2console("INFO", "[Admin] Deleted user account: " + req.params.user_id);
-						res.status(202);
-						res.send();
-					}
-				});
+			// Multiple vars for each step of clean-up
+			var deleteAccount = false;
+			var deleteGrantCodes = false;
+			var deleteAccessTokens = false;
+			var deleteRefreshTokens = false;
+
+			Account.deleteOne({_id: req.params.user_id},function(err) {
+				if (err) {
+					log2console("ERROR", "[Admin] Unable to delete user account: " + req.params.user_id, err);
+				} else {
+					log2console("INFO", "[Admin] Deleted user account: " + req.params.user_id);
+					deleteAccount = true;
+				}
+			});
+
+			GrantCode.deleteMany({user: req.params.user_id}, function(err) {
+				if (err) {
+					log2console("ERROR", "[Admin] Unable to delete Grant Codes for account: " + req.params.user_id, err);
+				} else {
+					log2console("INFO", "[Admin] Deleted Grant Codes for user account: " + req.params.user_id);
+					deleteGrantCodes = true;
+				}
+			});
+
+			AccessToken.deleteMany({user: req.params.user_id}, function(err) {
+				if (err) {
+					log2console("ERROR", "[Admin] Unable to delete Access Tokens for account: " + req.params.user_id, err);
+				} else {
+					log2console("INFO", "[Admin] Deleted Access Tokens for user account: " + req.params.user_id);
+					deleteAccessTokens = true;
+				}
+			});
+
+			RefreshToken.deleteMany({user: req.params.user_id}, function(err) {
+				if (err) {
+					log2console("ERROR", "[Admin] Unable to delete Refresh Tokens for account: " + req.params.user_id, err);
+				} else {
+					log2console("INFO", "[Admin] Deleted Refresh Tokens for user account: " + req.params.user_id);
+					deleteRefreshTokens = true;
+				}
+			});
+
+			if (deleteAccount && deleteGrantCodes && deleteAccessTokens && deleteRefreshTokens) {
+				res.status(202);
+				res.send(err);
+			}
+			else {
+				res.status(500);
+				res.send();
+			}
 		}
 });
 
