@@ -63,8 +63,6 @@
 	</div>
 	<!-- User Modal End -->
 	<script>
-
-	$("#country").countrySelect();
 	
 	$("#form-user").submit(function(e) {
 		e.preventDefault();
@@ -113,6 +111,7 @@
 		$('#username').prop('readonly', true);
 		$('#username').val(account.username);
 		$('#email').val(account.email);
+		$("#country").countrySelect();
 		$("#country").countrySelect("selectCountry", account.country.toLowerCase());
 		$("#userModal").modal();
 	}
