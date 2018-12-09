@@ -81,7 +81,7 @@
 		var country = $("#country_code").val().trim();
 		//account.username = $('#username').val();
 		account.email = ('#email').val();
-		account.country = ('#country').val();
+		account.country = country;
 		if (account.username && account.email && account.country) {
 				//post update
 				console.log("Updating" + JSON.stringify(account));
@@ -99,9 +99,9 @@
 					},
 				});
 				console.log(JSON.stringify(account));
-			} else {
-				alert("Ensure email address and country are set!");
-			}
+		} else {
+			alert("Ensure email address and country are set!");
+		}
 	}
 	
 	function editAccount(username) {

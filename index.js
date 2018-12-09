@@ -1196,8 +1196,8 @@ app.put('/devices',
 app.post('/account/:username',
 	ensureAuthenticated,
 	function(req,res){
-		var user = req.body.username;
 		if (req.user.username === mqtt_user) { // Check is admin user
+			var user = req.body.username;
 			Account.findOne({username: user},
 				function(err, data){
 					if (err) {
@@ -1223,7 +1223,7 @@ app.delete('/account/:username',
 			Account.deleteOne({username: user},
 				function(err) {
 					if (err) {
-						log2console("ERROR", "Unable to user account: " + user, err);
+						log2console("ERROR", "Unable to delete user account: " + user, err);
 						res.status(500);
 						res.send(err);
 					} else {
