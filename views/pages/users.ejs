@@ -84,6 +84,7 @@
 		account.country = ('#country').val();
 		if (account.username && account.email && account.country) {
 				//post update
+				console.log("Updating" + JSON.stringify(account));
 				$.ajax({
 					url: '/account/' + account.username,
 					type: 'POST',
