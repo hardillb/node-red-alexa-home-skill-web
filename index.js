@@ -1193,7 +1193,7 @@ app.put('/devices',
 
 });
 
-app.post('/account/:username',
+app.post('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
@@ -1212,15 +1212,14 @@ app.post('/account/:username',
 				region = "Unknown";
 			} 
 
-			var user = req.body.username;
-			Account.findOne({username: user},
+			Account.findOne({_id: req.params.user_id},
 				function(err, data){
 					if (err) {
-						log2console("ERROR", "[Admin] Unable to update user account: " + user, err);
+						log2console("ERROR", "[Admin] Unable to update user account: " + req.params.user_id, err);
 						res.status(500);
 						res.send(err);
 					} else {
-						log2console("INFO", "[Admin] Updated to user account: " + user);
+						log2console("INFO", "[Admin] Updated to user account: " + req.params.user_id);
 						data.email = req.body.email;
 						data.country = req.body.country.toUpperCase();
 						data.region = region;
@@ -1233,19 +1232,18 @@ app.post('/account/:username',
 		}
 });
 
-app.delete('/account/:username',
+app.delete('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
-			var user = req.params.username;
-			Account.deleteOne({username: user},
+			Account.deleteOne({_id: req.params.user_id},
 				function(err) {
 					if (err) {
-						log2console("ERROR", "[Admin] Unable to delete user account: " + user, err);
+						log2console("ERROR", "[Admin] Unable to delete user account: " + req.params.user_id, err);
 						res.status(500);
 						res.send(err);
 					} else {
-						log2console("INFO", "[Admin] Deleted user account: " + user);
+						log2console("INFO", "[Admin] Deleted user account: " + req.params.user_id);
 						res.status(202);
 						res.send();
 					}

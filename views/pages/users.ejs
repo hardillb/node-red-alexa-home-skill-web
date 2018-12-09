@@ -40,6 +40,7 @@
 				<form class="form-user" id="form-user">
 				<div class="modal-body">
 					<div class="form-group">
+						<input id="userId" type="hidden">
 						<label for="username">Username: </label>
 						<input id="username" class="form-control" type="text" required>
 						<br>
@@ -73,12 +74,15 @@
 		$('#username').val("");
 		$('#email').val("");
 		$('#country').val("");
+		$('#userId').val("");
 	}
 
 	function saveAccount() {
 		var username = $('#username').val();
 		var account = users[username];
 		var country = $("#country_code").val().trim();
+		//var userId = $('#userId').val();
+
 		//account.username = $('#username').val();
 		account.email = $('#email').val();
 		account.country = country;
@@ -86,7 +90,7 @@
 				//post update
 				//console.log("Updating" + JSON.stringify(account));
 				$.ajax({
-					url: '/account/' + account.username,
+					url: '/account/' + account._id,
 					type: 'POST',
 					data: JSON.stringify(account),
 					dataType: 'json',
@@ -107,6 +111,7 @@
 	function editAccount(username) {
 		clearModal()
 		var account = users[username];
+		$('#userId').val(account._id);
 		$('#username').prop('readonly', true);
 		$('#username').val(account.username);
 		$('#email').val(account.email);
@@ -120,7 +125,7 @@
 			if(answer) {
 				var account = users[username];
 				$.ajax({
-					url:"/account/" + account.username,
+					url:"/account/" + account._id,
 					type: 'DELETE',
 					success: function(data){
 						document.location.reload();
