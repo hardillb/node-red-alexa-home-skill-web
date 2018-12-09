@@ -84,7 +84,7 @@
 		account.country = country;
 		if (account.username && account.email && account.country) {
 				//post update
-				console.log("Updating" + JSON.stringify(account));
+				//console.log("Updating" + JSON.stringify(account));
 				$.ajax({
 					url: '/account/' + account.username,
 					type: 'POST',
@@ -98,7 +98,7 @@
 						document.location.reload();
 					},
 				});
-				console.log(JSON.stringify(account));
+				//console.log(JSON.stringify(account));
 		} else {
 			alert("Ensure email address and country are set!");
 		}

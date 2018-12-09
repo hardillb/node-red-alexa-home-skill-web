@@ -1216,9 +1216,11 @@ app.post('/account/:username',
 			Account.findOne({username: user},
 				function(err, data){
 					if (err) {
+						log2console("ERROR", "[Admin] Unable to update user account: " + user, err);
 						res.status(500);
 						res.send(err);
 					} else {
+						log2console("INFO", "[Admin] Updated to user account: " + user);
 						data.email = req.body.email;
 						data.country = req.body.country.toUpperCase();
 						data.region = region;
@@ -1239,11 +1241,11 @@ app.delete('/account/:username',
 			Account.deleteOne({username: user},
 				function(err) {
 					if (err) {
-						log2console("ERROR", "Unable to delete user account: " + user, err);
+						log2console("ERROR", "[Admin] Unable to delete user account: " + user, err);
 						res.status(500);
 						res.send(err);
 					} else {
-						log2console("INFO", "Deleted user account: " + user);
+						log2console("INFO", "[Admin] Deleted user account: " + user);
 						res.status(202);
 						res.send();
 					}
