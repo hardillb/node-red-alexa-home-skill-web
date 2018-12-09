@@ -1196,8 +1196,9 @@ app.put('/devices',
 app.post('/account/:username',
 	ensureAuthenticated,
 	function(req,res){
+		var user = req.body.username;
 		if (req.user.username === mqtt_user) { // Check is admin user
-			Account.findOne({username: account.username},
+			Account.findOne({username: user},
 				function(err, data){
 					if (err) {
 						res.status(500);
