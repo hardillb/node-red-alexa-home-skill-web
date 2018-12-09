@@ -1274,7 +1274,7 @@ app.delete('/account/:user_id',
 				if (err) {
 					log2console("ERROR", "[Admin] Unable to delete Refresh Tokens for account: " + userId, err);
 				} else {
-					log2console("INFO", "[Admin] Deleted Refresh Tokens for user account: " + req.params.user_id);
+					log2console("INFO", "[Admin] Deleted Refresh Tokens for user account: " + userId);
 					deleteRefreshTokens = true;
 				}
 			});
