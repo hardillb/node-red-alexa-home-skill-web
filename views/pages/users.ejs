@@ -19,15 +19,15 @@
 						<td><%= account.email %></td>
 						<td><%= account.country %></td>
 						<td><%= account.region %></td>
-						<td><button type="button" class="btn btn-secondary" onclick="editAccount('<%= account.username %>')">Edit</button></td>
-						<td><button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account.username %>')">Delete</button></td>
+						<td><button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button></td>
+						<td><button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button></td>
 					</tr>
 				<% }); %>
 			</tbody>
 		</table>
 	</div>
 
-	<!-- Modal -->
+	<!-- User Modal -->
 	<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered" role="document">
 			  <div class="modal-content">
@@ -61,6 +61,12 @@
 			</div>
 		</div>
 	</div>
+	<!-- User Modal End -->
+
+
+
+
+
 	<script>
 
 	$("#country").countrySelect();
@@ -78,12 +84,9 @@
 	}
 
 	function saveAccount() {
-		var username = $('#username').val();
-		var account = users[username];
+		var userId = $('#userId').val();
+		var account = users[userId];
 		var country = $("#country_code").val().trim();
-		//var userId = $('#userId').val();
-
-		//account.username = $('#username').val();
 		account.email = $('#email').val();
 		account.country = country;
 		if (account.username && account.email && account.country) {
@@ -108,7 +111,7 @@
 		}
 	}
 	
-	function editAccount(username) {
+	function editAccount(id) {
 		clearModal()
 		var account = users[username];
 		$('#userId').val(account._id);
@@ -119,25 +122,22 @@
 		$("#userModal").modal();
 	}
 
-	function deleteAccount(username) {
+	function deleteAccount(id) {
 		var answer = confirm("Are you sure you want to delete this user account?");
 		if(answer) {
-			if(answer) {
-				var account = users[username];
-				$.ajax({
-					url:"/account/" + account._id,
-					type: 'DELETE',
-					success: function(data){
-						document.location.reload();
-					}
-				});
-			}
+			$.ajax({
+				url:"/account/" + id,
+				type: 'DELETE',
+				success: function(data){
+					document.location.reload();
+				}
+			});
 		}
 	}
 
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
-		users[user.username] = user;
+		users[user._id] = user;
 	});
 	</script>
 <% include ../fragments/footer.ejs %>
