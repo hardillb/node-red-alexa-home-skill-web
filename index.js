@@ -1285,7 +1285,7 @@ app.delete('/account/:user_id',
 			}
 			else {
 				res.status(500);
-				res.send(err);
+				res.send();
 			}
 		}
 });
