@@ -1251,7 +1251,7 @@ app.delete('/account/:user_id',
 				}
 			});
 
-			GrantCode.deleteMany({user: req.params.user_id}, function(err) {
+			oauthModels.GrantCode.deleteMany({user: req.params.user_id}, function(err) {
 				if (err) {
 					log2console("ERROR", "[Admin] Unable to delete Grant Codes for account: " + req.params.user_id, err);
 				} else {
@@ -1260,7 +1260,7 @@ app.delete('/account/:user_id',
 				}
 			});
 
-			AccessToken.deleteMany({user: req.params.user_id}, function(err) {
+			oauthModels.AccessToken.deleteMany({user: req.params.user_id}, function(err) {
 				if (err) {
 					log2console("ERROR", "[Admin] Unable to delete Access Tokens for account: " + req.params.user_id, err);
 				} else {
@@ -1269,7 +1269,7 @@ app.delete('/account/:user_id',
 				}
 			});
 
-			RefreshToken.deleteMany({user: req.params.user_id}, function(err) {
+			oauthModels.RefreshToken.deleteMany({user: req.params.user_id}, function(err) {
 				if (err) {
 					log2console("ERROR", "[Admin] Unable to delete Refresh Tokens for account: " + req.params.user_id, err);
 				} else {
