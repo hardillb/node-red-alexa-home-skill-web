@@ -32,7 +32,7 @@
 			<div class="modal-dialog modal-dialog-centered" role="document">
 			  <div class="modal-content">
 				<div class="modal-header">
-				  <h5 class="modal-title" id="userModalTitle">Add User</h5>
+				  <h5 class="modal-title" id="userModalTitle">Edit User</h5>
 				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				  </button>
@@ -43,9 +43,8 @@
 						<label for="username">Username: </label>
 						<input id="username" class="form-control" type="text" required>
 						<br>
-						<label for="email">Email Address: </label>
-						<br>
-						<textarea id="email" class="form-control" type="email" required></textarea>
+						<label for="email">Email Address:</label>
+						<input type="email" id="email" class="form-control" required>
 						<br>
 						<label for="country" class="sr-only">Country</label>
 						<input type="text" id="country" class="form-control" required>
@@ -61,7 +60,6 @@
 			</div>
 		</div>
 	</div>
-
 	<script>
 
 	$("#country").countrySelect();
@@ -81,26 +79,25 @@
 		var username = $('#username').val();
 		var account = users[username];
 		var country = $("#country_code").val().trim();
-		account.username = $('#username').val();
+		//account.username = $('#username').val();
 		account.email = ('#email').val();
 		account.country = ('#country').val();
-
 		if (account.username && account.email && account.country) {
 				//post update
-						// $.ajax({
-						// 	url: '/device/' + device._id,
-						// 	type: 'POST',
-						// 	data: JSON.stringify(device),
-						// 	dataType: 'json',
-						// 	contentType: "application/json",
-						// 	success: function(data){
-						// 		//console.log("post response");
-						// 		//console.log(data);
-						// 		//reload
-						// 		document.location.reload();
-						// 	},
-						// });
-				// console.log(JSON.stringify(device));
+				$.ajax({
+					url: '/account/' + account.username,
+					type: 'POST',
+					data: JSON.stringify(account),
+					dataType: 'json',
+					contentType: "application/json",
+					success: function(data){
+						//console.log("post response");
+						//console.log(data);
+						//reload
+						document.location.reload();
+					},
+				});
+				console.log(JSON.stringify(account));
 			} else {
 				alert("Ensure email address and country are set!");
 			}
@@ -119,14 +116,14 @@
 	function deleteAccount(username) {
 		var answer = confirm("Are you sure you want to delete this user account?");
 		if(answer) {
-			// if(answer) {
-			// $.ajax({
-			// 	url:"/device/" + id,
-			// 	type: 'DELETE',
-			// 	success: function(data){
-			// 		document.location.reload();
-			// 	}
-			// });
+			if(answer) {
+			 $.ajax({
+			 	url:"/account/" + username,
+			 	type: 'DELETE',
+			 	success: function(data){
+			 		document.location.reload();
+			 	}
+			 });
 		}
 	}
 

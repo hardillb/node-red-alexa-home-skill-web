@@ -1193,6 +1193,47 @@ app.put('/devices',
 
 });
 
+app.post('/account/:username',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) { // Check is admin user
+			Account.findOne({username: account.username},
+				function(err, data){
+					if (err) {
+						res.status(500);
+						res.send(err);
+					} else {
+						data.email = account.email;
+						data.country = account.country;
+						data.save(function(err, d){
+							res.status(201);
+							res.send(d);
+						});
+					}
+				});
+		}
+});
+
+app.delete('/account/:username',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) { // Check is admin user
+			var user = req.body.username;
+			Account.deleteOne({username: user},
+				function(err) {
+					if (err) {
+						log2console("ERROR", "Unable to user account: " + user, err);
+						res.status(500);
+						res.send(err);
+					} else {
+						log2console("INFO", "Deleted user account: " + user);
+						res.status(202);
+						res.send();
+					}
+				});
+		}
+});
+
 app.post('/device/:dev_id',
 	ensureAuthenticated,
 	function(req,res){
