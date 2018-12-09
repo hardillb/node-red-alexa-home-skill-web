@@ -1245,8 +1245,9 @@ app.delete('/account/:user_id',
 			Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
 				//log2console("INFO", result);
 				res.status(202).json({message: 'deleted'});
+				log2console("INFO", "Deleted user account: " + userId);
 			}).catch(err => {
-				log2console("ERROR", "[Admin] " + err);
+				log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
 				res.status(500).json({error: err});
 			});
 		}
