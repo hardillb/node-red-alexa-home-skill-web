@@ -65,7 +65,7 @@
 	<script type="application/javascript">
 	
 	$("#country").countrySelect();
-	
+
 	$("#form-user").submit(function(e) {
 		e.preventDefault();
 		saveAccount()
@@ -113,8 +113,11 @@
 		$('#username').prop('readonly', true);
 		$('#username').val(account.username);
 		$('#email').val(account.email);
-		$("#country").countrySelect("selectCountry", account.country.toLowerCase());
+		// $("#country").countrySelect("selectCountry", account.country.toLowerCase());
 		$("#userModal").modal();
+		var txtcountry = $("#country").countrySelect("selectCountry", account.country);
+
+
 	}
 
 	function deleteAccount(id) {
