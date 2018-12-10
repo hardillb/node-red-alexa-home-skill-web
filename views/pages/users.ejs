@@ -110,7 +110,7 @@
 		var account = users[id];
 		$('#userId').val(account._id);
 		$('#username').prop('readonly', true);
-		if  ($('#username').val() != "mqtt-user") {
+		if  (account.username != "mqtt-user") {
 			$('#username').val(account.username);
 			$('#email').val(account.email);
 			cs.countrySelect("selectCountry", account.country);
