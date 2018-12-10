@@ -110,14 +110,14 @@
 		var account = users[id];
 		$('#userId').val(account._id);
 		$('#username').prop('readonly', true);
-		if  (account.username != "mqtt-user") {
+		if  (account.superuser != 1) {
 			$('#username').val(account.username);
 			$('#email').val(account.email);
 			cs.countrySelect("selectCountry", account.country);
 			$("#userModal").modal();
 		}
 		else {
-			alert("You cannot edit mqtt-user account")
+			alert("You cannot edit the superuser account")
 		}
 	}
 
