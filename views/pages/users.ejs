@@ -65,9 +65,11 @@
 	<!-- User Modal End -->
 	<script>
 
-	$("#form-user").submit(function(e) {
-		e.preventDefault();
-		saveAccount()
+	$(document).ready(function() { 
+		$("#form-user").submit(function(e) {
+			e.preventDefault();
+			saveAccount()
+		});
 	});
 
 	var cs = $("#country").countrySelect();
