@@ -1366,11 +1366,11 @@ app.get('/admin/users',
 		}
 });
 
-app.get('/admin/devices2',
+app.get('/admin/user-devices',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			Device.find({}, function(err, data){
+			Devices.find({}, function(err, data){
 				if (!err) {
 					res.render('pages/user-devices',{user:req.user, devices: data});
 				}
