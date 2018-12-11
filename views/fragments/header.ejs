@@ -28,12 +28,28 @@
                 <li <% if (locals.docs) {%>class="active"<% } %>><a class="nav-link" href="/docs">Documentation</a></li>
                 <li <% if (locals.about) {%>class="active"<% } %>><a class="nav-link" href="/about">About</a></li>
                 <li <% if (locals.privacy) {%>class="active"<% } %>><a class="nav-link" href="/privacy">Privacy</a></li>
+
                 <% if (user) { %>
                   <% if (user.superuser) { %>
                   <li><a class="nav-link" href="/admin/services">OAuth Services</a></li>
-                  <li><a class="nav-link" href="/admin/users">Users</a></li>
+                  <li><a class="nav-link" href="/admin/users">All Users</a></li>
+                  <li><a class="nav-link" href="/admin/user-devices">All Devices</a></li>
+
+                  <div class="dropdown">
+                      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Manage
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                         <a class="dropdown-item" href="/admin/services">OAuth Services</a>
+                         <a class="dropdown-item" href="/admin/users">All Users</a>
+                         <a class="dropdown-item" href="/admin/user-devices">All Devices</a>
+                      </div>
+                  </div>
                   <% } %>
                 <% } %>
+
+
+
                 <% if (user) { %>
                 <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
                 <% } %>
