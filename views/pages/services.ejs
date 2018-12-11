@@ -2,25 +2,30 @@
 <div class="container main-content">
   <h1>Services</h1>
   <!-- <div class="serviceHeader" > -->
-  <div class="row">
-    <div class="col-sm"><strong>Title</strong></div>
-    <div class="col-sm"><strong>oauth_id</strong></div>
-    <div class="col-sm"><strong>oauth_secret</strong></div>
-    <div class="col-sm"><strong>domains</strong></div>
-  </div>
-
-  <% services.forEach(function(service){ %>
-    <div class="row">
-      <div class="col-sm"><%= service.title %></div>
-      <div class="col-sm"><%= service.oauth_id %></div>
-      <div class="col-sm"><%= service.oauth_secret %></div>
-      <div class="col-sm"><%= service.domains.join(',') %></div>
-      <button class="btn btn-secondary" onclick="edit('<%= service._id %>')">Edit</button>
-      <button class="btn btn-secondary" style="margin-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button>
-    </div>
-  <% }); %>
-
-
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Title</th>
+            <th scope="col">OAuth Id</th>
+            <th scope="col">OAuth Secret</th>
+            <th scope="col">Domains</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+            <% services.forEach(function(service){ %>
+              <tr>
+                  <th scope="row"><%= service.title %></th>
+                  <td><%= service.oauth_id %></td>
+                  <td><%= service.oauth_secret %></td>
+                  <td><%= service.domains.join(',') %></td>
+                  <td><button class="btn btn-secondary" onclick="edit('<%= service._id %>')">Edit</button></td>
+                  <td><button class="btn btn-secondary" style="margin-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button></td>
+              </tr>
+            <% }); %>
+        </tbody>
+    </table>
   <div style="padding-top: 10px;">
     <button class="btn btn-primary" onclick="addService();">New Service</button>
   </div>
