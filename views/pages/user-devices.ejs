@@ -1,0 +1,113 @@
+<% include ../fragments/header.ejs %>
+	<div class="container main-content">
+		<h1>User Accounts</h1>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+				  <th scope="col">EndpointId</th>
+				  <th scope="col">Friendly Name</th>
+				  <th scope="col">Capabilities</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Report State</th>
+                  <th scope="col">State</th>
+                  <!--<th scope="col">Edit</th>-->
+				  <th scope="col">Delete</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% devices.forEach(function(device){ %>
+					<tr>
+						<th scope="row"><%= device.endpointId %></th>
+						<td><%= device.friendlyName %></td>
+                        <td>
+							<ul>
+								<% device.capabilities.forEach(function(capability){ %>
+									<li><%= capability %></li>
+								<% }); %>
+							</ul>
+                        </td>
+                        <td>
+							<ul>
+								<% device.displayCategories.forEach(function(category){ %>
+									<li><%= category %></li>
+								<% }); %>
+							</ul>
+                        </td>
+                        <td><%= device.reportState %></td>
+						<td><button type="button" class="btn btn-secondary" onclick="viewState('<%= device._id %>')">State</button></td>
+						<!--<td><button type="button" class="btn btn-secondary" onclick="editDevice('<%= device._id %>')">Edit</button></td>-->
+                        <td><button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id %>')">Delete</button></td>
+					</tr>
+				<% }); %>
+			</tbody>
+		</table>
+	</div>
+
+	<!-- State Modal -->
+	<div class="modal fade" id="stateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="stateModalTitle">Device State</h5>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>
+				<div class="modal-body">
+						<label for="state">State: </label>
+						<br>
+						<textarea id="state" class="form-control"></textarea>
+				</div>
+				<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- State Modal End -->
+
+	<script type="application/javascript">
+	
+	// Not used at present
+	function clearModal() {
+		//
+	}
+
+	function viewState(id) {
+		var device = devices[id];
+		$('#state').val(device.state);
+		$("#stateModal").modal('show');
+	}
+
+	// Not used at present
+	function saveDevice(id) {
+		var device = devices[id];
+	}
+	
+	// Currently not used, do we want to edit devices centrally? Duplicate lots of devices.ejs page here if so
+	function editDevice(id) {
+		clearModal()
+		var device = devices[id];
+		//
+	}
+
+	// Will currently fail, need to add logic to delete endpoint to allow superuser to action
+	function deleteDevice(id) {
+		var answer = confirm("Are you sure you want to delete this device?");
+		if(answer) {
+			$.ajax({
+				url:"/device/" + id,
+				type: 'DELETE',
+				success: function(data){
+					document.location.reload();
+				}
+			});
+		}
+	}
+
+	var devices = {};
+	<%- JSON.stringify(devices) %>.forEach(function(device){
+		devices[device._id] = device;
+	});
+	</script>
+<% include ../fragments/footer.ejs %>

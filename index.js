@@ -1354,6 +1354,7 @@ app.get('/admin/users',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
+			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
 			Account.find({}, function(err, data){
 				if (!err) {
 					res.render('pages/users',{user:req.user, users: data});
@@ -1365,12 +1366,14 @@ app.get('/admin/users',
 		}
 });
 
-app.get('/admin/devices',
+app.get('/admin/devices2',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			Devices.find({},function(error, data){
-				res.send(data);
+			Devices.find({}, function(err, data){
+				if (!err) {
+					res.render('pages/user-devices',{user:req.user, devices: data});
+				}
 			});
 		} else {
 			res.status(401).send();
