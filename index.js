@@ -1370,7 +1370,7 @@ app.get('/admin/devices2',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			Devices.find({}, function(err, data){
+			Device.find({}, function(err, data){
 				if (!err) {
 					res.render('pages/user-devices',{user:req.user, devices: data});
 				}
