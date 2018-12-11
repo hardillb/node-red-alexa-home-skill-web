@@ -1372,10 +1372,11 @@ app.get('/admin/user-devices',
 		if (req.user.username === mqtt_user) {
 			Devices.find({}, function(err, data){
 				if (!err) {
+					log2console("INFO", "User Devices: " + JSON.stringify(data));
 					res.render('pages/user-devices',{user:req.user, devices: data});
 				}
 			});
-		} else {
+	} else {
 			res.status(401).send();
 		}
 	});
