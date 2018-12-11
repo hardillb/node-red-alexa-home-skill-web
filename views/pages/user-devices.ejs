@@ -20,14 +20,14 @@
 						<th scope="row"><%= device.endpointId %></th>
 						<td><%= device.friendlyName %></td>
                         <td>
-							<ul>
+							<ul class="list-unstyled">
 								<% device.capabilities.forEach(function(capability){ %>
 									<li><%= capability %></li>
 								<% }); %>
 							</ul>
                         </td>
                         <td>
-							<ul>
+							<ul class="list-unstyled">
 								<% device.displayCategories.forEach(function(category){ %>
 									<li><%= category %></li>
 								<% }); %>
