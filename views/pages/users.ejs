@@ -63,13 +63,13 @@
 	</div>
 	<!-- User Modal End -->
 	<script type="application/javascript">
-	
-	var cs = $("#country").countrySelect();
 
 	$("#form-user").submit(function(e) {
 		e.preventDefault();
 		saveAccount()
 	});
+
+	var cs = $("#country").countrySelect();
 
 	function clearModal() {
 		$('#username').val("");
