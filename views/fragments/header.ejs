@@ -28,13 +28,18 @@
                 <li <% if (locals.docs) {%>class="active"<% } %>><a class="nav-link" href="/docs">Documentation</a></li>
                 <li <% if (locals.about) {%>class="active"<% } %>><a class="nav-link" href="/about">About</a></li>
                 <li <% if (locals.privacy) {%>class="active"<% } %>><a class="nav-link" href="/privacy">Privacy</a></li>
-
+                <% if (user) { %>
+                <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
+                <% } %>
+                <% if (user) { %>
+                  <!-- <li><a class="nav-link" href="/logout">Logout <%= user.username %></a></li> -->
+                  <li><a class="nav-link" href="/logout">Logout</a></li>
+                <% } else { %>
+                  <li <% if (locals.login) {%>class="active"<% } %>><a class="nav-link" href="/login">Login</a></li>
+                  <li <% if (locals.newuser) {%>class="active"<% } %>><a class="nav-link" href="/newuser">Register</a></li>
+                <% } %>
                 <% if (user) { %>
                   <% if (user.superuser) { %>
-                  <li><a class="nav-link" href="/admin/services">OAuth Services</a></li>
-                  <li><a class="nav-link" href="/admin/users">All Users</a></li>
-                  <li><a class="nav-link" href="/admin/user-devices">All Devices</a></li>
-
                   <div class="dropdown">
                       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Manage
@@ -46,19 +51,6 @@
                       </div>
                   </div>
                   <% } %>
-                <% } %>
-
-
-
-                <% if (user) { %>
-                <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
-                <% } %>
-                <% if (user) { %>
-                  <!-- <li><a class="nav-link" href="/logout">Logout <%= user.username %></a></li> -->
-                  <li><a class="nav-link" href="/logout">Logout</a></li>
-                <% } else { %>
-                  <li <% if (locals.login) {%>class="active"<% } %>><a class="nav-link" href="/login">Login</a></li>
-                  <li <% if (locals.newuser) {%>class="active"<% } %>><a class="nav-link" href="/newuser">Register</a></li>
                 <% } %>
           </ul>
         </div>
