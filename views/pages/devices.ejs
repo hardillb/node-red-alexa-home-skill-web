@@ -1,35 +1,37 @@
 <% include ../fragments/header.ejs %>
 	<div class="container main-content">
 		<h1>Devices for User: <%= user.username %></h1>
-		<div class="row">
-			<div class="col-sm"><strong>Name</strong></div>
-			<div class="col-sm"><strong>Description</strong></div>
-			<div class="col-sm"><strong>Capabilities</strong></div>
-		</div>
-		<% devices.forEach(function(device){ %>
-		<div class="devrow">
-			<div class="row">
-				<div class="col-sm"><%= device.friendlyName %></div>
-				<div class="col-sm"><%= device.description %></div>
-				<div class="col-sm">
-					<% device.capabilities.forEach(function(action){ %>
-						<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
-					<% }); %>
-				</div>
-			</div>
-			<div class="row" style="padding-left: 15px">
-				<div>
-					<button type="button" class="btn btn-secondary" onclick="edit('<%= device._id %>')">Edit</button>
-					<button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id%>')">Delete</button>
-				</div>
-			</div>
-		</div>
-		<% }); %>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">Name</th>
+					<th scope="col">Description</th>
+					<th scope="col">Capabilities</th>
+					<th scope="col">Edit</th>
+					<th scope="col">Delete</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% devices.forEach(function(device){ %>
+					<tr>
+						<th scope="row"><%= device.friendlyName %></th>
+						<td><%= device.friendlyName %></td>
+						<td><%= device.description %></td>
+						<td>
+							<% device.capabilities.forEach(function(action){ %>
+								<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
+							<% }); %>
+						</td>
+						<td><button type="button" class="btn btn-secondary" onclick="edit('<%= device._id %>')">Edit</button></td>
+						<td><button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id%>')">Delete</button></td>
+					</tr>
+				<% }); %>
+			</tbody>
+		</table>
 		<div style="padding-top: 10px;">
 			<button type="button" class="btn btn-secondary" onclick="addDevice();">Add Device</button>
 		</div>
-		<p>After making any changes remember to ask Alexa to update devices it knows about by saying 
-      "Alexa, discover devices"</p>
+		<p>After making any changes remember to ask Alexa to update devices it knows about by saying "Alexa, discover devices"</p>
 	</div>
 
 	<!-- Modal Start -->
