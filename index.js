@@ -1340,17 +1340,17 @@ app.post('/api/v1/devices',
 	}
 );
 
-app.get('/admin',
-	ensureAuthenticated,
-	function(req,res){
-		if (req.user.username == mqtt_user) {
-			Account.countDocuments({},function(err, count){
-				res.render('pages/admin',{user:req.user, userCount: count});
-			});
-		} else {
-			res.redirect('/');
-		}
-});
+// app.get('/admin',
+// 	ensureAuthenticated,
+// 	function(req,res){
+// 		if (req.user.username == mqtt_user) {
+// 			Account.countDocuments({},function(err, count){
+// 				res.render('pages/admin',{user:req.user, userCount: count});
+// 			});
+// 		} else {
+// 			res.redirect('/');
+// 		}
+// });
 
 app.get('/admin/services',
 	ensureAuthenticated, 
