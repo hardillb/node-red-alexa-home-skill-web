@@ -56,7 +56,7 @@
 				<div class="modal-body">
 						<label for="state">State: </label>
 						<br>
-						<textarea id="state" class="form-control"></textarea>
+						<textarea id="state" class="form-control" disabled></textarea>
 				</div>
 				<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -68,12 +68,12 @@
 
 	<script type="application/javascript">
 	
-	// Not used at present
-	function clearModal() {
-		//
+	function clearStateModal() {
+		$('#state').val("");
 	}
 
 	function viewState(id) {
+		clearStateModal()
 		var device = devices[id];
 		$('#state').val(device.state);
 		$("#stateModal").modal('show');
@@ -91,7 +91,6 @@
 		//
 	}
 
-	// Will currently fail, need to add logic to delete endpoint to allow superuser to action
 	function deleteDevice(id) {
 		var answer = confirm("Are you sure you want to delete this device?");
 		if(answer) {

@@ -1245,7 +1245,7 @@ app.delete('/account/:user_id',
 			Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
 				//log2console("INFO", result);
 				res.status(202).json({message: 'deleted'});
-				log2console("INFO", "Deleted user account: " + userId);
+				log2console("INFO", "[Admin] Deleted user account: " + userId);
 			}).catch(err => {
 				log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
 				res.status(500).json({error: err});
@@ -1285,18 +1285,34 @@ app.delete('/device/:dev_id',
 	function(req,res){
 		var user = req.user.username;
 		var id = req.params.dev_id;
-		log2console("INFO", "Deleted device id: " + id + " for user: " + req.user.username);
-		Devices.deleteOne({_id: id, username: user},
-			function(err) {
-				if (err) {
-					log2console("ERROR", "Unable to delete device id: " + id + " for user: " + req.user.username, err);
-					res.status(500);
-					res.send(err);
-				} else {
-					res.status(202);
-					res.send();
-				}
-			});
+		if (user != "mqtt-user") {
+			Devices.deleteOne({_id: id, username: user},
+				function(err) {
+					if (err) {
+						log2console("ERROR", "[User] Unable to delete device id: " + id + " for user: " + req.user.username, err);
+						res.status(500);
+						res.send(err);
+					} else {
+						log2console("INFO", "[User] Deleted device id: " + id + " for user: " + req.user.username);
+						res.status(202);
+						res.send();
+					}
+				});
+		}
+		else if (user == "mqtt-user") {
+			Devices.deleteOne({_id: id},
+				function(err) {
+					if (err) {
+						log2console("ERROR", "[Admin] Unable to delete device id: " + id, err);
+						res.status(500);
+						res.send(err);
+					} else {
+						log2console("INFO", "[Admin] Superuser deleted device id: " + id);
+						res.status(202);
+						res.send();
+					}
+				});
+		}
 });
 
 app.post('/api/v1/devices',
