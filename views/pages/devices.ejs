@@ -7,8 +7,7 @@
 					<th scope="col">Name</th>
 					<th scope="col">Description</th>
 					<th scope="col">Capabilities</th>
-					<th scope="col">Edit</th>
-					<th scope="col">Delete</th>
+					<th scope="col">Manage</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -21,8 +20,10 @@
 								<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
 							<% }); %>
 						</td>
-						<td><button type="button" class="btn btn-secondary" onclick="edit('<%= device._id %>')">Edit</button></td>
-						<td><button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id%>')">Delete</button></td>
+						<td>
+							<button type="button" class="btn btn-secondary" onclick="edit('<%= device._id %>')">Edit</button>
+							<button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id%>')">Delete</button>
+						</td>
 					</tr>
 				<% }); %>
 			</tbody>
