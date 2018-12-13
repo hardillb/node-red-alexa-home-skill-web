@@ -321,19 +321,19 @@ app.post('/newuser', function(req,res){
 	var region;
 	// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 	if (country.statusCode == 200) {
-		log2console("DEBUG", "User region: " + country.data[0].region);
+		//log2console("DEBUG", "[New User] User region: " + country.data[0].region);
 		// Use first array object, should always be singular data object returned via countries-api
 		region = country.data[0].region;
 	}
 	else {
-		log2console("DEBUG", "User region lookup failed.");
-		log2console("DEBUG", country);
+		log2console("WARNING", "[New User] User region lookup failed.");
+		log2console("WARNING", "[New User] " + country);
 		region = "Unknown";
 	} 
 
 	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
 		if (err) {
-			log2console("ERROR", "New user creation error: " + err);
+			log2console("ERROR", "[New User] New user creation error: " + err);
 			return res.status(400).send(err.message);
 		}
 
@@ -352,7 +352,7 @@ app.post('/newuser', function(req,res){
 					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 					function(err, count){
 						if (err) {
-							log2console("ERROR" , "New user creation error updating MQTT info: " + err);
+							log2console("ERROR" , "[New User] New user creation error updating MQTT info: " + err);
 						}
 					}
 				);
@@ -360,7 +360,7 @@ app.post('/newuser', function(req,res){
 		});
 
 		passport.authenticate('local')(req, res, function () {
-			log2console("INFO", "Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
+			log2console("INFO", "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
 			//measurement.send({
 			//	t:'event', 
 			//	ec:'System', 
@@ -383,8 +383,8 @@ app.get('/changePassword/:key',function(req, res, next){
 					lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
-					log2console("ERROR", "Password reset failed for user: " + lostPassword.user);
-					log2console("DEBUG", err);
+					log2console("ERROR", "[Change Password] Password reset failed for user: " + lostPassword.user);
+					log2console("DEBUG", "[Change Password] " + err);
 					res.redirect('/');
 				}
 			})
@@ -411,15 +411,15 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						//console.log("Chagned %s's password", u.username);
 						res.status(200).send();
 					} else {
-						log2console("ERROR", "Unable to change password for: " + u.username);
-						log2console("DEBUG", error);
+						log2console("ERROR", "[Change Password] Unable to change password for: " + u.username);
+						log2console("DEBUG", "[Change Password] " + error);
 						res.status(400).send("Problem setting new password");
 					}
 				});
 			});
 		} else {
-			log2console("ERROR", "Unable to change password for user, user not found: " + req.user.username);
-			log2console("DEBUG: ", err);
+			log2console("ERROR", "[Change Password] Unable to change password for user, user not found: " + req.user.username);
+			log2console("DEBUG: ", "[Change Password] " + err);
 			res.status(400).send("Problem setting new password");
 		}
 	});
@@ -1184,7 +1184,7 @@ app.put('/devices',
 			if (!err) {
 				res.status(201)
 				res.send(dev);
-				log2console("DEBUG", "New device created: " + JSON.stringify(dev));
+				log2console("DEBUG", "[Devices] New device created: " + JSON.stringify(dev));
 			} else {
 				res.status(500);
 				res.send(err);
@@ -1202,7 +1202,7 @@ app.post('/account/:user_id',
 			var region;
 			// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
 			if (country.statusCode == 200) {
-				log2console("DEBUG", "User region: " + country.data[0].region);
+				//log2console("DEBUG", "User region: " + country.data[0].region);
 				// Use first array object, should always be singular data object returned via countries-api
 				region = country.data[0].region;
 			}
@@ -1289,11 +1289,11 @@ app.delete('/device/:dev_id',
 			Devices.deleteOne({_id: id, username: user},
 				function(err) {
 					if (err) {
-						log2console("ERROR", "[User] Unable to delete device id: " + id + " for user: " + req.user.username, err);
+						log2console("ERROR", "[Device] Unable to delete device id: " + id + " for user: " + req.user.username, err);
 						res.status(500);
 						res.send(err);
 					} else {
-						log2console("INFO", "[User] Deleted device id: " + id + " for user: " + req.user.username);
+						log2console("INFO", "[Device] Deleted device id: " + id + " for user: " + req.user.username);
 						res.status(202);
 						res.send();
 					}
