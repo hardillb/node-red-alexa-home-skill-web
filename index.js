@@ -187,7 +187,6 @@ var accessLogStream = rfs('access.log', {
 });
 
 var app = express();
-
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
 app.use(morgan("combined", {stream: accessLogStream}));
