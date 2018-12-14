@@ -1390,7 +1390,7 @@ app.get('/admin/user-devices',
 		if (req.user.username === mqtt_user) {
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
 			const userDevices = Devices.find({});
-			const countDevices = Account.countDocuments({});
+			const countDevices = Devices.countDocuments({});
 			Promise.all([userDevices, countDevices]).then(result => {
 				// result[0] = userDevices, result[1] =  countDevices
 				res.render('pages/user-devices',{user:req.user, devices: result[0], devicecount: result[1]});
