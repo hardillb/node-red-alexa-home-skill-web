@@ -1373,8 +1373,9 @@ app.get('/admin/users2',
 			const countUsers = Account.countDocuments({});
 			Promise.all([userAccounts, countUsers]).then(result => {
 				log2console("INFO", "Result:" + result);
-				log2console("INFO", "Result.userAccounts:" + result.userAccounts);
-				log2console("INFO", "Result.countUsers:" + result.countUsers);
+				log2console("INFO", "Result.userAccounts:" + result[0]);
+				log2console("INFO", "Result.countUsers:" + result[1]);
+
 				//log2console("INFO", "Using result: " +  result(userAccounts) + "  " +  result(countUsers))
 				//log2console("INFO", "Using resolve: " +  resolve(userAccounts) + "  " +  resolve(countUsers))
 
