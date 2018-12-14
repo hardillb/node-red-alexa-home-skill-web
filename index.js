@@ -1369,8 +1369,8 @@ app.get('/admin/users2',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			var userAccounts = Account.find({});
-			var countUsers = Account.countDocuments({});
+			const userAccounts = Account.find({});
+			const countUsers = Account.countDocuments({});
 			Promise.all([userAccounts, countUsers]).then(result => {
 				//log2console("INFO", result);
 				res.render('pages/users',{user:req.user, users: userAccounts, usercount: countUsers});
