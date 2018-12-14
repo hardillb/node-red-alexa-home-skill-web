@@ -1379,7 +1379,7 @@ app.get('/admin/users2',
 				//log2console("INFO", "Using result: " +  result(userAccounts) + "  " +  result(countUsers))
 				//log2console("INFO", "Using resolve: " +  resolve(userAccounts) + "  " +  resolve(countUsers))
 
-				//res.render('pages/users',{user:req.user, users: result(userAccounts), usercount: result(countUsers)});
+				res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
 			});
 			
 			//.catch(err => {
