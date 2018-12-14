@@ -1365,6 +1365,25 @@ app.get('/admin/services',
 		}
 });
 
+app.get('/admin/users2',
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) {
+			var userAccounts = Account.find({});
+			var countUsers = Account.countDocuments({});
+			Promise.all([userAccounts, countUsers]).then(result => {
+				//log2console("INFO", result);
+				res.render('pages/users',{user:req.user, users: userAccounts, usercount: countUsers});
+			}).catch(err => {
+				//log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
+				res.status(500).json({error: err});
+			});
+		}
+		else {
+			res.status(401).send();
+		}
+	});
+
 app.get('/admin/users',
 	ensureAuthenticated,
 	function(req,res){
