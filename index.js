@@ -1372,7 +1372,7 @@ app.get('/admin/users2',
 			const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
 			Promise.all([userAccounts, countUsers]).then(result => {
-				log2console("INFO", "Result:" + result);
+				//log2console("INFO", "Result:" + result);
 				log2console("INFO", "Result.userAccounts:" + result[0]);
 				log2console("INFO", "Result.countUsers:" + result[1]);
 
