@@ -1365,48 +1365,25 @@ app.get('/admin/services',
 		}
 });
 
-app.get('/admin/users2',
-	ensureAuthenticated,
-	function(req,res){
-		if (req.user.username === mqtt_user) {
-			const userAccounts = Account.find({});
-			const countUsers = Account.countDocuments({});
-			Promise.all([userAccounts, countUsers]).then(result => {
-				//log2console("INFO", "Result:" + result);
-				log2console("INFO", "Result.userAccounts:" + result[0]);
-				log2console("INFO", "Result.countUsers:" + result[1]);
-
-				//log2console("INFO", "Using result: " +  result(userAccounts) + "  " +  result(countUsers))
-				//log2console("INFO", "Using resolve: " +  resolve(userAccounts) + "  " +  resolve(countUsers))
-
-				res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
-			});
-			
-			//.catch(err => {
-				//log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
-			//	res.status(500).json({error: err});
-			//});
-		}
-		else {
-			res.status(401).send();
-		}
-	});
-
 app.get('/admin/users',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
-			Account.find({}, function(err, data){
-				if (!err) {
-					res.render('pages/users',{user:req.user, users: data});
-				}
+			const userAccounts = Account.find({});
+			const countUsers = Account.countDocuments({});
+			Promise.all([userAccounts, countUsers]).then(result => {
+				//log2console("INFO", "Result.userAccounts:" + result[0]);
+				//log2console("INFO", "Result.countUsers:" + result[1]);
+				res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
+			}).catch(err => {
+				res.status(500).json({error: err});
 			});
 		}
 		else {
 			res.status(401).send();
 		}
-});
+	});
 
 app.get('/admin/user-devices',
 	ensureAuthenticated,
