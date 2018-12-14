@@ -1373,8 +1373,8 @@ app.get('/admin/users2',
 			const countUsers = Account.countDocuments({});
 			Promise.all([userAccounts, countUsers]).then(result => {
 				//log2console("INFO", result);
-				//log2console("INFO", "Using result: " +  result(userAccounts) + "  " +  result(countUsers))
-				log2console("INFO", "Using resolve: " +  resolve(userAccounts) + "  " +  resolve(countUsers))
+				log2console("INFO", "Using result: " +  result(userAccounts) + "  " +  result(countUsers))
+				//log2console("INFO", "Using resolve: " +  resolve(userAccounts) + "  " +  resolve(countUsers))
 
 				//res.render('pages/users',{user:req.user, users: result(userAccounts), usercount: result(countUsers)});
 			});
