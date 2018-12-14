@@ -1373,8 +1373,7 @@ app.get('/admin/users',
 			const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
 			Promise.all([userAccounts, countUsers]).then(result => {
-				//log2console("INFO", "Result.userAccounts:" + result[0]);
-				//log2console("INFO", "Result.countUsers:" + result[1]);
+				// result[0] = userAccounts, result[1] =  countUsers
 				res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
 			}).catch(err => {
 				res.status(500).json({error: err});
@@ -1389,10 +1388,14 @@ app.get('/admin/user-devices',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			Devices.find({}, function(err, data){
-				if (!err) {
-					res.render('pages/user-devices',{user:req.user, devices: data});
-				}
+			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
+			const userDevices = Devices.find({});
+			const countDevices = Account.countDocuments({});
+			Promise.all([userDevices, countDevices]).then(result => {
+				// result[0] = userDevices, result[1] =  countDevices
+				res.render('pages/user-devices',{user:req.user, devices: result[0], devicecount: result[1]});
+			}).catch(err => {
+				res.status(500).json({error: err});
 			});
 	} else {
 			res.status(401).send();
