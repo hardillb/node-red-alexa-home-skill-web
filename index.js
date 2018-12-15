@@ -1372,9 +1372,11 @@ app.get('/admin/users',
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
 			const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
-			Promise.all([userAccounts, countUsers]).then(result => {
+			// Promise.all([userAccounts, countUsers]).then(result => {
+			Promise.all([userAccounts, countUsers]).then(([users, count]) => {
 				// result[0] = userAccounts, result[1] =  countUsers
-				res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
+				// res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
+				res.render('pages/users',{user:req.user, users: users, usercount: count});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
