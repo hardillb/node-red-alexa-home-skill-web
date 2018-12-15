@@ -10,6 +10,7 @@
 				  <th scope="col">Email Address</th>
 				  <th scope="col">Country</th>
 				  <th scope="col">Region</th>
+				  <th scope="col">Device Count</th>
 				  <th scope="col">Manage</th>
 				</tr>
 			</thead>
@@ -21,6 +22,7 @@
 						<td><%= account.email %></td>
 						<td><%= account.country %></td>
 						<td><%= account.region %></td>
+						<td><%= account.count %></td>
 						<td>
 							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button>
 							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button>

@@ -1377,9 +1377,9 @@ app.get('/admin/users',
 				{ $group : { _id : "$username", count : { $sum : 1 } } }
 			 ]);
 			Promise.all([userAccounts, countUsers, countUserDevices]).then(([users, totalCount, perUserCount]) => {
-				log2console("INFO", "users: " + users)
-				log2console("INFO", "totalCount: " + totalCount)
-				log2console("INFO", "perUserCount: " + perUserCount)
+				//log2console("INFO", "users: " + users)
+				//log2console("INFO", "totalCount: " + totalCount)
+				//log2console("INFO", "perUserCount: " + perUserCount)
 				res.render('pages/users',{user:req.user, users: users, usercount: totalCount, peruser: perUserCount});
 			}).catch(err => {
 				res.status(500).json({error: err});
