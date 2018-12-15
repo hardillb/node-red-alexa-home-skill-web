@@ -1373,13 +1373,35 @@ app.get('/admin/user-devices',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
+
+			// const userDevices = Devices.find({});
+			// const countDevices = Devices.countDocuments({});
+			// Promise.all([userDevices, countDevices]).then(([devices, count]) => {
+			// 	res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
+			// }).catch(err => {
+			// 	res.status(500).json({error: err});
+			// });
+
 			const userDevices = Devices.find({});
-			const countDevices = Devices.countDocuments({});
-			Promise.all([userDevices, countDevices]).then(([devices, count]) => {
-				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
+			const countAllDevices = Devices.countDocuments({});	
+			const countUserDevices = Account.aggregate([
+				{$lookup: {
+						from : "devices",
+						localField : "username",
+						foreignField : "username",
+						as : "userdevs"
+					},
+				},
+				{ $unwind:"$userdevs" },
+				{ $group : { _id : "$username", count : { $sum : 1 } } }
+			 ]);
+			 
+			Promise.all([userDevices, countAllDevices, countUserDevices]).then(([devices, totalCount, perUserCount]) => {
+				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: totalCount, peruser: perUserCount });
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
+
 	} else {
 			res.status(401).send();
 		}

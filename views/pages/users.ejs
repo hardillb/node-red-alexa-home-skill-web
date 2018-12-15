@@ -6,9 +6,11 @@
 			<thead>
 				<tr>
 				  <th scope="col">Username</th>
+				  <th scope="col">isSuperUser</th>
 				  <th scope="col">Email Address</th>
 				  <th scope="col">Country</th>
 				  <th scope="col">Region</th>
+				  <th scope="col">Device Count</th>
 				  <th scope="col">Manage</th>
 				</tr>
 			</thead>
@@ -16,9 +18,11 @@
 				<% users.forEach(function(account){ %>
 					<tr>
 						<th scope="row"><%= account.username %></th>
+						<td><%= account.superuser %></td>
 						<td><%= account.email %></td>
 						<td><%= account.country %></td>
 						<td><%= account.region %></td>
+						<td><%= userDeviceCount[account.username].count %></td>
 						<td>
 							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button>
 							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button>
@@ -141,5 +145,11 @@
 	<%- JSON.stringify(users) %>.forEach(function(user){
 		users[user._id] = user;
 	});
+
+	var userDeviceCount = {};
+	<%- JSON.stringify(peruser) %>.forEach(function(user){
+		userDeviceCount[user._id] = user;
+	});
+
 	</script>
 <% include ../fragments/footer.ejs %>
