@@ -1217,7 +1217,7 @@ app.post('/account/:user_id',
 					} else {
 						log2console("INFO", "[Admin] Updated to user account: " + req.params.user_id);
 						data.email = req.body.email;
-						data.country = req.body.country;
+						data.country = req.body.country.toUpperCase();
 						data.region = region;
 						data.save(function(err, d){
 							res.status(201);
