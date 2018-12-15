@@ -1159,12 +1159,12 @@ app.get('/devices',
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.user.username;
-
-		Devices.find({username:user}, function(err, data){
-			if (!err) {
-				//console.log(data);
-				res.render('pages/devices',{user: req.user ,devices: data, devs: true});
-			}
+		const userDevices = Devices.find({username:user});
+		const countDevices = Devices.countDocuments({username:user});
+		Promise.all([userDevices, countDevices]).then(([devices, count]) => {
+			res.render('pages/devices',{user: req.user, devices: devices, count: count, devs: true});
+		}).catch(err => {
+			res.status(500).json({error: err});
 		});
 });
 
@@ -1339,27 +1339,16 @@ app.post('/api/v1/devices',
 	}
 );
 
-// app.get('/admin',
-// 	ensureAuthenticated,
-// 	function(req,res){
-// 		if (req.user.username == mqtt_user) {
-// 			Account.countDocuments({},function(err, count){
-// 				res.render('pages/admin',{user:req.user, userCount: count});
-// 			});
-// 		} else {
-// 			res.redirect('/');
-// 		}
-// });
-
 app.get('/admin/services',
 	ensureAuthenticated, 
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			oauthModels.Application.find({}, function(error, data){
-				if (!error){
-					res.render('pages/services',{user:req.user, services: data});
-				}
-			});
+			const applications = oauthModels.Application.find({});
+			Promise.all([applications]).then(([apps]) => {
+					res.render('pages/services',{user:req.user, services: apps});
+				}).catch(err => {
+					res.status(500).json({error: err});
+				});
 		} else {
 			res.status(401).send();
 		}
@@ -1372,10 +1361,7 @@ app.get('/admin/users',
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
 			const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
-			// Promise.all([userAccounts, countUsers]).then(result => {
 			Promise.all([userAccounts, countUsers]).then(([users, count]) => {
-				// result[0] = userAccounts, result[1] =  countUsers
-				// res.render('pages/users',{user:req.user, users: result[0], usercount: result[1]});
 				res.render('pages/users',{user:req.user, users: users, usercount: count});
 			}).catch(err => {
 				res.status(500).json({error: err});
@@ -1390,12 +1376,10 @@ app.get('/admin/user-devices',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
 			const userDevices = Devices.find({});
 			const countDevices = Devices.countDocuments({});
-			Promise.all([userDevices, countDevices]).then(result => {
-				// result[0] = userDevices, result[1] =  countDevices
-				res.render('pages/user-devices',{user:req.user, devices: result[0], devicecount: result[1]});
+			Promise.all([userDevices, countDevices]).then(([devices, count]) => {
+				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
@@ -1468,9 +1452,7 @@ var server = http.Server(app);
 server.listen(port, host, function(){
 	log2console("INFO", "[Core] App listening on: " + host + ":" + port);
 	log2console("INFO", "[Core] App_ID -> " + app_id);
-
 	setTimeout(function(){
-		
 	},5000);
 });
 
