@@ -149,9 +149,13 @@
 
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
-		users[user._id] = user;
 		if (userDeviceCount[user._id]) {
-			users[user._id].count = userDeviceCount[user._id].count
+			user.count = userDeviceCount[user._id].count
+			users[user._id] = user;
+		}
+		else {
+			user.count = 0;
+			users[user._id] = user;
 		}
 	});
 
