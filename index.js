@@ -1397,6 +1397,9 @@ app.get('/admin/user-devices',
 			 ]);
 			 
 			Promise.all([userDevices, countAllDevices, countUserDevices]).then(([devices, totalCount, perUserCount]) => {
+				log2console("INFO", "UserDevices: " + devices)
+				log2console("INFO", "countAllDevices: " + totalCount)
+				log2console("INFO", "countUserDevices: " + perUserCount)
 				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: totalCount, peruser: perUserCount });
 			}).catch(err => {
 				res.status(500).json({error: err});
