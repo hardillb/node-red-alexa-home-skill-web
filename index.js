@@ -1356,10 +1356,31 @@ app.get('/admin/users',
 	function(req,res){
 		if (req.user.username === mqtt_user) {
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
+			// const userAccounts = Account.find({});
+			// const countUsers = Account.countDocuments({});
+			// Promise.all([userAccounts, countUsers]).then(([users, count]) => {
+			// 	res.render('pages/users',{user:req.user, users: users, usercount: count});
+			// }).catch(err => {
+			// 	res.status(500).json({error: err});
+			// });
 			const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
-			Promise.all([userAccounts, countUsers]).then(([users, count]) => {
-				res.render('pages/users',{user:req.user, users: users, usercount: count});
+			const countUserDevices = Account.aggregate([
+				{$lookup: {
+						from : "devices",
+						localField : "username",
+						foreignField : "username",
+						as : "userdevs"
+					},
+				},
+				{ $unwind:"$userdevs" },
+				{ $group : { _id : "$username", count : { $sum : 1 } } }
+			 ]);
+			Promise.all([userAccounts, countUsers, countUserDevices]).then(([users, totalCount, perUserCount]) => {
+				log2console("INFO", "users: " + users)
+				log2console("INFO", "totalCount: " + totalCount)
+				log2console("INFO", "perUserCount: " + perUserCount)
+				res.render('pages/users',{user:req.user, users: users, usercount: totalCount, peruser: perUserCount});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
@@ -1373,38 +1394,13 @@ app.get('/admin/user-devices',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-
-			// const userDevices = Devices.find({});
-			// const countDevices = Devices.countDocuments({});
-			// Promise.all([userDevices, countDevices]).then(([devices, count]) => {
-			// 	res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
-			// }).catch(err => {
-			// 	res.status(500).json({error: err});
-			// });
-
 			const userDevices = Devices.find({});
-			const countAllDevices = Devices.countDocuments({});	
-			const countUserDevices = Account.aggregate([
-				{$lookup: {
-						from : "devices",
-						localField : "username",
-						foreignField : "username",
-						as : "userdevs"
-					},
-				},
-				{ $unwind:"$userdevs" },
-				{ $group : { _id : "$username", count : { $sum : 1 } } }
-			 ]);
-			 
-			Promise.all([userDevices, countAllDevices, countUserDevices]).then(([devices, totalCount, perUserCount]) => {
-				log2console("INFO", "UserDevices: " + devices)
-				log2console("INFO", "countAllDevices: " + totalCount)
-				log2console("INFO", "countUserDevices: " + perUserCount)
-				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: totalCount, peruser: perUserCount });
+			const countDevices = Devices.countDocuments({});
+			Promise.all([userDevices, countDevices]).then(([devices, count]) => {
+				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
-
 	} else {
 			res.status(401).send();
 		}
