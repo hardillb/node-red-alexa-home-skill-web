@@ -1171,13 +1171,10 @@ app.get('/devices',
 app.put('/devices',
 	ensureAuthenticated,
 	function(req,res){
-
 		var user = req.user.username;
 		var device = req.body;
-
 		device.username = user;
-		device.isReachable = true;
-
+		//device.isReachable = true;
 		var dev = new Devices(device);
 		dev.save(function(err, dev){
 			if (!err) {
