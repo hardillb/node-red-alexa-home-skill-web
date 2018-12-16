@@ -144,9 +144,15 @@
 			console.log("user:" + user);
 			//userJSON = JSON.parse(user._id);
 			//console.log("userJSON:" + userJSON);
-			objUser = user._id;
-			objUser.deviceCount = user.CountDevices;
-			console.log("userJSONstr:" + JSON.stringify(objUser));
+			var objUser = {
+				"_id": user._id._id,
+				"username": user.username,
+				"email": user.email,
+				"country": user.country,
+				"region": user.region,
+				"deviceCont": user.CountDevices
+			};
+			console.log("Constructed user:" + JSON.stringify(objUser));
 			users[objUser._id] = JSON.stringify(objUser); // Users now contained under _id element
 	});
 
