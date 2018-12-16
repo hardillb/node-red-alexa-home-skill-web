@@ -141,7 +141,7 @@
 
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
-			console.log("user:" + user);
+			console.log("user:" + JSON.stringify(user));
 			//userJSON = JSON.parse(user._id);
 			//console.log("userJSON:" + userJSON);
 			var objUser = {
