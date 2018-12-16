@@ -1381,11 +1381,10 @@ app.get('/admin/users',
 					"countDevices": { "$sum": "$deviceCount.count" }
 				  }}
 			 ]);
-
 			Promise.all([countUsers, usersAndCountDevices]).then(([totalCount, usersAndDevs]) => {
 				//log2console("INFO", "users: " + users)
 				//log2console("INFO", "totalCount: " + totalCount)
-				log2console("INFO", "usersAndDevs: " + JSON.stringify(usersAndDevs));
+				//log2console("INFO", "usersAndDevs: " + JSON.stringify(usersAndDevs));
 				res.render('pages/users',{user:req.user, users: usersAndDevs, usercount: totalCount});
 			}).catch(err => {
 				res.status(500).json({error: err});
