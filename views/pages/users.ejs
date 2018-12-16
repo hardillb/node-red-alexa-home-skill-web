@@ -146,10 +146,10 @@
 			//console.log("userJSON:" + userJSON);
 			var objUser = {
 				"_id": user._id._id,
-				"username": user.username,
-				"email": user.email,
-				"country": user.country,
-				"region": user.region,
+				"username": user._id.username,
+				"email": user._id.email,
+				"country": user._id.country,
+				"region": user._id.region,
 				"deviceCont": user.CountDevices
 			};
 			console.log("Constructed user:" + JSON.stringify(objUser));
