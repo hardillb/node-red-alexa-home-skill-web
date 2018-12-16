@@ -140,7 +140,7 @@
 	}
 
 	var users = {};
-	<%- JSON.stringify(users) %>.forEach(function(user){
+	<%- users %>.forEach(function(user){
 			//console.log("user:" + JSON.stringify(user));
 			var objUser = {
 				"_id": user._id._id,
@@ -154,6 +154,8 @@
 			console.log("Constructed user:" + JSON.stringify(objUser));
 			users[objUser._id] = objUser; // Users now contained under _id element
 	});
+
+	console.log("Final JSON object:" + JSON.stringify(users));
 
 	</script>
 <% include ../fragments/footer.ejs %>
