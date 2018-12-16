@@ -141,7 +141,7 @@
 
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
-			users[user._id] = user;
+			users[user._id] = user._id[0]; // expect array, contained under _id element
 	});
 
 	</script>
