@@ -10,20 +10,22 @@
 				  <th scope="col">Email Address</th>
 				  <th scope="col">Country</th>
 				  <th scope="col">Region</th>
+				  <th scope="col">Device Count</th>
 				  <th scope="col">Manage</th>
 				</tr>
 			</thead>
 			<tbody>
 				<% users.forEach(function(account){ %>
 					<tr>
-						<th scope="row"><%= account.username %></th>
-						<td><%= account.superuser %></td>
-						<td><%= account.email %></td>
-						<td><%= account.country %></td>
-						<td><%= account.region %></td>
+						<th scope="row"><%= account._id.username %></th>
+						<td><%= account._id.superuser %></td>
+						<td><%= account._id.email %></td>
+						<td><%= account._id.country %></td>
+						<td><%= account._id.region %></td>
+						<td><%= account.countDevices %></td>
 						<td>
-							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button>
-							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button>
+							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id._id %>')">Edit</button>
+							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id._id %>')">Delete</button>
 						</td>
 					</tr>
 				<% }); %>
