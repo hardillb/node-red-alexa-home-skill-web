@@ -140,9 +140,12 @@
 	}
 
 	var users = {};
-	users.forEach(function(user){
-			userJSON = JSON.parse(user._id)
-			users[userJSON._id] = JSON.stringify(user._id); // Users now contained under _id element
+	<%- JSON.stringify(users) %>.forEach(function(user){
+			userJSON = JSON.parse(user._id);
+			console.log("userJSON:" + userJSON);
+			userJSONstr = JSON.parse(user._id);
+			console.log("userJSONstr:" + userJSONstr);
+			users[userJSON._id] = userJSON; // Users now contained under _id element
 	});
 
 	</script>
