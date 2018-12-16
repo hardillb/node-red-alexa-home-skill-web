@@ -144,9 +144,10 @@
 			console.log("user:" + user);
 			//userJSON = JSON.parse(user._id);
 			//console.log("userJSON:" + userJSON);
-			userJSONstr = JSON.stringify(user._id);
-			console.log("userJSONstr:" + userJSONstr);
-			users[userJSON._id] = userJSON; // Users now contained under _id element
+			objUser = user._id;
+			objUser.deviceCount = user.CountDevices;
+			console.log("userJSONstr:" + JSON.stringify(objUser));
+			users[objUser._id] = JSON.stringify(objUser); // Users now contained under _id element
 	});
 
 	</script>
