@@ -150,7 +150,7 @@
 				"email": user._id.email,
 				"country": user._id.country,
 				"region": user._id.region,
-				"deviceCont": user.CountDevices
+				"deviceCont": user.countDevices
 			};
 			console.log("Constructed user:" + JSON.stringify(objUser));
 			users[objUser._id] = JSON.stringify(objUser); // Users now contained under _id element
