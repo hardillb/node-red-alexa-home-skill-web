@@ -18,15 +18,15 @@
 				<!-- Use "users" object sent in-line from NodeJS render block, NOT object array created below -->
 				<% users.forEach(function(account){ %>
 					<tr>
-						<th scope="row"><%= account._id.username %></th>
-						<td><%= account._id.superuser %></td>
-						<td><%= account._id.email %></td>
-						<td><%= account._id.country %></td>
-						<td><%= account._id.region %></td>
+						<th scope="row"><%= account.username %></th>
+						<td><%= account.superuser %></td>
+						<td><%= account.email %></td>
+						<td><%= account.country %></td>
+						<td><%= account.region %></td>
 						<td><%= account.countDevices %></td>
 						<td>
-							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id._id %>')">Edit</button>
-							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id._id %>')">Delete</button>
+							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button>
+							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button>
 						</td>
 					</tr>
 				<% }); %>
@@ -147,12 +147,12 @@
 	<%- JSON.stringify(users) %>.forEach(function(user){
 			//console.log("user:" + JSON.stringify(user));
 			var objUser = {
-				"_id": user._id._id,
-				"isSuperUser": user._id.superuser,
-				"username": user._id.username,
-				"email": user._id.email,
-				"country": user._id.country,
-				"region": user._id.region,
+				"_id": user._id,
+				"isSuperUser": user.superuser,
+				"username": user.username,
+				"email": user.email,
+				"country": user.country,
+				"region": user.region,
 				"countDevices": user.countDevices
 			};
 			//console.log("Constructed user:" + JSON.stringify(objUser));
