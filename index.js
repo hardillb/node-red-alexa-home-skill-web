@@ -1377,6 +1377,7 @@ app.get('/admin/users',
 				{ $group : { _id : {
 					_id: "$_id",
 					username: "$username",
+					superuser: "$superuser",
 					email: "$email",
 					country: "$country",
 					region: "$region",
