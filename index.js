@@ -1366,23 +1366,20 @@ app.get('/admin/users',
 			//const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
 			const usersAndCountDevices = Account.aggregate([
-				{$lookup: {
-						from : "devices",
-						localField : "username",
-						foreignField : "username",
-						as : "userdevs"
-					},
-				},
-				{ $unwind:"$userdevs" },
-				{ $group : { _id : {
-					_id: "$_id",
-					username: "$username",
-					superuser: "$superuser",
-					email: "$email",
-					country: "$country",
-					region: "$region",
-				},
-				countDevices : { $sum : 1 } } }
+				{ "$lookup": {
+					"from": "devices",
+					"let": { "username": "$username" },
+					"pipeline": [
+					  { "$match": {
+						"$expr": { "$eq": [ "$$username", "$username" ] }
+					  }},
+					  { "$count": "count" }
+					],
+					"as": "deviceCount"    
+				  }},
+				  { "$addFields": {
+					"countDevices": { "$sum": "$deviceCount.count" }
+				  }}
 			 ]);
 
 			Promise.all([countUsers, usersAndCountDevices]).then(([totalCount, usersAndDevs]) => {

@@ -15,6 +15,7 @@
 				</tr>
 			</thead>
 			<tbody>
+				<!-- Use "users" object sent in-line from NodeJS render block, NOT object array created below -->
 				<% users.forEach(function(account){ %>
 					<tr>
 						<th scope="row"><%= account._id.username %></th>
@@ -141,6 +142,7 @@
 		}
 	}
 
+	// Generate javascript object for use in JS code only
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
 			//console.log("user:" + JSON.stringify(user));
@@ -153,11 +155,9 @@
 				"region": user._id.region,
 				"countDevices": user.countDevices
 			};
-			console.log("Constructed user:" + JSON.stringify(objUser));
+			//console.log("Constructed user:" + JSON.stringify(objUser));
 			users[objUser._id] = objUser; // Users now contained under _id element
 	});
-
-	console.log("Final JSON object:" + JSON.stringify(users));
-
+	//console.log("Final JSON object:" + JSON.stringify(users));
 	</script>
 <% include ../fragments/footer.ejs %>
