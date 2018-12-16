@@ -10,7 +10,6 @@
 				  <th scope="col">Email Address</th>
 				  <th scope="col">Country</th>
 				  <th scope="col">Region</th>
-				  <th scope="col">Device Count</th>
 				  <th scope="col">Manage</th>
 				</tr>
 			</thead>
@@ -22,7 +21,6 @@
 						<td><%= account.email %></td>
 						<td><%= account.country %></td>
 						<td><%= account.region %></td>
-						<td><%= account.count %></td>
 						<td>
 							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button>
 							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button>
@@ -141,22 +139,9 @@
 		}
 	}
 
-
-	var userDeviceCount = {};
-	<%- JSON.stringify(peruser) %>.forEach(function(user){
-		userDeviceCount[user._id] = user;
-	});
-
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
-		if (userDeviceCount[user._id]) {
-			user.count = userDeviceCount[user._id].count
 			users[user._id] = user;
-		}
-		else {
-			user.count = 0;
-			users[user._id] = user;
-		}
 	});
 
 	</script>

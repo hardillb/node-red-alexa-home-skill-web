@@ -1363,9 +1363,9 @@ app.get('/admin/users',
 			// }).catch(err => {
 			// 	res.status(500).json({error: err});
 			// });
-			const userAccounts = Account.find({});
+			//const userAccounts = Account.find({});
 			const countUsers = Account.countDocuments({});
-			const countUserDevices = Account.aggregate([
+			const usersAndCountDevices = Account.aggregate([
 				{$lookup: {
 						from : "devices",
 						localField : "username",
@@ -1374,13 +1374,21 @@ app.get('/admin/users',
 					},
 				},
 				{ $unwind:"$userdevs" },
-				{ $group : { _id : "$username", count : { $sum : 1 } } }
+				{ $group : { _id : {
+					_id: "$_id",
+					username: "$username",
+					email: "$email",
+					country: "$country",
+					region: "$region",
+				},
+				countDevices : { $sum : 1 } } }
 			 ]);
-			Promise.all([userAccounts, countUsers, countUserDevices]).then(([users, totalCount, perUserCount]) => {
+
+			Promise.all([countUsers, usersAndCountDevices]).then(([totalCount, usersAndDevs]) => {
 				//log2console("INFO", "users: " + users)
 				//log2console("INFO", "totalCount: " + totalCount)
-				//log2console("INFO", "perUserCount: " + perUserCount)
-				res.render('pages/users',{user:req.user, users: users, usercount: totalCount, peruser: perUserCount});
+				log2console("INFO", "usersAndDevs: " + JSON.stringify(usersAndDevs));
+				res.render('pages/users',{user:req.user, users: usersAndDevs, usercount: totalCount});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
