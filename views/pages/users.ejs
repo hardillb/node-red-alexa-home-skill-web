@@ -150,10 +150,10 @@
 				"email": user._id.email,
 				"country": user._id.country,
 				"region": user._id.region,
-				"deviceCont": user.countDevices
+				"countDevices": user.countDevices
 			};
 			console.log("Constructed user:" + JSON.stringify(objUser));
-			users[objUser._id] = JSON.stringify(objUser); // Users now contained under _id element
+			users[objUser._id] = objUser; // Users now contained under _id element
 	});
 
 	</script>
