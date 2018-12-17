@@ -6,6 +6,7 @@
 			<thead>
 				<tr>
 				  <th scope="col">EndpointId</th>
+				  <th scope="col">Username</th>
 				  <th scope="col">Friendly Name</th>
 				  <th scope="col">Capabilities</th>
                   <th scope="col">Type</th>
@@ -19,6 +20,7 @@
 				<% devices.forEach(function(device){ %>
 					<tr>
 						<th scope="row"><%= device.endpointId %></th>
+						<td><%= device.username %></td>
 						<td><%= device.friendlyName %></td>
                         <td>
 							<ul class="list-unstyled">
