@@ -19,7 +19,10 @@ var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
-//var Measurement = require('./googleMeasurement.js');
+var ua = require('universal-analytics');
+
+// Use GA account ID specified in container definition
+var visitor = ua(process.env.GOOGLE_ANALYTICS_TID || "");
 
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
@@ -59,8 +62,6 @@ else {
 	var app_id = 'http://localhost:' + port;
 }
 var cookieSecret = 'ihytsrf334';
-//var googleAnalyicsTID = process.env.GOOGLE_ANALYTICS_TID;
-//var measurement = new Measurement(googleAnalyicsTID);
 
 var mqttClient;
 
@@ -193,7 +194,7 @@ app.use(morgan("combined", {stream: accessLogStream}));
 app.use(cookieParser(cookieSecret));
 app.use(flash());
 
-// Moved from express.session to connect-mongo
+// Session handler
 app.use(session({
 	store: new mongoStore({
 		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions"
@@ -210,7 +211,6 @@ app.use(passport.session());
 
 function requireHTTPS(req, res, next) {
 	if (req.get('X-Forwarded-Proto') === 'http') {
-        //FYI this should work for local development as well
         var url = 'https://' + req.get('host');
         if (req.get('host') === 'localhost') {
         	url += ':' + port;
@@ -253,22 +253,27 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 passport.use(accessTokenStrategy);
 
 app.get('/', function(req,res){
+	visitor.pageview("/", "https://" + process.env.WEB_HOSTNAME, "Home").send();
 	res.render('pages/index', {user: req.user, home: true});
 });
 
 app.get('/docs', function(req,res){
+	visitor.pageview("/docs", "https://" + process.env.WEB_HOSTNAME, "Docs").send();
 	res.render('pages/docs', {user: req.user, docs: true});
 });
 
 app.get('/about', function(req,res){
+	visitor.pageview("/about", "https://" + process.env.WEB_HOSTNAME, "About").send();
 	res.render('pages/about', {user: req.user, about: true});
 });
 
 app.get('/privacy', function(req,res){
+	visitor.pageview("/privacy", "https://" + process.env.WEB_HOSTNAME, "Privacy").send();
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
 
 app.get('/login', function(req,res){
+	visitor.pageview("/login", "https://" + process.env.WEB_HOSTNAME, "Login").send();
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
 
@@ -287,13 +292,17 @@ app.get('/logout', function(req,res){
 app.post('/login',
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
-		//console.log("login success");
-		//console.log(req.isAuthenticated());
-		//console.log(req.user);
+		var params = {
+			ec: "Security", // class
+			ea: "Login", //action
+			uid: req.user,
+			dp: "/login"
+		  }
+		visitor.event(params).send();
+
 		if (req.query.next) {
 			res.reconnect(req.query.next);
 		} else {
-			//console.log("passed Auth");
 			res.redirect('/devices');
 		}
 	});
@@ -311,6 +320,7 @@ function ensureAuthenticated(req,res,next) {
 }
 
 app.get('/newuser', function(req,res){
+	visitor.pageview("/newuser", "https://" + process.env.WEB_HOSTNAME, "New User").send();
 	res.render('pages/register',{user: req.user, newuser: true});
 });
 
@@ -360,12 +370,13 @@ app.post('/newuser', function(req,res){
 
 		passport.authenticate('local')(req, res, function () {
 			log2console("INFO", "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
-			//measurement.send({
-			//	t:'event', 
-			//	ec:'System', 
-			//	ea: 'NewUser',
-			//	uid: req.body.username
-			//});
+			var params = {
+				ec: "Security",
+				ea: "Create user, username:" + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region,
+				uid: req.user,
+				dp: "/newuser"
+			  }
+			visitor.event(params).send();
             res.status(201).send();
         });
 
@@ -382,8 +393,8 @@ app.get('/changePassword/:key',function(req, res, next){
 					lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
-					log2console("ERROR", "[Change Password] Password reset failed for user: " + lostPassword.user);
-					log2console("DEBUG", "[Change Password] " + err);
+					log2console("ERROR", "[Change Password] Unable to find correlating password reset key for user: " + lostPassword.user);
+					//log2console("DEBUG", "[Change Password] " + err);
 					res.redirect('/');
 				}
 			})
@@ -394,6 +405,7 @@ app.get('/changePassword/:key',function(req, res, next){
 });
 
 app.get('/changePassword', ensureAuthenticated, function(req, res, next){
+	visitor.pageview("/changePassword", "https://" + process.env.WEB_HOSTNAME, "Change Password").send();
 	res.render('pages/changePassword', {user: req.user});
 });
 
@@ -408,6 +420,13 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 				u.save(function(error){
 					if (!error) {
 						//console.log("Chagned %s's password", u.username);
+						var params = {
+							ec: "Security",
+							ea: "Changed password for username:" + u.username,
+							uid: req.user,
+							dp: "/changePassword"
+						  }
+						visitor.event(params).send();
 						res.status(200).send();
 					} else {
 						log2console("ERROR", "[Change Password] Unable to change password for: " + u.username);
@@ -425,6 +444,7 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 });
 
 app.get('/lostPassword', function(req, res, next){
+	visitor.pageview("/lostPassword", "https://" + process.env.WEB_HOSTNAME, "Lost Password").send();
 	res.render('pages/lostPassword', { user: req.user});
 });
 
@@ -554,12 +574,13 @@ app.get('/api/v1/devices',
 	function(req,res,next){
 
 		//console.log("all good, doing discover devices");
-		//measurement.send({
-		//	t:'event', 
-		//	ec:'discover', 
-		//	ea: req.body.header ? req.body.header.name : "Node-RED",
-		//	uid: req.user.username
-		//});
+		var params = {
+			ec: "Discovery",
+			ea: req.body.header ? req.body.header.name : "Node-RED",
+			uid: req.user.username,
+			dp: "/api/v1/devices"
+		  }
+		visitor.event(params).send();
 
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
@@ -889,15 +910,13 @@ var timeout = setInterval(function(){
 app.get('/api/v1/getstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-		//console.log(req.user.username);
-		//console.log(req);
-		//measurement.send({
-		//	e:'event', 
-		//	ec:'command', 
-		//	ea: req.body.directive.header.name,
-		//	uid: req.user.username
-		//
-		//});
+		var params = {
+			ec: "Get State",
+			ea: req.body.header ? req.body.header.name : "Node-RED",
+			uid: req.user.username,
+			dp: "/api/v1/getstate"
+		  }
+		visitor.event(params).send();
 
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
@@ -1084,13 +1103,15 @@ app.post('/api/v1/command',
 	function(req,res,next){
 		//console.log(req.user.username);
 		//console.log(req);
-		//measurement.send({
-		//	e:'event', 
-		//	ec:'command', 
-		//	ea: req.body.directive.header.name,
-		//	uid: req.user.username
-		//
-		//});
+		var params = {
+			ec: "Command",
+			ea: req.body.header ? req.body.header.name : "Node-RED",
+			uid: req.user.username,
+			dp: "/api/v1/command"
+		  }
+		visitor.event(params).send();
+
+
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (!err) {
 				// Convert "model" object class to JSON object
