@@ -253,7 +253,14 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 passport.use(accessTokenStrategy);
 
 app.get('/', function(req,res){
-	visitor.pageview("/", "https://" + process.env.WEB_HOSTNAME, "Home").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Home',
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
 	res.render('pages/index', {user: req.user, home: true});
 });
 
