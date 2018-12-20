@@ -20,9 +20,16 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
+var enableAnalytics = true;
 
 // Use GA account ID specified in container definition
-var visitor = ua(process.env.GOOGLE_ANALYTICS_TID || "");
+if (!(process.env.GOOGLE_ANALYTICS_TID)) {
+	log2console("WARNING","[Core] UID for Google Analytics not supplied via environment variable GOOGLE_ANALYTICS_TID");
+	enableAnalytics = false;
+}
+else {
+	var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
+}
 
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
@@ -260,7 +267,7 @@ app.get('/', function(req,res){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/index', {user: req.user, home: true});
 });
@@ -273,7 +280,7 @@ app.get('/docs', function(req,res){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/docs', {user: req.user, docs: true});
 });
@@ -286,7 +293,7 @@ app.get('/about', function(req,res){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/about', {user: req.user, about: true});
 });
@@ -299,7 +306,7 @@ app.get('/privacy', function(req,res){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
@@ -312,7 +319,7 @@ app.get('/login', function(req,res){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
@@ -339,7 +346,7 @@ app.post('/login',
 			uip: req.ip,
 			dp: "/login"
 		  }
-		visitor.event(params).send();
+		if (enableAnalytics) {visitor.pageview(view).send()};
 
 		if (req.query.next) {
 			res.reconnect(req.query.next);
@@ -369,7 +376,7 @@ app.get('/newuser', function(req,res){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/register',{user: req.user, newuser: true});
 });
@@ -426,7 +433,8 @@ app.post('/newuser', function(req,res){
 				uid: req.user,
 				dp: "/newuser"
 			  }
-			visitor.event(params).send();
+			if (enableAnalytics) {visitor.event(params).send()};
+
             res.status(201).send();
         });
 
@@ -463,8 +471,8 @@ app.get('/changePassword', ensureAuthenticated, function(req, res, next){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
-
+	if (enableAnalytics) {visitor.pageview(view).send()};
+	
 	res.render('pages/changePassword', {user: req.user});
 });
 
@@ -485,7 +493,7 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 							uid: req.user,
 							dp: "/changePassword"
 						  }
-						visitor.event(params).send();
+						if (enableAnalytics) {visitor.event(params).send()};
 						res.status(200).send();
 					} else {
 						log2console("ERROR", "[Change Password] Unable to change password for: " + u.username);
@@ -511,7 +519,7 @@ app.get('/lostPassword', function(req, res, next){
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
-	visitor.pageview(view).send();
+	if (enableAnalytics) {visitor.pageview(view).send()};
 
 	res.render('pages/lostPassword', { user: req.user});
 });
@@ -649,7 +657,7 @@ app.get('/api/v1/devices',
 			uip: req.ip,
 			dp: "/api/v1/devices"
 		  }
-		visitor.event(params).send();
+		if (enableAnalytics) {visitor.event(params).send()};
 
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
@@ -986,7 +994,7 @@ app.get('/api/v1/getstate/:dev_id',
 			uip: req.ip,
 			dp: "/api/v1/getstate"
 		  }
-		visitor.event(params).send();
+		if (enableAnalytics) {visitor.event(params).send()};
 
 		// Identify device, we know who user is from request
 		var id = req.params.dev_id;
@@ -1180,7 +1188,7 @@ app.post('/api/v1/command',
 			uip: req.ip,
 			dp: "/api/v1/command"
 		  }
-		visitor.event(params).send();
+		if (enableAnalytics) {visitor.event(params).send()};
 
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
@@ -1258,8 +1266,7 @@ app.get('/devices',
 			uip: req.ip,
 			ua: req.headers['user-agent']
 		}
-		visitor.pageview(view).send();
-
+		if (enableAnalytics) {visitor.pageview(view).send()};
 		var user = req.user.username;
 		const userDevices = Devices.find({username:user});
 		const countDevices = Devices.countDocuments({username:user});
@@ -1450,8 +1457,8 @@ app.get('/admin/services',
 				uip: req.ip,
 				ua: req.headers['user-agent']
 			}
-			visitor.pageview(view).send();
-
+			if (enableAnalytics) {visitor.pageview(view).send()};
+		
 			const applications = oauthModels.Application.find({});
 			Promise.all([applications]).then(([apps]) => {
 					res.render('pages/services',{user:req.user, services: apps});
@@ -1476,7 +1483,7 @@ app.get('/admin/users',
 				uip: req.ip,
 				ua: req.headers['user-agent']
 			}
-			visitor.pageview(view).send();
+			if (enableAnalytics) {visitor.pageview(view).send()};
 
 			const countUsers = Account.countDocuments({});
 			const usersAndCountDevices = Account.aggregate([
@@ -1521,7 +1528,7 @@ app.get('/admin/user-devices',
 				uip: req.ip,
 				ua: req.headers['user-agent']
 			}
-			visitor.pageview(view).send();
+			if (enableAnalytics) {visitor.pageview(view).send()};
 
 			const userDevices = Devices.find({});
 			const countDevices = Devices.countDocuments({});
