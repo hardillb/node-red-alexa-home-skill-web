@@ -361,7 +361,16 @@ function ensureAuthenticated(req,res,next) {
 }
 
 app.get('/newuser', function(req,res){
-	visitor.pageview("/newuser", "https://" + process.env.WEB_HOSTNAME, "New User").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'New User',
+		uid: req.user.username,
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/register',{user: req.user, newuser: true});
 });
 
@@ -446,7 +455,16 @@ app.get('/changePassword/:key',function(req, res, next){
 });
 
 app.get('/changePassword', ensureAuthenticated, function(req, res, next){
-	visitor.pageview("/changePassword", "https://" + process.env.WEB_HOSTNAME, "Change Password").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Change Password',
+		uid: req.user.username,
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/changePassword', {user: req.user});
 });
 
@@ -485,7 +503,16 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 });
 
 app.get('/lostPassword', function(req, res, next){
-	visitor.pageview("/lostPassword", "https://" + process.env.WEB_HOSTNAME, "Lost Password").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Lost Password',
+		uid: req.user.username,
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/lostPassword', { user: req.user});
 });
 
@@ -1221,6 +1248,16 @@ app.post('/api/v1/command',
 app.get('/devices',
 	ensureAuthenticated,
 	function(req,res){
+		var view = {
+			dp: req.path, 
+			dh: 'https://' + process.env.WEB_HOSTNAME,
+			dt: 'Devices',
+			uid: req.user.username,
+			uip: req.ip,
+			ua: req.headers['user-agent']
+		}
+		visitor.pageview(view).send();
+
 		var user = req.user.username;
 		const userDevices = Devices.find({username:user});
 		const countDevices = Devices.countDocuments({username:user});
@@ -1403,6 +1440,16 @@ app.get('/admin/services',
 	ensureAuthenticated, 
 	function(req,res){
 		if (req.user.username === mqtt_user) {
+			var view = {
+				dp: req.path, 
+				dh: 'https://' + process.env.WEB_HOSTNAME,
+				dt: 'Services Admin',
+				uid: req.user.username,
+				uip: req.ip,
+				ua: req.headers['user-agent']
+			}
+			visitor.pageview(view).send();
+
 			const applications = oauthModels.Application.find({});
 			Promise.all([applications]).then(([apps]) => {
 					res.render('pages/services',{user:req.user, services: apps});
@@ -1419,14 +1466,16 @@ app.get('/admin/users',
 	function(req,res){
 		if (req.user.username === mqtt_user) {
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
-			// const userAccounts = Account.find({});
-			// const countUsers = Account.countDocuments({});
-			// Promise.all([userAccounts, countUsers]).then(([users, count]) => {
-			// 	res.render('pages/users',{user:req.user, users: users, usercount: count});
-			// }).catch(err => {
-			// 	res.status(500).json({error: err});
-			// });
-			//const userAccounts = Account.find({});
+			var view = {
+				dp: req.path, 
+				dh: 'https://' + process.env.WEB_HOSTNAME,
+				dt: 'User Admin',
+				uid: req.user.username,
+				uip: req.ip,
+				ua: req.headers['user-agent']
+			}
+			visitor.pageview(view).send();
+
 			const countUsers = Account.countDocuments({});
 			const usersAndCountDevices = Account.aggregate([
 				{ "$lookup": {
@@ -1462,6 +1511,16 @@ app.get('/admin/user-devices',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
+			var view = {
+				dp: req.path, 
+				dh: 'https://' + process.env.WEB_HOSTNAME,
+				dt: 'User Device Admin',
+				uid: req.user.username,
+				uip: req.ip,
+				ua: req.headers['user-agent']
+			}
+			visitor.pageview(view).send();
+
 			const userDevices = Devices.find({});
 			const countDevices = Devices.countDocuments({});
 			Promise.all([userDevices, countDevices]).then(([devices, count]) => {
