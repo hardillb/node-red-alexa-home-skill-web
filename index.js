@@ -983,6 +983,7 @@ app.get('/api/v1/getstate/:dev_id',
 			ec: "Get State",
 			ea: req.body.header ? req.body.header.name : "Node-RED",
 			uid: req.user.username,
+			uip: req.ip,
 			dp: "/api/v1/getstate"
 		  }
 		visitor.event(params).send();
@@ -1176,6 +1177,7 @@ app.post('/api/v1/command',
 			ec: "Command",
 			ea: req.body.header ? req.body.header.name : "Node-RED",
 			uid: req.user.username,
+			uip: req.ip,
 			dp: "/api/v1/command"
 		  }
 		visitor.event(params).send();
