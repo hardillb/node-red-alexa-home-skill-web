@@ -261,26 +261,59 @@ app.get('/', function(req,res){
 		ua: req.headers['user-agent']
 	}
 	visitor.pageview(view).send();
+
 	res.render('pages/index', {user: req.user, home: true});
 });
 
 app.get('/docs', function(req,res){
-	visitor.pageview("/docs", "https://" + process.env.WEB_HOSTNAME, "Docs").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Docs',
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/docs', {user: req.user, docs: true});
 });
 
 app.get('/about', function(req,res){
-	visitor.pageview("/about", "https://" + process.env.WEB_HOSTNAME, "About").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'About',
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/about', {user: req.user, about: true});
 });
 
 app.get('/privacy', function(req,res){
-	visitor.pageview("/privacy", "https://" + process.env.WEB_HOSTNAME, "Privacy").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Privacy',
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
 
 app.get('/login', function(req,res){
-	visitor.pageview("/login", "https://" + process.env.WEB_HOSTNAME, "Login").send();
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Login',
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	visitor.pageview(view).send();
+
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
 
@@ -303,6 +336,7 @@ app.post('/login',
 			ec: "Security", // class
 			ea: "Login", //action
 			uid: req.user,
+			uip: req.ip,
 			dp: "/login"
 		  }
 		visitor.event(params).send();
@@ -585,6 +619,7 @@ app.get('/api/v1/devices',
 			ec: "Discovery",
 			ea: req.body.header ? req.body.header.name : "Node-RED",
 			uid: req.user.username,
+			uip: req.ip,
 			dp: "/api/v1/devices"
 		  }
 		visitor.event(params).send();
