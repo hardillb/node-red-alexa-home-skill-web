@@ -652,7 +652,7 @@ app.get('/api/v1/devices',
 		//console.log("all good, doing discover devices");
 		var params = {
 			ec: "Discovery",
-			ea: req.body.directive.header ? req.body.directive.header.name : "Discover Devices",
+			ea: req.body.directive.header ? "Running device discovery for username: " + req.user.username : "Discover Devices",
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/devices"
@@ -991,7 +991,7 @@ app.get('/api/v1/getstate/:dev_id',
 
 		var params = {
 			ec: "Get State",
-			ea: "GetState API request for endpointId: " + id,
+			ea: "GetState API request for username: " + req.user.username + ", endpointId: " + id,
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/getstate"
@@ -1184,7 +1184,7 @@ app.post('/api/v1/command',
 		//console.log(req);
 		var params = {
 			ec: "Command",
-			ea: req.body.directive.header ? "Command API directive:" + req.body.directive.header.name + ", endpointId:" + req.body.directive.endpoint.endpointId: "Command API directive",
+			ea: req.body.directive.header ? "Command API directive:" + req.body.directive.header.name + ", username: " + req.user.username + ", endpointId:" + req.body.directive.endpoint.endpointId : "Command API directive",
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/command"
