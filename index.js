@@ -346,7 +346,7 @@ app.post('/login',
 			uip: req.ip,
 			dp: "/login"
 		  }
-		if (enableAnalytics) {visitor.pageview(view).send()};
+		if (enableAnalytics) {visitor.pageview(params).send()};
 
 		if (req.query.next) {
 			res.reconnect(req.query.next);
