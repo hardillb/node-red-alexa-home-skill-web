@@ -652,7 +652,7 @@ app.get('/api/v1/devices',
 		//console.log("all good, doing discover devices");
 		var params = {
 			ec: "Discovery",
-			ea: req.body.header ? req.body.header.name : "Node-RED",
+			ea: req.body.directive.header ? req.body.directive.header.name : "Discover Devices",
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/devices"
@@ -987,9 +987,11 @@ var timeout = setInterval(function(){
 app.get('/api/v1/getstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
+		var id = req.params.dev_id;
+
 		var params = {
 			ec: "Get State",
-			ea: req.body.header ? req.body.header.name : "Node-RED",
+			ea: "GetState API request for endpointId: " + id,
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/getstate"
@@ -997,7 +999,6 @@ app.get('/api/v1/getstate/:dev_id',
 		if (enableAnalytics) {visitor.event(params).send()};
 
 		// Identify device, we know who user is from request
-		var id = req.params.dev_id;
 		log2console("DEBUG", "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
@@ -1183,7 +1184,7 @@ app.post('/api/v1/command',
 		//console.log(req);
 		var params = {
 			ec: "Command",
-			ea: req.body.header ? req.body.header.name : "Node-RED",
+			ea: req.body.directive.header ? "Command API directive:" + req.body.directive.header.name + ", endpointId:" + req.body.directive.endpoint.endpointId: "Command API directive",
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/command"
