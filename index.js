@@ -652,7 +652,7 @@ app.get('/api/v1/devices',
 		//console.log("all good, doing discover devices");
 		var params = {
 			ec: "Discovery",
-			ea: req.body.directive.header ? "Running device discovery for username: " + req.user.username : "Discover Devices",
+			ea: "Running device discovery for username: " + req.user.username,
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/devices"
