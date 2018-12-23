@@ -372,7 +372,6 @@ app.get('/newuser', function(req,res){
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'New User',
-		uid: req.user.username,
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
