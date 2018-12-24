@@ -514,7 +514,6 @@ app.get('/lostPassword', function(req, res, next){
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'Lost Password',
-		uid: req.user.username,
 		uip: req.ip,
 		ua: req.headers['user-agent']
 	}
