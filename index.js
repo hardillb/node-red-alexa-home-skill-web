@@ -385,7 +385,6 @@ app.post('/newuser', function(req,res){
 	if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
 		const country = countries.findByCountryCode(req.body.country.toUpperCase());
 		Promise.all([country]).then(([userCountry]) => {
-			log2console("INFO", "userCountry: " + JSON.stringify(userCountry));
 			if (country.statusCode == 200) {
 				var region = userCountry.data[0].region;
 				Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
