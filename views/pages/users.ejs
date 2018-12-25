@@ -121,7 +121,8 @@
 		if  (account.superuser != 1) {
 			$('#username').val(account.username);
 			$('#email').val(account.email);
-			cs.countrySelect("selectCountry", account.country);
+			if (account.country == 'Unknown') {cs.countrySelect("selectCountry","US")}
+			else {cs.countrySelect("selectCountry", account.country)}
 			$("#userModal").modal();
 		}
 		else {
