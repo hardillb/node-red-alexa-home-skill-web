@@ -428,12 +428,12 @@ app.post('/newuser', function(req,res){
 			}
 		}).catch(err => {
 			log2console("ERROR", "[New User] User region lookup failed.");
-			res.status(500).json({error: err});
+			res.status(500).send("Account creation failed, please check country is correctly specified!");
 		});
 	}
 	else {
 		log2console("ERROR", "[New User] Missing/ incorrect elements supplied for user account creation");
-		res.status(500).json(req.body);
+		res.status(500).send("Missing required attributes, please check registration form!");
 	}
 });
 
