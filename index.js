@@ -381,63 +381,60 @@ app.get('/newuser', function(req,res){
 });
 
 app.post('/newuser', function(req,res){
-	// Lookup Region for AWS Lambda/ Web API Skill Interaction
-	var country = countries.findByCountryCode(req.body.country.toUpperCase());
-	var region;
-	// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
-	if (country.statusCode == 200) {
-		//log2console("DEBUG", "[New User] User region: " + country.data[0].region);
-		// Use first array object, should always be singular data object returned via countries-api
-		region = country.data[0].region;
+	if (req.body.hasOwnProperty(username) && req.body.hasOwnProperty(email) && req.body.hasOwnProperty(country) && req.body.hasOwnProperty(password)) {
+		const country = countries.findByCountryCode(req.body.country.toUpperCase());
+		Promise.all([country]).then(([userCountry]) => {
+			log2console("INFO", "userCountry: " + JSON.stringify(userCountry));
+			if (country.statusCode == 200) {
+				var region = userCountry.data[0].region;
+				Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
+					if (err) {
+						log2console("ERROR", "[New User] New user creation error: " + err);
+						return res.status(400).send(err.message);
+					}
+					var topics = new Topics({topics: [
+							'command/' + account.username +'/#', 
+							'state/'+ account.username + '/#',
+							'response/' + account.username + '/#'
+						]});
+					topics.save(function(err){
+						if (!err){
+							var s = Buffer.from(account.salt, 'hex').toString('base64');
+							var h = Buffer.from(account.hash, 'hex').toString(('base64'));
+							var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
+							Account.updateOne(
+								{username: account.username}, 
+								{$set: {mqttPass: mqttPass, topics: topics._id}}, 
+								function(err, count){
+									if (err) {
+										log2console("ERROR" , "[New User] New user creation error updating MQTT info: " + err);
+									}
+								}
+							);
+						}
+					});
+					passport.authenticate('local')(req, res, function () {
+						log2console("INFO", "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
+						var params = {
+							ec: "Security",
+							ea: "Create user, username:" + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region,
+							uid: req.user,
+							dp: "/newuser"
+						}
+						if (enableAnalytics) {visitor.event(params).send()};
+						res.status(201).send();
+					});
+				});
+			}
+		}).catch(err => {
+			log2console("ERROR", "[New User] User region lookup failed.");
+			res.status(500).json({error: err});
+		});
 	}
 	else {
-		log2console("WARNING", "[New User] User region lookup failed.");
-		log2console("WARNING", "[New User] " + country);
-		region = "Unknown";
-	} 
-
-	Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
-		if (err) {
-			log2console("ERROR", "[New User] New user creation error: " + err);
-			return res.status(400).send(err.message);
-		}
-
-		var topics = new Topics({topics: [
-				'command/' + account.username +'/#', 
-				'state/'+ account.username + '/#',
-				'response/' + account.username + '/#'
-			]});
-		topics.save(function(err){
-			if (!err){
-				var s = Buffer.from(account.salt, 'hex').toString('base64');
-				var h = Buffer.from(account.hash, 'hex').toString(('base64'));
-				var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
-				Account.updateOne(
-					{username: account.username}, 
-					{$set: {mqttPass: mqttPass, topics: topics._id}}, 
-					function(err, count){
-						if (err) {
-							log2console("ERROR" , "[New User] New user creation error updating MQTT info: " + err);
-						}
-					}
-				);
-			}
-		});
-
-		passport.authenticate('local')(req, res, function () {
-			log2console("INFO", "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
-			var params = {
-				ec: "Security",
-				ea: "Create user, username:" + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region,
-				uid: req.user,
-				dp: "/newuser"
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
-
-            res.status(201).send();
-        });
-
-	});
+		log2console("ERROR", "[New User] Missing/ incorrect elements supplied for user account creation");
+		res.status(500).json(req.body);
+	}
 });
 
 

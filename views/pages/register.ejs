@@ -47,35 +47,35 @@
           var email = $('#email').val().trim();
           var country = $("#country_code").val().trim();
 
-          if ($('#country').val().trim() != "") {
-            // Build Submit Paramaters
-            var params = "username=" + encodeURIComponent(username)
-            + "&password=" + encodeURIComponent(password)
-            + "&email=" + encodeURIComponent(email)
-            + "&country=" + encodeURIComponent(country);
+          // Build Submit Paramaters
+          var params = "username=" + encodeURIComponent(username)
+          + "&password=" + encodeURIComponent(password)
+          + "&email=" + encodeURIComponent(email)
+          + "&country=" + encodeURIComponent(country);
 
-            // Post update
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/newUser',true);
-            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            xhr.onreadystatechange = function () {
-              if( xhr.readyState == 4 && xhr.status == 201) {
-                console.log("Created new user")
-                //new user created
-                window.location.href = "/";
-              } else if (xhr.readyState == 4 && xhr.status == 400) {
-                //show error
-                alert(xhr.responseText);
-              }
-              else {
-                console.log("Response:", xhr.status, xhr.readyState, xhr.responseText)
-              }
+          // Post update
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/newUser',true);
+          xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+          xhr.onreadystatechange = function () {
+            if( xhr.readyState == 4 && xhr.status == 201) {
+              console.log("Created new user")
+              //new user created
+              window.location.href = "/";
+            } else if (xhr.readyState == 4 && xhr.status == 400) {
+              //show error
+              alert("Failed to create user account, response: " + xhr.responseText);
             }
-            xhr.send(params);
-        }
-        else {
-          alert("Please ensure country is set!");
-        }
+            else if (xhr.readyState == 4 && xhr.status == 500) {
+              //show error
+              alert("Failed to create user account, response: " + xhr.responseText);
+            }
+            else {
+              console.log("Response:", xhr.status, xhr.readyState, xhr.responseText)
+            }
+          }
+          xhr.send(params);
+
         });
 
         function validatePassword(){
