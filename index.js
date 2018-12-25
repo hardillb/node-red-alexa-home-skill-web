@@ -1620,7 +1620,7 @@ function setstate(username, endpointId, payload) {
 				var dt = new Date().toISOString();
 				
 				// Check for device state element and create state object if does not exist on device			
-				dev.state = dev.state || {};
+				dev.state = (dev.state || {});
 
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
