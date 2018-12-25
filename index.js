@@ -381,7 +381,8 @@ app.get('/newuser', function(req,res){
 });
 
 app.post('/newuser', function(req,res){
-	if (req.body.hasOwnProperty('username') && req.body.hasOwnProperty('email') && req.body.hasOwnProperty('country') && req.body.hasOwnProperty('password')) {
+	var body = JSON.parse(req.body);
+	if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
 		const country = countries.findByCountryCode(req.body.country.toUpperCase());
 		Promise.all([country]).then(([userCountry]) => {
 			log2console("INFO", "userCountry: " + JSON.stringify(userCountry));
