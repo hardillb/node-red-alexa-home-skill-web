@@ -39,37 +39,43 @@
         verify.onkeyup = validatePassword;
 
         $("#form-register").submit(function(e) {
-            e.preventDefault();
+          e.preventDefault();
           // Username validation built-into input box
           var username = $('#username').val().trim();
           var password = $('#password').val().trim();
           var verify = $('#verify').val().trim();
           var email = $('#email').val().trim();
           var country = $("#country_code").val().trim();
-          // Build Submit Paramaters
-          var params = "username=" + encodeURIComponent(username)
-          + "&password=" + encodeURIComponent(password)
-          + "&email=" + encodeURIComponent(email)
-          + "&country=" + encodeURIComponent(country);
 
-          // Post update
-          var xhr = new XMLHttpRequest();
-          xhr.open('POST', '/newUser',true);
-          xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-          xhr.onreadystatechange = function () {
-            if( xhr.readyState == 4 && xhr.status == 201) {
-              console.log("Created new user")
-              //new user created
-              window.location.href = "/";
-            } else if (xhr.readyState == 4 && xhr.status == 400) {
-              //show error
-              alert(xhr.responseText);
+          if ($('#country').val().trim() != "") {
+            // Build Submit Paramaters
+            var params = "username=" + encodeURIComponent(username)
+            + "&password=" + encodeURIComponent(password)
+            + "&email=" + encodeURIComponent(email)
+            + "&country=" + encodeURIComponent(country);
+
+            // Post update
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/newUser',true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+              if( xhr.readyState == 4 && xhr.status == 201) {
+                console.log("Created new user")
+                //new user created
+                window.location.href = "/";
+              } else if (xhr.readyState == 4 && xhr.status == 400) {
+                //show error
+                alert(xhr.responseText);
+              }
+              else {
+                console.log("Response:", xhr.status, xhr.readyState, xhr.responseText)
+              }
             }
-            else {
-              console.log("Response:", xhr.status, xhr.readyState, xhr.responseText)
-            }
-          }
-          xhr.send(params);
+            xhr.send(params);
+        }
+        else {
+          alert("Please ensure country is set!");
+        }
         });
 
         function validatePassword(){

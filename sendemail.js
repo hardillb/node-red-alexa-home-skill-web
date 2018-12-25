@@ -47,10 +47,11 @@ Mailer.prototype.send = function send(to, from, subject, text, html){
 	};
 
 	transporter.sendMail(message, function(error, info){
+		var dt = new Date().toISOString();
 		if(error){
-			return console.log("ERROR: Unable to send email ",error);
+			return console.log("[" + dt + "] " + "[ERROR] Unable to send email ",error);
 		}
-		console.log('INFO: EMail sent: ', info.response);
+		console.log("[" + dt + "] " + "[INFO] [Mail] EMail sent to: " + message.to + ", subject: " + message.subject, info.response);
 	});
 }
 
