@@ -1278,27 +1278,28 @@ app.get('/devices',
 		var user = req.user.username;
 		const userDevices = Devices.find({username:user});
 		const countDevices = Devices.countDocuments({username:user});
+		const countGrants = Account.aggregate([
+			{ "$match": {
+				"username" : user
+			}},
+			{ "$lookup": {
+				"from": "grantcodes",
+				"let": { "user_id": "$_id" },
+				"pipeline": [
+					{ "$match": {
+					"$expr": { "$eq": [ "$$user_id", "$user" ] }
+					}},
+					{ "$count": "count" }
+				],
+				"as": "grantCount"    
+			}},
+			{ "$addFields": {
+			"countGrants": { "$sum": "$grantCount.count" }
+			}}
+		]);
 
-		// Establish whether grantcodes exist for user, will warn on Devices poage load if none as is a good indicator that account not linked to Amazon Account
-		// const countGrants = Account.aggregate([
-		// 	{ "$lookup": {
-		// 	  "from": "grantcodes",
-		// 	  "let": { "user_id": "$_id" },
-		// 	  "pipeline": [
-		// 		{ "$match": {
-		// 		  "$expr": { "$eq": [ "$$user_id", "$user" ] }
-		// 		}},
-		// 		{ "$count": "count" }
-		// 	  ],
-		// 	  "as": "grantCount"    
-		// 	}},
-		// 	{ "$addFields": {
-		// 	  "countGrants": { "$sum": "$grantCount.count" }
-		// 	}}
-		//   ])
-		  
-		Promise.all([userDevices, countDevices]).then(([devices, count]) => {
-			res.render('pages/devices',{user: req.user, devices: devices, count: count, devs: true});
+		Promise.all([userDevices, countDevices, countGrants]).then(([devices, countDevs, countUserGrants]) => {
+			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants.countGrants, devs: true});
 		}).catch(err => {
 			res.status(500).json({error: err});
 		});

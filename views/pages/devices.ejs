@@ -1,4 +1,14 @@
 <% include ../fragments/header.ejs %>
+
+<% if (grants) { %>
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		<strong>Warning!</strong> You still need to link your Amazon Account via the Alexa App!
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+<% } %>
+
 <div class="container main-content">
 	<h1>Devices for User: <%= user.username %></h1>
 	<h3>Total Count: <%= count %></h3>
