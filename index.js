@@ -1300,6 +1300,7 @@ app.get('/devices',
 
 		Promise.all([userDevices, countDevices, countGrants]).then(([devices, countDevs, countUserGrants]) => {
 			log2console("INFO", "Grant count for user: " + user + ", grants: " + countUserGrants.countGrants);
+			log2console("INFO", "countUserGrants: " + JSON.stringify(countUserGrants));
 			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants.countGrants, devs: true});
 		}).catch(err => {
 			res.status(500).json({error: err});
