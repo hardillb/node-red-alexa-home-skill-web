@@ -720,6 +720,15 @@ function replaceCapability(capability, reportState) {
 			]};
 	}
 
+	// ChannelController
+	if(capability == "ChannelController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.ChannelController",
+			"version": "3",
+			};
+	}
+
 	// PowerController
 	if(capability == "PowerController") {
 		return {
@@ -1020,6 +1029,9 @@ app.get('/api/v1/getstate/:dev_id',
 													});
 											}
 											break;
+										case "ChannelController":
+											// Return Channel State - no reportable state as of December 2018
+											break;
 										case "ColorController":
 											// Return color
 											if (deviceJSON.state.hasOwnProperty('colorHue') && deviceJSON.state.hasOwnProperty('colorSaturation') && deviceJSON.state.hasOwnProperty('brightness') && deviceJSON.state.hasOwnProperty('time')) {
@@ -1266,6 +1278,25 @@ app.get('/devices',
 		var user = req.user.username;
 		const userDevices = Devices.find({username:user});
 		const countDevices = Devices.countDocuments({username:user});
+
+		// Establish whether grantcodes exist for user, will warn on Devices poage load if none as is a good indicator that account not linked to Amazon Account
+		// const countGrants = Account.aggregate([
+		// 	{ "$lookup": {
+		// 	  "from": "grantcodes",
+		// 	  "let": { "user_id": "$_id" },
+		// 	  "pipeline": [
+		// 		{ "$match": {
+		// 		  "$expr": { "$eq": [ "$$user_id", "$user" ] }
+		// 		}},
+		// 		{ "$count": "count" }
+		// 	  ],
+		// 	  "as": "grantCount"    
+		// 	}},
+		// 	{ "$addFields": {
+		// 	  "countGrants": { "$sum": "$grantCount.count" }
+		// 	}}
+		//   ])
+		  
 		Promise.all([userDevices, countDevices]).then(([devices, count]) => {
 			res.render('pages/devices',{user: req.user, devices: devices, count: count, devs: true});
 		}).catch(err => {
@@ -1621,6 +1652,7 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('colorHue')) {dev.state.colorHue = payload.state.colorHue};
 				if (payload.state.hasOwnProperty('colorSaturation')) {dev.state.colorSaturation = payload.state.colorSaturation};
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
+				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
