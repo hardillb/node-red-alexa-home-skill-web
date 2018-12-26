@@ -1298,38 +1298,32 @@ app.post('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) { // Check is admin user
-			// Lookup Region for AWS Lambda/ Web API Skill Interaction
-			var country = countries.findByCountryCode(req.body.country.toUpperCase());
-			var region;
-			// log2console("DEBUG", "User country: " + req.body.country.toUpperCase());
-			if (country.statusCode == 200) {
-				//log2console("DEBUG", "User region: " + country.data[0].region);
-				// Use first array object, should always be singular data object returned via countries-api
-				region = country.data[0].region;
-			}
-			else {
-				log2console("DEBUG", "User region lookup failed.");
-				log2console("DEBUG", country);
-				region = "Unknown";
-			} 
-
-			Account.findOne({_id: req.params.user_id},
-				function(err, data){
-					if (err) {
-						log2console("ERROR", "[Admin] Unable to update user account: " + req.params.user_id, err);
-						res.status(500);
-						res.send(err);
-					} else {
-						log2console("INFO", "[Admin] Updated user account: " + req.params.user_id);
-						data.email = req.body.email;
-						data.country = req.body.country.toUpperCase();
-						data.region = region;
-						data.save(function(err, d){
-							res.status(201);
-							res.send(d);
+			const country = countries.findByCountryCode(req.body.country.toUpperCase());
+			Promise.all([country]).then(([userCountry]) => {
+				if (country.statusCode == 200) {
+					var region = userCountry.data[0].region;
+					Account.findOne({_id: req.params.user_id},
+						function(err, data){
+							if (err) {
+								log2console("ERROR", "[Admin] Unable to update user account: " + req.params.user_id, err);
+								res.status(500);
+								res.send(err);
+							} else {
+								log2console("INFO", "[Admin] Updated user account: " + req.params.user_id);
+								data.email = req.body.email;
+								data.country = req.body.country.toUpperCase();
+								data.region = region;
+								data.save(function(err, d){
+									res.status(201);
+									res.send(d);
+								});
+							}
 						});
-					}
-				});
+				}
+			}).catch(err => {
+				log2console("ERROR", "[Admin] Unable to update user account, user region lookup failed.");
+				res.status(500).send("Unable to update user account, user region lookup failed!");
+			});
 		}
 });
 
@@ -1343,6 +1337,7 @@ app.delete('/account/:user_id',
 			const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
 			const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
 			const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
+			//const deleteDevices = Devices.deleteMany({username: username}); // need to get username here
 			Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
 				//log2console("INFO", result);
 				res.status(202).json({message: 'deleted'});
