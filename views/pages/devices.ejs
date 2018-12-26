@@ -1,6 +1,6 @@
 <% include ../fragments/header.ejs %>
 
-<% if (grants) { %>
+<% if (grants == 0) { %>
 	<div class="alert alert-danger alert-dismissible fade show" role="alert">
 		<strong>Warning!</strong> You still need to link your Amazon Account via the Alexa App!
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
