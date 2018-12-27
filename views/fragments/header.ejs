@@ -29,7 +29,9 @@
                 <li <% if (locals.about) {%>class="active"<% } %>><a class="nav-link" href="/about">About</a></li>
                 <li <% if (locals.privacy) {%>class="active"<% } %>><a class="nav-link" href="/privacy">Privacy</a></li>
                 <% if (user) { %>
-                <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
+                  <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
+                <% } %>
+                <% if (user) { %>
                 <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/account">My Account</a></li>
                 <% } %>
                 <% if (user) { %>
