@@ -1391,7 +1391,7 @@ app.delete('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
 		var userId = req.params.user_id;
-		const user = Account.findOne({id_: req.params.user_id});
+		const user = Account.findOne({_id: userId});
 		Promise.all([user]).then(([userAccount]) => {
 			//log2console("INFO", "userAccount: " + userAccount);
 			//res.render('pages/account',{user: userAccount, acc: true});
