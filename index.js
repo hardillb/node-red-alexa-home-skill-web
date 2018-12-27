@@ -1267,7 +1267,7 @@ app.post('/api/v1/command',
 	}
 );
 
-app.get('/account',
+app.get('/my-account',
 	ensureAuthenticated,
 	function(req,res){
 		var view = {
@@ -1357,8 +1357,9 @@ app.put('/devices',
 app.post('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
-		if (req.user.username === mqtt_user) { // Check is admin user
-			const country = countries.findByCountryCode(req.body.country.toUpperCase());
+		var user = req.body;
+		if (req.user.username === mqtt_user || req.user.username == user.username) { // Check is admin user
+			const country = countries.findByCountryCode(user.country.toUpperCase());
 			Promise.all([country]).then(([userCountry]) => {
 				if (country.statusCode == 200) {
 					var region = userCountry.data[0].region;
@@ -1370,8 +1371,8 @@ app.post('/account/:user_id',
 								res.send(err);
 							} else {
 								log2console("INFO", "[Admin] Updated user account: " + req.params.user_id);
-								data.email = req.body.email;
-								data.country = req.body.country.toUpperCase();
+								data.email = user.email;
+								data.country = user.country.toUpperCase();
 								data.region = region;
 								data.save(function(err, d){
 									res.status(201);
@@ -1390,9 +1391,10 @@ app.post('/account/:user_id',
 app.delete('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
+		var username = req.user.username;
+		var userId = req.params.user_id;
 		if (req.user.username === mqtt_user) { // Check is admin user
-			// Multiple vars for each step of clean-up
-			var userId = req.params.user_id;
+			// Multiple vars for each step of clean-up			
 			const deleteAccount = Account.deleteOne({_id: userId});
 			const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
 			const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});

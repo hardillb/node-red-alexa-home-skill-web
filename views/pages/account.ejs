@@ -3,6 +3,7 @@
   <form class="form-account" id="form-account">
     <h1 class="h3 mb-3 font-weight-normal">My Account</h1>
     <div class="form-group row">
+      <input id="userId" type="hidden">
       <label for="username" class="col-sm-2 col-form-label">Username</label>
       <div class="col-sm-7">
         <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required title="a-z, A-Z, 0-9 characters and be 5-15 chars." value= <%= user.username %> disabled>
@@ -25,7 +26,7 @@
       <div class="col-sm-2"></div>
       <div class="btn-toolbar col-sm-7 justify-content-end">
         <button class="btn btn-danger btn-space" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete</button>
-        <a href="/account" id="cancel" name="cancel" style="margin-left :5px" class="btn btn-secondary btn-space">Cancel</a>  
+        <a href="/my-account" id="cancel" name="cancel" style="margin-left :5px" class="btn btn-secondary btn-space">Cancel</a>  
         <button class="btn btn-primary btn-space" style="margin-left :5px" id="submit" type="submit" value="submit">Save</button>
       </div>
   </div>
@@ -52,7 +53,37 @@ function saveAccount() {
   // If differences, prompt user to confirm, then save account
   var answer = confirm("Are you sure you want to save changes to your account?");
   if (answer) {
-    // Save changes to account
+		var userId = $('#userId').val();
+    var email = $('#email').val();
+    var country = $("#country_code").val().trim();
+    if (user.email != email || user.country != country) {
+      var account = user;
+      account.email = email;
+      account.country = country;
+      if (account.username && account.email && account.country) {
+          //post update
+          //console.log("Updating" + JSON.stringify(account));
+          $.ajax({
+            url: '/account/' + account._id,
+            type: 'POST',
+            data: JSON.stringify(account),
+            dataType: 'json',
+            contentType: "application/json",
+            success: function(data){
+              //console.log("post response");
+              //console.log(data);
+              //reload
+              document.location.reload();
+            },
+          });
+          //console.log(JSON.stringify(account));
+      } else {
+        alert("Ensure email address and country are set!");
+      }
+    }
+    else {
+      prompt("You have not changed email address or country, nothing to save!")
+    }
   }
 }
 
@@ -60,6 +91,12 @@ function deleteAccount(id) {
   var answer = confirm("Are you sure you want to delete your account/ all related data?");
   if (answer) {
     // Delete user account
+    $.ajax({
+				url:"/account/" + id,
+				type: 'DELETE',
+				success: function(data){
+					document.location.reload();
+				}
   }
 }
 
