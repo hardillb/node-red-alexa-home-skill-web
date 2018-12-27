@@ -1414,6 +1414,9 @@ app.delete('/account/:user_id',
 			else {
 				log2console("WARNING", "[Security] Attempt to delete user account blocked");
 			}
+		}).catch(err => {
+			log2console("ERROR", "[Admin] Failed to find user account: " + userId);
+			res.status(500).json({error: err});
 		});
 });
 
