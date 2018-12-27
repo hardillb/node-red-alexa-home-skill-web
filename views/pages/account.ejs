@@ -11,27 +11,34 @@
     <div class="form-group row">
       <label for="email" class="col-sm-2 col-form-label">Email</label>
       <div class="col-sm-10">
-        <input type="email" class="form-control" id="email" required disabled>
+        <input type="email" class="form-control" id="email" value= <%= user.email %> required disabled>
       </div>
     </div>
     <div class="form-group row">
       <label for="country" class="col-sm-2 col-form-label">Country</label>
       <div class="col-sm-10">
-        <input type="text" id="country" class="form-control" required disabled>
+        <input type="text" id="country" class="form-control" required>
         <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />
       </div>
     </div>
-    <a href="/account" id="cancel" name="cancel" class="btn btn-lg btn-secondary">Cancel</a>  
-    <button class="btn btn-lg btn-primary" id="submit" type="submit" value="submit">Save</button>
+    <a href="/account" id="cancel" name="cancel" class="btn btn-secondary">Cancel</a>  
+    <button class="btn btn-primary" id="submit" type="submit" value="submit">Save</button>
     <button class="btn btn-danger" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete</button>
   </form>
 </div>
 
 <script>
 
-$("#form-account").submit(function(e) {
-	e.preventDefault();
-	saveAccount()
+var cs = $("#country").countrySelect();
+
+$(document).ready(function() {
+  $("#form-account").submit(function(e) {
+    e.preventDefault();
+    saveAccount()
+  });
+
+  cs.countrySelect("selectCountry", user.country);
+
 });
 
 function saveAccount() {
@@ -50,6 +57,8 @@ function deleteAccount(id) {
     // Delete user account
   }
 }
+
+var user = JSON.stringify("<%= user %>");
 
 </script>
 
