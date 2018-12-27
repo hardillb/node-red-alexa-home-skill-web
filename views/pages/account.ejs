@@ -2,7 +2,9 @@
 <div class="container main-content col-sm-6">
   <form class="form-account" id="form-account">
     <h1 class="h3 mb-3 font-weight-normal">My Account</h1>
-    <p>Use this form to update your email address and country of residence, you can also link through to the password reset form from here.</p>
+    <div class="form-group row">
+      <p class="col-sm-9">Use this form to update your email address and country of residence, you can also link through to the password reset form from here.</p>
+    </div>
     <div class="form-group row">
       <input id="userId" type="hidden">
       <label for="username" class="col-sm-2 col-form-label">Username:</label>
@@ -31,7 +33,7 @@
       </div>
     </div>
     <div class="form-group row">
-          <p>Change your password</p>
+          <p class="col-sm-9">Change your password</p>
     </div>
     <div class="form-group row">
         <div class="col-sm-2"></div>
@@ -40,11 +42,11 @@
       </div>
     </div>
     <div class="form-group row">
-            <p>Decided you want to remove your account? You can use this page to permanently delete your account.</p>
+            <p class="col-sm-9">Decided you want to remove your account? You can use this page to permanently delete your account.</p>
     </div>
     <div class="form-group row">
         <div class="col-sm-2"></div>
-        <div class="btn-toolbar col-sm-2 justify-content-end">
+        <div class="btn-toolbar col-sm-7 justify-content-end">
             <button class="btn btn-danger btn-space" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete Account</button>
       </div>
     </div>
