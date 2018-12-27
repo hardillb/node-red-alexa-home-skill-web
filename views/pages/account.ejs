@@ -1,0 +1,57 @@
+<% include ../fragments/header.ejs %>
+<div class="container main-content">
+  <form class="form-account" id="form-account">
+    <h1 class="h3 mb-3 font-weight-normal">My Account</h1>
+    <div class="form-group row">
+      <label for="username" class="col-sm-2 col-form-label">Username</label>
+      <div class="col-sm-10">
+        <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required title="a-z, A-Z, 0-9 characters and be 5-15 chars." disabled>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="email" class="col-sm-2 col-form-label">Email</label>
+      <div class="col-sm-10">
+        <input type="email" class="form-control" id="email" required disabled>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="country" class="col-sm-2 col-form-label">Country</label>
+      <div class="col-sm-10">
+        <input type="text" id="country" class="form-control" required disabled>
+        <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />
+      </div>
+    </div>
+    <a href="/account" id="cancel" name="cancel" class="btn btn-lg btn-secondary btn-block">Cancel</a>  
+    <button class="btn btn-lg btn-secondary btn-block" id="reset" type="reset">Cancel 2</button>
+    <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit" value="submit">Save</button>
+    <button class="btn btn-danger" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete</button>
+  </form>
+</div>
+
+<script>
+
+$("#form-account").submit(function(e) {
+	e.preventDefault();
+	saveAccount()
+});
+
+function saveAccount() {
+  // Check for changes against data passed to client on page load
+  // If no differences alert user, do nothing
+  // If differences, prompt user to confirm, then save account
+  var answer = confirm("Are you sure you want to save changes to your account?");
+  if (answer) {
+    // Save changes to account
+  }
+}
+
+function deleteAccount(id) {
+  var answer = confirm("Are you sure you want to delete your account/ all related data?");
+  if (answer) {
+    // Delete user account
+  }
+}
+
+</script>
+
+<% include ../fragments/footer.ejs %>

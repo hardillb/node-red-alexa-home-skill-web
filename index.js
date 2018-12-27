@@ -36,6 +36,10 @@ if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_U
 	log2console("CRITICAL","[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
 	process.exit()
 }
+if (process.env.MQTT_USER != "mqtt-user") {
+	log2console("CRITICAL","[Core] Process.env.MQTT_USER must be set to 'mqtt-user'");
+	process.exit()
+}
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
 	log2console("WARNING","[Core] Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
@@ -50,13 +54,13 @@ var port = (process.env.VCAP_APP_PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var debug = (process.env.ALEXA_DEBUG || false)
 // MongoDB Settings
-var mongo_user = (process.env.MONGO_USER || undefined);
-var mongo_password = (process.env.MONGO_PASSWORD || undefined);
+var mongo_user = (process.env.MONGO_USER);
+var mongo_password = (process.env.MONGO_PASSWORD);
 var mongo_host = (process.env.MONGO_HOST || "mongodb");
 var mongo_port = (process.env.MONGO_PORT || "27017");
 // MQTT Settings
-var mqtt_user = (process.env.MQTT_USER || undefined);
-var mqtt_password = (process.env.MQTT_PASSWORD || undefined);
+var mqtt_user = (process.env.MQTT_USER);
+var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Express Settings
@@ -1263,6 +1267,28 @@ app.post('/api/v1/command',
 	}
 );
 
+app.get('/account',
+	ensureAuthenticated,
+	function(req,res){
+		var view = {
+			dp: req.path, 
+			dh: 'https://' + process.env.WEB_HOSTNAME,
+			dt: 'Account',
+			uid: req.user.username,
+			uip: req.ip,
+			ua: req.headers['user-agent']
+		}
+		if (enableAnalytics) {visitor.pageview(view).send()};
+
+		const user = Account.findOne({username: req.user.username});
+		Promise.all([user]).then(([userAccount]) => {
+			log2console("INFO", "userAccount: " + userAccount);
+			res.render('pages/account',{user: userAccount});
+		}).catch(err => {
+			res.status(500).json({error: err});
+		});
+});
+
 app.get('/devices',
 	ensureAuthenticated,
 	function(req,res){
@@ -1689,7 +1715,7 @@ function setstate(username, endpointId, payload) {
 function log2console(severity,message) {
 	var dt = new Date().toISOString();
 	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
-	if (severity == "DEBUG" && debug)
+	if (severity == "DEBUG" && debug == true)
 		console.log(prefixStr, message);
 	else if (severity != "DEBUG") {
 		console.log(prefixStr, message);
