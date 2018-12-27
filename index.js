@@ -1362,11 +1362,16 @@ app.post('/account/:user_id',
 					Account.findOne({_id: req.params.user_id},
 						function(err, data){
 							if (err) {
-								log2console("ERROR", "[Admin] Unable to update user account: " + req.params.user_id, err);
+								log2console("ERROR", "[Update User] Unable to update user account: " + req.params.user_id, err);
 								res.status(500);
-								res.send(err);
+								res.send();
 							} else {
-								log2console("INFO", "[Admin] Updated user account: " + req.params.user_id);
+								if (req.user.username === mqtt_user) {
+									log2console("INFO", "[Update User] Superuser updated user account: " + req.params.user_id);
+								}
+								else {
+									log2console("INFO", "[Update User] Self-service user account update: " + req.params.user_id);
+								}
 								data.email = user.email;
 								data.country = user.country.toUpperCase();
 								data.region = region;
@@ -1378,12 +1383,12 @@ app.post('/account/:user_id',
 						});
 				}
 			}).catch(err => {
-				log2console("ERROR", "[Admin] Unable to update user account, user region lookup failed.");
+				log2console("ERROR", "[Update User] Unable to update user account, user region lookup failed.");
 				res.status(500).send("Unable to update user account, user region lookup failed!");
 			});
 		}
 		else {
-			log2console("WARNING", "[Security] Attempt to modify user account blocked");
+			log2console("WARNING", "[Update User] Attempt to modify user account blocked");
 		}
 });
 
