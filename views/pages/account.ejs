@@ -3,7 +3,7 @@
   <form class="form-account" id="form-account">
     <h1 class="h3 mb-3 font-weight-normal">My Account</h1>
     <div class="form-group row">
-      <p class="col-sm-9">Use this form to update your email address and country of residence, you can also link through to the password reset form from here.</p>
+      Use this form to update your email address and country of residence, you can also link through to the password reset form from here.
     </div>
     <div class="form-group row">
       <input id="userId" type="hidden">
@@ -33,7 +33,7 @@
       </div>
     </div>
     <div class="form-group row">
-          <p class="col-sm-9">Change your password</p>
+          <p class="col-sm-9">To change your password click the button below.</p>
     </div>
     <div class="form-group row">
         <div class="col-sm-2"></div>
@@ -41,10 +41,10 @@
           <a href="/changepassword" id="changepw" name="changepw" style="margin-left :5px" class="btn btn-info btn-space">Change Password</a>
       </div>
     </div>
-    <div class="form-group row">
-            <p class="col-sm-9">Decided you want to remove your account? You can use this page to permanently delete your account.</p>
+    <div class="form-group row col-sm-9 bg-light rounded-top">
+            Decided you want to remove your account? Click the button below to delete your account and all associated data.
     </div>
-    <div class="form-group row">
+    <div class="form-group row col-sm-9 bg-light rounded-bottom">
         <div class="col-sm-2"></div>
         <div class="btn-toolbar col-sm-7 justify-content-end">
             <button class="btn btn-danger btn-space" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete Account</button>
