@@ -5,7 +5,7 @@
     <div class="form-group row">
       <label for="username" class="col-sm-2 col-form-label">Username</label>
       <div class="col-sm-10">
-        <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required title="a-z, A-Z, 0-9 characters and be 5-15 chars." disabled>
+        <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required title="a-z, A-Z, 0-9 characters and be 5-15 chars." value= <%= user.username %> disabled>
       </div>
     </div>
     <div class="form-group row">
@@ -21,9 +21,8 @@
         <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />
       </div>
     </div>
-    <a href="/account" id="cancel" name="cancel" class="btn btn-lg btn-secondary btn-block">Cancel</a>  
-    <button class="btn btn-lg btn-secondary btn-block" id="reset" type="reset">Cancel 2</button>
-    <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit" value="submit">Save</button>
+    <a href="/account" id="cancel" name="cancel" class="btn btn-lg btn-secondary">Cancel</a>  
+    <button class="btn btn-lg btn-primary" id="submit" type="submit" value="submit">Save</button>
     <button class="btn btn-danger" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete</button>
   </form>
 </div>
