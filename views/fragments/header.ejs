@@ -29,10 +29,8 @@
                 <li <% if (locals.about) {%>class="active"<% } %>><a class="nav-link" href="/about">About</a></li>
                 <li <% if (locals.privacy) {%>class="active"<% } %>><a class="nav-link" href="/privacy">Privacy</a></li>
                 <% if (user) { %>
-                  <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
-                <% } %>
-                <% if (user) { %>
-                <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/account">My Account</a></li>
+                <li <% if (locals.acc) {%>class="active"<% } %>><a class="nav-link" href="/account">My Account</a></li>
+                <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
                 <% } %>
                 <% if (user) { %>
                   <!-- <li><a class="nav-link" href="/logout">Logout <%= user.username %></a></li> -->
