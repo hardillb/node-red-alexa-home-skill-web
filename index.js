@@ -584,8 +584,13 @@ mqttClient.on('message',function(topic,message){
 			if (payload.success) {
 				waiting.res.status(200);
 				if (payload.extra) {
-					//console.log("sending extra");
-					waiting.res.send(payload.extra);
+					if (typeof payload.extra == "object") {
+						waiting.res.send(payload.extra);
+					} else {
+						logger.info("extra not an object: ", extra);
+						logger.info(waiting.user);
+						waiting.res.send({});
+					}
 				} else {
 					//console.log("not sending extra");
 					waiting.res.send({});
@@ -710,7 +715,7 @@ app.post('/device/:dev_id',
 					if (err) {
 						res.status(500);
 						res.send(err);
-					} else {
+					} else if (data) {
 						data.friendlyDescription = device.friendlyDescription;
 						data.actions = device.actions;
 						data.applianceTypes = device.applianceTypes;
@@ -718,6 +723,12 @@ app.post('/device/:dev_id',
 							res.status(201);
 							res.send(d);
 						});
+					} else {
+						res.status(500);
+						res.send("No such device");
+						logger.info("No such device");
+						logger.info("username: ",	user);
+						logger.info("device_id: ", id);
 					}
 				});
 		}
