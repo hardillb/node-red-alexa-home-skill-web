@@ -351,7 +351,12 @@ app.post('/login',
 		if (req.query.next) {
 			res.reconnect(req.query.next);
 		} else {
-			res.redirect('/devices');
+			if (req.user.username != mqtt_user) {
+				res.redirect('/devices');
+			}
+			else {
+				res.redirect('/admin/users');
+			}
 		}
 	});
 
