@@ -1405,17 +1405,22 @@ app.delete('/account/:user_id',
 				Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens, deleteDevices, deleteTopics]).then(result => {
 					//log2console("INFO", result);
 					res.status(202).json({message: 'deleted'});
-					log2console("INFO", "[Admin] Deleted user account: " + userId);
+					if (req.user.username === mqtt_user) {
+						log2console("INFO", "[Delete User] Superuser deleted user account: " + userId)
+					}
+					else {
+						log2console("INFO", "[Delete User] Self-service account deletion, user account: " + userId)
+					}
 				}).catch(err => {
-					log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
+					log2console("ERROR", "[Delete User] Failed to delete user account: " + userId);
 					res.status(500).json({error: err});
 				});
 			}
 			else {
-				log2console("WARNING", "[Security] Attempt to delete user account blocked");
+				log2console("WARNING", "[Delete User] Attempt to delete user account blocked");
 			}
 		}).catch(err => {
-			log2console("ERROR", "[Admin] Failed to find user account: " + userId);
+			log2console("ERROR", "[Delete User] Failed to find user account: " + userId);
 			res.status(500).send();
 		});
 });
