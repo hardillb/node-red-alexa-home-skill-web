@@ -2,8 +2,8 @@
 <div class="container main-content col-sm-6">
   <form class="form-account" id="form-account">
     <h1 class="h3 mb-3 font-weight-normal">My Account</h1>
-    <p>Use this page to update your email address and country of residence.</p>
-    <p>You can also use this page to permanently remove your account from this service.</p>
+    <p>Use this form to update your email address and country of residence, you can also link through to the password reset form from here.</p>
+    <p>Decided you want to remove your account? You can use this page to permanently delete your account.</p>
     <div class="form-group row">
       <input id="userId" type="hidden">
       <label for="username" class="col-sm-2 col-form-label">Username:</label>
@@ -27,9 +27,10 @@
     <div class="form-group row">
       <div class="col-sm-2"></div>
       <div class="btn-toolbar col-sm-7 justify-content-end">
-        <button class="btn btn-danger btn-space" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete</button>
+        <button class="btn btn-danger btn-space" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete Account</button>
         <a href="/my-account" id="cancel" name="cancel" style="margin-left :5px" class="btn btn-secondary btn-space">Cancel</a>  
-        <button class="btn btn-primary btn-space" style="margin-left :5px" id="submit" type="submit" value="submit">Save</button>
+        <a href="/changepassword" id="changepw" name="changepw" style="margin-left :5px" class="btn btn-info btn-space">Change Password</a>
+        <button class="btn btn-primary btn-space" style="margin-left :5px" id="submit" type="submit" value="submit">Save Changes</button>
       </div>
   </div>
   </form>
@@ -90,7 +91,7 @@ function saveAccount() {
 }
 
 function deleteAccount(id) {
-  var answer = confirm("Are you sure you want to delete your account/ all related data?");
+  var answer = confirm("Are you sure you want to delete your account/ all related data? This cannot be undone!");
   if (answer) {
     // Delete user account
     $.ajax({

@@ -1416,7 +1416,7 @@ app.delete('/account/:user_id',
 			}
 		}).catch(err => {
 			log2console("ERROR", "[Admin] Failed to find user account: " + userId);
-			res.status(500).json({error: err});
+			res.status(500).send();
 		});
 });
 
