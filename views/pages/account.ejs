@@ -6,47 +6,60 @@
       Use this form to update your email address and country of residence, you can also link through to the password reset form from here.
     </div>
     <div class="form-group row">
-      <input id="userId" type="hidden">
-      <label for="username" class="col-sm-2 col-form-label">Username:</label>
+      <div class="col-sm-2">
+        <input id="userId" type="hidden">
+        <label for="username" class="col-form-label">Username:</label>
+      </div>
       <div class="col-sm-7">
         <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required title="a-z, A-Z, 0-9 characters and be 5-15 chars." value= <%= user.username %> disabled>
       </div>
     </div>
     <div class="form-group row">
-      <label for="email" class="col-sm-2 col-form-label">Email:</label>
+      <div class="col-sm-2">
+        <label for="email" class="col-form-label">Email:</label>
+      </div>
       <div class="col-sm-7">
         <input type="email" class="form-control" id="email" value= <%= user.email %> required>
       </div>
     </div>
     <div class="form-group row">
-      <label for="country" class="col-sm-2 col-form-label">Country:</label>
+      <div class="col-sm-2">
+        <label for="country" class="col-form-label">Country:</label>
+      </div>
       <div class="col-sm-7">
         <input type="text" id="country" class="form-control" required>
         <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />
       </div>
     </div>
     <div class="form-group row">
-      <div class="col-sm-2"></div>
-      <div class="btn-toolbar col-sm-7 justify-content-end">
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-7 text-right">
         <a href="/my-account" id="cancel" name="cancel" style="margin-left :5px" class="btn btn-secondary btn-space">Cancel</a>  
         <button class="btn btn-primary btn-space" style="margin-left :5px" id="submit" type="submit" value="submit">Save Changes</button>
       </div>
     </div>
     <div class="form-group row">
-          <p class="col-sm-9">To change your password click the button below.</p>
+        <div class="col-sm-6">
+          <p>To change your password click the button below.</p>
+        </div>
     </div>
     <div class="form-group row">
-        <div class="col-sm-2"></div>
-      <div class="btn-toolbar col-sm-7 justify-content-end">
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-7 text-right">
           <a href="/changepassword" id="changepw" name="changepw" style="margin-left :5px" class="btn btn-info btn-space">Change Password</a>
       </div>
     </div>
-    <div class="form-group row col-sm-9 bg-light rounded-top">
-            Decided you want to remove your account? Click the button below to delete your account and all associated data.
+    <div class="form-group row">
+        <div class="col-sm-6">
+          <p>Decided you want to remove your account? Click the button below to delete your account and all associated data.</p>
+        </div>
     </div>
-    <div class="form-group row col-sm-9 bg-light rounded-bottom">
-        <div class="col-sm-2"></div>
-        <div class="btn-toolbar col-sm-7 justify-content-end">
+    <div class="form-group row">
+        <div class="col-sm-2">
+        </div>
+        <div class="col-sm-7 text-right">
             <button class="btn btn-danger btn-space" id="delete" type="button" onclick="deleteAccount('<%= user._id %>')">Delete Account</button>
       </div>
     </div>
