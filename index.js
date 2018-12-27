@@ -1282,7 +1282,7 @@ app.get('/account',
 
 		const user = Account.findOne({username: req.user.username});
 		Promise.all([user]).then(([userAccount]) => {
-			log2console("INFO", "userAccount: " + userAccount);
+			//log2console("INFO", "userAccount: " + userAccount);
 			res.render('pages/account',{user: userAccount, acc: true});
 		}).catch(err => {
 			res.status(500).json({error: err});
