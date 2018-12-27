@@ -2,21 +2,23 @@
 <div class="container main-content col-sm-6">
   <form class="form-account" id="form-account">
     <h1 class="h3 mb-3 font-weight-normal">My Account</h1>
+    <p>Use this page to update your email address and country of residence.</p>
+    <p>You can also use this page to permanently remove your account from this service.</p>
     <div class="form-group row">
       <input id="userId" type="hidden">
-      <label for="username" class="col-sm-2 col-form-label">Username</label>
+      <label for="username" class="col-sm-2 col-form-label">Username:</label>
       <div class="col-sm-7">
         <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required title="a-z, A-Z, 0-9 characters and be 5-15 chars." value= <%= user.username %> disabled>
       </div>
     </div>
     <div class="form-group row">
-      <label for="email" class="col-sm-2 col-form-label">Email</label>
+      <label for="email" class="col-sm-2 col-form-label">Email:</label>
       <div class="col-sm-7">
         <input type="email" class="form-control" id="email" value= <%= user.email %> required>
       </div>
     </div>
     <div class="form-group row">
-      <label for="country" class="col-sm-2 col-form-label">Country</label>
+      <label for="country" class="col-sm-2 col-form-label">Country:</label>
       <div class="col-sm-7">
         <input type="text" id="country" class="form-control" required>
         <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />

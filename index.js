@@ -36,10 +36,6 @@ if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_U
 	log2console("CRITICAL","[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
 	process.exit()
 }
-if (process.env.MQTT_USER != "mqtt-user") {
-	log2console("CRITICAL","[Core] Process.env.MQTT_USER must be set to 'mqtt-user'");
-	process.exit()
-}
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
 	log2console("WARNING","[Core] Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
@@ -1358,7 +1354,7 @@ app.post('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.body;
-		if (req.user.username === mqtt_user || req.user.username == user.username) { // Check is admin user
+		if (req.user.username === mqtt_user || req.user.username == user.username) { // Check is admin user, or user themselves
 			const country = countries.findByCountryCode(user.country.toUpperCase());
 			Promise.all([country]).then(([userCountry]) => {
 				if (country.statusCode == 200) {
@@ -1386,29 +1382,39 @@ app.post('/account/:user_id',
 				res.status(500).send("Unable to update user account, user region lookup failed!");
 			});
 		}
+		else {
+			log2console("WARNING", "[Security] Attempt to modify user account blocked");
+		}
 });
 
 app.delete('/account/:user_id',
 	ensureAuthenticated,
 	function(req,res){
-		var username = req.user.username;
 		var userId = req.params.user_id;
-		if (req.user.username === mqtt_user) { // Check is admin user
-			// Multiple vars for each step of clean-up			
-			const deleteAccount = Account.deleteOne({_id: userId});
-			const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
-			const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
-			const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
-			//const deleteDevices = Devices.deleteMany({username: username}); // need to get username here
-			Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
-				//log2console("INFO", result);
-				res.status(202).json({message: 'deleted'});
-				log2console("INFO", "[Admin] Deleted user account: " + userId);
-			}).catch(err => {
-				log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
-				res.status(500).json({error: err});
-			});
-		}
+		const user = Account.findOne({id_: req.params.user_id});
+		Promise.all([user]).then(([userAccount]) => {
+			//log2console("INFO", "userAccount: " + userAccount);
+			//res.render('pages/account',{user: userAccount, acc: true});
+			if (userAccount.username == req.user.username || req.user.username === mqtt_user) {
+				const deleteAccount = Account.deleteOne({_id: userId});
+				const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
+				const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
+				const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
+				const deleteDevices = Devices.deleteMany({username: userAccount.username});
+				const deleteTopics = Topics.deleteOne({_id:userAccount.topics});
+				Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens, deleteDevices, deleteTopics]).then(result => {
+					//log2console("INFO", result);
+					res.status(202).json({message: 'deleted'});
+					log2console("INFO", "[Admin] Deleted user account: " + userId);
+				}).catch(err => {
+					log2console("ERROR", "[Admin] Failed to delete user account: " + userId);
+					res.status(500).json({error: err});
+				});
+			}
+			else {
+				log2console("WARNING", "[Security] Attempt to delete user account blocked");
+			}
+		});
 });
 
 app.post('/device/:dev_id',
@@ -1443,7 +1449,7 @@ app.delete('/device/:dev_id',
 	function(req,res){
 		var user = req.user.username;
 		var id = req.params.dev_id;
-		if (user != "mqtt-user") {
+		if (req.user.username != mqtt_user) {
 			Devices.deleteOne({_id: id, username: user},
 				function(err) {
 					if (err) {
@@ -1457,7 +1463,7 @@ app.delete('/device/:dev_id',
 					}
 				});
 		}
-		else if (user == "mqtt-user") {
+		else if (req.user.username === mqtt_user) {
 			Devices.deleteOne({_id: id},
 				function(err) {
 					if (err) {
