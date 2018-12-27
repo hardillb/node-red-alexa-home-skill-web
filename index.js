@@ -1269,7 +1269,7 @@ app.get('/my-account',
 		var view = {
 			dp: req.path, 
 			dh: 'https://' + process.env.WEB_HOSTNAME,
-			dt: 'Account',
+			dt: 'My Account',
 			uid: req.user.username,
 			uip: req.ip,
 			ua: req.headers['user-agent']
