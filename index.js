@@ -197,7 +197,32 @@ var accessLogStream = rfs('access.log', {
 var app = express();
 
 // New rate-limiter for getstate API
-var client = require('redis').createClient({host: 'redis'})
+var client = require('redis').createClient({
+	host: 'redis',
+	retry_strategy: function (options) {
+        if (options.error && options.error.code === 'ECONNREFUSED') {
+            // End reconnecting on a specific error and flush all commands with
+            // a individual error
+			log2console("ERROR", "[REDIS] The redis server refused the connection");
+			return new Error('The server refused the connection');
+        }
+        if (options.total_retry_time > 1000 * 60 * 60) {
+            // End reconnecting after a specific timeout and flush all commands
+            // with a individual error
+			log2console("ERROR", "[REDIS] Retry time exhausted");
+			return new Error('Retry time exhausted');
+        }
+        if (options.attempt > 10) {
+			// End reconnecting with built in error
+			log2console("ERROR", "[REDIS] Connection retry limit exhausted");
+            return undefined;
+        }
+		// reconnect after
+		log2console("ERROR", "[REDIS] Attempting reconnection after set interval");
+        return Math.min(options.attempt * 100, 3000);
+   	}
+});
+
 var limiter = require('express-limiter')(app, client)
 limiter({
 	path: '/api/v1/getstate/:dev_id',
