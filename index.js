@@ -214,12 +214,12 @@ var client = require('redis').createClient({
         }
         if (options.attempt > 10) {
 			// End reconnecting with built in error
-			//log2console("ERROR", "[REDIS] Connection retry limit exhausted");
+			log2console("ERROR", "[REDIS] Redis server connection retry limit exhausted");
             return undefined;
         }
 		// reconnect after
 		//log2console("ERROR", "[REDIS] Attempting reconnection after set interval");
-        return Math.min(options.attempt * 1000, 3000);
+        return Math.min(options.attempt * 1000, 10000);
    	}
 });
 
@@ -232,7 +232,7 @@ client.on('reconnecting', function() {
 });
 
 client.on('error', function (err) {
-    log2console("ERROR", "[REDIS] Unable to connect to redis server, will retry");
+    log2console("ERROR", "[REDIS] Unable to connect to redis server");
 });
 
 
