@@ -206,12 +206,12 @@ limiter({
 		if (req.hasOwnProperty('user')) {
 		  //log2console("INFO", "Rate limiter matched based on user")
 		  opts.lookup = 'req.user.username'
-		  opts.total = 100
+		  opts.total = 150
 		  opts.expire = 1000 * 60 * 60
 		} else {
 		  //log2console("INFO", "Rate limiter matched based on IP")
 		  opts.lookup = 'connection.remoteAddress'
-		  opts.total = 25
+		  opts.total = 100
 		  opts.expire = 1000 * 60 * 60
 		}
 		return next()
