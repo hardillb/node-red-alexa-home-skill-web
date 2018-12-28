@@ -195,6 +195,29 @@ var accessLogStream = rfs('access.log', {
 });
 
 var app = express();
+
+// New rate-limiter
+var client = require('redis').createClient()
+var limiter = require('express-limiter')(app, client)
+limiter({
+	path: '*',
+	method: 'all',
+	lookup: function(req, res, opts, next) {
+		if (req.user) {
+		  opts.lookup = 'req.user.username'
+		  opts.total = 100
+		  opts.expire = 1000 * 60 * 60
+		} else {
+		  opts.lookup = 'connection.remoteAddress'
+		  opts.total = 25
+		  opts.expire = 1000 * 60 * 60
+		}
+	},
+	onRateLimited: function (req, res, next) {
+		next({ message: 'Rate limit exceeded', status: 429 })
+	  }
+  })
+
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
 app.use(morgan("combined", {stream: accessLogStream}));
