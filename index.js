@@ -217,7 +217,12 @@ limiter({
 		return next()
 	},
 	onRateLimited: function (req, res, next) {
-		log2console("WARNING", "Rate limit exceeded")
+		if (req.hasOwnProperty('user')) {
+			log2console("WARNING", "Rate limit exceeded for user:" + req.user.username)
+		}
+		else {
+			log2console("WARNING", "Rate limit exceeded for IP address:" + req.ip)
+		}
 		next({ message: 'Rate limit exceeded', status: 429 })
 	  }
   })
