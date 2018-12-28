@@ -197,7 +197,7 @@ var accessLogStream = rfs('access.log', {
 var app = express();
 
 // New rate-limiter
-var client = require('redis').createClient()
+var client = require('redis').createClient({host: 'redis'})
 var limiter = require('express-limiter')(app, client)
 limiter({
 	path: '*',
@@ -214,6 +214,7 @@ limiter({
 		}
 	},
 	onRateLimited: function (req, res, next) {
+		log2console("WARNING")
 		next({ message: 'Rate limit exceeded', status: 429 })
 	  }
   })
