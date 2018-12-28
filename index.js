@@ -219,7 +219,7 @@ var client = require('redis').createClient({
 });
 
 client.on('connect', function() {
-    log2console("INFO", "[Core] Connecting to Redis server..");
+    log2console("INFO", "[Core] Connecting to Redis server...");
 });
 
 client.on('ready', function() {
