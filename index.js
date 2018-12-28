@@ -219,15 +219,19 @@ var client = require('redis').createClient({
 });
 
 client.on('connect', function() {
-    log2console("INFO", "[Core] Connecting to redis server");
+    log2console("INFO", "[Core] Connecting to Redis server..");
+});
+
+client.on('ready', function() {
+    log2console("INFO", "[Core] Redis connection ready!");
 });
 
 client.on('reconnecting', function() {
-    log2console("INFO", "[Core] Attempting to reconnect to redis server");
+    log2console("INFO", "[Core] Attempting to reconnect to Redis server");
 });
 
 client.on('error', function (err) {
-    log2console("ERROR", "[Core] Unable to connect to redis server");
+    log2console("ERROR", "[Core] Unable to connect to Redis server");
 });
 
 
