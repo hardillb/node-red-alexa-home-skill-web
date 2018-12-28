@@ -200,21 +200,13 @@ var app = express();
 var client = require('redis').createClient({host: 'redis'})
 var limiter = require('express-limiter')(app, client)
 limiter({
-	path: '/api/v1/getstate',
+	path: '/api/v1/getstate/:dev_id',
 	method: 'all',
 	lookup: function(req, res, opts, next) {
-		if (req.hasOwnProperty('user')) {
-		  //log2console("DEBUG", "Rate limiter matched based on user: " + req.user.username)
-		  opts.lookup = 'req.user.username'
+		  opts.lookup = ['params.id']
 		  opts.total = 150
 		  opts.expire = 1000 * 60 * 60
-		} else {
-		  //log2console("DEBUG", "Rate limiter matched based on IP address: " + req.ip)
-		  opts.lookup = 'connection.remoteAddress'
-		  opts.total = 100
-		  opts.expire = 1000 * 60 * 60
-		}
-		return next()
+		  return next()
 	},
 	onRateLimited: function (req, res, next) {
 		if (req.hasOwnProperty('user')) {
@@ -223,8 +215,7 @@ limiter({
 		else {
 			log2console("WARNING", "Rate limit exceeded for IP address:" + req.ip)
 		}
-		//next({ message: 'Rate limit exceeded', status: 429 })
-		next()
+		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
   })
 
