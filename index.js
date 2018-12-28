@@ -203,7 +203,7 @@ limiter({
 	path: '/api/v1/getstate/:dev_id',
 	method: 'all',
 	lookup: function(req, res, opts, next) {
-		  opts.lookup = ['params.id']
+		  opts.lookup = ['params.dev_id']
 		  opts.total = 150
 		  opts.expire = 1000 * 60 * 60
 		  return next()
