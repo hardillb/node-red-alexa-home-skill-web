@@ -908,6 +908,10 @@ var onGoingCommands = {};
 
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
+	var arrTopic = topic.split("/"); 
+	var username = arrTopic[1];
+	var endpointId = arrTopic[2];
+
 	if (topic.startsWith('response/')){
 		log2console("INFO", "[Command API] Acknowledged MQTT response message for topic: " + topic);
 		var payload = JSON.parse(message.toString());
@@ -923,21 +927,17 @@ mqttClient.on('message',function(topic,message){
 				log2console("ERROR", "[Command API] Failed MQTT Command API response");
 			}
 			delete onGoingCommands[payload.messageId];
-			// should really parse uid out of topic
-			//measurement.send({
-			//	t:'event', 
-			//	ec:'command', 
-			//	ea: 'complete',
-			//	uid: waiting.user
-			//});
+			var params = {
+				ec: "Command",
+				ea: "Command API successfully processed MQTT command for username: " + username,
+				uid: username,
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
 		}
 	}
 	else if (topic.startsWith('state/')){
 		log2console("INFO", "[State API] Acknowledged MQTT state message topic: " + topic);
 		// Split topic/ get username and endpointId
-		var arrTopic = topic.split("/"); 
-		var username = arrTopic[1];
-		var endpointId = arrTopic[2];
 		var messageJSON = JSON.parse(message);
 		var payload = messageJSON.payload;
 		// Call setstate to update attribute in mongodb
@@ -955,13 +955,12 @@ mqttClient.on('message',function(topic,message){
 		}
 		// If successful remove messageId from onGoingCommands
 		delete onGoingCommands[payload.messageId];
-		// should really parse uid out of topic
-		//measurement.send({
-		//	t:'event', 
-		//	ec:'command', 
-		//	ea: 'complete',
-		//	uid: waiting.user
-		//});
+		var params = {
+			ec: "Set State",
+			ea: "State API successfully processed MQTT state for username: " + username + " device: " + endpointId,
+			uid: username,
+		  }
+		if (enableAnalytics) {visitor.event(params).send()};
 	}
 	else {
 		log2console("DEBUG", "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
