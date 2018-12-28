@@ -204,16 +204,17 @@ limiter({
 	method: 'all',
 	lookup: function(req, res, opts, next) {
 		if (req.hasOwnProperty('user')) {
-		  log2console("INFO", "Rate limiter matched based on user")
+		  //log2console("INFO", "Rate limiter matched based on user")
 		  opts.lookup = 'req.user.username'
 		  opts.total = 100
 		  opts.expire = 1000 * 60 * 60
 		} else {
-		  log2console("INFO", "Rate limiter matched based on IP")
+		  //log2console("INFO", "Rate limiter matched based on IP")
 		  opts.lookup = 'connection.remoteAddress'
 		  opts.total = 25
 		  opts.expire = 1000 * 60 * 60
 		}
+		return next()
 	},
 	onRateLimited: function (req, res, next) {
 		log2console("WARNING", "Rate limit exceeded")
