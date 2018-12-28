@@ -196,11 +196,11 @@ var accessLogStream = rfs('access.log', {
 
 var app = express();
 
-// New rate-limiter
+// New rate-limiter for getstate API
 var client = require('redis').createClient({host: 'redis'})
 var limiter = require('express-limiter')(app, client)
 limiter({
-	path: '*',
+	path: '/api/v1/getstate',
 	method: 'all',
 	lookup: function(req, res, opts, next) {
 		if (req.hasOwnProperty('user')) {
