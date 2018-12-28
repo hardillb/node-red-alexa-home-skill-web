@@ -203,7 +203,7 @@ limiter({
 	path: '*',
 	method: 'all',
 	lookup: function(req, res, opts, next) {
-		if (req.user) {
+		if (req.hasOwnProperty('user')) {
 		  opts.lookup = 'req.user.username'
 		  opts.total = 100
 		  opts.expire = 1000 * 60 * 60
