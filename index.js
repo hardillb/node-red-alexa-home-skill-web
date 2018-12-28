@@ -223,6 +223,19 @@ var client = require('redis').createClient({
    	}
 });
 
+client.on('connect', function() {
+    log2console("INFO", "[REDIS] Connecting to redis server");
+});
+
+client.on('reconnecting', function() {
+    log2console("INFO", "[REDIS] Attempting to reconnect to redis server");
+});
+
+client.on('error', function (err) {
+    log2console("ERROR", "[REDIS] Unable to connect to redis server, will retry");
+});
+
+
 var limiter = require('express-limiter')(app, client)
 limiter({
 	path: '/api/v1/getstate/:dev_id',
