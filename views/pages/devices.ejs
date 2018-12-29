@@ -394,7 +394,7 @@ function generateState(deviceState) {
 					else {dummyState.brightness = 1}
 				case "ColorTemperatureController": // if no existing state set to warm white
 					if (deviceState.hasOwnProperty('colorTemperature')) {
-						if (typeof deviceState.colorTemperature == 'number' && (deviceState.colorTemperature >= 0 || deviceState.colorTemperature <= 10000)) {
+						if (typeof deviceState.colorTemperature == 'number' && (deviceState.colorTemperature >= 1000 || deviceState.colorTemperature <= 10000)) {
 							dummyState.colorTemperature = deviceState.colorTemperature;
 						}
 					}
