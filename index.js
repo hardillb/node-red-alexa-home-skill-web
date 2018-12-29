@@ -1526,6 +1526,7 @@ app.post('/device/:dev_id',
 						data.displayCategories = device.displayCategories;
 						data.reportState = device.reportState;
 						data.validRange = device.validRange;
+						data.state = device.state;
 						data.save(function(err, d){
 							res.status(201);
 							res.send(d);
