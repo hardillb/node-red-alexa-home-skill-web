@@ -145,6 +145,9 @@ function saveDevice() {
 		}
 		else {device.reportState = false}
 
+		// Generate/ save dummy state data
+		device.state = generateState();
+
 		if (device.friendlyName && device.description && device.capabilities.length > 0) {
 			$.ajax({
 				url:"/devices",
@@ -324,6 +327,34 @@ function deleteDevice(id) {
 			}
 		});
 	}
+}
+
+function generateState() {
+	var dt = new Date().toISOString();
+	var dummyState = {};
+	dummyState.time = dt;
+	$('input[name=capabilities]').each(function(index){
+		switch ($(this).attr("id"))  {
+			case "BrightnessController":
+				dummyState.brightness = 75;
+			case "ColorController":
+				dummyState.colorHue = 120;
+				dummyState.colorSaturation = 1;
+				dummyState.brightness = 1;
+			case "ColorTemperatureController":
+				dummyState.colorTemperature = 2200;
+			case "LockController":
+				dummyState.lock = "UNLOCKED";
+			case "PowerController":
+				dummyState.power = "OFF";
+			case "ThermostatController":
+				if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22};
+				if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
+				dummyState.thermostatMode = "HEAT";
+			}		
+		}
+	);
+	return dummyState;
 }
 
 function checkCapability(check) {
