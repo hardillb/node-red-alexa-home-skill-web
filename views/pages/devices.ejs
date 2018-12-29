@@ -302,7 +302,8 @@ function edit(id) {
 			$('#Farenheit').removeAttr("disabled");
 			$("#Celsius").prop('required',true);
 			$("#Farenheit").prop('required',true);
-			$('#' + validRange.scale).prop('checked',true);
+			if (validRange.scale == 'CELCIUS') {$("#Celsius").prop('checked', true)}
+			if (validRange.scale == 'FARENHEIT') {$("#Farenheit").prop('checked', true)}
 		}
 		if (validRange.hasOwnProperty('maximumValue')) {
 			$('#validRangeOptions').show();
