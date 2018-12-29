@@ -339,7 +339,7 @@ function generateState(deviceState) {
 	dummyState.time = dt;
 	if (deviceState == null) { // new device, no existing state
 		$('input[name=capabilities]').each(function(index){
-			if ($('input[id^='+$(this).attr("id")+']').prop("checked") = true) {
+			if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 						dummyState.brightness = 75;
@@ -363,7 +363,7 @@ function generateState(deviceState) {
 	}
 	else { // device has some state data already, ensure each capability has valid state data
 		$('input[name=capabilities]').each(function(index){
-			if ($('input[id^='+$(this).attr("id")+']').prop("checked") = true) {
+			if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 							if (deviceState.hasOwnProperty('brightness')) {
