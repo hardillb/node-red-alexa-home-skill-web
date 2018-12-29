@@ -343,20 +343,26 @@ function generateState(deviceState) {
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 						dummyState.brightness = 75;
+						break;
 					case "ColorController": // set to green
 						dummyState.colorHue = 120;
 						dummyState.colorSaturation = 1;
 						dummyState.brightness = 1;
+						break;
 					case "ColorTemperatureController": // set to warm white
 						dummyState.colorTemperature = 2200;
+						break;
 					case "LockController":
 						dummyState.lock = "UNLOCKED";
+						break;
 					case "PowerController":
 						dummyState.power = "OFF";
+						break;
 					case "ThermostatController":
 						if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22};
 						if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
 						dummyState.thermostatMode = "HEAT";
+						break;
 					}		
 				//}
 		});
@@ -374,6 +380,7 @@ function generateState(deviceState) {
 							else {
 									dummyState.brightness = 75;
 								}
+							break;
 					case "ColorController": // if no existing state set to green
 						if (deviceState.hasOwnProperty('colorHue')) {
 								if (typeof deviceState.colorHue == 'number' && (deviceState.colorHue >= 0 || deviceState.colorHue <= 360)) {
@@ -393,6 +400,7 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.brightness = 1}
+						break;
 					case "ColorTemperatureController": // if no existing state set to warm white
 						if (deviceState.hasOwnProperty('colorTemperature')) {
 							if (typeof deviceState.colorTemperature == 'number' && (deviceState.colorTemperature >= 1000 || deviceState.colorTemperature <= 10000)) {
@@ -400,6 +408,7 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.colorTemperature = 2200}
+						break;
 					case "LockController":
 						if (deviceState.hasOwnProperty('lock')) {
 							if (typeof deviceState.lock == 'string' && (deviceState.lock == 'UNLOCKED' || deviceState.lock == 'LOCKED')) {
@@ -407,6 +416,7 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.lock = "UNLOCKED"}
+						break;
 					case "PowerController":
 						if (deviceState.hasOwnProperty('power')) {
 							if (typeof deviceState.power == 'string' && (deviceState.power == 'ON' || deviceState.power == 'OFF')) {
@@ -414,6 +424,7 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.power = "OFF"}
+						break;
 					case "ThermostatController":
 						if (deviceState.hasOwnProperty('thermostatSetPoint')) {
 							if (typeof deviceState.thermostatSetPoint == 'number') {
@@ -430,6 +441,7 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.thermostatMode = "HEAT"}
+						break;
 					}
 				//}		
 			}
