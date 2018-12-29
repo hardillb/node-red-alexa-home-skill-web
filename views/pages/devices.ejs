@@ -337,9 +337,10 @@ function generateState(deviceState) {
 	var dt = new Date().toISOString();
 	var dummyState = {};
 	dummyState.time = dt;
+	console.log("deviceState: " + JSON.stringify(deviceState));
 	if (deviceState == null) { // new device, no existing state
+		console.log("No device state, generating dummy state");
 		$('input[name=capabilities]:checked').each(function(index){
-			//if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 						dummyState.brightness = 75;
@@ -364,12 +365,11 @@ function generateState(deviceState) {
 						dummyState.thermostatMode = "HEAT";
 						break;
 					}		
-				//}
 		});
 	}
 	else { // device has some state data already, ensure each capability has valid state data
 		$('input[name=capabilities]:checked').each(function(index){
-			//if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
+			console.log("Existing device state, generating dummy state");
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 							if (deviceState.hasOwnProperty('brightness')) {
@@ -377,9 +377,7 @@ function generateState(deviceState) {
 									dummyState.brightness = deviceState.brightness;
 								}
 							}
-							else {
-									dummyState.brightness = 75;
-								}
+							else {dummyState.brightness = 75}
 							break;
 					case "ColorController": // if no existing state set to green
 						if (deviceState.hasOwnProperty('colorHue')) {
@@ -432,8 +430,8 @@ function generateState(deviceState) {
 							}
 						}
 						else {
-							if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22};
-							if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
+							if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22}
+							else if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74}
 						}
 						if (deviceState.hasOwnProperty('thermostatMode')) {
 							if (typeof deviceState.thermostatMode == 'string') {
@@ -443,10 +441,10 @@ function generateState(deviceState) {
 						else {dummyState.thermostatMode = "HEAT"}
 						break;
 					}
-				//}		
 			}
 		);
 	}
+	console.log("Dummy state: " + JSON.stringify(dummyState));
 	return dummyState;
 }
 
