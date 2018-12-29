@@ -248,9 +248,22 @@ limiter({
 	onRateLimited: function (req, res, next) {
 		if (req.hasOwnProperty('user')) {
 			log2console("WARNING", "Rate limit exceeded for user:" + req.user.username)
+			var params = {
+				ec: "Express-limiter",
+				ea: "Rate limited: " + req.user.username,
+				uid: req.user.username,
+				uip: req.ip
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
 		}
 		else {
 			log2console("WARNING", "Rate limit exceeded for IP address:" + req.ip)
+			var params = {
+				ec: "Express-limiter",
+				ea: "Rate limited: " + req.ip,
+				uip: req.ip
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
 		}
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
@@ -620,10 +633,10 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
 			for (var i = 0; i < application.domains.length; i++) {
-				log2console("INFO", "Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
+				log2console("INFO", "[Oauth2] Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
 				if (uri.host == application.domains[i] || (uri.protocol == application.domains[i] && uri.protocol != 'http' && uri.protocol != 'https')) {
 					match = true;
-					log2console("INFO", "Found Service definition associated with redirectURI: " + redirectURI);
+					log2console("INFO", "[Oauth2] Found Service definition associated with redirectURI: " + redirectURI);
 					break;
 				}
 			}
@@ -671,11 +684,11 @@ app.post('/auth/finish',function(req,res,next) {
 		}, function(error,user,info){
 			//console.log("/auth/finish authenticating");
 			if (user) {
-				log2console("INFO", "Authenticated: " + user.username);
+				log2console("INFO", "[Oauth2] Authenticated: " + user.username);
 				req.user = user;
 				next();
 			} else if (!error){
-				log2console("WARNING", "Not Authenticated");
+				log2console("WARNING", "[Oauth2] User not authenticated");
 				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
 			}
