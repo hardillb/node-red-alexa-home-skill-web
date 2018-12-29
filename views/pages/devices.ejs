@@ -359,8 +359,7 @@ function generateState(deviceState) {
 						dummyState.thermostatMode = "HEAT";
 					}		
 				}
-			}
-		);
+		});
 	}
 	else { // device has some state data already, ensure each capability has valid state data
 		$('input[name=capabilities]').each(function(index){
