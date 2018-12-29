@@ -338,8 +338,8 @@ function generateState(deviceState) {
 	var dummyState = {};
 	dummyState.time = dt;
 	if (deviceState == null) { // new device, no existing state
-		$('input[name=capabilities]').each(function(index){
-			if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
+		$('input[name=capabilities]:checked').each(function(index){
+			//if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 						dummyState.brightness = 75;
@@ -358,12 +358,12 @@ function generateState(deviceState) {
 						if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
 						dummyState.thermostatMode = "HEAT";
 					}		
-				}
+				//}
 		});
 	}
 	else { // device has some state data already, ensure each capability has valid state data
-		$('input[name=capabilities]').each(function(index){
-			if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
+		$('input[name=capabilities]:checked').each(function(index){
+			//if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true) {
 				switch ($(this).attr("id"))  {
 					case "BrightnessController":
 							if (deviceState.hasOwnProperty('brightness')) {
@@ -431,7 +431,7 @@ function generateState(deviceState) {
 						}
 						else {dummyState.thermostatMode = "HEAT"}
 					}
-				}		
+				//}		
 			}
 		);
 	}
