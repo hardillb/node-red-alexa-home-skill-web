@@ -75,6 +75,10 @@
 								<br />
 							</div>
 							<div class="form-check">
+								<input title="Temperature Sensor" type="checkbox" class="form-check-input" name="capabilities" id="TemperatureSensor" value="TemperatureSensor" onclick='checkCapability(this)'>
+							<label class="form-check-label" for="TemperatureSensor"> Temperature Sensor </label>
+							</div>
+							<div class="form-check">
 									<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
 								<label class="form-check-label" for="ThermostatController"> Thermostat (1-Point) </label>
 							</div>
@@ -144,6 +148,10 @@
 							<input type="radio" class="form-check-input" id="TV" name="appType" value="TV">
 							<label class="form-check-label" for="TV">TV </label>
 							<br />
+						</div>
+						<div class="form-check">
+							<input type="radio" class="form-check-input" id="TEMPERATURE_SENSOR" name="appType" value="TEMPERATURE_SENSOR">
+							<label class="form-check-label" for="TEMPERATURE_SENSOR">Temperature Sensor </label>
 						</div>
 						<div class="form-check">
 							<input type="radio" class="form-check-input" id="THERMOSTAT" name="appType" value="THERMOSTAT">

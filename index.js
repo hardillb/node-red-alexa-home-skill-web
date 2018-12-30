@@ -883,6 +883,15 @@ function replaceCapability(capability, reportState) {
 		  };
 	}
 
+	// TemperatureSensor 
+	if(capability == "TemperatureSensor") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.TemperatureSensor",
+			"version" : "3"
+			};
+	}
+
 	// ThermostatController - SinglePoint
 	if(capability == "ThermostatController")  {
 		return {
@@ -1177,8 +1186,23 @@ app.get('/api/v1/getstate/:dev_id',
 													});
 											}
 											break;
+										case "TemperatureSensor":
+											// Return temperature
+											if (deviceJSON.state.hasOwnProperty('temperature') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push({
+													"namespace": "Alexa.TemperatureSensor",
+													"name": "temperature",
+													"value": {
+														"value": deviceJSON.state.temperature,
+														"scale": deviceJSON.validRange.scale.toUpperCase()
+													  },
+													"timeOfSample": deviceJSON.state.time,
+													"uncertaintyInMilliseconds": 10000
+												});
+											}
+											break
 										case "ThermostatController":
-											// Return Temperature
+											// Return thermostatSetPoint
 											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
 												properties.push({
 														"namespace":"Alexa.ThermostatController",
@@ -1784,6 +1808,7 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
+				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference

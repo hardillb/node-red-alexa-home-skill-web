@@ -83,6 +83,24 @@ $("#ThermostatController").change(function(e) {
 	}
 });
 
+// Enable Celsius and Farenheit options for Temperature Sesnor
+$("#TemperatureSensor").change(function(e) {
+	if ( $(this).is(':checked') == false) {
+		$('#validRangeScaleOptions').hide();
+		$("#Celsius").prop('required',false);
+		$("#Farenheit").prop('required',false);
+		$('#Celsius').attr("disabled", "disabled"); 
+		$('#Farenheit').attr("disabled", "disabled");
+	}
+	else {
+		$('#validRangeOptions').show();
+		$('#Celsius').removeAttr("disabled");
+		$('#Farenheit').removeAttr("disabled");
+		$("#Celsius").prop('required',true);
+		$("#Farenheit").prop('required',true);
+	}
+});
+
 // Enable/ disable minimumValue/ maximumValue elements
 $("#ColorTemperatureController").change(function(e) {
 	if ( $(this).is(':checked') == false ) {
@@ -113,7 +131,7 @@ function saveDevice() {
 		device.friendlyName = $('#friendlyName').val();
 		device.description = $('#description').val();
 
-		if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
 				if (this.checked) {
@@ -172,7 +190,7 @@ function saveDevice() {
 		var device = devices[devID];
 		device.description = $('#description').val();
 
-		if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
 				if (this.checked) {
@@ -283,9 +301,11 @@ function edit(id) {
 		$('#' + type).prop('checked',true);
 	});
 
-	// ColorTemperatureController
+	// Capabilities with range/ scale
 	var colorTemperature = $('#ColorTemperatureController').prop('checked');
 	var thermostat = $('#ThermostatController').prop('checked');
+	var temperature = $('#TemperatureSensor').prop('checked');
+
 
 	// reportState Boolean
 	if (device.hasOwnProperty('reportState')) {
@@ -294,7 +314,7 @@ function edit(id) {
 	}
 
 	// Handle min/max and scale values, only show if ThermostatController or ColorTemperatureController
-	if (device.hasOwnProperty('validRange') && ( colorTemperature || thermostat ) ) {
+	if (device.hasOwnProperty('validRange') && ( colorTemperature || thermostat || temperature) ) {
 		validRange = device.validRange;
 		if (validRange.hasOwnProperty('scale')) {
 			$('#validRangeScaleOptions').show();
@@ -317,7 +337,6 @@ function edit(id) {
 			$("#minimumValue").prop('required',true);
 			$("#minimumValue").val(validRange.minimumValue);
 		}
-		// Update Form Validation Requirements ??
 	}
 }
 
@@ -359,6 +378,9 @@ function generateState(deviceState) {
 						break;
 					case "PowerController":
 						dummyState.power = "OFF";
+						break;
+					case "TemperatureSensor":
+						dummyState.temperature = 22;
 						break;
 					case "ThermostatController":
 						if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22};
@@ -423,6 +445,14 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.power = "OFF"}
+						break;
+					case "TemperatureSensor":
+						if (deviceState.hasOwnProperty('temperature')) {
+							if (typeof deviceState.temperature == 'number') {
+								dummyState.power = deviceState.temperature;
+							}
+						}
+						else {dummyState.temperature = 22}
 						break;
 					case "ThermostatController":
 						if (deviceState.hasOwnProperty('thermostatSetPoint')) {
@@ -497,30 +527,35 @@ function checkCapability(check) {
 	// Single Capabilities HERE
 	else {
 		if ($('#ChannelController').prop('checked')) {
-			// Auto-select Activity (can be changed by user)
+			// Auto-select Device Type (can be changed by user)
 			$('#TV').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		if ($('#InputController').prop('checked')) {
-			// Auto-select Activity (can be changed by user)
+			// Auto-select Device Type (can be changed by user)
 			$('#TV').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		else if ($('#PowerController').prop('checked')) {
-			// Auto-select Activity (can be changed by user)
+			// Auto-select Device Type (can be changed by user)
 			$('#SWITCH').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		else if ($('#StepSpeaker').prop('checked')) {
-			// Auto-select Activity (can be changed by user)
+			// Auto-select Device Type (can be changed by user)
 			$('#SPEAKER').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		else if ($('#PlaybackController').prop('checked')) {
-			// Auto-select Activity (can be changed by user)
+			// Auto-select Device Type (can be changed by user)
 			$('#TV').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
+		else if ($('#TemperatureSensor').prop('checked')) {
+			// Auto-select Device Type (can be changed by user)
+			$('#TEMPERATURE_SENSOR').prop('checked', true);
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		}	
 		else {
 			// De-select ALL Activity
 			$('input[name=appType]').each(function(index){$('input[id^='+$(this).attr("id")+']').prop("checked", false)});
