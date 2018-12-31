@@ -888,7 +888,16 @@ function replaceCapability(capability, reportState) {
 		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.TemperatureSensor",
-			"version" : "3"
+			"version" : "3",
+			"properties": {
+                "supported": [
+                  {
+                    "name": "temperature"
+                  }
+                ],
+                "proactivelyReported": false,
+                "retrievable": true
+              }
 			};
 	}
 
