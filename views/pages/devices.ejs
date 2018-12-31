@@ -130,7 +130,6 @@ function saveDevice() {
 		};
 		device.friendlyName = $('#friendlyName').val();
 		device.description = $('#description').val();
-
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
@@ -146,7 +145,11 @@ function saveDevice() {
 					scale: scale
 				}
 		}
-
+		else if ( $('#ColorTemperatureController').prop('checked')) {
+			device.validRange = {
+				scale: scale
+				}
+		}
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
 				device.capabilities.push(this.value);
