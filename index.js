@@ -49,6 +49,8 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 var port = (process.env.VCAP_APP_PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var debug = (process.env.ALEXA_DEBUG || false)
+log2console("INFO","[Core] Debug logging enabled:" + debug);
+
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER);
 var mongo_password = (process.env.MONGO_PASSWORD);
@@ -1849,7 +1851,7 @@ function setstate(username, endpointId, payload) {
 function log2console(severity,message) {
 	var dt = new Date().toISOString();
 	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
-	if (severity == "DEBUG" && debug == true)
+	if (severity == "DEBUG" && debug == "true")
 		console.log(prefixStr, message);
 	else if (severity != "DEBUG") {
 		console.log(prefixStr, message);
