@@ -501,7 +501,7 @@ function checkCapability(check) {
 		// Clear other capability/ type selections
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "THERMOSTAT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "ThermostatController" || $(this).attr("id") != "TemperatureSensor"){
+			if ($(this).attr("id") != "ThermostatController" && $(this).attr("id") != "TemperatureSensor"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 			}
 		});
