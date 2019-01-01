@@ -1193,6 +1193,18 @@ app.get('/api/v1/getstate/:dev_id',
 										case "PlaybackController":
 											// Return Playback State - no reportable state as of November 2018
 											break;
+										case "PercentageController":
+											// Return Power State
+											if (deviceJSON.state.hasOwnProperty('percentage') && deviceJSON.state.hasOwnProperty('time')) {
+												properties.push({
+															"namespace": "Alexa.PercentageController",
+															"name": "percentage",
+															"value": deviceJSON.state.percentage,
+															"timeOfSample": deviceJSON.state.time,
+															"uncertaintyInMilliseconds": 10000
+													});
+											}
+											break;
 										case "PowerController":
 											// Return Power State
 											if (deviceJSON.state.hasOwnProperty('power') && deviceJSON.state.hasOwnProperty('time')) {
@@ -1826,6 +1838,7 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
+				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {

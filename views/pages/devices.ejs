@@ -379,6 +379,9 @@ function generateState(deviceState) {
 					case "LockController":
 						dummyState.lock = "UNLOCKED";
 						break;
+					case "PercentageController":
+						dummyState.percentage = 100;
+						break;
 					case "PowerController":
 						dummyState.power = "OFF";
 						break;
