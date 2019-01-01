@@ -1828,7 +1828,6 @@ function setstate(username, endpointId, payload) {
 				
 				// Check for device state element and create state object if does not exist on device			
 				dev.state = (dev.state || {});
-
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
 				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
@@ -1839,6 +1838,10 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
+				if (payload.state.hasOwnProperty('percentageDelta')) {
+					var newPercentage = dev.state.percentage + payload.state.percentageDelta;
+					dev.state.percentage = newPercentage;
+				};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
