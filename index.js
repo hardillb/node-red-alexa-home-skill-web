@@ -1820,6 +1820,33 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
+				if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
+					dev.state.thermostatMode = payload.state.thermostatMode;
+				};
+				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
+					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
+						var newTemp;
+						var newMode;
+						if (payload.state.targetSetpointDelta < 0 ) {
+							newTemp = dev.state.thermostatSetPoint - payload.state.targetSetpointDelta;
+							newMode = "COOL";
+						}
+						else {
+							newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+							newMode = "HEAT";
+						}
+						// Check within supported range of device
+						if (dev.hasOwnProperty('validRange')) {
+							if (dev.validRange.hasOwnProperty('validRange') && dev.validRange.hasOwnProperty('validRange')) {
+								if (!newTemp < dev.validRange.minimumValue || !newTemp > dev.validRange.maximumValue) {
+									dev.state.thermostatSetPoint = newTemp;
+									dev.state.thermostatMode = newMode;
+								}
+							}
+						}
+				
+					}
+				}
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference
