@@ -1840,8 +1840,8 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
 				if (payload.state.hasOwnProperty('percentageDelta')) {
 					var newPercentage = dev.state.percentage + payload.state.percentageDelta;
-					if (newPercentage > 0) (newPercentage = 100)
-					else if (newPercentage < 0) (newPercentage = 0)
+					if (newPercentage > 100) {newPercentage = 100}
+					else if (newPercentage < 0) {newPercentage = 0}
 					dev.state.percentage = newPercentage;
 				};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
