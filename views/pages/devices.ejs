@@ -493,8 +493,8 @@ function checkCapability(check) {
 		$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "SceneController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		return false;
 	}
-	else if ($('#ThermostatController').prop('checked') || ($('#ThermostatController').prop('checked') && $('#TemperatureSensor').prop('checked'))) {
-		alert("Thermostat selected, this can only co-exist with Temperature Sensor capability!");
+	else if ($('#ThermostatController').prop('checked') || ($('#ThermostatController').prop('checked') && $('#TemperatureSensor').prop('checked')) || ($('#ThermostatController').prop('checked') && $('#TemperatureSensor').prop('checked') && $('#PowerController').prop('checked'))) {
+		alert("Thermostat selected, this can only co-exist with Temperature Sensor and Power Controller capability!");
 		$('#ReportState').prop('checked', true);
 		$('#TemperatureSensor').prop('checked', true);
 		$('#THERMOSTAT').prop('checked', true);
@@ -506,7 +506,7 @@ function checkCapability(check) {
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "ThermostatController" && $(this).attr("id") != "TemperatureSensor"){
+			if ($(this).attr("id") != "ThermostatController" && $(this).attr("id") != "TemperatureSensor" && $(this).attr("id") != "PowerController") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 			}
 		});
@@ -563,7 +563,7 @@ function checkCapability(check) {
 			$('#ReportState').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
-		else if ($('#StepSpeaker').prop('checked')) {
+		else if ($('#StepSpeaker').prop('checked') || $('#Speaker').prop('checked')) {
 			// Auto-select Device Type (can be changed by user)
 			$('#SPEAKER').prop('checked', true);
 			$('#ReportState').prop('checked', false);
