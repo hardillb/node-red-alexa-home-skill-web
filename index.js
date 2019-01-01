@@ -875,6 +875,20 @@ function replaceCapability(capability, reportState) {
 			};
 	}
 
+	// PercentageController
+	if(capability == "PercentageController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PercentageController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "percentage"
+				}]
+			}
+		};
+	}
+
 	// PlaybackController
 	if(capability == "PlaybackController") {
 		return {
@@ -900,8 +914,6 @@ function replaceCapability(capability, reportState) {
 				}
 			};
 	}
-
-
 
 	// Speaker
 	if(capability == "Speaker") {
