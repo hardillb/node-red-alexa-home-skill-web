@@ -826,35 +826,13 @@ function replaceCapability(capability, reportState) {
 			};
 	}
 
-	// PlaybackController w/ PowerController
-	if(capability == "PlaybackPowerController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.PowerController",
-			"version": "3",
-			"properties": {
-				"supported": [{
-					"name": "powerState"
-				}],
-				"proactivelyReported": false,
-				"retrievable": reportState
-				}
-			},
-			{
-			"type": "AlexaInterface",
-			"interface": "Alexa.PlaybackController",
-			"version": "3",
-			"supportedOperations" : ["Play", "Pause", "Stop"]
-			};
-	}
-
 	// PlaybackController
 	if(capability == "PlaybackController") {
 		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.PlaybackController",
 			"version": "3",
-			"supportedOperations" : ["Play", "Pause", "Stop"]
+			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
 			};
 	}
 
