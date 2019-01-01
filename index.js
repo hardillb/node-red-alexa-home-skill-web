@@ -768,6 +768,64 @@ app.get('/api/v1/devices',
 function replaceCapability(capability, reportState) {
 	// console.log(capability)
 
+	// BrightnessController
+	if(capability == "BrightnessController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.BrightnessController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "brightness"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+
+	// ChannelController
+	if(capability == "ChannelController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.ChannelController",
+			"version": "3",
+			};
+	}
+
+	// ColorController
+	if(capability == "ColorController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "color"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+	
+	// ColorTemperatureController
+	if(capability == "ColorTemperatureController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorTemperatureController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "colorTemperatureInKelvin"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+
+
 	// InputController, pre-defined 4x HDMI inputs and phono
 	if(capability == "InputController") {
 		return {
@@ -801,12 +859,29 @@ function replaceCapability(capability, reportState) {
 			]};
 	}
 
-	// ChannelController
-	if(capability == "ChannelController") {
+	// LockController
+	if(capability == "LockController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.LockController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "lockState"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+
+	// PlaybackController
+	if(capability == "PlaybackController") {
 		return {
 			"type": "AlexaInterface",
-			"interface": "Alexa.ChannelController",
+			"interface": "Alexa.PlaybackController",
 			"version": "3",
+			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
 			};
 	}
 
@@ -826,15 +901,7 @@ function replaceCapability(capability, reportState) {
 			};
 	}
 
-	// PlaybackController
-	if(capability == "PlaybackController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.PlaybackController",
-			"version": "3",
-			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
-			};
-	}
+
 
 	// Speaker
 	if(capability == "Speaker") {
@@ -853,6 +920,16 @@ function replaceCapability(capability, reportState) {
 			};
 	}
 
+	// SceneController 
+	if(capability == "SceneController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.SceneController",
+			"version" : "3",
+			"supportsDeactivation" : false
+			};
+	}
+
 	// StepSpeaker
 	if(capability == "StepSpeaker") {
 		return {
@@ -868,16 +945,6 @@ function replaceCapability(capability, reportState) {
 				   }
 				]}
 			};
-	}
-
-	// SceneController 
-	if(capability == "SceneController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.SceneController",
-			"version" : "3",
-			"supportsDeactivation" : false
-		  };
 	}
 
 	// TemperatureSensor 
@@ -925,72 +992,6 @@ function replaceCapability(capability, reportState) {
 			}
 		};
 	}
-			
-	// ColorController
-	if(capability == "ColorController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.ColorController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "color"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-	
-	// ColorTemperatureController
-	if(capability == "ColorTemperatureController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.ColorTemperatureController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "colorTemperatureInKelvin"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-
-	// BrightnessController
-	if(capability == "BrightnessController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.BrightnessController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "brightness"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-
-	// LockController
-	if(capability == "LockController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.LockController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "lockState"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-
-
 };
 
 var onGoingCommands = {};
@@ -1805,20 +1806,16 @@ function setstate(username, endpointId, payload) {
 				dev.state = (dev.state || {});
 
 				dev.state.time = dt;
-				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
-				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
+				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
 				if (payload.state.hasOwnProperty('colorBrightness')) {dev.state.colorBrightness = payload.state.colorBrightness};
 				if (payload.state.hasOwnProperty('colorHue')) {dev.state.colorHue = payload.state.colorHue};
 				if (payload.state.hasOwnProperty('colorSaturation')) {dev.state.colorSaturation = payload.state.colorSaturation};
+				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
-				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
-				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
-				if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
-					dev.state.thermostatMode = payload.state.thermostatMode;
-				};
+				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						var newTemp;
@@ -1843,6 +1840,10 @@ function setstate(username, endpointId, payload) {
 				
 					}
 				}
+				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
+				if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
+					dev.state.thermostatMode = payload.state.thermostatMode;
+				};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference
