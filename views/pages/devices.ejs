@@ -496,12 +496,12 @@ function checkCapability(check) {
 		$('input[name=capabilities]').each(function(index){if ($(this).attr("id") != "SceneController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		return false;
 	}
-	else if ($('#ThermostatController').prop('checked') || ($('#ThermostatController').prop('checked') && $('#TemperatureSensor').prop('checked')) || ($('#ThermostatController').prop('checked') && $('#TemperatureSensor').prop('checked') && $('#PowerController').prop('checked'))) {
-		alert("Thermostat selected, this can only co-exist with Temperature Sensor and Power Controller capability!");
+	else if ($('#ThermostatController').prop('checked')) {
 		$('#ReportState').prop('checked', true);
 		$('#TemperatureSensor').prop('checked', true);
 		$('#THERMOSTAT').prop('checked', true);
 		$('#TEMPERATURE_SENSOR').prop('checked', true);
+		
 		// Clear other capability/ type selections
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "THERMOSTAT" && $(this).attr("id") != "TEMPERATURE_SENSOR") {
