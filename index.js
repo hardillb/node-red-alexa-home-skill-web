@@ -884,7 +884,9 @@ function replaceCapability(capability, reportState) {
 			"properties": {
 				"supported": [{
 					"name": "percentage"
-				}]
+				}],
+				"proactivelyReported": false,
+				"retrievable": reportState
 			}
 		};
 	}
