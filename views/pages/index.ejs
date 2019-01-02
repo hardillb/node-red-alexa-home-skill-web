@@ -72,6 +72,12 @@
           <td>"Alexa, (pause | play | stop) Kitchen TV"</td>
         </tr>
         <tr>
+          <th scope="row">Percentage Control</th>
+          <td>Increase by%, decrease by %, set to specific %</td>
+          <td>Any MQTT enabled Fan</td>
+          <td>"Alexa, set Bedroom Fan to 50%"</td>
+        </tr>
+        <tr>
           <th scope="row">Power Control</th>
           <td>On/ Off</td>
           <td>Any MQTT enabled smart-switch/ plug, KODI RPC (w/ HDMI CEC)</td>
@@ -84,10 +90,22 @@
           <td>"Alexa, turn on Movie Night"</td>
         </tr>
         <tr>
-          <th scope="row">Speaker (Step) Control</th>
+          <th scope="row">Speaker Control</th>
+          <td>Set volume to #, increase/ decrease volume, mute, unmute</td>
+          <td>Amplifier, AVR, any device that can be set to a specific volume</td>
+          <td>"Alexa, (increase | decrease | mute) volume on AV Receiver," "Alexa, set volume on AV Receiver to 50"</td>
+        </tr>
+        <tr>
+          <th scope="row">Step Speaker Control</th>
           <td>Increase/ decrease volume, mute, unmute</td>
-          <td>Yamaha Music Cast Amplifier</td>
+          <td>Device that cannot be set to specific volume, only increase/ decrease and mute</td>
           <td>"Alexa, (increase | decrease | mute) volume on AV Receiver"</td>
+        </tr>
+        <tr>
+          <th scope="row">Temperature Sensor</th>
+          <td>*No commands*</td>
+          <td>N/A</td>
+          <td>"Alexa, what is the temperature the Lounge?"</td>
         </tr>
         <tr>
           <th scope="row">Thermostat Control (Single Point)</th>

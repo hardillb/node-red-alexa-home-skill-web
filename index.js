@@ -1828,7 +1828,7 @@ function setstate(username, endpointId, payload) {
 			if (!error) {
 				var dt = new Date().toISOString();
 				var deviceJSON = JSON.parse(JSON.stringify(dev));
-				// Check for device state element and create state object if does not exist on device			
+				// Need some kind of err handling here, see the occasional crash			
 				dev.state = (dev.state || {});
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
