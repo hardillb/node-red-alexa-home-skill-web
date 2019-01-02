@@ -1825,9 +1825,11 @@ function setstate(username, endpointId, payload) {
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
 			if (!error) {
 				var dt = new Date().toISOString();
-				
+				var deviceJSON = JSON.parse(JSON.stringify(dev));
 				// Check for device state element and create state object if does not exist on device			
-				dev.state = (dev.state || {});
+				if (!deviceJSON.hasOwnProperty('state')) {
+					dev.state = {}
+				}
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
 				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
