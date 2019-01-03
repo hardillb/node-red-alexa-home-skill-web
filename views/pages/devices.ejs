@@ -385,6 +385,9 @@ function generateState(deviceState) {
 					case "PowerController":
 						dummyState.power = "OFF";
 						break;
+					case "Speaker":
+						dummyState.volume = 50;
+						break;
 					case "TemperatureSensor":
 						dummyState.temperature = 22;
 						break;

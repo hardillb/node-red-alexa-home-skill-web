@@ -1850,20 +1850,16 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						var newTemp;
 						var newMode;
-						if (payload.state.targetSetpointDelta < 0 ) {
-							newTemp = dev.state.thermostatSetPoint - payload.state.targetSetpointDelta;
-							newMode = "COOL";
-						}
-						else {
-							newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
-							newMode = "HEAT";
-						}
+						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+						
+						if (payload.state.targetSetpointDelta < 0 ) {newMode = "COOL"}
+						else {newMode = "HEAT"}
+
 						// Check within supported range of device
 						if (dev.hasOwnProperty('validRange')) {
 							if (dev.validRange.hasOwnProperty('validRange') && dev.validRange.hasOwnProperty('validRange')) {
-								if (!newTemp < dev.validRange.minimumValue || !newTemp > dev.validRange.maximumValue) {
+								if (!(newTemp < dev.validRange.minimumValue) || !(newTemp > dev.validRange.maximumValue)) {
 									dev.state.thermostatSetPoint = newTemp;
 									dev.state.thermostatMode = newMode;
 								}
@@ -1885,6 +1881,10 @@ function setstate(username, endpointId, payload) {
 					}
 					else {dev.state.thermostatMode = "HEAT"}
 				}
+				if (payload.state.hasOwnProperty('volumeDelta')) {
+					var newVolume = dev.state.volume + payload.state.volumeDelta;
+					dev.state.volume = newVolume;
+				};
 				log2console("DEBUG", "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
