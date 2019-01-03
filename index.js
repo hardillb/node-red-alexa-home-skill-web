@@ -1849,6 +1849,19 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
+
+					try {
+						log2console("DEBUG", "targetSetpointDelta, dev.state: " + JSON.stringify(dev.state));
+					} catch(e) {
+						log2console("DEBUG", "Error showing dev.state on console");
+					}
+
+					try {
+						log2console("DEBUG", "targetSetpointDelta, deviceJSON: " + JSON.stringify(deviceJSON));
+					} catch(e) {
+						log2console("DEBUG", "Error showing deviceJSON on console");
+					}
+
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						var newMode;
 						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
