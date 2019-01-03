@@ -1851,15 +1851,19 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
 
 					try {
-						log2console("DEBUG", "targetSetpointDelta, dev.state: " + JSON.stringify(dev.state));
+						if (dev.state.hasOwnProperty('thermostatSetPoint')) {
+							log2console("DEBUG", "1. targetSetpointDelta: " + dev.state.targetSetpointDelta);
+						}
 					} catch(e) {
-						log2console("DEBUG", "Error showing dev.state on console");
+						log2console("DEBUG", "1. Error showing device.state.targetSetpointDelta on console");
 					}
 
 					try {
-						log2console("DEBUG", "targetSetpointDelta, deviceJSON: " + JSON.stringify(deviceJSON));
+						if (dev.state.hasOwnProperty('thermostatSetPoint')) {
+							log2console("DEBUG", "2. targetSetpointDelta: " + JSON.parse(dev.state.targetSetpointDelta));
+						}
 					} catch(e) {
-						log2console("DEBUG", "Error showing deviceJSON on console");
+						log2console("DEBUG", "2. Error showing device.state.targetSetpointDelta on console");
 					}
 
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
