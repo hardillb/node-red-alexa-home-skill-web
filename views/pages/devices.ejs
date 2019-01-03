@@ -560,11 +560,23 @@ function checkCapability(check) {
 			$('#ReportState').prop('checked', false);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TV") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
+		else if ($('#PercentageController').prop('checked')) {
+			// Auto-select Device Type (can be changed by user)
+			$('#OTHER').prop('checked', true);
+			$('#ReportState').prop('checked', true);
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "OTHER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		}
 		else if ($('#PowerController').prop('checked')) {
 			// Auto-select Device Type (can be changed by user)
 			$('#SWITCH').prop('checked', true);
 			$('#ReportState').prop('checked', true);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		}
+		else if ($('#Speaker').prop('checked') || $('#Speaker').prop('checked')) {
+			// Auto-select Device Type (can be changed by user)
+			$('#SPEAKER').prop('checked', true);
+			$('#ReportState').prop('checked', true);
+			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		else if ($('#StepSpeaker').prop('checked') || $('#Speaker').prop('checked')) {
 			// Auto-select Device Type (can be changed by user)
