@@ -1849,40 +1849,33 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
-
 					try {
 						if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-							log2console("DEBUG", "1. targetSetpointDelta: " + dev.state.targetSetpointDelta);
-						}
-					} catch(e) {
-						log2console("DEBUG", "1. Error showing device.state.targetSetpointDelta on console");
-					}
+							log2console("DEBUG", "1. thermostatSetPoint: " + dev.state.thermostatSetPoint);
+							var newMode;
+							var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+							log2console("DEBUG", "2. newTemp: " + newTemp);
 
-					try {
-						if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-							log2console("DEBUG", "2. targetSetpointDelta: " + JSON.parse(dev.state.targetSetpointDelta));
-						}
-					} catch(e) {
-						log2console("DEBUG", "2. Error showing device.state.targetSetpointDelta on console");
-					}
+							if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
+							else {newMode = "HEAT"}
+							log2console("DEBUG", "3. newMode: " + newMode);
 
-					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						var newMode;
-						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
-						
-						if (payload.state.targetSetpointDelta < 0 ) {newMode = "COOL"}
-						else {newMode = "HEAT"}
-
-						// Check within supported range of device
-						if (dev.hasOwnProperty('validRange')) {
-							if (dev.validRange.hasOwnProperty('validRange') && dev.validRange.hasOwnProperty('validRange')) {
-								if (!(newTemp < dev.validRange.minimumValue) || !(newTemp > dev.validRange.maximumValue)) {
-									dev.state.thermostatSetPoint = newTemp;
-									dev.state.thermostatMode = newMode;
+							// Check within supported range of device
+							if (dev.hasOwnProperty('validRange')) {
+								log2console("DEBUG", "4. validRange: " + dev.validRange);
+								if (dev.validRange.hasOwnProperty('minimumValue') && dev.validRange.hasOwnProperty('maximumValue')) {
+									log2console("DEBUG", "5. has validRange minimumValue and maximumValue");
+									if (!(newTemp < dev.validRange.minimumValue) || !(newTemp > dev.validRange.maximumValue)) {
+										log2console("DEBUG", "6. new value falls within validRange, applying state");
+										dev.state.thermostatSetPoint = newTemp;
+										dev.state.thermostatMode = newMode;
+									}
 								}
 							}
+
 						}
-				
+					} catch(e) {
+						log2console("DEBUG", "Error applying state update to thermostatSetPoint and thermostatMode");
 					}
 				}
 				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
