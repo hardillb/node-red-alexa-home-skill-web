@@ -1886,6 +1886,7 @@ function setstate(username, endpointId, payload) {
 					if (dev.state.hasOwnProperty('volume')) {
 						var newVolume = dev.state.volume + payload.state.volumeDelta;
 						dev.state.volume = newVolume;
+					}
 				}
 				log2console("DEBUG", "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
