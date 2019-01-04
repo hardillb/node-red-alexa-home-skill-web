@@ -1824,10 +1824,12 @@ function setstate(username, endpointId, payload) {
 	if (payload.hasOwnProperty('state')) {
 		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
-			if (!error) {
+			if (error) {
+				log2console("WARNING", "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
+			}
+			if (dev) {
 				var dt = new Date().toISOString();
 				var deviceJSON = JSON.parse(JSON.stringify(dev));
-				// Need some kind of err handling here, see the occasional crash			
 				dev.state = (dev.state || {});
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
@@ -1895,9 +1897,6 @@ function setstate(username, endpointId, payload) {
 					}
 					else {log2console("DEBUG", "[State API] Updated state for endpointId: " + endpointId);}
 				});
-			}
-			else {
-				log2console("WARNING", "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
 			}
 		});
 	}
