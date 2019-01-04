@@ -1841,41 +1841,31 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
 				if (payload.state.hasOwnProperty('percentageDelta')) {
-					var newPercentage = dev.state.percentage + payload.state.percentageDelta;
-					if (newPercentage > 100) {newPercentage = 100}
-					else if (newPercentage < 0) {newPercentage = 0}
-					dev.state.percentage = newPercentage;
+					if (dev.state.hasOwnProperty('percentage')) {
+						var newPercentage = dev.state.percentage + payload.state.percentageDelta;
+						if (newPercentage > 100) {newPercentage = 100}
+						else if (newPercentage < 0) {newPercentage = 0}
+						dev.state.percentage = newPercentage;
+					}
 				};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
 				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
-					try {
-						if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-							log2console("DEBUG", "1. thermostatSetPoint: " + dev.state.thermostatSetPoint);
-							var newMode;
-							var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
-							log2console("DEBUG", "2. newTemp: " + newTemp);
-
-							if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-							else {newMode = "HEAT"}
-							log2console("DEBUG", "3. newMode: " + newMode);
-
-							// Check within supported range of device
-							if (deviceJSON.hasOwnProperty('validRange')) {
-								log2console("DEBUG", "4. validRange: " + deviceJSON.validRange);
-								if (deviceJSON.validRange.hasOwnProperty('minimumValue') && deviceJSON.validRange.hasOwnProperty('maximumValue')) {
-									log2console("DEBUG", "5. has validRange minimumValue and maximumValue");
-									if (!(newTemp < deviceJSON.validRange.minimumValue) || !(newTemp > deviceJSON.validRange.maximumValue)) {
-										log2console("DEBUG", "6. new value falls within validRange, applying state");
-										dev.state.thermostatSetPoint = newTemp;
-										dev.state.thermostatMode = newMode;
-									}
+					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
+						var newMode;
+						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+						if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
+						else {newMode = "HEAT"}
+						// Check within supported range of device
+						if (deviceJSON.hasOwnProperty('validRange')) {
+							if (deviceJSON.validRange.hasOwnProperty('minimumValue') && deviceJSON.validRange.hasOwnProperty('maximumValue')) {
+								if (!(newTemp < deviceJSON.validRange.minimumValue) || !(newTemp > deviceJSON.validRange.maximumValue)) {
+									dev.state.thermostatSetPoint = newTemp;
+									dev.state.thermostatMode = newMode;
 								}
 							}
-
 						}
-					} catch(e) {
-						log2console("DEBUG", "Error applying state update to thermostatSetPoint and thermostatMode");
+
 					}
 				}
 				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
@@ -1891,10 +1881,12 @@ function setstate(username, endpointId, payload) {
 					}
 					else {dev.state.thermostatMode = "HEAT"}
 				}
+				if (payload.state.hasOwnProperty('volume')) {dev.state.volume = payload.state.volume}
 				if (payload.state.hasOwnProperty('volumeDelta')) {
-					var newVolume = dev.state.volume + payload.state.volumeDelta;
-					dev.state.volume = newVolume;
-				};
+					if (dev.state.hasOwnProperty('volume')) {
+						var newVolume = dev.state.volume + payload.state.volumeDelta;
+						dev.state.volume = newVolume;
+				}
 				log2console("DEBUG", "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {

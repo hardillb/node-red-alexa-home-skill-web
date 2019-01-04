@@ -447,6 +447,14 @@ function generateState(deviceState) {
 						}
 						else {dummyState.lock = "UNLOCKED"}
 						break;
+					case "PercentageController":
+						if (deviceState.hasOwnProperty('percentage')) {
+							if (typeof deviceState.percentage == 'number') {
+								dummyState.percentage = deviceState.percentage;
+							}
+						}
+						else {dummyState.percentage = 100}
+						break;
 					case "PowerController":
 						if (deviceState.hasOwnProperty('power')) {
 							if (typeof deviceState.power == 'string' && (deviceState.power == 'ON' || deviceState.power == 'OFF')) {
@@ -454,6 +462,14 @@ function generateState(deviceState) {
 							}
 						}
 						else {dummyState.power = "OFF"}
+						break;
+					case "Speaker":
+						if (deviceState.hasOwnProperty('volume')) {
+							if (typeof deviceState.volume == 'number') {
+								dummyState.volume = deviceState.volume;
+							}
+						}
+						else {dummyState.volume = 50}
 						break;
 					case "TemperatureSensor":
 						if (deviceState.hasOwnProperty('temperature')) {
