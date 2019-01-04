@@ -1333,9 +1333,12 @@ app.post('/api/v1/command',
 		  }
 		if (enableAnalytics) {visitor.event(params).send()};
 
-
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
-			if (!err) {
+			if (err) {
+				log2console("ERROR", "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				res.status(404).send();	
+			}
+			if (data) {
 				// Convert "model" object class to JSON object
 				var deviceJSON = JSON.parse(JSON.stringify(data));
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
@@ -1389,10 +1392,6 @@ app.post('/api/v1/command',
 					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
 					onGoingCommands[req.body.directive.header.messageId] = command;
 				}
-			}
-			else {
-				log2console("ERROR", "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
-				res.status(404).send();
 			}
 		});
 	}
