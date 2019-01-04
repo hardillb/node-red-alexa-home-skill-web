@@ -1861,11 +1861,11 @@ function setstate(username, endpointId, payload) {
 							log2console("DEBUG", "3. newMode: " + newMode);
 
 							// Check within supported range of device
-							if (dev.hasOwnProperty('validRange')) {
-								log2console("DEBUG", "4. validRange: " + dev.validRange);
-								if (dev.validRange.hasOwnProperty('minimumValue') && dev.validRange.hasOwnProperty('maximumValue')) {
+							if (deviceJSON.hasOwnProperty('validRange')) {
+								log2console("DEBUG", "4. validRange: " + deviceJSON.validRange);
+								if (deviceJSON.validRange.hasOwnProperty('minimumValue') && deviceJSON.validRange.hasOwnProperty('maximumValue')) {
 									log2console("DEBUG", "5. has validRange minimumValue and maximumValue");
-									if (!(newTemp < dev.validRange.minimumValue) || !(newTemp > dev.validRange.maximumValue)) {
+									if (!(newTemp < deviceJSON.validRange.minimumValue) || !(newTemp > deviceJSON.validRange.maximumValue)) {
 										log2console("DEBUG", "6. new value falls within validRange, applying state");
 										dev.state.thermostatSetPoint = newTemp;
 										dev.state.thermostatMode = newMode;
