@@ -588,7 +588,7 @@ mqttClient.on('message',function(topic,message){
 						logger.info("extra payload", payload.extra);
 						waiting.res.send(payload.extra);
 					} else {
-						logger.info("extra not an object: ", extra);
+						logger.info("extra not an object: ", payload);
 						logger.info(waiting.user);
 						waiting.res.send({});
 					}
