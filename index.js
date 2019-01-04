@@ -1114,7 +1114,12 @@ app.get('/api/v1/getstate/:dev_id',
 		log2console("DEBUG", "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
-			if (!err) {
+			if (err) {
+				// Device not found
+				log2console("WARNING","[State API] No device found for username: " + req.user.username + " endpointId:" + id);
+				res.status(500).send();
+			}
+			if (data) {
 				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
 				if (deviceJSON && deviceJSON.hasOwnProperty('reportState')) {
 					if (deviceJSON.reportState = true) { // Only respond if device element 'reportState' is set to true
@@ -1301,11 +1306,6 @@ app.get('/api/v1/getstate/:dev_id',
 						res.status(500).send();
 					}
 				}
-			else {
-				// Device not found
-				log2console("WARNING","[State API] No device found for username: " + req.user.username + " endpointId:" + id);
-				res.status(500).send();
-			}
 		});
  	}
 );
