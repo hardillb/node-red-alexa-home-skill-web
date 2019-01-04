@@ -592,19 +592,14 @@ function checkCapability(check) {
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		else if ($('#Speaker').prop('checked') || $('#Speaker').prop('checked')) {
+			// Warn ref use of single Speaker capability
+			if ($('#StepSpeaker').prop('checked') && $('#Speaker').prop('checked')) {
+				alert("You can use *either* the StepSpeaker or Speaker capability, both cannot be selected!");
+				$('#StepSpeaker').prop('checked', false);
+			}	
 			// Auto-select Device Type (can be changed by user)
 			$('#SPEAKER').prop('checked', true);
 			$('#ReportState').prop('checked', true);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-		}
-		else if ($('#StepSpeaker').prop('checked') && $('#Speaker').prop('checked')) {
-			alert("You can use *either* the StepSpeaker or Speaker capability, both cannot be selected!");
-			$('#StepSpeaker').prop('checked', false);
-		}
-		else if ($('#StepSpeaker').prop('checked') || $('#Speaker').prop('checked')) {
-			// Auto-select Device Type (can be changed by user)
-			$('#SPEAKER').prop('checked', true);
-			$('#ReportState').prop('checked', false);
 			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		}
 		else if ($('#PlaybackController').prop('checked')) {
