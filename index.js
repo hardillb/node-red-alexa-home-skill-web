@@ -236,11 +236,9 @@ client.on('error', function (err) {
     log2console("ERROR", "[Core] Unable to connect to Redis server");
 });
 
-
-var limiter = require('express-limiter')(app, client)
+// GetState Limiter, uses specific param, 150 reqs/ hr
+const getStateLimiter = require('express-limiter')(app, client)
 limiter({
-	path: '/api/v1/getstate/:dev_id',
-	method: 'all',
 	lookup: function(req, res, opts, next) {
 		  opts.lookup = ['params.dev_id']
 		  opts.total = 150
@@ -259,17 +257,59 @@ limiter({
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
 		else {
-			log2console("WARNING", "Rate limit exceeded for IP address:" + req.ip)
+			log2console("WARNING", "[Rate Limiter] GetState rate-limit exceeded for IP address:" + req.ip)
 			var params = {
 				ec: "Express-limiter",
-				ea: "Rate limited: " + req.ip,
+				ea: "GetState: rate-limited path: " + req.path + ", IP address:" + req.ip,
 				uip: req.ip
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
-  })
+  });
+
+// Restrictive Limiter, used to prevenmt abuse on NewUser, Login, 10 reqs/ hr
+const restrictiveLimiter = require('express-limiter')(app, client)
+limiter({
+	lookup: function(req, res, opts, next) {
+		opts.lookup = 'connection.remoteAddress'
+		opts.total = 10
+		opts.expire = 1000 * 60 * 60
+		return next()
+  },
+	onRateLimited: function (req, res, next) {
+		log2console("WARNING", "[Rate Limiter] Restrictive rate-limit exceeded for path: " + req.path + ",  IP address:" + req.ip)
+		var params = {
+			ec: "Express-limiter",
+			ea: "Restrictive: rate-limited path: " + req.path + ", IP address:" + req.ip,
+			uip: req.ip
+		  }
+		if (enableAnalytics) {visitor.event(params).send()};
+		res.status(429).json('Rate limit exceeded');
+	}
+});
+
+// Default Limiter, used on Discovery API/ GetDevices 100 reqs/ hr
+const defaultLimiter = require('express-limiter')(app, client)
+limiter({
+	lookup: function(req, res, opts, next) {
+		opts.lookup = 'connection.remoteAddress'
+		opts.total = 100
+		opts.expire = 1000 * 60 * 60
+		return next()
+  },
+	onRateLimited: function (req, res, next) {
+		log2console("WARNING", "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
+		var params = {
+			ec: "Express-limiter",
+			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
+			uip: req.ip
+		  }
+		if (enableAnalytics) {visitor.event(params).send()};
+		res.status(429).json('Rate limit exceeded');
+	  }
+});
 
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
@@ -412,7 +452,7 @@ app.get('/logout', function(req,res){
 });
 
 //app.post('/login',passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/2faCheck', failureFlash: true }));
-app.post('/login',
+app.post('/login', restrictiveLimiter,
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
 		var params = {
@@ -461,7 +501,7 @@ app.get('/newuser', function(req,res){
 	res.render('pages/register',{user: req.user, newuser: true});
 });
 
-app.post('/newuser', function(req,res){
+app.post('/newuser', restrictiveLimiter, function(req,res){
 	var body = JSON.parse(JSON.stringify(req.body));
 	if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
 		const country = countries.findByCountryCode(req.body.country.toUpperCase());
@@ -721,7 +761,7 @@ app.post('/auth/exchange',function(req,res,next){
 
 
 // Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
-app.get('/api/v1/devices',
+app.get('/api/v1/devices', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 
@@ -1096,7 +1136,7 @@ var timeout = setInterval(function(){
 },500);
 
 // Get State API, gets device "state" element from MongoDB, used for device status review in Alexa App
-app.get('/api/v1/getstate/:dev_id',
+app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		var id = req.params.dev_id;
@@ -1115,7 +1155,6 @@ app.get('/api/v1/getstate/:dev_id',
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (err) {
-				// Device not found
 				log2console("WARNING","[State API] No device found for username: " + req.user.username + " endpointId:" + id);
 				res.status(500).send();
 			}
