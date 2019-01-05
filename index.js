@@ -236,9 +236,11 @@ client.on('error', function (err) {
     log2console("ERROR", "[Core] Unable to connect to Redis server");
 });
 
+
+const limiter = require('express-limiter')(app, client)
+
 // GetState Limiter, uses specific param, 150 reqs/ hr
-const getStateLimiter = require('express-limiter')(app, client)
-limiter({
+const getStateLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		  opts.lookup = ['params.dev_id']
 		  opts.total = 150
@@ -270,8 +272,7 @@ limiter({
   });
 
 // Restrictive Limiter, used to prevenmt abuse on NewUser, Login, 10 reqs/ hr
-const restrictiveLimiter = require('express-limiter')(app, client)
-limiter({
+const restrictiveLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		opts.lookup = 'connection.remoteAddress'
 		opts.total = 10
@@ -291,8 +292,7 @@ limiter({
 });
 
 // Default Limiter, used on Discovery API/ GetDevices 100 reqs/ hr
-const defaultLimiter = require('express-limiter')(app, client)
-limiter({
+const defaultLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		opts.lookup = 'connection.remoteAddress'
 		opts.total = 100
