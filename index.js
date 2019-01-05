@@ -427,6 +427,19 @@ app.get('/privacy', function(req,res){
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
 
+app.get('/tos', function(req,res){
+	var view = {
+		dp: req.path, 
+		dh: 'https://' + process.env.WEB_HOSTNAME,
+		dt: 'Terms of Service',
+		uip: req.ip,
+		ua: req.headers['user-agent']
+	}
+	if (enableAnalytics) {visitor.pageview(view).send()};
+
+	res.render('pages/tos', {user: req.user, tos: true});
+});
+
 app.get('/login', function(req,res){
 	var view = {
 		dp: req.path, 

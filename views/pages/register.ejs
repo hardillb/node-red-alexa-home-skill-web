@@ -6,6 +6,9 @@
 		</button>
   </div>
   
+  <% include ../fragments/tos-modal.ejs %>
+  <% include ../fragments/privacy-modal.ejs %>
+
   <div class="container main-content">
       <!-- <div id="register"> -->
         <!-- <form class="form-register" id="form-register" onsubmit="submitUser()"> -->
@@ -31,6 +34,8 @@
             <br>
             <label for="verify" class="sr-only">Re-enter Password</label>
             <input type="password" id="verify" name="verify" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" autocomplete="new-password" placeholder="Re-enter Password" required title="Re-enter Password">
+            <small id="tosLink" class="form-text text-muted"><a href="#tosModal">View Terms of Service</a></small>
+            <small id="privacyLink" class="form-text text-muted"><a href="#privacyModal">View Privacy Policy</a></small>
             <br>
             <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Register</button>
         </form>
@@ -44,6 +49,13 @@
         var verify = document.getElementById("verify");
         password.onchange = validatePassword;
         verify.onkeyup = validatePassword;
+
+        $('a[href$="#tosModal"]').on( "click", function() {
+          $('#tosModal').modal('show');
+        });
+        $('a[href$="#privacyModal"]').on( "click", function() {
+          $('#privacyModal').modal('show');
+        });
 
         $("#form-register").submit(function(e) {
           e.preventDefault();

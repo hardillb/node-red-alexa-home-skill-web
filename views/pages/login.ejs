@@ -3,6 +3,10 @@
     <% if (message) { %>
       <p><strong><%= message %></strong></p>
     <% } %>
+    
+    <% include ../fragments/tos-modal.ejs %>
+    <% include ../fragments/privacy-modal.ejs %>
+
     <div id="login">
       <form class="form-signin" method="POST" action="/login">
         <h1 class="h3 mb-3 font-weight-normal">Please Sign In</h1>
@@ -11,6 +15,8 @@
         <br>
         <label for="password" class="sr-only">Password</label>
         <input type="password" id="password" name="password" class="form-control" autocomplete="current-password" placeholder="Password" required>
+        <small id="tosLink" class="form-text text-muted"><a href="#tosModal">View Terms of Service</a></small>
+        <small id="privacyLink" class="form-text text-muted"><a href="#privacyModal">View Privacy Policy</a></small>
         <br>
         <button class="btn btn-lg btn-secondary btn-block" type="submit" value="login">Sign In</button>
         <br>
@@ -18,6 +24,13 @@
         <p> <a href="/newuser">Register for an account?</a></p>
       </form>
     </div>
-
   </div>
+  <script>
+    $('a[href$="#tosModal"]').on( "click", function() {
+      $('#tosModal').modal('show');
+    });
+    $('a[href$="#privacyModal"]').on( "click", function() {
+      $('#privacyModal').modal('show');
+    });
+  </script>
 <% include ../fragments/footer.ejs %>
