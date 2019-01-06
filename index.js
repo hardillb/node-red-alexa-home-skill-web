@@ -308,7 +308,7 @@ const restrictiveLimiter = limiter({
 	}
 });
 
-// Default Limiter, used on Discovery API/ GetDevices 100 reqs/ hr
+// Default Limiter, used on majority of routers ex. OAuth2-related and Command API
 const defaultLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		opts.lookup = 'connection.remoteAddress'
@@ -392,7 +392,7 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 
 passport.use(accessTokenStrategy);
 
-app.get('/', function(req,res){
+app.get('/', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -405,7 +405,7 @@ app.get('/', function(req,res){
 	res.render('pages/index', {user: req.user, home: true});
 });
 
-app.get('/docs', function(req,res){
+app.get('/docs', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -418,7 +418,7 @@ app.get('/docs', function(req,res){
 	res.render('pages/docs', {user: req.user, docs: true});
 });
 
-app.get('/about', function(req,res){
+app.get('/about', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -431,7 +431,7 @@ app.get('/about', function(req,res){
 	res.render('pages/about', {user: req.user, about: true});
 });
 
-app.get('/privacy', function(req,res){
+app.get('/privacy', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -444,7 +444,7 @@ app.get('/privacy', function(req,res){
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
 
-app.get('/tos', function(req,res){
+app.get('/tos', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -457,7 +457,7 @@ app.get('/tos', function(req,res){
 	res.render('pages/tos', {user: req.user, tos: true});
 });
 
-app.get('/login', function(req,res){
+app.get('/login', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -470,7 +470,7 @@ app.get('/login', function(req,res){
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
 
-app.get('/logout', function(req,res){
+app.get('/logout', defaultLimiter, function(req,res){
 	req.logout();
 	if (req.query.next) {
 		//console.log(req.query.next);
@@ -518,7 +518,7 @@ function ensureAuthenticated(req,res,next) {
 	}
 }
 
-app.get('/newuser', function(req,res){
+app.get('/newuser', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -589,7 +589,7 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 });
 
 
-app.get('/changePassword/:key',function(req, res, next){
+app.get('/changePassword/:key', defaultLimiter, function(req, res, next){
 	var uuid = req.params.key;
 	LostPassword.findOne({uuid: uuid}).populate('user').exec(function(error, lostPassword){
 		if (!error && lostPassword) {
@@ -609,7 +609,7 @@ app.get('/changePassword/:key',function(req, res, next){
 	});
 });
 
-app.get('/changePassword', ensureAuthenticated, function(req, res, next){
+app.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -623,7 +623,7 @@ app.get('/changePassword', ensureAuthenticated, function(req, res, next){
 	res.render('pages/changePassword', {user: req.user});
 });
 
-app.post('/changePassword', ensureAuthenticated, function(req, res, next){
+app.post('/changePassword', restrictiveLimiter, ensureAuthenticated, function(req, res, next){
 	Account.findOne({username: req.user.username}, function (err, user){
 		if (!err && user) {
 			user.setPassword(req.body.password, function(e,u){
@@ -657,7 +657,7 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 	});
 });
 
-app.get('/lostPassword', function(req, res, next){
+app.get('/lostPassword', defaultLimiter, function(req, res, next){
 	var view = {
 		dp: req.path, 
 		dh: 'https://' + process.env.WEB_HOSTNAME,
@@ -673,7 +673,7 @@ app.get('/lostPassword', function(req, res, next){
 var sendemail = require('./sendemail');
 var mailer = new sendemail();
 
-app.post('/lostPassword', function(req, res, next){
+app.post('/lostPassword', restrictiveLimiter, function(req, res, next){
 	var email = req.body.email;
 	Account.findOne({email: email}, function(error, user){
 		if (!error){
@@ -1380,7 +1380,7 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 );
 
 // API to set device state in MongoDB
-app.post('/api/v1/setstate',
+app.post('/api/v1/setstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		// do nothing, disused for now, may use along side command API 
@@ -1466,7 +1466,7 @@ app.post('/api/v1/command',
 	}
 );
 
-app.get('/my-account',
+app.get('/my-account', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var view = {
@@ -1488,7 +1488,7 @@ app.get('/my-account',
 		});
 });
 
-app.get('/devices',
+app.get('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var view = {
@@ -1532,7 +1532,7 @@ app.get('/devices',
 		});
 });
 
-app.put('/devices',
+app.put('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.user.username;
@@ -1553,7 +1553,7 @@ app.put('/devices',
 
 });
 
-app.post('/account/:user_id',
+app.post('/account/:user_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.body;
@@ -1595,7 +1595,7 @@ app.post('/account/:user_id',
 		}
 });
 
-app.delete('/account/:user_id',
+app.delete('/account/:user_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var userId = req.params.user_id;
@@ -1633,7 +1633,7 @@ app.delete('/account/:user_id',
 		});
 });
 
-app.post('/device/:dev_id',
+app.post('/device/:dev_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.user.username;
@@ -1661,7 +1661,7 @@ app.post('/device/:dev_id',
 		}
 });
 
-app.delete('/device/:dev_id',
+app.delete('/device/:dev_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.user.username;
@@ -1696,7 +1696,7 @@ app.delete('/device/:dev_id',
 		}
 });
 
-app.post('/api/v1/devices',
+app.post('/api/v1/devices', defaultLimiter,
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		var devices = req.body;
@@ -1721,7 +1721,7 @@ app.post('/api/v1/devices',
 	}
 );
 
-app.get('/admin/services',
+app.get('/admin/services', defaultLimiter,
 	ensureAuthenticated, 
 	function(req,res){
 		if (req.user.username === mqtt_user) {
@@ -1746,7 +1746,7 @@ app.get('/admin/services',
 		}
 });
 
-app.get('/admin/users',
+app.get('/admin/users', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
@@ -1792,7 +1792,7 @@ app.get('/admin/users',
 		}
 	});
 
-app.get('/admin/user-devices',
+app.get('/admin/user-devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
@@ -1818,7 +1818,7 @@ app.get('/admin/user-devices',
 		}
 	});
 
-app.put('/services',
+app.put('/services', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username == mqtt_user) {
@@ -1833,7 +1833,7 @@ app.put('/services',
 		}
 });
 
-app.post('/service/:id',
+app.post('/service/:id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var service = req.body;
@@ -1854,7 +1854,7 @@ app.post('/service/:id',
 			});
 });
 
-app.delete('/service/:id',
+app.delete('/service/:id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		oauthModels.Application.remove({_id:req.params.id},
