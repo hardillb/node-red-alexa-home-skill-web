@@ -20,11 +20,30 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
+const { format, createLogger, transports } = require('winston');
 var enableAnalytics = true;
+
+// Configure Logging, with Exception Handler
+const logger = createLogger({
+	levels: winston.config.syslog.levels,
+	transports: [
+	  // Console Transport
+	  new transports.Console({
+		level: 'info',
+		format: format.combine(
+		  format.timestamp(),
+		  format.colorize(),
+		  format.simple()
+		),
+		handleExceptions: true
+	  })
+	  // Will add AWS CloudWatch capability here as well
+	]
+  });
 
 // Use GA account ID specified in container definition
 if (!(process.env.GOOGLE_ANALYTICS_TID)) {
-	log2console("WARNING","[Core] UID for Google Analytics not supplied via environment variable GOOGLE_ANALYTICS_TID");
+	logger.log('warn',"[Core] UID for Google Analytics not supplied via environment variable GOOGLE_ANALYTICS_TID");
 	enableAnalytics = false;
 }
 else {
@@ -33,23 +52,23 @@ else {
 
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
-	log2console("CRITICAL","[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
+	logger.log('error',"[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
 	process.exit()
 }
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
-	log2console("WARNING","[Core] Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
+	logger.log('warn',"[Core] Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");
 }
 // Warn on not supply of MAIL username/ password/ server
 if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
-	log2console("WARNING","[Core] No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors");
+	logger.log('warn',"[Core] No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors");
 }
 
 // NodeJS App Settings
 var port = (process.env.VCAP_APP_PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 var debug = (process.env.ALEXA_DEBUG || false)
-log2console("INFO","[Core] Debug logging enabled:" + debug);
+logger.log('info', "[Core] Debug logging enabled:" + debug);
 
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER);
@@ -88,53 +107,53 @@ if (mqtt_user) {
 	mqttOptions.password = mqtt_password;
 }
 
-log2console("INFO", "[Core] Connecting to MQTT server: " + mqtt_url);
+logger.log('info', "[Core] Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
-	log2console("ERROR", "[Core] MQTT connect error");
+	lologger.log('emerg', "[Core] MQTT connect error");
 });
 
 mqttClient.on('reconnect', function(){
-	log2console("WARNING", "[Core] MQTT reconnect event");
+	logger.log('warn', "[Core] MQTT reconnect event");
 });
 
 mqttClient.on('connect', function(){
-	log2console("INFO", "[Core] MQTT connected, subscribing to 'response/#'")
+	logger.log('info', "[Core] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	log2console("INFO", "[Core] MQTT connected, subscribing to 'state/#'")
+	logger.log('info', "[Core] MQTT connected, subscribing to 'state/#'")
 	mqttClient.subscribe('state/#');
 });
 
 // Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-log2console("INFO", "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
+logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 
 mongoose_connection.on('connecting', function() {
-	log2console("INFO", "[Core] Connecting to MongoDB...");
+	logger.log('info', "[Core] Connecting to MongoDB...");
 });
 
 mongoose_connection.on('error', function(error) {
-	log2console("ERROR", "[Core] MongoDB connection: " + error);
+	lologger.log('emerg', "[Core] MongoDB connection: " + error);
 	//mongoose.disconnect();
 });
 
 mongoose_connection.on('connected', function() {
-    log2console("INFO", "[Core] MongoDB connected!");
+    logger.log('info', "[Core] MongoDB connected!");
 });
   
 mongoose_connection.once('open', function() {
-    log2console("INFO", "[Core] MongoDB connection opened!");
+    logger.log('info', "[Core] MongoDB connection opened!");
 });
 
 mongoose_connection.on('reconnected', function () {
-    log2console("INFO", "[Core] MongoDB reconnected!");
+    logger.log('info', "[Core] MongoDB reconnected!");
 });
 
 mongoose_connection.on('disconnected', function() {
-	log2console("WARNING", "[Core] MongoDB disconnected!");
+	logger.log('warn', "[Core] MongoDB disconnected!");
 });
 
 // Fixes in relation to: https://github.com/Automattic/mongoose/issues/6922#issue-354147871
@@ -174,7 +193,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 						{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 						function(err, count){
 							if (err) {
-								log2console("ERROR", err);
+								lologger.log('emerg', err);
 							}
 						}
 					);
@@ -182,7 +201,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			});
 		});
 	} else {
-		log2console("INFO", "[Core] Superuser MQTT account, " + mqtt_user + " already exists");
+		logger.log('info', "[Core] Superuser MQTT account, " + mqtt_user + " already exists");
 	}
 });
 
@@ -206,34 +225,34 @@ var client = require('redis').createClient({
 			return new Error('The server refused the connection');
         }
         if (options.total_retry_time > 1000 * 60 * 60) {
-			//log2console("ERROR", "[REDIS] Retry time exhausted");
+			//lologger.log('emerg', "[REDIS] Retry time exhausted");
 			return new Error('Retry time exhausted');
         }
         if (options.attempt > 100) {
 			// End reconnecting with built in error
-			log2console("ERROR", "[Core] Redis server connection retry limit exhausted");
+			lologger.log('emerg', "[Core] Redis server connection retry limit exhausted");
             return undefined;
         }
 		// reconnect after
-		//log2console("ERROR", "[REDIS] Attempting reconnection after set interval");
+		//lologger.log('emerg', "[REDIS] Attempting reconnection after set interval");
         return Math.min(options.attempt * 1000, 10000);
    	}
 });
 
 client.on('connect', function() {
-    log2console("INFO", "[Core] Connecting to Redis server...");
+    logger.log('info', "[Core] Connecting to Redis server...");
 });
 
 client.on('ready', function() {
-    log2console("INFO", "[Core] Redis connection ready!");
+    logger.log('info', "[Core] Redis connection ready!");
 });
 
 client.on('reconnecting', function() {
-    log2console("INFO", "[Core] Attempting to reconnect to Redis server");
+    logger.log('info', "[Core] Attempting to reconnect to Redis server");
 });
 
 client.on('error', function (err) {
-    log2console("ERROR", "[Core] Unable to connect to Redis server");
+    lologger.log('emerg', "[Core] Unable to connect to Redis server");
 });
 
 
@@ -249,7 +268,7 @@ const getStateLimiter = limiter({
 	},
 	onRateLimited: function (req, res, next) {
 		if (req.hasOwnProperty('user')) {
-			log2console("WARNING", "Rate limit exceeded for user:" + req.user.username)
+			logger.log('warn', "Rate limit exceeded for user:" + req.user.username)
 			var params = {
 				ec: "Express-limiter",
 				ea: "Rate limited: " + req.user.username,
@@ -259,7 +278,7 @@ const getStateLimiter = limiter({
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
 		else {
-			log2console("WARNING", "[Rate Limiter] GetState rate-limit exceeded for IP address:" + req.ip)
+			logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for IP address:" + req.ip)
 			var params = {
 				ec: "Express-limiter",
 				ea: "GetState: rate-limited path: " + req.path + ", IP address:" + req.ip,
@@ -280,7 +299,7 @@ const restrictiveLimiter = limiter({
 		return next()
   },
 	onRateLimited: function (req, res, next) {
-		log2console("WARNING", "[Rate Limiter] Restrictive rate-limit exceeded for path: " + req.path + ",  IP address:" + req.ip)
+		logger.log('warn', "[Rate Limiter] Restrictive rate-limit exceeded for path: " + req.path + ",  IP address:" + req.ip)
 		var params = {
 			ec: "Express-limiter",
 			ea: "Restrictive: rate-limited path: " + req.path + ", IP address:" + req.ip,
@@ -300,7 +319,7 @@ const defaultLimiter = limiter({
 		return next()
   },
 	onRateLimited: function (req, res, next) {
-		log2console("WARNING", "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
+		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
 		var params = {
 			ec: "Express-limiter",
 			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
@@ -358,7 +377,7 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			log2console("ERROR", "[Core] Missing grant token:" + token);
+			lologger.log('emerg', "[Core] Missing grant token:" + token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
 			//console.log("Token is GOOD!");
@@ -523,7 +542,7 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 				var region = userCountry.data[0].region;
 				Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
 					if (err) {
-						log2console("ERROR", "[New User] New user creation error: " + err);
+						lologger.log('emerg', "[New User] New user creation error: " + err);
 						return res.status(400).send(err.message);
 					}
 					var topics = new Topics({topics: [
@@ -541,14 +560,14 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 								{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 								function(err, count){
 									if (err) {
-										log2console("ERROR" , "[New User] New user creation error updating MQTT info: " + err);
+										lologger.log('emerg' , "[New User] New user creation error updating MQTT info: " + err);
 									}
 								}
 							);
 						}
 					});
 					passport.authenticate('local')(req, res, function () {
-						log2console("INFO", "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
+						logger.log('info', "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
 						var params = {
 							ec: "Security",
 							ea: "Create user, username:" + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region,
@@ -561,12 +580,12 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 				});
 			}
 		}).catch(err => {
-			log2console("ERROR", "[New User] User region lookup failed.");
+			lologger.log('emerg', "[New User] User region lookup failed.");
 			res.status(500).send("Account creation failed, please check country is correctly specified!");
 		});
 	}
 	else {
-		log2console("ERROR", "[New User] Missing/ incorrect elements supplied for user account creation");
+		lologger.log('emerg', "[New User] Missing/ incorrect elements supplied for user account creation");
 		res.status(500).send("Missing required attributes, please check registration form!");
 	}
 });
@@ -581,8 +600,8 @@ app.get('/changePassword/:key',function(req, res, next){
 					lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
-					log2console("ERROR", "[Change Password] Unable to find correlating password reset key for user: " + lostPassword.user);
-					//log2console("DEBUG", "[Change Password] " + err);
+					lologger.log('emerg', "[Change Password] Unable to find correlating password reset key for user: " + lostPassword.user);
+					//logger.log('debug', "[Change Password] " + err);
 					res.redirect('/');
 				}
 			})
@@ -626,15 +645,15 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						if (enableAnalytics) {visitor.event(params).send()};
 						res.status(200).send();
 					} else {
-						log2console("ERROR", "[Change Password] Unable to change password for: " + u.username);
-						log2console("DEBUG", "[Change Password] " + error);
+						lologger.log('emerg', "[Change Password] Unable to change password for: " + u.username);
+						logger.log('debug', "[Change Password] " + error);
 						res.status(400).send("Problem setting new password");
 					}
 				});
 			});
 		} else {
-			log2console("ERROR", "[Change Password] Unable to change password for user, user not found: " + req.user.username);
-			log2console("DEBUG: ", "[Change Password] " + err);
+			lologger.log('emerg', "[Change Password] Unable to change password for user, user not found: " + req.user.username);
+			logger.log('debug', "[Change Password] " + err);
 			res.status(400).send("Problem setting new password");
 		}
 	});
@@ -688,10 +707,10 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
 			for (var i = 0; i < application.domains.length; i++) {
-				log2console("INFO", "[Oauth2] Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
+				logger.log('info', "[Oauth2] Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
 				if (uri.host == application.domains[i] || (uri.protocol == application.domains[i] && uri.protocol != 'http' && uri.protocol != 'https')) {
 					match = true;
-					log2console("INFO", "[Oauth2] Found Service definition associated with redirectURI: " + redirectURI);
+					logger.log('info', "[Oauth2] Found Service definition associated with redirectURI: " + redirectURI);
 					break;
 				}
 			}
@@ -739,11 +758,11 @@ app.post('/auth/finish',function(req,res,next) {
 		}, function(error,user,info){
 			//console.log("/auth/finish authenticating");
 			if (user) {
-				log2console("INFO", "[Oauth2] Authenticated: " + user.username);
+				logger.log('info', "[Oauth2] Authenticated: " + user.username);
 				req.user = user;
 				next();
 			} else if (!error){
-				log2console("WARNING", "[Oauth2] User not authenticated");
+				logger.log('warn', "[Oauth2] User not authenticated");
 				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
 			}
@@ -791,7 +810,7 @@ app.get('/api/v1/devices', defaultLimiter,
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
 			if (!error) {
-				log2console("INFO", "[Discover API] Running device discovery for user:" + user);
+				logger.log('info', "[Discover API] Running device discovery for user:" + user);
 				var devs = [];
 				for (var i=0; i< data.length; i++) {
 					var dev = {};
@@ -1070,7 +1089,7 @@ mqttClient.on('message',function(topic,message){
 	var endpointId = arrTopic[2];
 
 	if (topic.startsWith('response/')){
-		log2console("INFO", "[Command API] Acknowledged MQTT response message for topic: " + topic);
+		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
@@ -1078,10 +1097,10 @@ mqttClient.on('message',function(topic,message){
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				commandWaiting.res.status(200).send();
-				log2console("DEBUG", "[Command API] Successful MQTT Command API response");				
+				logger.log('debug', "[Command API] Successful MQTT Command API response");				
 			} else {
 				commandWaiting.res.status(503).send();
-				log2console("ERROR", "[Command API] Failed MQTT Command API response");
+				lologger.log('emerg', "[Command API] Failed MQTT Command API response");
 			}
 			delete onGoingCommands[payload.messageId];
 			var params = {
@@ -1093,7 +1112,7 @@ mqttClient.on('message',function(topic,message){
 		}
 	}
 	else if (topic.startsWith('state/')){
-		log2console("INFO", "[State API] Acknowledged MQTT state message topic: " + topic);
+		logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
 		// Split topic/ get username and endpointId
 		var messageJSON = JSON.parse(message);
 		var payload = messageJSON.payload;
@@ -1103,10 +1122,10 @@ mqttClient.on('message',function(topic,message){
 		var stateWaiting = onGoingCommands[payload.messageId];
 		if (stateWaiting) {
 			if (payload.success) {
-				log2console("INFO", "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
+				logger.log('info', "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
 				stateWaiting.res.status(200).send();
 			} else {
-				log2console("ERROR", "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
+				lologger.log('emerg', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
 				stateWaiting.res.status(503).send();
 			}
 		}
@@ -1120,7 +1139,7 @@ mqttClient.on('message',function(topic,message){
 		if (enableAnalytics) {visitor.event(params).send()};
 	}
 	else {
-		log2console("DEBUG", "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
+		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
 	}
 });
 
@@ -1130,11 +1149,11 @@ var timeout = setInterval(function(){
 	var keys = Object.keys(onGoingCommands);
 	for (key in keys){
 		var waiting = onGoingCommands[keys[key]];
-		log2console("DEBUG", "[MQTT] Queued MQTT message: " + keys[key]);
+		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
-				log2console("ERROR", "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
+				lologger.log('emerg', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
@@ -1164,11 +1183,11 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 		if (enableAnalytics) {visitor.event(params).send()};
 
 		// Identify device, we know who user is from request
-		log2console("DEBUG", "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
+		logger.log('debug', "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (err) {
-				log2console("WARNING","[State API] No device found for username: " + req.user.username + " endpointId:" + id);
+				logger.log('warn',"[State API] No device found for username: " + req.user.username + " endpointId:" + id);
 				res.status(500).send();
 			}
 			if (data) {
@@ -1330,13 +1349,13 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 								}
 							else {
 								// Device has no state, return as such
-								log2console("WARNING","[State API] No state found for username: " + req.user.username + " endpointId:" + id);
+								logger.log('warn',"[State API] No state found for username: " + req.user.username + " endpointId:" + id);
 								res.status(500).send();
 							}
 						}
 						// State reporting not enabled for device, send error code
 						else {
-							log2console("DEBUG","[State API] State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
+							logger.log('debug',"[State API] State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
 							var properties = [];
 							properties.push({
 								"namespace": "Alexa.EndpointHealth",
@@ -1354,7 +1373,7 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 					}
 					// 'reportState' element missing on device, send error code
 					else {
-						log2console("WARNING", "[State API] User: " + req.user.username + " device: " + id +  " has no reportState attribute, check MongoDB schema");
+						logger.log('warn', "[State API] User: " + req.user.username + " device: " + id +  " has no reportState attribute, check MongoDB schema");
 						res.status(500).send();
 					}
 				}
@@ -1387,7 +1406,7 @@ app.post('/api/v1/command',
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (err) {
-				log2console("ERROR", "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				lologger.log('emerg', "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
 				res.status(404).send();	
 			}
 			if (data) {
@@ -1399,19 +1418,19 @@ app.post('/api/v1/command',
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
-				log2console("DEBUG", "[Command API] Received command API request for user: " + req.user.username + " command: " + message);
+				logger.log('debug', "[Command API] Received command API request for user: " + req.user.username + " command: " + message);
 				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
 					// Handle Out of Range
 					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-							log2console("WARNING", "[Command API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+							logger.log('warn', "[Command API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
 							res.status(417).send();
 							validationStatus = false;
 						}
 					}
-					else {log2console("DEBUG", "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
+					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
 				}
 
 				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
@@ -1420,20 +1439,20 @@ app.post('/api/v1/command',
 					// Handle Temperature Out of Range
 					if (deviceJSON.hasOwnProperty('validRange')) {
 						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-							log2console("WARNING", "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
+							logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
 							res.status(416).send();
 							validationStatus = false;
 						}
 					}
-					else {log2console("DEBUG", "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
+					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
 				}
 				
 				if (validationStatus) {
 					try{
 						mqttClient.publish(topic,message);
-						log2console("INFO", "[Command API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+						logger.log('info', "[Command API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 					} catch (err) {
-						log2console("ERROR", "[Command API] Failed to publish MQTT command for user: " + req.user.username);
+						lologger.log('emerg', "[Command API] Failed to publish MQTT command for user: " + req.user.username);
 					}
 					var command = {
 						user: req.user.username,
@@ -1464,7 +1483,7 @@ app.get('/my-account',
 
 		const user = Account.findOne({username: req.user.username});
 		Promise.all([user]).then(([userAccount]) => {
-			//log2console("INFO", "userAccount: " + userAccount);
+			//logger.log('info', "userAccount: " + userAccount);
 			res.render('pages/account',{user: userAccount, acc: true});
 		}).catch(err => {
 			res.status(500).json({error: err});
@@ -1507,8 +1526,8 @@ app.get('/devices',
 		]);
 
 		Promise.all([userDevices, countDevices, countGrants]).then(([devices, countDevs, countUserGrants]) => {
-			//log2console("INFO", "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
-			//log2console("INFO", "countUserGrants: " + JSON.stringify(countUserGrants));
+			//logger.log('info', "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
+			//logger.log('info', "countUserGrants: " + JSON.stringify(countUserGrants));
 			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, devs: true});
 		}).catch(err => {
 			res.status(500).json({error: err});
@@ -1527,7 +1546,7 @@ app.put('/devices',
 			if (!err) {
 				res.status(201)
 				res.send(dev);
-				log2console("DEBUG", "[Devices] New device created: " + JSON.stringify(dev));
+				logger.log('debug', "[Devices] New device created: " + JSON.stringify(dev));
 			} else {
 				res.status(500);
 				res.send(err);
@@ -1548,15 +1567,15 @@ app.post('/account/:user_id',
 					Account.findOne({_id: req.params.user_id},
 						function(err, data){
 							if (err) {
-								log2console("ERROR", "[Update User] Unable to update user account: " + req.params.user_id, err);
+								lologger.log('emerg', "[Update User] Unable to update user account: " + req.params.user_id, err);
 								res.status(500);
 								res.send();
 							} else {
 								if (req.user.username === mqtt_user) {
-									log2console("INFO", "[Update User] Superuser updated user account: " + req.params.user_id);
+									logger.log('info', "[Update User] Superuser updated user account: " + req.params.user_id);
 								}
 								else {
-									log2console("INFO", "[Update User] Self-service user account update: " + req.params.user_id);
+									logger.log('info', "[Update User] Self-service user account update: " + req.params.user_id);
 								}
 								data.email = user.email;
 								data.country = user.country.toUpperCase();
@@ -1569,12 +1588,12 @@ app.post('/account/:user_id',
 						});
 				}
 			}).catch(err => {
-				log2console("ERROR", "[Update User] Unable to update user account, user region lookup failed.");
+				lologger.log('emerg', "[Update User] Unable to update user account, user region lookup failed.");
 				res.status(500).send("Unable to update user account, user region lookup failed!");
 			});
 		}
 		else {
-			log2console("WARNING", "[Update User] Attempt to modify user account blocked");
+			logger.log('warn', "[Update User] Attempt to modify user account blocked");
 		}
 });
 
@@ -1584,7 +1603,7 @@ app.delete('/account/:user_id',
 		var userId = req.params.user_id;
 		const user = Account.findOne({_id: userId});
 		Promise.all([user]).then(([userAccount]) => {
-			//log2console("INFO", "userAccount: " + userAccount);
+			//logger.log('info', "userAccount: " + userAccount);
 			//res.render('pages/account',{user: userAccount, acc: true});
 			if (userAccount.username == req.user.username || req.user.username === mqtt_user) {
 				const deleteAccount = Account.deleteOne({_id: userId});
@@ -1594,24 +1613,24 @@ app.delete('/account/:user_id',
 				const deleteDevices = Devices.deleteMany({username: userAccount.username});
 				const deleteTopics = Topics.deleteOne({_id:userAccount.topics});
 				Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens, deleteDevices, deleteTopics]).then(result => {
-					//log2console("INFO", result);
+					//logger.log('info', result);
 					res.status(202).json({message: 'deleted'});
 					if (req.user.username === mqtt_user) {
-						log2console("INFO", "[Delete User] Superuser deleted user account: " + userId)
+						logger.log('info', "[Delete User] Superuser deleted user account: " + userId)
 					}
 					else {
-						log2console("INFO", "[Delete User] Self-service account deletion, user account: " + userId)
+						logger.log('info', "[Delete User] Self-service account deletion, user account: " + userId)
 					}
 				}).catch(err => {
-					log2console("ERROR", "[Delete User] Failed to delete user account: " + userId);
+					lologger.log('emerg', "[Delete User] Failed to delete user account: " + userId);
 					res.status(500).json({error: err});
 				});
 			}
 			else {
-				log2console("WARNING", "[Delete User] Attempt to delete user account blocked");
+				logger.log('warn', "[Delete User] Attempt to delete user account blocked");
 			}
 		}).catch(err => {
-			log2console("ERROR", "[Delete User] Failed to find user account: " + userId);
+			lologger.log('emerg', "[Delete User] Failed to find user account: " + userId);
 			res.status(500).send();
 		});
 });
@@ -1653,11 +1672,11 @@ app.delete('/device/:dev_id',
 			Devices.deleteOne({_id: id, username: user},
 				function(err) {
 					if (err) {
-						log2console("ERROR", "[Device] Unable to delete device id: " + id + " for user: " + req.user.username, err);
+						lologger.log('emerg', "[Device] Unable to delete device id: " + id + " for user: " + req.user.username, err);
 						res.status(500);
 						res.send(err);
 					} else {
-						log2console("INFO", "[Device] Deleted device id: " + id + " for user: " + req.user.username);
+						logger.log('info', "[Device] Deleted device id: " + id + " for user: " + req.user.username);
 						res.status(202);
 						res.send();
 					}
@@ -1667,11 +1686,11 @@ app.delete('/device/:dev_id',
 			Devices.deleteOne({_id: id},
 				function(err) {
 					if (err) {
-						log2console("ERROR", "[Admin] Unable to delete device id: " + id, err);
+						lologger.log('emerg', "[Admin] Unable to delete device id: " + id, err);
 						res.status(500);
 						res.send(err);
 					} else {
-						log2console("INFO", "[Admin] Superuser deleted device id: " + id);
+						logger.log('info', "[Admin] Superuser deleted device id: " + id);
 						res.status(202);
 						res.send();
 					}
@@ -1762,9 +1781,9 @@ app.get('/admin/users',
 				  }}
 			 ]);
 			Promise.all([countUsers, usersAndCountDevices]).then(([totalCount, usersAndDevs]) => {
-				//log2console("INFO", "users: " + users)
-				//log2console("INFO", "totalCount: " + totalCount)
-				//log2console("INFO", "usersAndDevs: " + JSON.stringify(usersAndDevs));
+				//logger.log('info', "users: " + users)
+				//logger.log('info', "totalCount: " + totalCount)
+				//logger.log('info', "usersAndDevs: " + JSON.stringify(usersAndDevs));
 				res.render('pages/users',{user:req.user, users: usersAndDevs, usercount: totalCount});
 			}).catch(err => {
 				res.status(500).json({error: err});
@@ -1863,8 +1882,8 @@ app.delete('/service/:id',
 var server = http.Server(app);
 
 server.listen(port, host, function(){
-	log2console("INFO", "[Core] App listening on: " + host + ":" + port);
-	log2console("INFO", "[Core] App_ID -> " + app_id);
+	logger.log('info', "[Core] App listening on: " + host + ":" + port);
+	logger.log('info', "[Core] App_ID -> " + app_id);
 	setTimeout(function(){
 	},5000);
 });
@@ -1872,12 +1891,12 @@ server.listen(port, host, function(){
 // Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
-	log2console("DEBUG", "[State API] SetState payload:" + JSON.stringify(payload));
+	logger.log('debug', "[State API] SetState payload:" + JSON.stringify(payload));
 	if (payload.hasOwnProperty('state')) {
 		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
 			if (error) {
-				log2console("WARNING", "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
+				logger.log('warn', "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
 			}
 			if (dev) {
 				var dt = new Date().toISOString();
@@ -1941,29 +1960,30 @@ function setstate(username, endpointId, payload) {
 						dev.state.volume = newVolume;
 					}
 				}
-				log2console("DEBUG", "[State API] Endpoint state update: " + JSON.stringify(dev.state));
+				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
-						log2console("DEBUG", "[State API] Error updating state for endpointId: " + endpointId);
+						logger.log('debug', "[State API] Error updating state for endpointId: " + endpointId);
 					}
-					else {log2console("DEBUG", "[State API] Updated state for endpointId: " + endpointId);}
+					else {logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);}
 				});
 			}
 		});
 	}
 	else {
-		log2console("WARNING", "[State API] setstate called, but MQTT payload has no 'state' property!");
+		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
 	}
 }
 
-function log2console(severity,message) {
-	var dt = new Date().toISOString();
-	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
-	if (severity == "DEBUG" && debug == "true")
-		console.log(prefixStr, message);
-	else if (severity != "DEBUG") {
-		console.log(prefixStr, message);
-	}
-};
+// Deprectaed in favour of Winston
+// function log2console(severity,message) {
+// 	var dt = new Date().toISOString();
+// 	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
+// 	if (severity == "DEBUG" && debug == "true")
+// 		console.log(prefixStr, message);
+// 	else if (severity != "DEBUG") {
+// 		console.log(prefixStr, message);
+// 	}
+// };
 
