@@ -25,7 +25,7 @@ var enableAnalytics = true;
 
 // Configure Logging, with Exception Handler
 const logger = createLogger({
-	levels: winston.config.syslog.levels,
+	levels: transports.config.syslog.levels,
 	transports: [
 	  // Console Transport
 	  new transports.Console({
