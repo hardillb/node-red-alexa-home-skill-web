@@ -41,7 +41,7 @@ const logger = createLogger({
 	]
   });
 
-logger.log('info', "[Core] Debug logging enabled:" + consoleLoglevel);
+logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
 
 // Create logger stream object for use with morgan
 logger.stream = {
