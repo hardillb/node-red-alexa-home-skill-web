@@ -1,6 +1,3 @@
-//var fs = require('fs'); //Deprecated
-//var rfs = require('rotating-file-stream'); //Deprecated
-// var path = require('path'); //Deprecated
 var url = require('url');
 var mqtt = require('mqtt');
 var http = require('http');
@@ -22,13 +19,18 @@ var countries = require('countries-api');
 var ua = require('universal-analytics');
 const { format, createLogger, transports } = require('winston');
 var enableAnalytics = true;
+var consoleLoglevel = "info"; // default console log level
 
 // Configure Logging, with Exception Handler
+var debug = (process.env.ALEXA_DEBUG || false);
+if (debug == "true") {consoleLoglevel = "verbose"};
+logger.log('info', "[Core] Debug logging enabled:" + consoleLoglevel);
+
 const logger = createLogger({
 	transports: [
 	  // Console Transport
 	  new transports.Console({
-		level: 'verbose',
+		level: consoleLoglevel,
 		format: format.combine(
 		  format.timestamp(),
 		  format.colorize(),
@@ -74,8 +76,6 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 // NodeJS App Settings
 var port = (process.env.VCAP_APP_PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
-var debug = (process.env.ALEXA_DEBUG || false)
-logger.log('info', "[Core] Debug logging enabled:" + debug);
 
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER);
@@ -212,20 +212,9 @@ Account.findOne({username: mqtt_user}, function(error, account){
 	}
 });
 
-// Deprecated
-// var logDirectory = path.join(__dirname, 'log');
-// fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
-
-// var accessLogStream = rfs('access.log', {
-//   interval: '1d', // rotate daily
-//   compress: 'gzip', // compress rotated files
-//   maxFiles: 30,
-//   path: logDirectory
-// });
-
 var app = express();
 
-// New rate-limiter for getstate API
+// Redis client, required by express-limiter
 var client = require('redis').createClient({
 	host: 'redis',
 	retry_strategy: function (options) {
@@ -263,7 +252,7 @@ client.on('error', function (err) {
     logger.log('error', "[Core] Unable to connect to Redis server");
 });
 
-
+// Rate-limiter 
 const limiter = require('express-limiter')(app, client)
 
 // GetState Limiter, uses specific param, 150 reqs/ hr
@@ -1983,15 +1972,3 @@ function setstate(username, endpointId, payload) {
 		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
 	}
 }
-
-// Deprectaed in favour of Winston
-// function log2console(severity,message) {
-// 	var dt = new Date().toISOString();
-// 	var prefixStr = "[" + dt + "] " + "[" + severity + "]"
-// 	if (severity == "DEBUG" && debug == "true")
-// 		console.log(prefixStr, message);
-// 	else if (severity != "DEBUG") {
-// 		console.log(prefixStr, message);
-// 	}
-// };
-
