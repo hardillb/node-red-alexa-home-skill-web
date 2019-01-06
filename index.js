@@ -1,8 +1,8 @@
 //var fs = require('fs'); //Deprecated
-var url = require('url');
 //var rfs = require('rotating-file-stream'); //Deprecated
+// var path = require('path'); //Deprecated
+var url = require('url');
 var mqtt = require('mqtt');
-var path = require('path');
 var http = require('http');
 var https = require('https');
 var flash = require('connect-flash');
@@ -43,7 +43,7 @@ const logger = createLogger({
 // Create logger stream object for use with morgan
 logger.stream = {
 	write: function(message, encoding) {
-	  // use the 'info' log level so the output will be picked up by both transports (file and console)
+	  // use the 'verbose' log level
 	  logger.verbose(message);
 	},
   };
