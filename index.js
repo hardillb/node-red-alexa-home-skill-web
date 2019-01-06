@@ -20,15 +20,15 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
-const { format, createLogger, transports } = require('winston');
+const winston = require('winston');
 var enableAnalytics = true;
 
 // Configure Logging, with Exception Handler
-const logger = createLogger({
-	levels: transports.config.syslog.levels,
+const logger = winston.createLogger({
+	levels: winston.config.syslog.levels,
 	transports: [
 	  // Console Transport
-	  new transports.Console({
+	  new winston.transports.Console({
 		level: 'info',
 		format: format.combine(
 		  format.timestamp(),
