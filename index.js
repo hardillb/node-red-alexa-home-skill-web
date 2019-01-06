@@ -20,15 +20,14 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
-const winston = require('winston');
+const { format, createLogger, transports } = require('winston');
 var enableAnalytics = true;
 
 // Configure Logging, with Exception Handler
-const logger = winston.createLogger({
-	levels: winston.config.syslog.levels,
+const logger = createLogger({
 	transports: [
 	  // Console Transport
-	  new winston.transports.Console({
+	  new transports.Console({
 		level: 'info',
 		format: format.combine(
 		  format.timestamp(),
@@ -111,7 +110,7 @@ logger.log('info', "[Core] Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
-	lologger.log('emerg', "[Core] MQTT connect error");
+	logger.log('error', "[Core] MQTT connect error");
 });
 
 mqttClient.on('reconnect', function(){
@@ -136,7 +135,7 @@ mongoose_connection.on('connecting', function() {
 });
 
 mongoose_connection.on('error', function(error) {
-	lologger.log('emerg', "[Core] MongoDB connection: " + error);
+	logger.log('error', "[Core] MongoDB connection: " + error);
 	//mongoose.disconnect();
 });
 
@@ -193,7 +192,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 						{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 						function(err, count){
 							if (err) {
-								lologger.log('emerg', err);
+								logger.log('error', err);
 							}
 						}
 					);
@@ -225,16 +224,16 @@ var client = require('redis').createClient({
 			return new Error('The server refused the connection');
         }
         if (options.total_retry_time > 1000 * 60 * 60) {
-			//lologger.log('emerg', "[REDIS] Retry time exhausted");
+			//logger.log('error', "[REDIS] Retry time exhausted");
 			return new Error('Retry time exhausted');
         }
         if (options.attempt > 100) {
 			// End reconnecting with built in error
-			lologger.log('emerg', "[Core] Redis server connection retry limit exhausted");
+			logger.log('error', "[Core] Redis server connection retry limit exhausted");
             return undefined;
         }
 		// reconnect after
-		//lologger.log('emerg', "[REDIS] Attempting reconnection after set interval");
+		//logger.log('error', "[REDIS] Attempting reconnection after set interval");
         return Math.min(options.attempt * 1000, 10000);
    	}
 });
@@ -252,7 +251,7 @@ client.on('reconnecting', function() {
 });
 
 client.on('error', function (err) {
-    lologger.log('emerg', "[Core] Unable to connect to Redis server");
+    logger.log('error', "[Core] Unable to connect to Redis server");
 });
 
 
@@ -377,7 +376,7 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			lologger.log('emerg', "[Core] Missing grant token:" + token);
+			logger.log('error', "[Core] Missing grant token:" + token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
 			//console.log("Token is GOOD!");
@@ -542,7 +541,7 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 				var region = userCountry.data[0].region;
 				Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
 					if (err) {
-						lologger.log('emerg', "[New User] New user creation error: " + err);
+						logger.log('error', "[New User] New user creation error: " + err);
 						return res.status(400).send(err.message);
 					}
 					var topics = new Topics({topics: [
@@ -560,7 +559,7 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 								{$set: {mqttPass: mqttPass, topics: topics._id}}, 
 								function(err, count){
 									if (err) {
-										lologger.log('emerg' , "[New User] New user creation error updating MQTT info: " + err);
+										logger.log('error' , "[New User] New user creation error updating MQTT info: " + err);
 									}
 								}
 							);
@@ -580,12 +579,12 @@ app.post('/newuser', restrictiveLimiter, function(req,res){
 				});
 			}
 		}).catch(err => {
-			lologger.log('emerg', "[New User] User region lookup failed.");
+			logger.log('warn', "[New User] User region lookup failed.");
 			res.status(500).send("Account creation failed, please check country is correctly specified!");
 		});
 	}
 	else {
-		lologger.log('emerg', "[New User] Missing/ incorrect elements supplied for user account creation");
+		logger.log('warn', "[New User] Missing/ incorrect elements supplied for user account creation");
 		res.status(500).send("Missing required attributes, please check registration form!");
 	}
 });
@@ -600,7 +599,7 @@ app.get('/changePassword/:key',function(req, res, next){
 					lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
-					lologger.log('emerg', "[Change Password] Unable to find correlating password reset key for user: " + lostPassword.user);
+					logger.log('warn', "[Change Password] Unable to find correlating password reset key for user: " + lostPassword.user);
 					//logger.log('debug', "[Change Password] " + err);
 					res.redirect('/');
 				}
@@ -645,14 +644,14 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 						if (enableAnalytics) {visitor.event(params).send()};
 						res.status(200).send();
 					} else {
-						lologger.log('emerg', "[Change Password] Unable to change password for: " + u.username);
+						logger.log('warn', "[Change Password] Unable to change password for: " + u.username);
 						logger.log('debug', "[Change Password] " + error);
 						res.status(400).send("Problem setting new password");
 					}
 				});
 			});
 		} else {
-			lologger.log('emerg', "[Change Password] Unable to change password for user, user not found: " + req.user.username);
+			logger.log('warn', "[Change Password] Unable to change password for user, user not found: " + req.user.username);
 			logger.log('debug', "[Change Password] " + err);
 			res.status(400).send("Problem setting new password");
 		}
@@ -1100,7 +1099,7 @@ mqttClient.on('message',function(topic,message){
 				logger.log('debug', "[Command API] Successful MQTT Command API response");				
 			} else {
 				commandWaiting.res.status(503).send();
-				lologger.log('emerg', "[Command API] Failed MQTT Command API response");
+				logger.log('warn', "[Command API] Failed MQTT Command API response");
 			}
 			delete onGoingCommands[payload.messageId];
 			var params = {
@@ -1125,7 +1124,7 @@ mqttClient.on('message',function(topic,message){
 				logger.log('info', "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
 				stateWaiting.res.status(200).send();
 			} else {
-				lologger.log('emerg', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
+				logger.log('warn', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
 				stateWaiting.res.status(503).send();
 			}
 		}
@@ -1153,7 +1152,7 @@ var timeout = setInterval(function(){
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
-				lologger.log('emerg', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
+				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
@@ -1406,7 +1405,7 @@ app.post('/api/v1/command',
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (err) {
-				lologger.log('emerg', "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				logger.log('warn', "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
 				res.status(404).send();	
 			}
 			if (data) {
@@ -1452,7 +1451,7 @@ app.post('/api/v1/command',
 						mqttClient.publish(topic,message);
 						logger.log('info', "[Command API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 					} catch (err) {
-						lologger.log('emerg', "[Command API] Failed to publish MQTT command for user: " + req.user.username);
+						logger.log('warn', "[Command API] Failed to publish MQTT command for user: " + req.user.username);
 					}
 					var command = {
 						user: req.user.username,
@@ -1567,7 +1566,7 @@ app.post('/account/:user_id',
 					Account.findOne({_id: req.params.user_id},
 						function(err, data){
 							if (err) {
-								lologger.log('emerg', "[Update User] Unable to update user account: " + req.params.user_id, err);
+								logger.log('warn', "[Update User] Unable to update user account: " + req.params.user_id, err);
 								res.status(500);
 								res.send();
 							} else {
@@ -1588,7 +1587,7 @@ app.post('/account/:user_id',
 						});
 				}
 			}).catch(err => {
-				lologger.log('emerg', "[Update User] Unable to update user account, user region lookup failed.");
+				logger.log('warn', "[Update User] Unable to update user account, user region lookup failed.");
 				res.status(500).send("Unable to update user account, user region lookup failed!");
 			});
 		}
@@ -1622,7 +1621,7 @@ app.delete('/account/:user_id',
 						logger.log('info', "[Delete User] Self-service account deletion, user account: " + userId)
 					}
 				}).catch(err => {
-					lologger.log('emerg', "[Delete User] Failed to delete user account: " + userId);
+					logger.log('warn', "[Delete User] Failed to delete user account: " + userId);
 					res.status(500).json({error: err});
 				});
 			}
@@ -1630,7 +1629,7 @@ app.delete('/account/:user_id',
 				logger.log('warn', "[Delete User] Attempt to delete user account blocked");
 			}
 		}).catch(err => {
-			lologger.log('emerg', "[Delete User] Failed to find user account: " + userId);
+			logger.log('warn', "[Delete User] Failed to find user account: " + userId);
 			res.status(500).send();
 		});
 });
@@ -1672,7 +1671,7 @@ app.delete('/device/:dev_id',
 			Devices.deleteOne({_id: id, username: user},
 				function(err) {
 					if (err) {
-						lologger.log('emerg', "[Device] Unable to delete device id: " + id + " for user: " + req.user.username, err);
+						logger.log('warn', "[Device] Unable to delete device id: " + id + " for user: " + req.user.username, err);
 						res.status(500);
 						res.send(err);
 					} else {
@@ -1686,7 +1685,7 @@ app.delete('/device/:dev_id',
 			Devices.deleteOne({_id: id},
 				function(err) {
 					if (err) {
-						lologger.log('emerg', "[Admin] Unable to delete device id: " + id, err);
+						logger.log('warn', "[Admin] Unable to delete device id: " + id, err);
 						res.status(500);
 						res.send(err);
 					} else {
