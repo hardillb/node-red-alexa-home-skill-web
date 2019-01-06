@@ -24,7 +24,6 @@ var consoleLoglevel = "info"; // default console log level
 // Configure Logging, with Exception Handler
 var debug = (process.env.ALEXA_DEBUG || false);
 if (debug == "true") {consoleLoglevel = "verbose"};
-logger.log('info', "[Core] Debug logging enabled:" + consoleLoglevel);
 
 const logger = createLogger({
 	transports: [
@@ -41,6 +40,8 @@ const logger = createLogger({
 	  // Will add AWS CloudWatch capability here as well
 	]
   });
+
+logger.log('info', "[Core] Debug logging enabled:" + consoleLoglevel);
 
 // Create logger stream object for use with morgan
 logger.stream = {
