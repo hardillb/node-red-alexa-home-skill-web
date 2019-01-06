@@ -1,6 +1,6 @@
-var fs = require('fs');
+//var fs = require('fs'); //Deprecated
 var url = require('url');
-var rfs = require('rotating-file-stream');
+//var rfs = require('rotating-file-stream'); //Deprecated
 var mqtt = require('mqtt');
 var path = require('path');
 var http = require('http');
@@ -28,7 +28,7 @@ const logger = createLogger({
 	transports: [
 	  // Console Transport
 	  new transports.Console({
-		level: 'info',
+		level: 'verbose',
 		format: format.combine(
 		  format.timestamp(),
 		  format.colorize(),
@@ -39,6 +39,14 @@ const logger = createLogger({
 	  // Will add AWS CloudWatch capability here as well
 	]
   });
+
+// Create logger stream object for use with morgan
+logger.stream = {
+	write: function(message, encoding) {
+	  // use the 'info' log level so the output will be picked up by both transports (file and console)
+	  logger.verbose(message);
+	},
+  };
 
 // Use GA account ID specified in container definition
 if (!(process.env.GOOGLE_ANALYTICS_TID)) {
@@ -204,15 +212,16 @@ Account.findOne({username: mqtt_user}, function(error, account){
 	}
 });
 
-var logDirectory = path.join(__dirname, 'log');
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+// Deprecated
+// var logDirectory = path.join(__dirname, 'log');
+// fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
 
-var accessLogStream = rfs('access.log', {
-  interval: '1d', // rotate daily
-  compress: 'gzip', // compress rotated files
-  maxFiles: 30,
-  path: logDirectory
-});
+// var accessLogStream = rfs('access.log', {
+//   interval: '1d', // rotate daily
+//   compress: 'gzip', // compress rotated files
+//   maxFiles: 30,
+//   path: logDirectory
+// });
 
 var app = express();
 
@@ -331,7 +340,7 @@ const defaultLimiter = limiter({
 
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
-app.use(morgan("combined", {stream: accessLogStream}));
+app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
 app.use(cookieParser(cookieSecret));
 app.use(flash());
 
