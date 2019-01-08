@@ -363,7 +363,8 @@ function requireHTTPS(req, res, next) {
 
 app.use(requireHTTPS);
 
-app.use('/',express.static('static'));
+app.use('/',express.static('static')); // Static ocntent router
+app.use('/octicons', express.static('node_modules/octicons/build')); // Octicons router
 
 passport.use(new LocalStrategy(Account.authenticate()));
 
