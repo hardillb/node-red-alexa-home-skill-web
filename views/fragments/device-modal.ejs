@@ -24,8 +24,9 @@
 					<div class="col-sm">
 						<fieldset class="form-group" id="capabilityType">
 							<legend>Capabilities</legend>
+							<small id="tooltipInfo" class="form-text text-muted">Hover over capability for more information</small>
 							<div class="form-check">
-									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
+									<input title="Brightness Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
 								<label class="form-check-label" for="BrightnessController" data-toggle="tooltip" data-placement="right" title="Use to control dimmable smart bulb / switch"> Brightness Control </label>
 								<br />
 							</div>
@@ -35,12 +36,12 @@
 							<br />
 							</div>
 							<div class="form-check">
-									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
+									<input title="Color Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController" onclick='checkCapability(this)'>
 								<label class="form-check-label" for="ColorController" data-placement="right" title="Use to control color of smart bulb"> Color Control </label>
 								<br />
 							</div>
 							<div class="form-check">
-									<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
+									<input title="Color Temperature Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
 								<label class="form-check-label" for="ColorTemperatureController" data-toggle="tooltip" data-placement="right" title="Use to control smart bulb color temperature"> Color Temperature Control </label>
 								<br />
 							</div>
@@ -86,7 +87,7 @@
 							</div>
 							<div class="form-check">
 								<input title="Temperature Sensor" type="checkbox" class="form-check-input" name="capabilities" id="TemperatureSensor" value="TemperatureSensor" onclick='checkCapability(this)'>
-							<label class="form-check-label" for="TemperatureSensor" data-toggle="tooltip" data-placement="right" title="Use to send sensor data, to commands"> Temperature Sensor </label>
+							<label class="form-check-label" for="TemperatureSensor" data-toggle="tooltip" data-placement="right" title="Use to make sensor data retrievable"> Temperature Sensor </label>
 							</div>
 							<div class="form-check">
 									<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
