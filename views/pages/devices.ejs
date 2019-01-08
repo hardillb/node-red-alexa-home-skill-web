@@ -49,6 +49,10 @@
 <% include ../fragments/device-modal.ejs %>
 
 <script>
+
+$(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
 		
 $("#form-device").submit(function(e) {
 	e.preventDefault();
