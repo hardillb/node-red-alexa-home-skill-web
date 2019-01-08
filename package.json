@@ -30,6 +30,7 @@
     "mqtt": "^2.18.8",
     "nodemailer": "^4.6.8",
     "oauth2orize": "^1.11.0",
+    "octicons": "^8.2.0",
     "passport": "^0.3.2",
     "passport-http": "^0.3.0",
     "passport-http-bearer": "^1.0.1",
