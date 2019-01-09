@@ -2040,49 +2040,54 @@ app.get('/admin/update-schema', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			// Sync Alexa and Google Home data, this will move to attributes element on permenant basis
-			Devices.find().forEach(function (dev) {
-				if (dev) {
-					var hasValidRange = false;
-					if (dev.validRange) {
-						hasValidRange = true;
-						if (dev.validRange.scale) { // Assume thermostat temperature
-							dev.attributes.temperatureRange = {};
-							dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
-							dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-							dev.attributes.temperatureScale = dev.validRange.scale;
+			const userDevices = Devices.find({});
+			Promise.all([userDevices]).then(([devices]) => {
+				devices.forEach(dev => {
+					if (dev) {
+						var hasValidRange = false;
+						if (dev.validRange) {
+							hasValidRange = true;
+							if (dev.validRange.scale) { // Assume thermostat temperature
+								dev.attributes.temperatureRange = {};
+								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+								dev.attributes.temperatureScale = dev.validRange.scale;
+							}
+							else { // Assume color temperature
+								dev.attributes.colorTemperatureRange = {};
+								dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
+								dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+							}
 						}
-						else { // Assume color temperature
-							dev.attributes.colorTemperatureRange = {};
-							dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
-							dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+						if (hasValidRange == true) {
+							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + " to:");
+							logger.log('info', JSON.stringify(dev.validRange));
+							logger.log('info', "New  dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
+							logger.log('info', JSON.stringify(dev.attributes));
+							res.status(201);
+							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
+							// 	if (err) {
+							// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
+							// 	}
+							// 	else {logger.log('info', "Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
+							// });
+						} else {
+							logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to:");
+							logger.log('info', "Unknown");
+							res.status(201);
+							// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
+							// 	if (err) {
+							// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
+							// 	}
+							// 	else {logger.log('info', "Updated dev.room for endpointId: " + dev.endpointId);}
+							// });
 						}
 					}
-					if (hasValidRange == true) {
-						logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + " to:");
-						logger.log('info', JSON.stringify(dev.validRange));
-						logger.log('info', "New  dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
-						logger.log('info', JSON.stringify(dev.attributes));
-						res.status(201);
-						// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
-						// 	if (err) {
-						// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
-						// 	}
-						// 	else {logger.log('info', "Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
-						// });
-					} else {
-						logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to:");
-						logger.log('info', "Unknown");
-						res.status(201);
-						// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
-						// 	if (err) {
-						// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
-						// 	}
-						// 	else {logger.log('info', "Updated dev.room for endpointId: " + dev.endpointId);}
-						// });
-					}
-				}
+				});
+			}).catch(err => {
+				res.status(500).json({error: err});
 			});
+			// Sync Alexa and Google Home data, this will move to attributes element on permenant basis
 		} else {
 			res.status(401).send();
 		}
