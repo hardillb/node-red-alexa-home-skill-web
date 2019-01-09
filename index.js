@@ -331,7 +331,7 @@ const defaultLimiter = limiter({
 
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
-app.use(favicon(path.join(__dirname, 'static', 'favicon.ico')));
+app.use(favicon(path.join('static', 'favicon.ico')));
 app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
 app.use(cookieParser(cookieSecret));
 app.use(flash());
