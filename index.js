@@ -2045,8 +2045,10 @@ app.get('/admin/update-schema', defaultLimiter,
 				logger.log('info', JSON.stringify(devices));
 				devices.forEach(dev => {
 					if (dev) {
+						logger.log('info', JSON.stringify(dev));
+						var deviceJSON = JSON.parse(JSON.stringify(dev));
 						var hasValidRange = false;
-						if (dev.validRange) {
+						if (deviceJSON.validRange) {
 							hasValidRange = true;
 							if (dev.validRange.scale) { // Assume thermostat temperature
 								dev.attributes.temperatureRange = {};
@@ -2063,7 +2065,7 @@ app.get('/admin/update-schema', defaultLimiter,
 						if (hasValidRange == true) {
 							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + " to:");
 							logger.log('info', JSON.stringify(dev.validRange));
-							logger.log('info', "New  dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
+							logger.log('info', "New dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
 							logger.log('info', JSON.stringify(dev.attributes));
 							res.status(201);
 							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
