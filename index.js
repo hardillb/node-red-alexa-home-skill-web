@@ -2045,6 +2045,8 @@ app.get('/admin/update-schema', defaultLimiter,
 				logger.log('info', JSON.stringify(devices));
 				devices.forEach(dev => {
 					if (dev) {
+						dev.validRange = dev.validRange;
+						dev.attributes = ( dev.attributes || {})
 						logger.log('info', JSON.stringify(dev));
 						var deviceJSON = JSON.parse(JSON.stringify(dev));
 						var hasValidRange = false;
