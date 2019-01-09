@@ -879,8 +879,8 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.deviceInfo = {
 							manufacturerName : "Node-RED",
 							model : "Node-RED",
-							hwVersion = "0.0.1",
-							swVersion = "0.0.1"
+							hwVersion : "0.0.1",
+							swVersion : "0.0.1"
 						}
 						// Initially only support OnOff trait, don't add other device types
 						if (dev.traits.indexOf("action.devices.traits.OnOff") > -1) {
