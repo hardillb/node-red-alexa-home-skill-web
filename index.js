@@ -2,6 +2,7 @@ var url = require('url');
 var mqtt = require('mqtt');
 var http = require('http');
 var https = require('https');
+var favicon = require('serve-favicon')
 var flash = require('connect-flash');
 var morgan = require('morgan');
 var express = require('express');
@@ -330,6 +331,7 @@ const defaultLimiter = limiter({
 
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
+app.use(favicon(path.join(__dirname, 'static', 'favicon.ico')));
 app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
 app.use(cookieParser(cookieSecret));
 app.use(flash());
@@ -790,6 +792,220 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
+// Google Home SYNC
+app.post('/api/v1/action', defaultLimiter,
+	passport.authenticate(['bearer', 'basic'], { session: false }),
+	function(req,res,next){
+	logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
+
+	var intent = req.header.inputs.intent;
+	var requestId = req.header.requestId;
+
+	switch (intent) {
+		case 'action.devices.SYNC' : 
+			const findUser = Account.find({username: req.user.username});
+			const findDevices = Devices.find({username: req.user.username});
+			Promise.all([findUser, findDevices]).then(([user, devices]) => {
+				if (user && devices) {
+					// SYNC response (single device example)
+					// {
+					// 	"requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
+					// 	"payload": {
+					// 	  "agentUserId": "1836.15267389",
+					// 	  "devices": [{
+					// 		"id": "123",
+					// 		"type": "action.devices.types.OUTLET",
+					// 		"traits": [
+					// 		  "action.devices.traits.OnOff"
+					// 		],
+					// 		"name": {
+					// 		  "defaultNames": ["My Outlet 1234"],
+					// 		  "name": "Night light",
+					// 		  "nicknames": ["wall plug"]
+					// 		},
+					// 		"willReportState": false,
+					// 		"roomHint": "kitchen",
+					// 		"deviceInfo": {
+					// 		  "manufacturer": "lights-out-inc",
+					// 		  "model": "hs1234",
+					// 		  "hwVersion": "3.2",
+					// 		  "swVersion": "11.4"
+					// 		},
+					// 		"customData": {
+					// 		  "fooValue": 74,
+					// 		  "barValue": true,
+					// 		  "bazValue": "foo"
+					// 		}
+					// 	  }]
+					// 	}
+					// }
+
+					// Device info in DB
+					// device.room
+					// device.attributes : {
+					//     colorModel: String,
+					//     colorTemperatureRange: {
+					//         temperatureMinK: Number,
+					//         temperatureMaxK: Number
+					//     },
+					//     temperatureRange: {
+					//         temperatureMin: Number,
+					//         temperatureMax: Number,       
+					//     },
+					//	   temperatureScale: String,
+					//     thermostatModes: [],
+					//     availableModes: Schema.Types.Mixed,
+					//		   1 - 5, low, medium, high
+					//     availableToggles: Schema.Types.Mixed,
+					//     availableFanSpeeds: Schema.Types.Mixed,
+					//     sceneSupportsDeactivation: Boolean
+					// }
+
+					// Build Device Array
+					var devs = [];
+					for (var i=0; i< data.length; i++) {
+						var dev = {}
+						dev.id = "" + data[i].endpointId;
+						dev.type = gHomeReplaceType(displayCategories)
+						dev.traits = [];
+						data[i].capabilities.forEach(function(capability){
+							dev.traits.push(ghomeReplaceCapability(capability, dev.reportState))
+						});
+						dev.willReportState = data[i].reportState;
+						//dev.roomHint = data[i].room; // Optional, will require schema extension
+						dev.name = {
+							name : data[i].friendlyName
+							}
+						dev.deviceInfo = {
+							manufacturerName : "Node-RED",
+							model : "Node-RED",
+							hwVersion = "0.0.1",
+							swVersion = "0.0.1"
+						}
+						// Initially only support OnOff trait, don't add other device types
+						if (dev.traits.indexOf("action.devices.traits.OnOff") > -1) {
+							devs.push(dev);
+						}
+					}
+					// Build Response
+					var response = {
+						"requestId": requestId,
+						"payload": {
+							"agentUserId": user._id,
+							"devices" : devs
+						}
+					}
+					// Send Response
+					res.status(200).json(response);
+				}
+				else if (!user){
+					res.status(500).json({message: "User not found"});
+				}
+				else if (!device) {
+					res.status(500).json({message: "Device not found"});
+				}
+			}).catch(err => {
+				res.status(500).json({message: "An error occurred."});
+			});
+			break;
+		case 'action.devices.EXEC' : 
+			// Exec
+			res.status(500).json({message: "EXEC not yet supported"});
+			break;
+		case 'action.devices.QUERY' :
+			// Query
+			res.status(500).json({message: "QUERY not yet supported"});
+			break;
+		case 'action.devices.DISCONNECT' : 
+			// Remove OAuth tokens for Google Home
+			res.status(500).json({message: "DISCONNECT not yet supported"});
+			break; 
+	}
+});
+
+function gHomeReplaceCapability(capability) {
+	// PowerController
+	if(capability == "PowerController") {
+		return "action.devices.traits.OnOff";
+	}
+
+	if(capability == "BrightnessController")  {
+		return "action.devices.traits.Brightness";
+	}
+
+	if(capability == "ColorController" || capability == "ColorTemperatureController")  {
+		// "attributes": {
+		//     "colorModel": "rgb", // String. Required if the device supports the full spectrum color model either 'rgb' or 'hsv'
+		//     "colorTemperatureRange": { // String. Required if the device supports color temperature set by Kelvin
+		//       "temperatureMinK": 2000,
+		//       "temperatureMaxK": 9000
+		//     },
+		//     "commandOnlyColorSetting": true // Boolean. Defaults to false. Leave default if state node is used.
+		//   }
+		return "action.devices.traits.ColorSetting";
+	}
+
+	if(capability == "SceneController") {
+		// "attributes": {
+		// 	"sceneReversible": true
+		//   }	
+		return "action.devices.traits.Scene";
+	}
+
+	if(capability == "ThermostatController")  {
+		// action.devices.traits.TemperatureSetting
+		// "attributes": {
+		//     "availableThermostatModes": "off,heat,cool,on",
+		//     "thermostatTemperatureUnit": "F"
+		// }
+
+		// action.devices.traits.TemperatureControl
+		// "attributes": {
+		//     "temperatureRange": {
+		//       "minThresholdCelsius": 30,
+		//       "maxThresholdCelsius": 100
+		//     },
+		//     "temperatureStepCelsius": 1,
+		//     "temperatureUnitForUX": "C"
+		//   }
+		return ["action.devices.traits.TemperatureSetting", "action.devices.traits.TemperatureControl"]; // Will be a problem, as is an array
+	}
+
+		// Modes
+		// "availableModes": [{
+		// 	"name": "mode",
+		// 	"name_values": [{
+		// 	  "name_synonym": ["mode"],
+		// 	  "lang": "en"
+		// 	}],
+		// 	"settings": [{
+		// 	  "setting_name": "auto",
+		// 	  "setting_values": [{
+		// 		"setting_synonym": ["auto", "automatic"],
+		// 		"lang": "en"
+		// 	  }]
+		// 	}, {
+		// 	  "setting_name": "manual",
+		// 	  "setting_values": [{
+		// 		"setting_synonym": ["auto", "non-auto"],
+		// 		"lang": "en"
+		// 	  }]
+		// 	}],
+}
+
+function gHomeReplaceType(type) {
+	switch (type) {	
+		case "ACTIVITY_TRIGGER": 
+			return "action.devices.types.SCENE"
+		case "LIGHT": 
+			return "action.devices.types.LIGHT"
+		case "SMARTPLUG": 
+			return "action.devices.types.OUTLET"
+		case "SWITCH":
+			return "action.devices.types.SWITCH"
+		case "THERMOSTAT" :
+			return "action.devices.types.THERMOSTAT"
+}
 
 // Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
 app.get('/api/v1/devices', defaultLimiter,
@@ -1818,6 +2034,58 @@ app.get('/admin/user-devices', defaultLimiter,
 			res.status(401).send();
 		}
 	});
+
+app.get('/admin/update-schema', defaultLimiter,
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) {
+			// Sync Alexa and Google Home data, this will move to attributes element on permenant basis
+			Devices.find().forEach(function (dev) {
+				if (dev) {
+					var hasValidRange = false;
+					if (dev.validRange) {
+						hasValidRange = true;
+						if (dev.validRange.scale) { // Assume thermostat temperature
+							dev.attributes.temperatureRange = {};
+							dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+							dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+							dev.attributes.temperatureScale = dev.validRange.scale;
+						}
+						else { // Assume color temperature
+							dev.attributes.colorTemperatureRange = {};
+							dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
+							dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+						}
+					}
+					if (hasValidRange == true) {
+						logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + " to:");
+						logger.log('info', JSON.stringify(dev.validRange));
+						logger.log('info', "New  dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
+						logger.log('info', JSON.stringify(dev.attributes));
+						res.status(201);
+						// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
+						// 	if (err) {
+						// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
+						// 	}
+						// 	else {logger.log('info', "Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
+						// });
+					} else {
+						logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to:");
+						logger.log('info', "Unknown");
+						res.status(201);
+						// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
+						// 	if (err) {
+						// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
+						// 	}
+						// 	else {logger.log('info', "Updated dev.room for endpointId: " + dev.endpointId);}
+						// });
+					}
+				}
+			});
+		} else {
+			res.status(401).send();
+		}
+});
 
 app.put('/services', defaultLimiter,
 	ensureAuthenticated,

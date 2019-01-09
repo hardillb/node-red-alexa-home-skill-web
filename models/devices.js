@@ -21,9 +21,30 @@ var Devices = new Schema({
     	extraDetail4: String
     },
     reportState: Boolean,
-    state: Schema.Types.Mixed
+    state: Schema.Types.Mixed,
+    attributes : Schema.Types.Mixed,
+    room : String
 });
 
 Devices.plugin(AutoIncrement, {inc_field: 'endpointId'});
 
 module.exports = mongoose.model('Devices', Devices);
+
+    // attributes{..} will replace validRange { minimumValue, maximumValue, scale}
+    // attributes : {
+    //     colorModel: String,
+    //     colorTemperatureRange: {
+    //         temperatureMinK: Number,
+    //         temperatureMaxK: Number
+    //     },
+    //     temperatureRange: {
+    //         temperatureMin: Number,
+    //         temperatureMax: Number,
+    //         scale: String       
+    //     },
+    //     thermostatModes: [],
+    //     availableModes: Schema.Types.Mixed,
+    //     availableToggles: Schema.Types.Mixed,
+    //     availableFanSpeeds: Schema.Types.Mixed,
+    //     sceneSupportsDeactivation: Boolean
+    // }
