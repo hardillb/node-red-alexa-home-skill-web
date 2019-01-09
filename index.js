@@ -2042,6 +2042,7 @@ app.get('/admin/update-schema', defaultLimiter,
 		if (req.user.username === mqtt_user) {
 			const userDevices = Devices.find({});
 			Promise.all([userDevices]).then(([devices]) => {
+				logger.log('info', JSON.stringify(devices));
 				devices.forEach(dev => {
 					if (dev) {
 						var hasValidRange = false;
