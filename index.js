@@ -1005,6 +1005,7 @@ function gHomeReplaceType(type) {
 			return "action.devices.types.SWITCH"
 		case "THERMOSTAT" :
 			return "action.devices.types.THERMOSTAT"
+	}
 }
 
 // Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
@@ -2007,7 +2008,7 @@ app.get('/admin/users', defaultLimiter,
 		else {
 			res.status(401).send();
 		}
-	});
+});
 
 app.get('/admin/user-devices', defaultLimiter,
 	ensureAuthenticated,
@@ -2033,7 +2034,7 @@ app.get('/admin/user-devices', defaultLimiter,
 	} else {
 			res.status(401).send();
 		}
-	});
+});
 
 app.get('/admin/update-schema', defaultLimiter,
 	ensureAuthenticated,
