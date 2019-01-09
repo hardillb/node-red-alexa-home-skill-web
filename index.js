@@ -2067,7 +2067,6 @@ app.get('/admin/update-schema', defaultLimiter,
 							logger.log('info', JSON.stringify(dev.validRange));
 							logger.log('info', "New dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
 							logger.log('info', JSON.stringify(dev.attributes));
-							res.status(201);
 							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
 							// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
@@ -2077,7 +2076,6 @@ app.get('/admin/update-schema', defaultLimiter,
 						} else {
 							logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to:");
 							logger.log('info', "Unknown");
-							res.status(201);
 							// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
 							// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
@@ -2087,6 +2085,7 @@ app.get('/admin/update-schema', defaultLimiter,
 						}
 					}
 				});
+				res.status(201);
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
