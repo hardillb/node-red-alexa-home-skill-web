@@ -2023,6 +2023,7 @@ app.get('/admin/user-devices', defaultLimiter,
 		}
 });
 
+// Sync Alexa and Google Home data, this will copy device.validRange to device.attributes element
 app.get('/admin/update-schema', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -2073,12 +2074,6 @@ app.get('/admin/update-schema', defaultLimiter,
 							});
 						} else {
 							logger.log('info', "endpointId: " + dev.endpointId + ", NO CHANGE");
-							// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
-							// 	if (err) {
-							// 		logger.log('warn', "ERROR updating dev.room for endpointId: " + dev.endpointId);
-							// 	}
-							// 	else {logger.log('info', "SUCCESS Updated dev.room for endpointId: " + dev.endpointId);}
-							// });
 						}
 					}
 				});
@@ -2086,7 +2081,6 @@ app.get('/admin/update-schema', defaultLimiter,
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
-			// Sync Alexa and Google Home data, this will move to attributes element on permenant basis
 		} else {
 			res.status(401).send();
 		}
