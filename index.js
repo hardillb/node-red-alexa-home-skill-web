@@ -2066,7 +2066,7 @@ app.get('/admin/update-schema', defaultLimiter,
 							hasAttributes = true;
 							dev.attributes.temperatureScale = dev.validRange.scale;
 						}
-						if (hasValidRange == true) {
+						if (hasAttributes == true) {
 							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + ": " + JSON.stringify(dev.validRange));
 							logger.log('info', "New dev.attributes for endpointId: " + dev.endpointId + " to: " + JSON.stringify(dev.attributes));
 							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
