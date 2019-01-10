@@ -2050,13 +2050,18 @@ app.get('/admin/update-schema', defaultLimiter,
 						logger.log('info', JSON.stringify(dev));
 						var hasValidRange = false;
 						if (dev.validRange) {
-							if (dev.validRange.hasOwnProperty('scale')) { // Thermostat
+							if (dev.validRange.hasOwnProperty('scale')) { // Thermostat or Temp Sensor
 								if (dev.validRange.scale == "CELSIUS" || dev.validRange.scale == "FARENHEIT" ) {
 									hasValidRange = true;
-									dev.attributes.temperatureRange = {};
-									dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
-									dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-									dev.attributes.temperatureScale = dev.validRange.scale;
+									if (dev.displayCategories.indexOf("THERMOSTAT") > -1) { // Thermostat
+										dev.attributes.temperatureRange = {};
+										dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+										dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+										dev.attributes.temperatureScale = dev.validRange.scale;
+									}
+									else { // Temp Sensor
+										dev.attributes.temperatureScale = dev.validRange.scale;
+									}
 								}
 							}
 							else { // ColorTemperature
