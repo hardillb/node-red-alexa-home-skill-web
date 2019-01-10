@@ -2050,17 +2050,21 @@ app.get('/admin/update-schema', defaultLimiter,
 						logger.log('info', JSON.stringify(dev));
 						var hasAttributes = false;
 						if (dev.capabilities.indexOf("ThermostatController") > -1) { // Thermostat
-							hasAttributes = true;
-							dev.attributes.temperatureRange = {};
-							dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
-							dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-							dev.attributes.temperatureScale = dev.validRange.scale;
+							if (dev.validRange.minimumValue > 0 && dev.validRange.maximumValue > 0) {
+								hasAttributes = true;
+								dev.attributes.temperatureRange = {};
+								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+								dev.attributes.temperatureScale = dev.validRange.scale;
+							}
 						}
-						if (dev.capabilities.indexOf("ColorController") > -1) { // Thermostat
-							hasAttributes = true;
-							dev.attributes.colorTemperatureRange = {};
-							dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
-							dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+						if (dev.capabilities.indexOf("ColorController") > -1) { // ColorController
+							if (dev.validRange.minimumValue > 0 &&  dev.validRange.maximumValue > 100) {
+								hasAttributes = true;
+								dev.attributes.colorTemperatureRange = {};
+								dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
+								dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+							}
 						}
 						if (dev.capabilities.indexOf("TemperatureSensor") > -1) { // Thermostat
 							hasAttributes = true;
