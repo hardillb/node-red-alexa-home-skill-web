@@ -1499,7 +1499,7 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 													"name": "temperature",
 													"value": {
 														"value": deviceJSON.state.temperature,
-														"scale": deviceJSON.validRange.scale.toUpperCase()
+														"scale": deviceJSON.attributes.temperatureScale.toUpperCase()
 													  },
 													"timeOfSample": deviceJSON.state.time,
 													"uncertaintyInMilliseconds": 10000
@@ -1514,7 +1514,7 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 														"name":"targetSetpoint",
 														"value":{  
 															"value":deviceJSON.state.thermostatSetPoint,
-															"scale":deviceJSON.validRange.scale.toUpperCase()
+															"scale":deviceJSON.attributes.temperatureScale.toUpperCase()
 															},
 														"timeOfSample":deviceJSON.state.time,
 														"uncertaintyInMilliseconds":10000
@@ -1615,32 +1615,36 @@ app.post('/api/v1/command',
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
 				logger.log('debug', "[Command API] Received command API request for user: " + req.user.username + " command: " + message);
-				// Check validRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
+				// Check attributes.colorTemperatureRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ColorTemperatureController" && req.body.directive.header.name == "SetColorTemperature") {
 					var compare = req.body.directive.payload.colorTemperatureInKelvin;
 					// Handle Out of Range
-					if (deviceJSON.hasOwnProperty('validRange')) {
-						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-							logger.log('warn', "[Command API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
-							res.status(417).send();
-							validationStatus = false;
+					if (deviceJSON.hasOwnProperty('attributes')) {
+						if (deviceJSON.attributes.hasOwnProperty('colorTemperatureRange')) {
+							if (compare < data.attributes.colorTemperatureRange.temperatureMinK || compare > data.attributes.colorTemperatureRange.temperatureMaxK) {
+								logger.log('warn', "[Command API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.attributes.colorTemperatureRange));
+								res.status(417).send();
+								validationStatus = false;
+							}
 						}
 					}
-					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
+					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have data.attributes.colorTemperatureRange defined")}
 				}
 
-				// Check validRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
+				// Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
 				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
 					var compare = req.body.directive.payload.targetSetpoint.value;
 					// Handle Temperature Out of Range
-					if (deviceJSON.hasOwnProperty('validRange')) {
-						if (compare < data.validRange.minimumValue || compare > data.validRange.maximumValue) {
-							logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.validRange));
-							res.status(416).send();
-							validationStatus = false;
+					if (deviceJSON.hasOwnProperty('attributes')) {
+						if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
+							if (compare < data.attributes.temperatureRange.temperatureMin || compare > data.attributes.temperatureRange.temperatureMax) {
+								logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.attributes.temperatureRange));
+								res.status(417).send();
+								validationStatus = false;
+							}
 						}
 					}
-					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have validRange defined")}
+					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have data.attributes.temperatureRange defined")}
 				}
 				
 				if (validationStatus) {
@@ -1848,14 +1852,7 @@ app.post('/device/:dev_id', defaultLimiter,
 						data.capabilities = device.capabilities;
 						data.displayCategories = device.displayCategories;
 						data.reportState = device.reportState;
-						// Staged Code
-						//data.attributes = device.attributes
-						// End Staged Code
-
-						// Delete
-						data.validRange = device.validRange;
-						// End Delete
-
+						data.attributes = device.attributes
 						data.state = device.state;
 						data.save(function(err, d){
 							res.status(201);
@@ -2194,16 +2191,19 @@ function setstate(username, endpointId, payload) {
 						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
 						if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
 						else {newMode = "HEAT"}
+
 						// Check within supported range of device
-						if (deviceJSON.hasOwnProperty('validRange')) {
-							if (deviceJSON.validRange.hasOwnProperty('minimumValue') && deviceJSON.validRange.hasOwnProperty('maximumValue')) {
-								if (!(newTemp < deviceJSON.validRange.minimumValue) || !(newTemp > deviceJSON.validRange.maximumValue)) {
-									dev.state.thermostatSetPoint = newTemp;
-									dev.state.thermostatMode = newMode;
+						if (deviceJSON.hasOwnProperty('attributes')) {
+							if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
+								if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
+									if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
+										dev.state.thermostatSetPoint = newTemp;
+										dev.state.thermostatMode = newMode;
+									}
 								}
+
 							}
 						}
-
 					}
 				}
 				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};

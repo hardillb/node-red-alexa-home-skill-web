@@ -39,8 +39,7 @@ module.exports = mongoose.model('Devices', Devices);
     //     },
     //     temperatureRange: {
     //         temperatureMin: Number,
-    //         temperatureMax: Number,
-    //         scale: String       
+    //         temperatureMax: Number,    
     //     },
     //     temperatureScale: String,
     //     thermostatModes: [],
