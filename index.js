@@ -2022,12 +2022,12 @@ app.get('/admin/update-schema', defaultLimiter,
 		if (req.user.username === mqtt_user) {
 			const userDevices = Devices.find({});
 			Promise.all([userDevices]).then(([devices]) => {
-				logger.log('info', JSON.stringify(devices));
+				//logger.log('info', JSON.stringify(devices));
 				devices.forEach(dev => {
 					if (dev) {
 						dev.validRange = dev.validRange;
 						dev.attributes = ( dev.attributes || {});
-						logger.log('info', JSON.stringify(dev));
+						logger.log('info', "endpointId:" + dev.endpointId + ":" + JSON.stringify(dev));
 						var hasAttributes = false;
 						if (dev.capabilities.indexOf("ThermostatController") > -1) { // Thermostat
 							if (dev.validRange.minimumValue > 0 && dev.validRange.maximumValue > 0) {
@@ -2057,8 +2057,7 @@ app.get('/admin/update-schema', defaultLimiter,
 							dev.attributes.temperatureScale = dev.validRange.scale;
 						}
 						if (hasAttributes == true) {
-							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + ": " + JSON.stringify(dev.validRange));
-							logger.log('info', "New dev.attributes for endpointId: " + dev.endpointId + " to: " + JSON.stringify(dev.attributes));
+							logger.log('info', "endpointId: " + dev.endpointId + ", CHANGED, new dev.attributes value: " + JSON.stringify(dev.attributes));
 							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
 							// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
@@ -2066,7 +2065,7 @@ app.get('/admin/update-schema', defaultLimiter,
 							// 	else {logger.log('info', "Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
 							// });
 						} else {
-							logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to: Unknown");
+							logger.log('info', "endpointId: " + dev.endpointId + ", NO CHANGE");
 							// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
 							// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
