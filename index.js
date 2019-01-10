@@ -2048,21 +2048,22 @@ app.get('/admin/update-schema', defaultLimiter,
 						dev.validRange = dev.validRange;
 						dev.attributes = ( dev.attributes || {});
 						logger.log('info', JSON.stringify(dev));
-						var hasValidRange = false;
+						var hasAttributes = false;
 						if (dev.displayCategories.indexOf("ThermostatController") > -1) { // Thermostat
-							hasValidRange = true;
+							hasAttributes = true;
 							dev.attributes.temperatureRange = {};
 							dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
 							dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
 							dev.attributes.temperatureScale = dev.validRange.scale;
 						}
 						if (dev.capabilities.indexOf("ColorController") > -1) { // Thermostat
-							hasValidRange = true;
+							hasAttributes = true;
 							dev.attributes.colorTemperatureRange = {};
 							dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
 							dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
 						}
 						if (dev.capabilities.indexOf("TemperatureSensor") > -1) { // Thermostat
+							hasAttributes = true;
 							dev.attributes.temperatureScale = dev.validRange.scale;
 						}
 						if (hasValidRange == true) {
