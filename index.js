@@ -2065,11 +2065,11 @@ app.get('/admin/update-schema', defaultLimiter,
 						}
 						if (hasAttributes == true) {
 							logger.log('info', "endpointId: " + dev.endpointId + ", CHANGED, new dev.attributes value: " + JSON.stringify(dev.attributes));
-							Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
+							Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes }}, function(err, data) {
 							 	if (err) {
-							 		logger.log('warn', "ERROR updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
+							 		logger.log('warn', "ERROR updating dev.attributes for endpointId: " + dev.endpointId);
 							 	}
-							 	else {logger.log('info', "SUCCESS Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
+							 	else {logger.log('info', "SUCCESS Updated dev.attributes for endpointId: " + dev.endpointId);}
 							});
 						} else {
 							logger.log('info', "endpointId: " + dev.endpointId + ", NO CHANGE");
