@@ -2046,13 +2046,12 @@ app.get('/admin/update-schema', defaultLimiter,
 				devices.forEach(dev => {
 					if (dev) {
 						dev.validRange = dev.validRange;
-						dev.attributes = ( dev.attributes || {})
+						dev.attributes = ( dev.attributes || {});
 						logger.log('info', JSON.stringify(dev));
-						var deviceJSON = JSON.parse(JSON.stringify(dev));
 						var hasValidRange = false;
-						if (deviceJSON.validRange) {
+						if (dev.validRange) {
 							hasValidRange = true;
-							if (dev.validRange.scale) { // Assume thermostat temperature
+							if (dev.validRange.hasOwnProperty('scale')) { // Assume thermostat temperature
 								dev.attributes.temperatureRange = {};
 								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
 								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
@@ -2065,10 +2064,8 @@ app.get('/admin/update-schema', defaultLimiter,
 							}
 						}
 						if (hasValidRange == true) {
-							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + " to:");
-							logger.log('info', JSON.stringify(dev.validRange));
-							logger.log('info', "New dev.attributes and dev.state for endpointId: " + dev.endpointId + " to:");
-							logger.log('info', JSON.stringify(dev.attributes));
+							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + ": " + JSON.stringify(dev.validRange));
+							logger.log('info', "New dev.attributes for endpointId: " + dev.endpointId + " to: " + JSON.stringify(dev.attributes));
 							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
 							// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
@@ -2076,8 +2073,7 @@ app.get('/admin/update-schema', defaultLimiter,
 							// 	else {logger.log('info', "Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
 							// });
 						} else {
-							logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to:");
-							logger.log('info', "Unknown");
+							logger.log('info', "New dev.room for endpointId: " + dev.endpointId + " to: Unknown");
 							// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
 							// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
@@ -2087,7 +2083,7 @@ app.get('/admin/update-schema', defaultLimiter,
 						}
 					}
 				});
-				res.status(201);
+				res.status(200).send();
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
