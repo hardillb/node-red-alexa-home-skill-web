@@ -2049,7 +2049,7 @@ app.get('/admin/update-schema', defaultLimiter,
 						dev.attributes = ( dev.attributes || {});
 						logger.log('info', JSON.stringify(dev));
 						var hasAttributes = false;
-						if (dev.displayCategories.indexOf("ThermostatController") > -1) { // Thermostat
+						if (dev.capabilities.indexOf("ThermostatController") > -1) { // Thermostat
 							hasAttributes = true;
 							dev.attributes.temperatureRange = {};
 							dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
