@@ -840,27 +840,6 @@ app.post('/api/v1/action', defaultLimiter,
 					// 	}
 					// }
 
-					// Device info in DB
-					// device.room
-					// device.attributes : {
-					//     colorModel: String,
-					//     colorTemperatureRange: {
-					//         temperatureMinK: Number,
-					//         temperatureMaxK: Number
-					//     },
-					//     temperatureRange: {
-					//         temperatureMin: Number,
-					//         temperatureMax: Number,       
-					//     },
-					//	   temperatureScale: String,
-					//     thermostatModes: [],
-					//     availableModes: Schema.Types.Mixed,
-					//		   1 - 5, low, medium, high
-					//     availableToggles: Schema.Types.Mixed,
-					//     availableFanSpeeds: Schema.Types.Mixed,
-					//     sceneSupportsDeactivation: Boolean
-					// }
-
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< data.length; i++) {
@@ -869,13 +848,14 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.type = gHomeReplaceType(displayCategories)
 						dev.traits = [];
 						data[i].capabilities.forEach(function(capability){
-							dev.traits.push(ghomeReplaceCapability(capability, dev.reportState))
+							dev.traits.push(ghomeReplaceCapability(capability))
 						});
-						dev.willReportState = data[i].reportState;
-						//dev.roomHint = data[i].room; // Optional, will require schema extension
 						dev.name = {
 							name : data[i].friendlyName
 							}
+						dev.willReportState = data[i].reportState;
+						//dev.roomHint = data[i].room; // Optional, will require schema extension
+						dev.attributes = data[i].attributes;
 						dev.deviceInfo = {
 							manufacturerName : "Node-RED",
 							model : "Node-RED",
@@ -2056,6 +2036,7 @@ app.get('/admin/update-schema', defaultLimiter,
 								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
 								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
 								dev.attributes.temperatureScale = dev.validRange.scale;
+								dev.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; // All declared devices currently have this by nature of discovery response
 							}
 						}
 						if (dev.capabilities.indexOf("ColorController") > -1) { // ColorController
