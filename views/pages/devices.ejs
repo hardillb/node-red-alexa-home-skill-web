@@ -142,18 +142,49 @@ function saveDevice() {
 				}
 			});
 		}
-		if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+
+		if ($('#ThermostatController').prop('checked')) {
+			// Staged Code
+			// device.attributes.temperatureRange = {
+			// 	temperatureMin: $('#minimumValue').val(),
+			// 	temperatureMax: $('#maximumValue').val(),
+			// }
+			// device.attributes.temperatueScale = scale;
+			
+			// Remove
 			device.validRange = {
 					minimumValue: $('#minimumValue').val(),
 					maximumValue: $('#maximumValue').val(),
 					scale: scale
 				}
+			// End Remove
 		}
 		else if ( $('#TemperatureSensor').prop('checked')) {
+			// Staged Code
+			// device.attributes.temperatueScale = scale;
+
+			// Remove
 			device.validRange = {
 				scale: scale
 				}
+			// End Remove
 		}
+
+		if ($('#ColorTemperatureController').prop('checked')) {
+			// Staged Code			
+			// device.attributes.colorTemperatureRange = {
+			// 	temperatureMinK: $('#minimumValue').val(),
+			// 	temperatureMaxK: $('#maximumValue').val()
+			// }
+
+			// Remove
+			device.validRange = {
+					minimumValue: $('#minimumValue').val(),
+					maximumValue: $('#maximumValue').val()
+				}
+			// End Remove
+		}	
+		
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
 				device.capabilities.push(this.value);
@@ -197,7 +228,7 @@ function saveDevice() {
 		var device = devices[devID];
 		device.description = $('#description').val();
 
-		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
 				if (this.checked) {
@@ -205,12 +236,37 @@ function saveDevice() {
 				}
 			});
 		}
-		if ($('#ThermostatController').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
+		if ($('#ThermostatController').prop('checked')) {
+			// Staged  Code
+			// device.attributes.temperatureRange = {
+			// 	temperatureMin: $('#minimumValue').val(),
+			// 	temperatureMax: $('#maximumValue').val(),
+			// }
+			// device.attributes.temperatueScale = scale;
+			
+			// Remove
 			device.validRange = {
 					minimumValue: $('#minimumValue').val(),
 					maximumValue: $('#maximumValue').val(),
 					scale: scale
 				}
+			// End Remove
+		}
+
+		if ($('#ColorTemperatureController').prop('checked')) {
+			// Staged  Code			
+			// device.attributes.colorTemperatureRange = {
+			// 	temperatureMinK: $('#minimumValue').val(),
+			// 	temperatureMaxK: $('#maximumValue').val()
+			// }
+
+			// Remove
+			device.validRange = {
+					minimumValue: $('#minimumValue').val(),
+					maximumValue: $('#maximumValue').val(),
+					scale: scale
+				}
+			// End Remove
 		}
 
 		device.capabilities = [];
@@ -314,14 +370,63 @@ function edit(id) {
 	var temperature = $('#TemperatureSensor').prop('checked');
 
 
-	// reportState Boolean
+	// ReportState Boolean
 	if (device.hasOwnProperty('reportState')) {
 		if (device.reportState == true) {$('#ReportState').prop('checked', true)};
 		if (device.reportState == false) {$('#ReportState').prop('checked', false)};
 	}
 
+	// Staged Code
+	// if (device.hasOwnProperty('attributes')){
+	// 	// Color Controller
+	// 	if (colorTemperature && device.attributes.hasOwnProperty('colorTemperatureRange')) {
+	// 		if (device.attributes.colorTemperatureRange.hasOwnProperty('temperatureMaxK')) {
+	// 			$('#validRangeOptions').show();
+	// 			$("#maximumValue").prop('required',true);
+	// 			$('#maximumValue').removeAttr("disabled"); 
+	// 			$("#maximumValue").val(device.attributes.colorTemperatureRange.temperatureMaxK);
+	// 		}
+	// 		if (device.attributes.colorTemperatureRange.hasOwnProperty('temperatureMinK')) {
+	// 			$('#validRangeOptions').show();
+	// 			$("#minimumValue").prop('required',true);
+	// 			$('#minimumValue').removeAttr("disabled"); 
+	// 			$("#minimumValue").val(device.attributes.colorTemperatureRange.temperatureMinK);
+	// 		}
+	// 	}
+	// 	// Thermostat or Temperature Sensor
+	// 	else if ((thermostat || temperature) &&  device.attributes.hasOwnProperty('temperatureRange')) {
+	// 		if (validRange.hasOwnProperty('scale')) {
+	// 			$('#validRangeScaleOptions').show();
+	// 			$('#Celsius').removeAttr("disabled");
+	// 			$('#Farenheit').removeAttr("disabled");
+	// 			$("#Celsius").prop('required',true);
+	// 			$("#Farenheit").prop('required',true);
+	// 			if (device.attributes.temperatureScale == 'CELSIUS') {$("#Celsius").prop('checked', true)}
+	// 			if (device.attributes.temperatureScale == 'FARENHEIT') {$("#Farenheit").prop('checked', true)}
+	// 		}
+	// 		if (device.attributes.temperatureScale.hasOwnProperty('temperatureMax')) {
+	// 			$('#validRangeOptions').show();
+	// 			$("#maximumValue").prop('required',true);
+	// 			$('#maximumValue').removeAttr("disabled"); 
+	// 			$("#maximumValue").val(device.attributes.temperatureScale.temperatureMax);
+	// 		}
+	// 		if (device.attributes.temperatureScale.hasOwnProperty('temperatureMin')) {
+	// 			$('#validRangeOptions').show();
+	// 			$("#minimumValue").prop('required',true);
+	// 			$('#minimumValue').removeAttr("disabled"); 
+	// 			$("#minimumValue").val(device.attributes.temperatureScale.temperatureMin);
+	// 		}
+	// 	}
+	// }
+	// End Staged Code
+
+
+	// Delete
 	// Handle min/max and scale values, only show if ThermostatController or ColorTemperatureController
 	if (device.hasOwnProperty('validRange') && ( colorTemperature || thermostat || temperature) ) {
+		// Staged Code
+		// validRange = device.validRange;
+
 		validRange = device.validRange;
 		if (validRange.hasOwnProperty('scale')) {
 			$('#validRangeScaleOptions').show();
@@ -345,6 +450,7 @@ function edit(id) {
 			$("#minimumValue").val(validRange.minimumValue);
 		}
 	}
+	// End Delete
 }
 
 function deleteDevice(id) {

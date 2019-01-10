@@ -42,6 +42,7 @@ module.exports = mongoose.model('Devices', Devices);
     //         temperatureMax: Number,
     //         scale: String       
     //     },
+    //     temperatureScale: String,
     //     thermostatModes: [],
     //     availableModes: Schema.Types.Mixed,
     //     availableToggles: Schema.Types.Mixed,

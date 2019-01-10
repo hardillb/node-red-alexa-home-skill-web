@@ -1848,7 +1848,14 @@ app.post('/device/:dev_id', defaultLimiter,
 						data.capabilities = device.capabilities;
 						data.displayCategories = device.displayCategories;
 						data.reportState = device.reportState;
+						// Staged Code
+						//data.attributes = device.attributes
+						// End Staged Code
+
+						// Delete
 						data.validRange = device.validRange;
+						// End Delete
+
 						data.state = device.state;
 						data.save(function(err, d){
 							res.status(201);
@@ -2035,7 +2042,7 @@ app.get('/admin/update-schema', defaultLimiter,
 								dev.attributes.temperatureRange = {};
 								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
 								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-								dev.attributes.temperatureScale = dev.validRange.scale;
+								dev.attributes.temperatureScale = dev.validRange.scale.toUpperCase();
 								dev.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; // All declared devices currently have this by nature of discovery response
 							}
 						}
@@ -2058,19 +2065,19 @@ app.get('/admin/update-schema', defaultLimiter,
 						}
 						if (hasAttributes == true) {
 							logger.log('info', "endpointId: " + dev.endpointId + ", CHANGED, new dev.attributes value: " + JSON.stringify(dev.attributes));
-							// Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
-							// 	if (err) {
-							// 		logger.log('warn', "Error updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
-							// 	}
-							// 	else {logger.log('info', "Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
-							// });
+							Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes, room: "Unknown" }}, function(err, data) {
+							 	if (err) {
+							 		logger.log('warn', "ERROR updating dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);
+							 	}
+							 	else {logger.log('info', "SUCCESS Updated dev.attributes.colorTemperatureRange for endpointId: " + dev.endpointId);}
+							});
 						} else {
 							logger.log('info', "endpointId: " + dev.endpointId + ", NO CHANGE");
 							// Devices.updateOne({_id:dev._id}, { $set: { room: "Unknown" }}, function(err, data) {
 							// 	if (err) {
-							// 		logger.log('warn', "Error updating dev.room for endpointId: " + dev.endpointId);
+							// 		logger.log('warn', "ERROR updating dev.room for endpointId: " + dev.endpointId);
 							// 	}
-							// 	else {logger.log('info', "Updated dev.room for endpointId: " + dev.endpointId);}
+							// 	else {logger.log('info', "SUCCESS Updated dev.room for endpointId: " + dev.endpointId);}
 							// });
 						}
 					}
