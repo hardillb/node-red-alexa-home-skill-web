@@ -372,13 +372,13 @@ function edit(id) {
 					$('#validRangeOptions').show();
 					$("#maximumValue").prop('required',true);
 					$('#maximumValue').removeAttr("disabled"); 
-					$("#maximumValue").val(device.attributes.temperatureScale.temperatureMax);
+					$("#maximumValue").val(device.attributes.temperatureRange.temperatureMax);
 				}
 				if (device.attributes.temperatureRange.hasOwnProperty('temperatureMin')) {
 					$('#validRangeOptions').show();
 					$("#minimumValue").prop('required',true);
 					$('#minimumValue').removeAttr("disabled"); 
-					$("#minimumValue").val(device.attributes.temperatureScale.temperatureMin);
+					$("#minimumValue").val(device.attributes.temperatureRange.temperatureMin);
 				}
 			}
 		}
