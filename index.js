@@ -2050,17 +2050,22 @@ app.get('/admin/update-schema', defaultLimiter,
 						logger.log('info', JSON.stringify(dev));
 						var hasValidRange = false;
 						if (dev.validRange) {
-							hasValidRange = true;
-							if (dev.validRange.hasOwnProperty('scale')) { // Assume thermostat temperature
-								dev.attributes.temperatureRange = {};
-								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
-								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-								dev.attributes.temperatureScale = dev.validRange.scale;
+							if (dev.validRange.hasOwnProperty('scale')) { // Thermostat
+								if (dev.validRange.scale == "CELSIUS" || dev.validRange.scale == "FARENHEIT" ) {
+									hasValidRange = true;
+									dev.attributes.temperatureRange = {};
+									dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+									dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+									dev.attributes.temperatureScale = dev.validRange.scale;
+								}
 							}
-							else { // Assume color temperature
-								dev.attributes.colorTemperatureRange = {};
-								dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
-								dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+							else { // ColorTemperature
+								if (dev.validRange.maximumValue > 0) {
+									hasValidRange = true;
+									dev.attributes.colorTemperatureRange = {};
+									dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
+									dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+								}
 							}
 						}
 						if (hasValidRange == true) {
