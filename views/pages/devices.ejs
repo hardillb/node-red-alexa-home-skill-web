@@ -368,13 +368,13 @@ function edit(id) {
 				if (device.attributes.temperatureScale == 'FARENHEIT') {$("#Farenheit").prop('checked', true)}
 			}
 			if (device.attributes.hasOwnProperty('temperatureRange')) {
-				if (device.attributes.temperatureScale.hasOwnProperty('temperatureMax')) {
+				if (device.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
 					$('#validRangeOptions').show();
 					$("#maximumValue").prop('required',true);
 					$('#maximumValue').removeAttr("disabled"); 
 					$("#maximumValue").val(device.attributes.temperatureScale.temperatureMax);
 				}
-				if (device.attributes.temperatureScale.hasOwnProperty('temperatureMin')) {
+				if (device.attributes.temperatureRange.hasOwnProperty('temperatureMin')) {
 					$('#validRangeOptions').show();
 					$("#minimumValue").prop('required',true);
 					$('#minimumValue').removeAttr("disabled"); 
