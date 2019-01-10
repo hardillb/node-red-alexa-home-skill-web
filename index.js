@@ -2049,29 +2049,21 @@ app.get('/admin/update-schema', defaultLimiter,
 						dev.attributes = ( dev.attributes || {});
 						logger.log('info', JSON.stringify(dev));
 						var hasValidRange = false;
-						if (dev.validRange) {
-							if (dev.validRange.hasOwnProperty('scale')) { // Thermostat or Temp Sensor
-								if (dev.validRange.scale == "CELSIUS" || dev.validRange.scale == "FARENHEIT" ) {
-									hasValidRange = true;
-									if (dev.displayCategories.indexOf("THERMOSTAT") > -1) { // Thermostat
-										dev.attributes.temperatureRange = {};
-										dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
-										dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-										dev.attributes.temperatureScale = dev.validRange.scale;
-									}
-									else { // Temp Sensor
-										dev.attributes.temperatureScale = dev.validRange.scale;
-									}
-								}
-							}
-							else { // ColorTemperature
-								if (dev.validRange.maximumValue > 0) {
-									hasValidRange = true;
-									dev.attributes.colorTemperatureRange = {};
-									dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
-									dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
-								}
-							}
+						if (dev.displayCategories.indexOf("ThermostatController") > -1) { // Thermostat
+							hasValidRange = true;
+							dev.attributes.temperatureRange = {};
+							dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+							dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+							dev.attributes.temperatureScale = dev.validRange.scale;
+						}
+						if (dev.capabilities.indexOf("ColorController") > -1) { // Thermostat
+							hasValidRange = true;
+							dev.attributes.colorTemperatureRange = {};
+							dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
+							dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+						}
+						if (dev.capabilities.indexOf("TemperatureSensor") > -1) { // Thermostat
+							dev.attributes.temperatureScale = dev.validRange.scale;
 						}
 						if (hasValidRange == true) {
 							logger.log('info', "Existing dev.validRange for endpointId: " + dev.endpointId + ": " + JSON.stringify(dev.validRange));
