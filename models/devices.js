@@ -46,5 +46,5 @@ module.exports = mongoose.model('Devices', Devices);
     //     availableModes: Schema.Types.Mixed,
     //     availableToggles: Schema.Types.Mixed,
     //     availableFanSpeeds: Schema.Types.Mixed,
-    //     sceneSupportsDeactivation: Boolean
+    //     sceneReversible: Boolean
     // }

@@ -2042,10 +2042,15 @@ app.get('/admin/update-schema', defaultLimiter,
 						if (dev.capabilities.indexOf("ColorController") > -1) { // ColorController
 							if (dev.validRange.minimumValue > 0 &&  dev.validRange.maximumValue > 100) {
 								hasAttributes = true;
+								dev.attributes.colorModel = "hsv";
 								dev.attributes.colorTemperatureRange = {};
 								dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
 								dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
 							}
+						}
+						if (dev.capabilities.indexOf("SceneController") > -1) { // Scene
+							hasAttributes = true;
+							dev.attributes.sceneReversible = true;
 						}
 						if (dev.capabilities.indexOf("TemperatureSensor") > -1) { // Thermostat
 							hasAttributes = true;
