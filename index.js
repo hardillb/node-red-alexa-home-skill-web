@@ -797,7 +797,7 @@ app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 	//console.log(req)
-	logger.log('verbose', "[GHome API] Request:" + req.body);
+	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
 
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
@@ -850,7 +850,11 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.type = gHomeReplaceType(dev.type);
 						dev.traits = [];
 						devices[i].capabilities.forEach(function(capability){
-							dev.traits.push(gHomeReplaceCapability(capability))
+							var trait = gHomeReplaceCapability(capability);
+							// Limit supported traits
+							if (trait == "action.devices.traits.OnOff"){
+								dev.traits.push(trait);
+							}
 						});
 						dev.name = {
 							name : devices[i].friendlyName
@@ -865,7 +869,7 @@ app.post('/api/v1/action', defaultLimiter,
 							swVersion : "0.0.1"
 						}
 						// Initially only support OnOff trait, don't add other device types
-						if (dev.traits.indexOf("action.devices.traits.OnOff") > -1) {
+						if (dev.traits.length > 0) {
 							devs.push(dev);
 						}
 					}
@@ -873,7 +877,7 @@ app.post('/api/v1/action', defaultLimiter,
 					var response = {
 						"requestId": requestId,
 						"payload": {
-							"agentUserId": user._id,
+							"agentUserId": user[0]._id,
 							"devices" : devs
 						}
 					}
