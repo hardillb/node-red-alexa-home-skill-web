@@ -864,9 +864,11 @@ app.post('/api/v1/action', defaultLimiter,
 					res.status(200).json(response);
 				}
 				else if (!user){
+					logger.log('warn', "[GHome Sync API] User not found");
 					res.status(500).json({message: "User not found"});
 				}
 				else if (!device) {
+					logger.log('warn', "[GHome Sync API] Device not found");
 					res.status(500).json({message: "Device not found"});
 				}
 			}).catch(err => {
@@ -874,14 +876,82 @@ app.post('/api/v1/action', defaultLimiter,
 				res.status(500).json({message: "An error occurred."});
 			});
 			break;
+
+
 		case 'action.devices.EXEC' : 
 			// Exec
 			res.status(500).json({message: "EXEC not yet supported"});
 			break;
+
+
 		case 'action.devices.QUERY' :
-			// Query
-			res.status(500).json({message: "QUERY not yet supported"});
+			logger.log('verbose', "[GHome Query API] Running device discovery for user:" + req.user.username);
+			const findUser = Account.find({username: req.user.username});
+			const findDevices = Devices.find({username: req.user.username});
+			Promise.all([findUser, findDevices]).then(([user, devices]) => {
+				if (user && devices) {
+					var arrQueryDevices = req.body.inputs[0].devices;
+					var response = {
+						"requestId": requestId,
+						"payload": {
+							"devices" : {}
+						}
+					}
+					for (var i=0; i< arrQueryDevices.length; i++) {
+						// Find device in array of user devices returned in promise
+						var data = devices.find(obj => obj.endpointId === arrQueryDevices[i].id);
+						if (data) {
+							logger.log('verbose', "[GHome Query API] Match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
+							response.payload.devices[obj.endpointId].online = true;
+							// Build state response based upon device traits
+							data.capabilities.forEach(function(capability){
+								var trait = gHomeReplaceCapability(capability);
+								if (trait == "action.devices.traits.Brightness"){
+									response.payload.devices[obj.endpointId].brightness = data.state.brightness;
+								}
+								if (trait == "action.devices.traits.ColorSetting") {
+									if (!response.payload.devices[obj.endpointId].hasOwnProperty('on')){
+										response.payload.devices[obj.endpointId].on = data.state.power.toLowerCase();
+									}
+									response.payload.devices[obj.endpointId].color = {
+											"temperatureK":data.state.colorTemperature,
+											"spectrumHsv": {
+											  "hue": data.state.colorHue,
+											  "saturation": data.state.colorSaturation,
+											  "value": data.state.colorBrightness
+											}
+										}
+								}
+								if (trait == "action.devices.traits.OnOff") {
+									response.payload.devices[obj.endpointId].on = data.state.power.toLowerCase();
+								}
+								// if (trait == "action.devices.traits.Scene") {} Only requires 'online' which is set above
+							});
+						}
+						else {
+							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
+						}
+					}
+					// Send Response
+					logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
+					res.status(200).json(response);
+				}
+				else if (!user){
+					logger.log('warn', "[GHome Query API] User not found");
+					res.status(500).json({message: "User not found"});
+				}
+				else if (!device) {
+					logger.log('warn', "[GHome Query API] Device not found");
+					res.status(500).json({message: "Device not found"});
+				}
+
+			}).catch(err => {
+				logger.log('error', "[GHome Query API] error:" + err)
+				res.status(500).json({message: "An error occurred."});
+			});
 			break;
+
+
 		case 'action.devices.DISCONNECT' : 
 			// Remove OAuth tokens for Google Home
 			res.status(500).json({message: "DISCONNECT not yet supported"});
