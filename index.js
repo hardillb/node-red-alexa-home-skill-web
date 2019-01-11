@@ -877,6 +877,7 @@ app.post('/api/v1/action', defaultLimiter,
 							"devices" : devs
 						}
 					}
+					logger.log('verbose', "[GHome Sync API] Discovery Response: " + JSON.stringify(response));
 					// Send Response
 					res.status(200).json(response);
 				}
@@ -887,7 +888,7 @@ app.post('/api/v1/action', defaultLimiter,
 					res.status(500).json({message: "Device not found"});
 				}
 			}).catch(err => {
-				logger.log('error', "GHome API error:" + err)
+				logger.log('error', "[GHome Sync API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
 			});
 			break;
