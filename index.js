@@ -805,8 +805,8 @@ app.post('/api/v1/action', defaultLimiter,
 	switch (intent) {
 		case 'action.devices.SYNC' :
 			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
-			const findUser = Account.find({username: req.user.username});
-			const findDevices = Devices.find({username: req.user.username});
+			var findUser = Account.find({username: req.user.username});
+			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
 					// Build Device Array
@@ -886,8 +886,8 @@ app.post('/api/v1/action', defaultLimiter,
 
 		case 'action.devices.QUERY' :
 			logger.log('verbose', "[GHome Query API] Running device discovery for user:" + req.user.username);
-			const findUser = Account.find({username: req.user.username});
-			const findDevices = Devices.find({username: req.user.username});
+			var findUser = Account.find({username: req.user.username});
+			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
 					var arrQueryDevices = req.body.inputs[0].devices;
