@@ -150,6 +150,7 @@ function saveDevice() {
 				temperatureMax: $('#maximumValue').val(),
 			}
 			device.attributes.temperatureScale = scale;
+			device.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; 
 		}
 		
 		if ( $('#TemperatureSensor').prop('checked')) {
@@ -162,6 +163,10 @@ function saveDevice() {
 				temperatureMaxK: $('#maximumValue').val()
 			}
 		}	
+
+		if ($('#SceneController').prop('checked')) {
+			device.attributes.sceneReversible = true;
+		}
 		
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
@@ -204,6 +209,7 @@ function saveDevice() {
 	} else {
 		// Modify Existing Device
 		var device = devices[devID];
+		device.attributes = {};
 		device.description = $('#description').val();
 
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked')) {
@@ -221,6 +227,7 @@ function saveDevice() {
 				temperatureMax: $('#maximumValue').val(),
 			}
 			device.attributes.temperatureScale = scale;
+			device.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"];
 		}
 		
 		if ( $('#TemperatureSensor').prop('checked')) {
@@ -232,6 +239,10 @@ function saveDevice() {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
 			}
+		}
+
+		if ($('#SceneController').prop('checked')) {
+			device.attributes.sceneReversible = true;
 		}
 
 		device.capabilities = [];
