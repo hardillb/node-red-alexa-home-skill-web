@@ -796,7 +796,7 @@ app.post('/auth/exchange',function(req,res,next){
 app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-	console.log(req)
+	//console.log(req)
 	logger.log('verbose', "[GHome API] Request:" + req.body);
 
 	var intent = req.body.inputs[0].intent;
@@ -887,6 +887,7 @@ app.post('/api/v1/action', defaultLimiter,
 					res.status(500).json({message: "Device not found"});
 				}
 			}).catch(err => {
+				logger.log('error', "GHome API error:" + err)
 				res.status(500).json({message: "An error occurred."});
 			});
 			break;
