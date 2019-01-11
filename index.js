@@ -847,7 +847,7 @@ app.post('/api/v1/action', defaultLimiter,
 					for (var i=0; i< devices.length; i++) {
 						var dev = {}
 						dev.id = "" + devices[i].endpointId;
-						dev.type = gHomeReplaceType(displayCategories)
+						dev.type = gHomeReplaceType(dev.type);
 						dev.traits = [];
 						devices[i].capabilities.forEach(function(capability){
 							dev.traits.push(ghomeReplaceCapability(capability))
