@@ -844,20 +844,20 @@ app.post('/api/v1/action', defaultLimiter,
 
 					// Build Device Array
 					var devs = [];
-					for (var i=0; i< data.length; i++) {
+					for (var i=0; i< devices.length; i++) {
 						var dev = {}
-						dev.id = "" + data[i].endpointId;
+						dev.id = "" + devices[i].endpointId;
 						dev.type = gHomeReplaceType(displayCategories)
 						dev.traits = [];
-						data[i].capabilities.forEach(function(capability){
+						devices[i].capabilities.forEach(function(capability){
 							dev.traits.push(ghomeReplaceCapability(capability))
 						});
 						dev.name = {
-							name : data[i].friendlyName
+							name : devices[i].friendlyName
 							}
-						dev.willReportState = data[i].reportState;
-						//dev.roomHint = data[i].room; // Optional, will require schema extension
-						dev.attributes = data[i].attributes;
+						dev.willReportState = devices[i].reportState;
+						//dev.roomHint = devices[i].room; // Optional, will require schema extension
+						dev.attributes = devices[i].attributes;
 						dev.deviceInfo = {
 							manufacturerName : "Node-RED",
 							model : "Node-RED",
