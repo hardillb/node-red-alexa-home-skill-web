@@ -156,12 +156,17 @@ function saveDevice() {
 		if ( $('#TemperatureSensor').prop('checked')) {
 			device.attributes.temperatureScale = scale;
 		}
+		
+		if ($('#ColorController').prop('checked')) {
+			devices.attributes.commandOnlyColorSetting = false;
+		}
 
 		if ($('#ColorTemperatureController').prop('checked')) {	
 			device.attributes.colorTemperatureRange = {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
 			}
+			devices.attributes.commandOnlyColorSetting = false;
 		}	
 
 		if ($('#SceneController').prop('checked')) {
@@ -234,11 +239,16 @@ function saveDevice() {
 			device.attributes.temperatureScale = scale;
 		}
 
+		if ($('#ColorController').prop('checked')) {
+			devices.attributes.commandOnlyColorSetting = false;
+		}
+
 		if ($('#ColorTemperatureController').prop('checked')) {		
 			device.attributes.colorTemperatureRange = {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
 			}
+			devices.attributes.commandOnlyColorSetting = false;
 		}
 
 		if ($('#SceneController').prop('checked')) {

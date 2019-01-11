@@ -24,7 +24,7 @@ var consoleLoglevel = "info"; // default console log level
 
 // Configure Logging, with Exception Handler
 var debug = (process.env.ALEXA_DEBUG || false);
-if (debug == "true") {consoleLoglevel = "verbose"};
+if (debug == "true") {consoleLoglevel = "debug"};
 
 const logger = createLogger({
 	transports: [
@@ -257,11 +257,11 @@ client.on('error', function (err) {
 // Rate-limiter 
 const limiter = require('express-limiter')(app, client)
 
-// GetState Limiter, uses specific param, 150 reqs/ hr
+// GetState Limiter, uses specific param, 100 reqs/ hr
 const getStateLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		  opts.lookup = ['params.dev_id']
-		  opts.total = 150
+		  opts.total = 100
 		  opts.expire = 1000 * 60 * 60
 		  return next()
 	},
@@ -792,13 +792,11 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
-// Google Home
+/////////////////////// Start GHome Additions
 app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-	//console.log(req)
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
-
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
 
@@ -879,13 +877,60 @@ app.post('/api/v1/action', defaultLimiter,
 
 
 		case 'action.devices.EXEC' : 
-			// Exec
-			res.status(500).json({message: "EXEC not yet supported"});
+			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
+			var findDevices = Devices.find({username: req.user.username});
+			Promise.all([findUser, findDevices]).then(([user, devices]) => {
+				if (user && devices) {
+					// Capture incoming command, transform to Alexa format
+
+					// Array of devices
+					var arrCommandsDevices =  req.body.inputs[0].payload.commands[0].devices;
+					// Array of commands, assume match with device array at same index?!
+					var arrExecutions = req.body.inputs[0].payload.execution;
+
+					// Iterate through commands in payload, against each device
+					for (var i=0; i< arrExecutions.length; i++) {
+						if (arrExecutions[i].command = "action.devices.commands.OnOff"){
+							logger.log('debug', "[GHome Exec API] OnOff command for user:" + req.user.username);
+
+							// Command parameters
+							var params = arrExecutions[i].params.on;
+						}
+
+						if (arrExecutions[i].command = "action.devices.commands.ActivateScene"){
+							logger.log('debug', "[GHome Exec API] ActivateScene command for user:" + req.user.username);
+							var params = arrExecutions[i].params.deactivate;
+						}
+
+						// Match device to returned array in case of any required property/ validation
+						arrCommandsDevices.forEach(function(element) {
+							var data = devices.find(obj => obj.endpointId === element.id);
+							logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
+							// Build MQTT command message for each device
+							res.status(500).json({message: "EXEC Not yet supported"});
+						});
+
+					}
+
+				}
+				else if (!user){
+					logger.log('warn', "[GHome Exec API] User not found");
+					res.status(500).json({message: "User not found"});
+				}
+				else if (!device) {
+					logger.log('warn', "[GHome Exec API] Device not found");
+					res.status(500).json({message: "Device not found"});
+				}
+			}).catch(err => {
+				logger.log('error', "[GHome Exec API] error:" + err)
+				res.status(500).json({message: "An error occurred."});
+			});
+
 			break;
 
 
 		case 'action.devices.QUERY' :
-			logger.log('verbose', "[GHome Query API] Running device discovery for user:" + req.user.username);
+			logger.log('verbose', "[GHome Query API] Running device state query for user:" + req.user.username);
 			var findUser = Account.find({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
@@ -925,7 +970,8 @@ app.post('/api/v1/action', defaultLimiter,
 								if (trait == "action.devices.traits.OnOff") {
 									response.payload.devices[obj.endpointId].on = data.state.power.toLowerCase();
 								}
-								// if (trait == "action.devices.traits.Scene") {} Only requires 'online' which is set above
+								// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
+								// if (trait == "action.devices.traits.Thermostat") {}
 							});
 						}
 						else {
@@ -959,88 +1005,30 @@ app.post('/api/v1/action', defaultLimiter,
 	}
 });
 
+// Convert Alexa Device Capabilities to Google Home-compatible
 function gHomeReplaceCapability(capability) {
-	// PowerController
-	if(capability == "PowerController") {
-		return "action.devices.traits.OnOff";
-	}
-
-	if(capability == "BrightnessController")  {
-		return "action.devices.traits.Brightness";
-	}
-
-	if(capability == "ColorController" || capability == "ColorTemperatureController")  {
-		// "attributes": {
-		//     "colorModel": "rgb", // String. Required if the device supports the full spectrum color model either 'rgb' or 'hsv'
-		//     "colorTemperatureRange": { // String. Required if the device supports color temperature set by Kelvin
-		//       "temperatureMinK": 2000,
-		//       "temperatureMaxK": 9000
-		//     },
-		//     "commandOnlyColorSetting": true // Boolean. Defaults to false. Leave default if state node is used.
-		//   }
-		return "action.devices.traits.ColorSetting";
-	}
-
-	if(capability == "SceneController") {
-		// "attributes": {
-		// 	"sceneReversible": true
-		//   }	
-		return "action.devices.traits.Scene";
-	}
-
+	if(capability == "PowerController") {return "action.devices.traits.OnOff"};
+	if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"};
+	if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"};
+	if(capability == "SceneController") {return "action.devices.traits.Scene"};
 	if(capability == "ThermostatController")  {
-		// action.devices.traits.TemperatureSetting
-		// "attributes": {
-		//     "availableThermostatModes": "off,heat,cool,on",
-		//     "thermostatTemperatureUnit": "F"
-		// }
-
-		// action.devices.traits.TemperatureControl
-		// "attributes": {
-		//     "temperatureRange": {
-		//       "minThresholdCelsius": 30,
-		//       "maxThresholdCelsius": 100
-		//     },
-		//     "temperatureStepCelsius": 1,
-		//     "temperatureUnitForUX": "C"
-		//   }
-		return ["action.devices.traits.TemperatureSetting", "action.devices.traits.TemperatureControl"]; // Will be a problem, as is an array
+		return ["action.devices.traits.TemperatureSetting", "action.devices.traits.TemperatureControl"]; // Will be a problem, << is an array
 	}
-
-		// Modes
-		// "availableModes": [{
-		// 	"name": "mode",
-		// 	"name_values": [{
-		// 	  "name_synonym": ["mode"],
-		// 	  "lang": "en"
-		// 	}],
-		// 	"settings": [{
-		// 	  "setting_name": "auto",
-		// 	  "setting_values": [{
-		// 		"setting_synonym": ["auto", "automatic"],
-		// 		"lang": "en"
-		// 	  }]
-		// 	}, {
-		// 	  "setting_name": "manual",
-		// 	  "setting_values": [{
-		// 		"setting_synonym": ["auto", "non-auto"],
-		// 		"lang": "en"
-		// 	  }]
-		// 	}],
 }
 
+// Convert Alexa Device Types to Google Home-compatible
 function gHomeReplaceType(type) {
 	logger.log('verbose', "gHomeReplaceType input: " + type)
-	var replaceType = "NA";
-	if (type == "ACTIVITY_TRIGGER") {replaceType = "action.devices.types.SCENE"}
-	if (type == "LIGHT") {replaceType = "action.devices.types.LIGHT"}
-	if (type == "SMARTPLUG") {replaceType = "action.devices.types.OUTLET"}
-	if (type == "SWITCH") {replaceType = "action.devices.types.SWITCH"}
-	if (type == "THERMOSTAT") {replaceType = "action.devices.types.THERMOSTAT"}
-
-	logger.log('verbose', "gHomeReplaceType return: " + replaceType)
-	return replaceType;
+	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
+	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
+	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
+	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
+	else if (type == "THERMOSTAT") {return "action.devices.types.THERMOSTAT"}
+	else {return "NA"}
 }
+/////////////////////// End GHome Additions
+
+
 
 // Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
 app.get('/api/v1/devices', defaultLimiter,
