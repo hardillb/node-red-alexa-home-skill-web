@@ -797,10 +797,10 @@ app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 	console.log(req)
-	logger.log('verbose', "[GHome API] Request:" + req);
+	logger.log('verbose', "[GHome API] Request:" + req.body);
 
-	var intent = req.inputs.intent;
-	var requestId = req.requestId;
+	var intent = req.body.inputs[0].intent;
+	var requestId = req.body.requestId;
 
 	switch (intent) {
 		case 'action.devices.SYNC' :
