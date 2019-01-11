@@ -165,7 +165,7 @@ function saveDevice() {
 		}	
 
 		if ($('#SceneController').prop('checked')) {
-			device.attributes.sceneReversible = true;
+			device.attributes.sceneReversible = false;
 		}
 		
 		$('input[name=capabilities]').each(function(index){
@@ -242,7 +242,7 @@ function saveDevice() {
 		}
 
 		if ($('#SceneController').prop('checked')) {
-			device.attributes.sceneReversible = true;
+			device.attributes.sceneReversible = false;
 		}
 
 		device.capabilities = [];
