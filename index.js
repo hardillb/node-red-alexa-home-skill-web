@@ -1639,7 +1639,7 @@ app.post('/api/v1/command',
 						if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
 							if (compare < data.attributes.temperatureRange.temperatureMin || compare > data.attributes.temperatureRange.temperatureMax) {
 								logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(data.attributes.temperatureRange));
-								res.status(417).send();
+								res.status(416).send();
 								validationStatus = false;
 							}
 						}
