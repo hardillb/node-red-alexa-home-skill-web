@@ -809,39 +809,6 @@ app.post('/api/v1/action', defaultLimiter,
 			const findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
-					// SYNC response (single device example)
-					// {
-					// 	"requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
-					// 	"payload": {
-					// 	  "agentUserId": "1836.15267389",
-					// 	  "devices": [{
-					// 		"id": "123",
-					// 		"type": "action.devices.types.OUTLET",
-					// 		"traits": [
-					// 		  "action.devices.traits.OnOff"
-					// 		],
-					// 		"name": {
-					// 		  "defaultNames": ["My Outlet 1234"],
-					// 		  "name": "Night light",
-					// 		  "nicknames": ["wall plug"]
-					// 		},
-					// 		"willReportState": false,
-					// 		"roomHint": "kitchen",
-					// 		"deviceInfo": {
-					// 		  "manufacturer": "lights-out-inc",
-					// 		  "model": "hs1234",
-					// 		  "hwVersion": "3.2",
-					// 		  "swVersion": "11.4"
-					// 		},
-					// 		"customData": {
-					// 		  "fooValue": 74,
-					// 		  "barValue": true,
-					// 		  "bazValue": "foo"
-					// 		}
-					// 	  }]
-					// 	}
-					// }
-
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
