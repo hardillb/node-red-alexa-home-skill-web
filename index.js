@@ -983,23 +983,15 @@ function gHomeReplaceCapability(capability) {
 
 function gHomeReplaceType(type) {
 	logger.log('verbose', "gHomeReplaceType input: " + type)
-	switch (type) {	
-		case "ACTIVITY_TRIGGER": 
-			logger.log('verbose', "gHomeReplaceType return: action.devices.types.SCENE")
-			return "action.devices.types.SCENE"
-		case "LIGHT": 
-			logger.log('verbose', "gHomeReplaceType return: action.devices.types.LIGHT")
-			return "action.devices.types.LIGHT"
-		case "SMARTPLUG": 
-			logger.log('verbose', "gHomeReplaceType return: action.devices.types.OUTLET")
-			return "action.devices.types.OUTLET"
-		case "SWITCH":
-			logger.log('verbose', "gHomeReplaceType return: action.devices.types.SWITCH")
-			return "action.devices.types.SWITCH"
-		case "THERMOSTAT" :
-			logger.log('verbose', "gHomeReplaceType return: action.devices.types.THERMOSTAT")
-			return "action.devices.types.THERMOSTAT"
-	}
+	var replaceType;
+	if (type == "ACTIVITY_TRIGGER") {replaceType = "action.devices.types.SCENE"}
+	if (type == "LIGHT") {replaceType = "action.devices.types.LIGHT"}
+	if (type == "OUTLET") {replaceType = "action.devices.types.OUTLET"}
+	if (type == "SWITCH") {replaceType = "action.devices.types.SWITCH"}
+	if (type == "THERMOSTAT") {replaceType = "action.devices.types.THERMOSTAT"}
+	
+	logger.log('verbose', "gHomeReplaceType return: " + replaceType)
+	return replaceType;
 }
 
 // Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
