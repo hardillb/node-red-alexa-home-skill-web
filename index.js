@@ -868,8 +868,8 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.deviceInfo = {
 							manufacturer : "Node-RED",
 							model : "Node-RED",
-							hwVersion : "0.0.1",
-							swVersion : "0.0.1"
+							hwVersion : "0.1",
+							swVersion : "0.1"
 						}
 						// Limit supported traits, don't add other device types
 						if (dev.traits.length > 0 && dev.type != "NA") {
