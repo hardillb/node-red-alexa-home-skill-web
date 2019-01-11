@@ -817,11 +817,19 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.type = gHomeReplaceType(devices[i].displayCategories);
 						dev.traits = [];
 						// Limit supported device types
-						if (dev.type == "action.devices.types.LIGHT" || dev.type == "action.devices.types.OUTLET" || dev.type == "action.devices.types.SWITCH"   ) {
+						if (dev.type == "action.devices.types.SCENE" 
+						|| dev.type == "action.devices.types.LIGHT" 
+						|| dev.type == "action.devices.types.OUTLET" 
+						|| dev.type == "action.devices.types.SWITCH" ) {
+
 							devices[i].capabilities.forEach(function(capability){
 								var trait = gHomeReplaceCapability(capability);
 								// Limit supported traits
-								if (trait == "action.devices.traits.OnOff"){
+								if (trait == "action.devices.traits.OnOff"
+								|| trait == "action.devices.traits.ColorSetting"
+								|| trait == "action.devices.traits.Scene"
+								|| trait == "action.devices.traits.Brightness"){
+
 									dev.traits.push(trait);
 								}
 							});
@@ -956,7 +964,7 @@ function gHomeReplaceType(type) {
 	var replaceType = "NA";
 	if (type == "ACTIVITY_TRIGGER") {replaceType = "action.devices.types.SCENE"}
 	if (type == "LIGHT") {replaceType = "action.devices.types.LIGHT"}
-	if (type == "OUTLET") {replaceType = "action.devices.types.OUTLET"}
+	if (type == "SMARTPLUG") {replaceType = "action.devices.types.OUTLET"}
 	if (type == "SWITCH") {replaceType = "action.devices.types.SWITCH"}
 	if (type == "THERMOSTAT") {replaceType = "action.devices.types.THERMOSTAT"}
 
