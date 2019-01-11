@@ -798,8 +798,8 @@ app.post('/api/v1/action', defaultLimiter,
 	function(req,res,next){
 	logger.log('verbose', "[GHome API] Request:" + req);
 
-	var intent = req.header.inputs.intent;
-	var requestId = req.header.requestId;
+	var intent = req.inputs.intent;
+	var requestId = req.requestId;
 
 	switch (intent) {
 		case 'action.devices.SYNC' :
