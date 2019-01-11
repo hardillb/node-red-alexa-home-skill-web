@@ -864,9 +864,9 @@ app.post('/api/v1/action', defaultLimiter,
 							}
 						dev.willReportState = devices[i].reportState;
 						//dev.roomHint = devices[i].room; // Optional, will require schema extension
-						//dev.attributes = devices[i].attributes;
+						//dev.attributes = devices[i].attributes; // Disabled until attribute supported traits enabled
 						dev.deviceInfo = {
-							manufacturerName : "Node-RED",
+							manufacturer : "Node-RED",
 							model : "Node-RED",
 							hwVersion : "0.0.1",
 							swVersion : "0.0.1"
