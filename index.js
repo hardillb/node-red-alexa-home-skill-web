@@ -869,7 +869,7 @@ app.post('/api/v1/action', defaultLimiter,
 							swVersion : "0.0.1"
 						}
 						// Initially only support OnOff trait, don't add other device types
-						if (dev.traits.length > 0) {
+						if (dev.traits.length > 0 && dev.type != "NA") {
 							devs.push(dev);
 						}
 					}
@@ -983,13 +983,13 @@ function gHomeReplaceCapability(capability) {
 
 function gHomeReplaceType(type) {
 	logger.log('verbose', "gHomeReplaceType input: " + type)
-	var replaceType;
+	var replaceType = "NA";
 	if (type == "ACTIVITY_TRIGGER") {replaceType = "action.devices.types.SCENE"}
 	if (type == "LIGHT") {replaceType = "action.devices.types.LIGHT"}
 	if (type == "OUTLET") {replaceType = "action.devices.types.OUTLET"}
 	if (type == "SWITCH") {replaceType = "action.devices.types.SWITCH"}
 	if (type == "THERMOSTAT") {replaceType = "action.devices.types.THERMOSTAT"}
-	
+
 	logger.log('verbose', "gHomeReplaceType return: " + replaceType)
 	return replaceType;
 }
