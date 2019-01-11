@@ -985,19 +985,19 @@ function gHomeReplaceType(type) {
 	logger.log('verbose', "gHomeReplaceType input: " + type)
 	switch (type) {	
 		case "ACTIVITY_TRIGGER": 
-			logger.log('verbose', "gHomeReplaceType return: " + "action.devices.types.SCENE")
+			logger.log('verbose', "gHomeReplaceType return: action.devices.types.SCENE")
 			return "action.devices.types.SCENE"
 		case "LIGHT": 
-			logger.log('verbose', "gHomeReplaceType return: " + "action.devices.types.LIGHT")
+			logger.log('verbose', "gHomeReplaceType return: action.devices.types.LIGHT")
 			return "action.devices.types.LIGHT"
 		case "SMARTPLUG": 
-			logger.log('verbose', "gHomeReplaceType return: " + "action.devices.types.OUTLET")
+			logger.log('verbose', "gHomeReplaceType return: action.devices.types.OUTLET")
 			return "action.devices.types.OUTLET"
 		case "SWITCH":
-			logger.log('verbose', "gHomeReplaceType return: " + "action.devices.types.SWITCH")
+			logger.log('verbose', "gHomeReplaceType return: action.devices.types.SWITCH")
 			return "action.devices.types.SWITCH"
 		case "THERMOSTAT" :
-			logger.log('verbose', "gHomeReplaceType return: " + "action.devices.types.THERMOSTAT")
+			logger.log('verbose', "gHomeReplaceType return: action.devices.types.THERMOSTAT")
 			return "action.devices.types.THERMOSTAT"
 	}
 }
