@@ -849,13 +849,16 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.id = "" + devices[i].endpointId;
 						dev.type = gHomeReplaceType(devices[i].displayCategories);
 						dev.traits = [];
-						devices[i].capabilities.forEach(function(capability){
-							var trait = gHomeReplaceCapability(capability);
-							// Limit supported traits
-							if (trait == "action.devices.traits.OnOff"){
-								dev.traits.push(trait);
-							}
-						});
+						// Limit supported device types
+						if (dev.type == "action.devices.types.LIGHT" || dev.type == "action.devices.types.OUTLET" || dev.type == "action.devices.types.SWITCH"   ) {
+							devices[i].capabilities.forEach(function(capability){
+								var trait = gHomeReplaceCapability(capability);
+								// Limit supported traits
+								if (trait == "action.devices.traits.OnOff"){
+									dev.traits.push(trait);
+								}
+							});
+						}
 						dev.name = {
 							name : devices[i].friendlyName
 							}
@@ -868,7 +871,7 @@ app.post('/api/v1/action', defaultLimiter,
 							hwVersion : "0.0.1",
 							swVersion : "0.0.1"
 						}
-						// Initially only support OnOff trait, don't add other device types
+						// Limit supported traits, don't add other device types
 						if (dev.traits.length > 0 && dev.type != "NA") {
 							devs.push(dev);
 						}
