@@ -850,7 +850,7 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.type = gHomeReplaceType(dev.type);
 						dev.traits = [];
 						devices[i].capabilities.forEach(function(capability){
-							dev.traits.push(ghomeReplaceCapability(capability))
+							dev.traits.push(gHomeReplaceCapability(capability))
 						});
 						dev.name = {
 							name : devices[i].friendlyName
