@@ -792,17 +792,18 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
-// Google Home SYNC
+// Google Home
 app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-	logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
+	logger.log('verbose', "[GHome API] Request:" + req);
 
 	var intent = req.header.inputs.intent;
 	var requestId = req.header.requestId;
 
 	switch (intent) {
-		case 'action.devices.SYNC' : 
+		case 'action.devices.SYNC' :
+			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
 			const findUser = Account.find({username: req.user.username});
 			const findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
@@ -2020,68 +2021,68 @@ app.get('/admin/user-devices', defaultLimiter,
 		}
 });
 
-// Sync Alexa and Google Home data, this will copy device.validRange to device.attributes element
-app.get('/admin/update-schema', defaultLimiter,
-	ensureAuthenticated,
-	function(req,res){
-		if (req.user.username === mqtt_user) {
-			const userDevices = Devices.find({});
-			Promise.all([userDevices]).then(([devices]) => {
-				//logger.log('info', JSON.stringify(devices));
-				devices.forEach(dev => {
-					if (dev) {
-						dev.validRange = dev.validRange;
-						dev.attributes = ( dev.attributes || {});
-						logger.log('info', "endpointId:" + dev.endpointId + ":" + JSON.stringify(dev));
-						var hasAttributes = false;
-						if (dev.capabilities.indexOf("ThermostatController") > -1) { // Thermostat
-							if (dev.validRange.minimumValue > 0 && dev.validRange.maximumValue > 0) {
-								hasAttributes = true;
-								dev.attributes.temperatureRange = {};
-								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
-								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
-								dev.attributes.temperatureScale = dev.validRange.scale.toUpperCase();
-								dev.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; // All declared devices currently have this by nature of discovery response
-							}
-						}
-						if (dev.capabilities.indexOf("ColorController") > -1) { // ColorController
-							if (dev.validRange.minimumValue > 0 &&  dev.validRange.maximumValue > 100) {
-								hasAttributes = true;
-								dev.attributes.colorModel = "hsv";
-								dev.attributes.colorTemperatureRange = {};
-								dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
-								dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
-							}
-						}
-						if (dev.capabilities.indexOf("SceneController") > -1) { // Scene
-							hasAttributes = true;
-							dev.attributes.sceneReversible = true;
-						}
-						if (dev.capabilities.indexOf("TemperatureSensor") > -1) { // Thermostat
-							hasAttributes = true;
-							dev.attributes.temperatureScale = dev.validRange.scale;
-						}
-						if (hasAttributes == true) {
-							logger.log('info', "endpointId: " + dev.endpointId + ", CHANGED, new dev.attributes value: " + JSON.stringify(dev.attributes));
-							Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes }}, function(err, data) {
-							 	if (err) {
-							 		logger.log('warn', "ERROR updating dev.attributes for endpointId: " + dev.endpointId);
-							 	}
-							 	else {logger.log('info', "SUCCESS Updated dev.attributes for endpointId: " + dev.endpointId);}
-							});
-						} else {
-							logger.log('info', "endpointId: " + dev.endpointId + ", NO CHANGE");
-						}
-					}
-				});
-				res.status(200).send();
-			}).catch(err => {
-				res.status(500).json({error: err});
-			});
-		} else {
-			res.status(401).send();
-		}
-});
+// One-time, sync Alexa and Google Home data, this will copy device.validRange to device.attributes element
+// app.get('/admin/update-schema', defaultLimiter,
+// 	ensureAuthenticated,
+// 	function(req,res){
+// 		if (req.user.username === mqtt_user) {
+// 			const userDevices = Devices.find({});
+// 			Promise.all([userDevices]).then(([devices]) => {
+// 				//logger.log('info', JSON.stringify(devices));
+// 				devices.forEach(dev => {
+// 					if (dev) {
+// 						dev.validRange = dev.validRange;
+// 						dev.attributes = ( dev.attributes || {});
+// 						logger.log('info', "endpointId:" + dev.endpointId + ":" + JSON.stringify(dev));
+// 						var hasAttributes = false;
+// 						if (dev.capabilities.indexOf("ThermostatController") > -1) { // Thermostat
+// 							if (dev.validRange.minimumValue > 0 && dev.validRange.maximumValue > 0) {
+// 								hasAttributes = true;
+// 								dev.attributes.temperatureRange = {};
+// 								dev.attributes.temperatureRange.temperatureMin = dev.validRange.minimumValue;
+// 								dev.attributes.temperatureRange.temperatureMax = dev.validRange.maximumValue;
+// 								dev.attributes.temperatureScale = dev.validRange.scale.toUpperCase();
+// 								dev.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; // All declared devices currently have this by nature of discovery response
+// 							}
+// 						}
+// 						if (dev.capabilities.indexOf("ColorController") > -1) { // ColorController
+// 							if (dev.validRange.minimumValue > 0 &&  dev.validRange.maximumValue > 100) {
+// 								hasAttributes = true;
+// 								dev.attributes.colorModel = "hsv";
+// 								dev.attributes.colorTemperatureRange = {};
+// 								dev.attributes.colorTemperatureRange.temperatureMinK = dev.validRange.minimumValue;
+// 								dev.attributes.colorTemperatureRange.temperatureMaxK = dev.validRange.maximumValue;
+// 							}
+// 						}
+// 						if (dev.capabilities.indexOf("SceneController") > -1) { // Scene
+// 							hasAttributes = true;
+// 							dev.attributes.sceneReversible = true;
+// 						}
+// 						if (dev.capabilities.indexOf("TemperatureSensor") > -1) { // Thermostat
+// 							hasAttributes = true;
+// 							dev.attributes.temperatureScale = dev.validRange.scale;
+// 						}
+// 						if (hasAttributes == true) {
+// 							logger.log('info', "endpointId: " + dev.endpointId + ", CHANGED, new dev.attributes value: " + JSON.stringify(dev.attributes));
+// 							Devices.updateOne({_id:dev._id}, { $set: { attributes: dev.attributes }}, function(err, data) {
+// 							 	if (err) {
+// 							 		logger.log('warn', "ERROR updating dev.attributes for endpointId: " + dev.endpointId);
+// 							 	}
+// 							 	else {logger.log('info', "SUCCESS Updated dev.attributes for endpointId: " + dev.endpointId);}
+// 							});
+// 						} else {
+// 							logger.log('info', "endpointId: " + dev.endpointId + ", NO CHANGE");
+// 						}
+// 					}
+// 				});
+// 				res.status(200).send();
+// 			}).catch(err => {
+// 				res.status(500).json({error: err});
+// 			});
+// 		} else {
+// 			res.status(401).send();
+// 		}
+// });
 
 app.put('/services', defaultLimiter,
 	ensureAuthenticated,
