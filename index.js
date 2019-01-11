@@ -796,7 +796,7 @@ app.post('/auth/exchange',function(req,res,next){
 app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-	logger.log('verbose', "[GHome API] Request:" + req);
+	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req));
 
 	var intent = req.inputs.intent;
 	var requestId = req.requestId;
