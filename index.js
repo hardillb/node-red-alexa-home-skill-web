@@ -983,7 +983,7 @@ app.post('/api/v1/action', defaultLimiter,
 							};
 
 							onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
-							res.status(500).send();
+							//res.status(500).send();
 							// Add response handler on MQTT message recieved where message hasOwnProperty googlehome, build and send expected response
 						});
 					}
