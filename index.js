@@ -1014,7 +1014,7 @@ app.post('/api/v1/action', defaultLimiter,
 						logger.log('debug', "[GHome Query API] Trying to match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
 						logger.log('debug', "[GHome Query API] User devices: " + JSON.stringify(devices));	
 
-						var data = devices.find(obj => obj.endpointId === arrQueryDevices[i].id);
+						var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
 							response.payload.devices[obj.endpointId].online = true;
