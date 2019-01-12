@@ -381,13 +381,13 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 			logger.log('error', "[Core] Missing grant token:" + token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
-			//console.log("Token is GOOD!");
+			logger.log('debug', "[Core] OAuth Token good, token:" + token);
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
-			//console.log("TOKEN PROBLEM");
+			logger.log('error', "[Core] OAuth Token error, token:" + token);
 			done(null, false);
 		} else {
-			//console.log("TOKEN PROBLEM 2");
+			logger.log('error', "[Core] OAuth Token error:" + error);
 			done(error);
 		}
 	});
