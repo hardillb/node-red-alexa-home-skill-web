@@ -831,6 +831,15 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.willReportState = devices[i].reportState;
 						//dev.roomHint = devices[i].room; // Optional, will require schema extension
 						dev.attributes = devices[i].attributes; // Disabled until attribute supported traits enabled
+
+						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
+						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
+							delete dev.attributes.temperatureScale;
+							delete dev.attributes.thermostatModes;
+							dev.attributes.availableThermostatModes = devices[i].attributes.thermostatModes.map(function(x){ return x.toLowerCase()});
+							dev.attributes.thermostatTemperatureUnit = devices[i].attributes.temperatureScale.charAt(0).toUpperCase; // >> Need to make this upper F or C, so trim
+						}
+
 						dev.deviceInfo = {
 							manufacturer : "Node-RED",
 							model : "Node-RED",
@@ -881,39 +890,42 @@ app.post('/api/v1/action', defaultLimiter,
 						var params = arrExecutions[i].params; // Google Home Parameters
 						var message; // Placeholder for MQTT Command
 						// Transform Google command format into Alexa Command format (to avoid re-work on Node-RED Nodes, !need to revisit!)
+
+						// Don't match to Alexa, in contrrib check for message details and match accordingly
+
 						// action.devices.commands.OnOff
-						if (arrExecutions[i].command = "action.devices.commands.OnOff"){
-							logger.log('debug', "[GHome Exec API] OnOff command for user:" + req.user.username);
-							// Set MQTT Message with invalid/ placeholder endpointId
-							if (params.on == true) {
-								message = {"directive":{"header":{"namespace":"Alexa.PowerController","name":"TurnOn","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
-							}
-							else if (params.on == false) {
-								message = {"directive":{"header":{"namespace":"Alexa.PowerController","name":"TurnOff","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
-							}
-						}
-						// action.devices.commands.ActivateScene
-						if (arrExecutions[i].command = "action.devices.commands.ActivateScene"){
-							logger.log('debug', "[GHome Exec API] ActivateScene command for user:" + req.user.username);
-							message = {"directive":{"header":{"namespace":"Alexa.SceneController","name":"Activate","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
-						}
-						// action.devices.commands.BrightnessAbsolute
-						if (arrExecutions[i].command = "action.devices.commands.BrightnessAbsolute"){
-							logger.log('debug', "[GHome Exec API] BrightnessAbsolute command for user:" + req.user.username);
-							message = {"directive":{"header":{"namespace":"Alexa.BrightnessController","name":"SetBrightness","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{"brightness":params.brightness}}};
-						}
-						// action.devices.commands.ColorAbsolute
-						if (arrExecutions[i].command = "action.devices.commands.ColorAbsolute"){
-							logger.log('debug', "[GHome Exec API] ColorAbsolute command for user:" + req.user.username);
-							// ColorTemp command
-							if (params.color.hasOwnProperty('colorTemperature')){
-								message = {"directive":{"header":{"namespace":"Alexa.ColorTemperatureController","name":"SetColorTemperature","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{"colorTemperatureInKelvin":params.color.temperature}}};
-							}
-							// Color command
-							if (params.color.hasOwnProperty('spectrumHSV')){
-								message = {"directive":{"header":{"namespace":"Alexa.ColorController","name":"SetColor","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{"color":{"hue":params.color.spectrumHSV.hue,"saturation":params.color.spectrumHSV.saturation,"brightness":params.color.spectrumHSV.value}}}};
-							}
-						}
+						// if (arrExecutions[i].command = "action.devices.commands.OnOff"){
+						// 	logger.log('debug', "[GHome Exec API] OnOff command for user:" + req.user.username);
+						// 	// Set MQTT Message with invalid/ placeholder endpointId
+						// 	if (params.on == true) {
+						// 		message = {"directive":{"header":{"namespace":"Alexa.PowerController","name":"TurnOn","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
+						// 	}
+						// 	else if (params.on == false) {
+						// 		message = {"directive":{"header":{"namespace":"Alexa.PowerController","name":"TurnOff","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
+						// 	}
+						// }
+						// // action.devices.commands.ActivateScene
+						// if (arrExecutions[i].command = "action.devices.commands.ActivateScene"){
+						// 	logger.log('debug', "[GHome Exec API] ActivateScene command for user:" + req.user.username);
+						// 	message = {"directive":{"header":{"namespace":"Alexa.SceneController","name":"Activate","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
+						// }
+						// // action.devices.commands.BrightnessAbsolute
+						// if (arrExecutions[i].command = "action.devices.commands.BrightnessAbsolute"){
+						// 	logger.log('debug', "[GHome Exec API] BrightnessAbsolute command for user:" + req.user.username);
+						// 	message = {"directive":{"header":{"namespace":"Alexa.BrightnessController","name":"SetBrightness","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{"brightness":params.brightness}}};
+						// }
+						// // action.devices.commands.ColorAbsolute
+						// if (arrExecutions[i].command = "action.devices.commands.ColorAbsolute"){
+						// 	logger.log('debug', "[GHome Exec API] ColorAbsolute command for user:" + req.user.username);
+						// 	// ColorTemp command
+						// 	if (params.color.hasOwnProperty('colorTemperature')){
+						// 		message = {"directive":{"header":{"namespace":"Alexa.ColorTemperatureController","name":"SetColorTemperature","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{"colorTemperatureInKelvin":params.color.temperature}}};
+						// 	}
+						// 	// Color command
+						// 	if (params.color.hasOwnProperty('spectrumHSV')){
+						// 		message = {"directive":{"header":{"namespace":"Alexa.ColorController","name":"SetColor","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{"color":{"hue":params.color.spectrumHSV.hue,"saturation":params.color.spectrumHSV.saturation,"brightness":params.color.spectrumHSV.value}}}};
+						// 	}
+						// }
 
 						// Add other supported command types here namely:
 						// action.devices.commands.SetTemperature // will need validation that is in range
@@ -929,28 +941,36 @@ app.post('/api/v1/action', defaultLimiter,
 							// Set MQTT Topic
 							var topic = "command/" + req.user.username + "/" + element.id;
 							// Set MQTT endpointId
-							message.directive.endpoint.endpointId = "" + element.id;
+							//message.directive.endpoint.endpointId = "" + element.id;
+
+
 
 							// Add "ghome" element to message to show it is a GHome API message, also include params variable
-							message.googlehome = {}
-							message.googlehome.params = params;
+							//message.googlehome = {}
+							//message.googlehome.params = params;
+
+							// Check endpointIt not 0, then process command
 
 							try{
+								// Define MQTT Message
+								var message = JSON.stringify({
+									requestId: requestId,
+									id: element.id,
+									execution: arrExecutions[i]
+								});
 								//mqttClient.publish(topic,message); // Publish Command
 								logger.log('info', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 							} catch (err) {
 								logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
 							}
+
 							var command = {
 								user: req.user.username,
 								res: res,
 								timestamp: Date.now()
 							};
-					
-							// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
-							//onGoingCommands[requestId] = command;
-
-							res.status(500).json({message: "EXEC not yet supported"});
+							onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+							//res.status(500).json({message: "EXEC not yet supported"});
 
 							// Add response handler on MQTT message recieved where message hasOwnProperty googlehome, build and send expected response
 						});
@@ -1055,9 +1075,7 @@ function gHomeReplaceCapability(capability) {
 	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
-	else if(capability == "ThermostatController")  {
-		return ["action.devices.traits.TemperatureSetting", "action.devices.traits.TemperatureControl"]; // Will be a problem, << is an array
-	}
+	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
 	else {return "Not Supported"}
 }
 
