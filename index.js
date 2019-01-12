@@ -1026,6 +1026,8 @@ app.post('/api/v1/action', defaultLimiter,
 							// Add state response based upon device traits
 							data.capabilities.forEach(function(capability){
 								var trait = gHomeReplaceCapability(capability);
+
+								// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
 								if (trait == "action.devices.traits.Brightness"){
 									response.payload.devices[data.endpointId].brightness = data.state.brightness;
 								}
@@ -1102,7 +1104,7 @@ function gHomeReplaceCapability(capability) {
 
 // Convert Alexa Device Types to Google Home-compatible
 function gHomeReplaceType(type) {
-	// Limit supported deviuce types, add new ones here
+	// Limit supported device types, add new ones here
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
