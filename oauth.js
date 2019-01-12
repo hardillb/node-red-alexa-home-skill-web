@@ -34,27 +34,28 @@ server.exchange(oauth2orize.exchange.code({
 			var now = (new Date().getTime())
 			OAuth.AccessToken.findOne({application:application, user: grant.user, expires: {$gt: now}}, function(error,token){
 				if (token) {
+					console.log("debug", "Found valid AccessToken for user:" + grant.user);
 					OAuth.RefreshToken.findOne({application:application, user: grant.user},function(error, refreshToken){
 						if (refreshToken){
+							console.log("debug", "Found valid RefreshToken for user:" + grant.user);
 							var expires = Math.round((token.expires - (new Date().getTime()))/1000);
 							done(null,token.token, refreshToken.token,{token_type: 'Bearer', expires_in: expires});
-							//console.log("sent expires_in: " + expires);
+							console.log("debug", "AccessToken sent expires_in: " + expires);
 						} else {
 							// Shouldn't get here unless there is an error as there
 							// should be a refresh token if there is an access token
+							console.log("debug", "Error, could not find valid RefreshToken for user:" + grant.user);
 							done(error);
 						}
 					});
 				} else if (!error) {
+					console.log("debug", "Valid AccessToken not found for user:" + grant.user);
 					var token = new OAuth.AccessToken({
 						application: grant.application,
 						user: grant.user,
 						grant: grant,
 						scope: grant.scope
 					});
-
-					//console.log("Creating new token: ", token)
-
 					token.save(function(error){
 						var expires = Math.round((token.expires - (new Date().getTime()))/1000);
 						//delete old refreshToken or reuse?
@@ -70,7 +71,7 @@ server.exchange(oauth2orize.exchange.code({
 								console.log(JSON.stringify(refreshToken));
 
 								refreshToken.save(function(error){
-									done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope });
+									done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope});
 								});
 							} else {
 								done(error);

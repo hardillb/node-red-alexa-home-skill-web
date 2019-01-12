@@ -707,6 +707,7 @@ app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI,
 	if (typeof applicationID == "string") {applicationID = parseInt(applicationID)};
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
 		if (application) {
+			logger.log("debug", "[Oauth2] Starting Auth for application:" + application.title);
 			var match = false, uri = url.parse(redirectURI || '');
 			for (var i = 0; i < application.domains.length; i++) {
 				logger.log('info', "[Oauth2] Checking OAuth redirectURI against defined service domain: " + application.domains[i]);
@@ -753,6 +754,7 @@ app.post('/auth/finish',function(req,res,next) {
 	//console.log(req.body);
 	//console.log(req.params);
 	if (req.user) {
+		logger.log("debug", "[OAuth2] User already logged in:" + req.user.username);
 		next();
 	} else {
 		passport.authenticate('local', {
