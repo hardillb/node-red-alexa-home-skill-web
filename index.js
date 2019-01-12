@@ -999,7 +999,7 @@ app.post('/api/v1/action', defaultLimiter,
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
-					var arrQueryDevices = req.body.inputs[0].devices;
+					var arrQueryDevices = req.body.inputs[0].payload.devices;
 					var response = {
 						"requestId": requestId,
 						"payload": {
@@ -1064,7 +1064,7 @@ app.post('/api/v1/action', defaultLimiter,
 
 		case 'action.devices.DISCONNECT' : 
 			// Remove OAuth tokens for Google Home
-			res.status(500).json({message: "DISCONNECT not yet supported"});
+			res.status(200).send();
 			break; 
 	}
 });
