@@ -158,7 +158,7 @@ function saveDevice() {
 		}
 		
 		if ($('#ColorController').prop('checked')) {
-			//devices.attributes.commandOnlyColorSetting = false;
+			device.attributes.commandOnlyColorSetting = false;
 		}
 
 		if ($('#ColorTemperatureController').prop('checked')) {	
@@ -166,7 +166,7 @@ function saveDevice() {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
 			}
-			devices.attributes.commandOnlyColorSetting = false;
+			device.attributes.commandOnlyColorSetting = false;
 		}	
 
 		if ($('#SceneController').prop('checked')) {
@@ -240,7 +240,7 @@ function saveDevice() {
 		}
 
 		if ($('#ColorController').prop('checked')) {
-			//devices.attributes.commandOnlyColorSetting = false;
+			device.attributes.commandOnlyColorSetting = false;
 		}
 
 		if ($('#ColorTemperatureController').prop('checked')) {		
@@ -248,7 +248,7 @@ function saveDevice() {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
 			}
-			devices.attributes.commandOnlyColorSetting = false;
+			device.attributes.commandOnlyColorSetting = false;
 		}
 
 		if ($('#SceneController').prop('checked')) {
