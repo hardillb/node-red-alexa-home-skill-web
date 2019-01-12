@@ -1024,8 +1024,11 @@ app.post('/api/v1/action', defaultLimiter,
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
 							logger.log('verbose', "[GHome Query API] Response object: " + JSON.stringify(response));
-							response.payload.devices[data.endpointId].online = true;
-							// Build state response based upon device traits
+
+							// Create initial JSON object for device
+							response.payload.devices[data.endpointId] = {online: true};
+
+							// Add state response based upon device traits
 							data.capabilities.forEach(function(capability){
 								var trait = gHomeReplaceCapability(capability);
 								if (trait == "action.devices.traits.Brightness"){
