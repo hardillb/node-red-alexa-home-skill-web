@@ -1017,6 +1017,7 @@ app.post('/api/v1/action', defaultLimiter,
 						var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
+							logger.log('verbose', "[GHome Query API] Response object: " + JSON.stringify(response));
 							response.payload.devices[data.endpointId].online = true;
 							// Build state response based upon device traits
 							data.capabilities.forEach(function(capability){
