@@ -66,6 +66,8 @@ server.exchange(oauth2orize.exchange.code({
 									user: grant.user,
 									application: grant.application
 								});
+								console.log("debug", "Created RefreshToken for user:" + grant.user + ", expires_in:" + expires);
+								console.log(JSON.stringify(refreshToken));
 
 								refreshToken.save(function(error){
 									done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope });
@@ -99,13 +101,13 @@ server.exchange(oauth2orize.exchange.refreshToken({
 						grant: grant,
 						scope: grant.scope
 					});
-					console.log("debug", "Created AccessToken for user:" + refresh.user);
-					console.log(JSON.stringify(newToken));
 
 					newToken.save(function(error){
 						var expires = Math.round((newToken.expires - (new Date().getTime()))/1000);
 						if (!error) {
-							console.log("debug", "Token saved")
+							console.log("debug", "Created AccessToken for user:" + refresh.user  + ", expires_in:" + expires);
+							console.log(JSON.stringify(newToken));
+							console.log("debug", "Access Token saved")
 							done(null, newToken.token, refresh.token, {token_type: 'Bearer', expires_in: expires, scope: newToken.scope});
 						} else {
 							console.log("debug", "Error saving token")
