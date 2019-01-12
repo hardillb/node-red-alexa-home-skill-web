@@ -968,7 +968,7 @@ app.post('/api/v1/action', defaultLimiter,
 									id: element.id,
 									execution: arrExecutions[i]
 								});
-								//mqttClient.publish(topic,message); // Publish Command
+								mqttClient.publish(topic,message); // Publish Command
 								logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 								logger.log('debug', "[GHome Exec API] MQTT message:" + message);
 
@@ -982,10 +982,7 @@ app.post('/api/v1/action', defaultLimiter,
 								timestamp: Date.now()
 							};
 
-							logger.log('verbose', "[GHome Exec API] Added MQTT to Ongoing Commands buffer");
-							logger.log('debug', "[GHome Exec API] Ongoing Command:" + JSON.stringify(command));
-
-							//onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+							onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
 							res.status(500).send();
 							// Add response handler on MQTT message recieved where message hasOwnProperty googlehome, build and send expected response
 						});
