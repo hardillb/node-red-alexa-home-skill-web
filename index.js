@@ -1017,18 +1017,18 @@ app.post('/api/v1/action', defaultLimiter,
 						var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
-							response.payload.devices[obj.endpointId].online = true;
+							response.payload.devices[data.endpointId].online = true;
 							// Build state response based upon device traits
 							data.capabilities.forEach(function(capability){
 								var trait = gHomeReplaceCapability(capability);
 								if (trait == "action.devices.traits.Brightness"){
-									response.payload.devices[obj.endpointId].brightness = data.state.brightness;
+									response.payload.devices[data.endpointId].brightness = data.state.brightness;
 								}
 								if (trait == "action.devices.traits.ColorSetting") {
-									if (!response.payload.devices[obj.endpointId].hasOwnProperty('on')){
-										response.payload.devices[obj.endpointId].on = data.state.power.toLowerCase();
+									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
+										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
 									}
-									response.payload.devices[obj.endpointId].color = {
+									response.payload.devices[data.endpointId].color = {
 											"temperatureK":data.state.colorTemperature,
 											"spectrumHsv": {
 											  "hue": data.state.colorHue,
@@ -1038,7 +1038,7 @@ app.post('/api/v1/action', defaultLimiter,
 										}
 								}
 								if (trait == "action.devices.traits.OnOff") {
-									response.payload.devices[obj.endpointId].on = data.state.power.toLowerCase();
+									response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
 								}
 								// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
 								// if (trait == "action.devices.traits.Thermostat") {}
