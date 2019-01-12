@@ -120,6 +120,8 @@ server.exchange(oauth2orize.exchange.refreshToken({
 				}
 			});
 		} else {
+			if (!refresh) {console.log("debug", "Error, refresh token not found for application:" + application.title)};
+			if (refresh.application != application.id){console.log("debug", "Error, refresh.application: " + refresh.application + " does not match application.id:" + application.id)};
 			done(error, false);
 		}
 	});
