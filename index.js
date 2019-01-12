@@ -834,10 +834,10 @@ app.post('/api/v1/action', defaultLimiter,
 
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
+							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
+							dev.attributes.thermostatTemperatureUnit = dev.attributes.temperatureScale.charAt(0).toUpperCase; // >> Need to make this upper F or C, so trim
 							delete dev.attributes.temperatureScale;
 							delete dev.attributes.thermostatModes;
-							dev.attributes.availableThermostatModes = devices[i].attributes.thermostatModes.map(function(x){ return x.toLowerCase()});
-							dev.attributes.thermostatTemperatureUnit = devices[i].attributes.temperatureScale.charAt(0).toUpperCase; // >> Need to make this upper F or C, so trim
 						}
 
 						dev.deviceInfo = {
@@ -1082,7 +1082,6 @@ function gHomeReplaceCapability(capability) {
 // Convert Alexa Device Types to Google Home-compatible
 function gHomeReplaceType(type) {
 	// Limit supported deviuce types, add new ones here
-	logger.log('verbose', "gHomeReplaceType input: " + type)
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
