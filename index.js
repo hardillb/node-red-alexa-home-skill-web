@@ -820,7 +820,8 @@ app.post('/api/v1/action', defaultLimiter,
 							// Check supported capability/ trait
 							devices[i].capabilities.forEach(function(capability){
 								var trait = gHomeReplaceCapability(capability);
-								if (trait != "Not Supported"){
+								// Add supported traits, don't add duplicates
+								if (trait != "Not Supported" && dev.traits.indexOf(trait) == -1){
 									dev.traits.push(trait);
 								}
 							});
