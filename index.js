@@ -894,7 +894,7 @@ app.post('/api/v1/action', defaultLimiter,
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (devices) {
 					var arrCommandsDevices =  req.body.inputs[0].payload.commands[0].devices; // Array of devices to execute commands against
-					var arrExecutions = req.body.inputs[0].payload.execution; // Array of commands, assume match with device array at same index?!
+					var arrExecutions = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
 
 					for (var i=0; i< arrExecutions.length; i++) { // Iterate through commands in payload, against each listed 
 						var params = arrExecutions[i].params; // Google Home Parameters
