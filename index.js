@@ -892,7 +892,7 @@ app.post('/api/v1/action', defaultLimiter,
 			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
-				if (user && devices) {
+				if (devices) {
 					var arrCommandsDevices =  req.body.inputs[0].payload.commands[0].devices; // Array of devices to execute commands against
 					var arrExecutions = req.body.inputs[0].payload.execution; // Array of commands, assume match with device array at same index?!
 
@@ -990,10 +990,6 @@ app.post('/api/v1/action', defaultLimiter,
 							// Add response handler on MQTT message recieved where message hasOwnProperty googlehome, build and send expected response
 						});
 					}
-				}
-				else if (!user){
-					logger.log('warn', "[GHome Exec API] User not found");
-					res.status(500).json({message: "User not found"});
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Exec API] Device not found");
