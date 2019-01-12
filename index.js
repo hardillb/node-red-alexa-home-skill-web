@@ -704,6 +704,7 @@ app.post('/lostPassword', restrictiveLimiter, function(req, res, next){
 
 // Authorization URI
 app.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI, done) {
+	if (typeof applicationID == "string") {applicationID = parseInt(applicationID)};
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
 		if (application) {
 			var match = false, uri = url.parse(redirectURI || '');
@@ -766,6 +767,9 @@ app.post('/auth/finish',function(req,res,next) {
 				logger.log('warn', "[Oauth2] User not authenticated");
 				req.flash('error', 'Your email or password was incorrect. Please try again.');
 				res.redirect(req.body['auth_url'])
+			}
+			else {
+				logger.log('error', "[Oauth2] Auth error: " + error);
 			}
  		})(req,res,next);
 	}
