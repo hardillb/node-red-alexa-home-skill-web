@@ -1048,7 +1048,13 @@ app.post('/api/v1/action', defaultLimiter,
 										}
 								}
 								if (trait == "action.devices.traits.OnOff") {
-									response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
+									if (data.state.power.toLowerCase() == 'on') {
+										response.payload.devices[data.endpointId].on = true;
+									}
+									else {
+										response.payload.devices[data.endpointId].on = false;
+									}
+									
 								}
 								// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
 								// if (trait == "action.devices.traits.Thermostat") {}
