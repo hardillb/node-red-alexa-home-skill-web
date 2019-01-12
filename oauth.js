@@ -116,6 +116,9 @@ server.exchange(oauth2orize.exchange.refreshToken({
 						}
 					});
 				} else {
+					if (!grant) {console.log("debug", "Error, GrantCode not found")};
+					if (!grant.active) {console.log("debug", "Error, grant not active")};
+					if (grant.application != application.id){console.log("debug", "Error, grant.application: " + grant.application + " does not match application.id:" + application.id)};
 					done(error,null);
 				}
 			});
