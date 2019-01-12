@@ -801,6 +801,7 @@ app.post('/api/v1/action', defaultLimiter,
 	var requestId = req.body.requestId;
 
 	switch (intent) {
+		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
 			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
 			var findUser = Account.find({username: req.user.username});
@@ -814,7 +815,7 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.id = "" + devices[i].endpointId;
 						dev.type = gHomeReplaceType(devices[i].displayCategories);
 						dev.traits = [];
-						// Limit supported device types
+						// Limit supported device types, add new ones here
 						if (dev.type == "action.devices.types.SCENE" 
 						|| dev.type == "action.devices.types.LIGHT" 
 						|| dev.type == "action.devices.types.OUTLET" 
@@ -822,7 +823,7 @@ app.post('/api/v1/action', defaultLimiter,
 
 							devices[i].capabilities.forEach(function(capability){
 								var trait = gHomeReplaceCapability(capability);
-								// Limit supported traits
+								// Limit supported traits, add new ones here
 								if (trait == "action.devices.traits.OnOff"
 								|| trait == "action.devices.traits.ColorSetting"
 								|| trait == "action.devices.traits.Scene"
@@ -875,43 +876,87 @@ app.post('/api/v1/action', defaultLimiter,
 			});
 			break;
 
-
+		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXEC' : 
 			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
-					// Capture incoming command, transform to Alexa format
+					var arrCommandsDevices =  req.body.inputs[0].payload.commands[0].devices; // Array of devices to execute commands against
+					var arrExecutions = req.body.inputs[0].payload.execution; // Array of commands, assume match with device array at same index?!
 
-					// Array of devices
-					var arrCommandsDevices =  req.body.inputs[0].payload.commands[0].devices;
-					// Array of commands, assume match with device array at same index?!
-					var arrExecutions = req.body.inputs[0].payload.execution;
+					for (var i=0; i< arrExecutions.length; i++) { // Iterate through commands in payload, against each listed 
+						var params = arrExecutions[i].params; // Google Home Parameters
+						var message; // Placeholder for MQTT Command
+						// Transform Google command format into Alexa Command format (to avoid re-work on Node-RED Nodes, !need to revisit!)
 
-					// Iterate through commands in payload, against each device
-					for (var i=0; i< arrExecutions.length; i++) {
+						// action.devices.commands.OnOff
 						if (arrExecutions[i].command = "action.devices.commands.OnOff"){
 							logger.log('debug', "[GHome Exec API] OnOff command for user:" + req.user.username);
-
-							// Command parameters
-							var params = arrExecutions[i].params.on;
+							// Set MQTT Message with invalid/ placeholder endpointId
+							if (params.on == true) {
+								message = {"directive":{"header":{"namespace":"Alexa.PowerController","name":"TurnOn","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
+							}
+							else if (params.on == false) {
+								message = {"directive":{"header":{"namespace":"Alexa.PowerController","name":"TurnOff","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
+							}
 						}
 
+						// action.devices.commands.ActivateScene
 						if (arrExecutions[i].command = "action.devices.commands.ActivateScene"){
 							logger.log('debug', "[GHome Exec API] ActivateScene command for user:" + req.user.username);
-							var params = arrExecutions[i].params.deactivate;
+							message = {"directive":{"header":{"namespace":"Alexa.SceneController","name":"Activate","payloadVersion":"3","messageId":requestId},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"0","cookie":{}},"payload":{}}};
 						}
+
+						// action.devices.commands.BrightnessAbsolute
+						if (arrExecutions[i].command = "action.devices.commands.BrightnessAbsolute"){
+							logger.log('debug', "[GHome Exec API] BrightnessAbsolute command for user:" + req.user.username);
+							message = {"directive":{"header":{"namespace":"Alexa.BrightnessController","name":"SetBrightness","payloadVersion":"3","messageId":"5c38805b-7f03-41af-bcc1-cae061d325e1"},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"226","cookie":{}},"payload":{"brightness":params.brightness}}};
+						}
+
+						// action.devices.commands.ColorAbsolute
+						if (arrExecutions[i].command = "action.devices.commands.ColorAbsolute"){
+							logger.log('debug', "[GHome Exec API] ColorAbsolute command for user:" + req.user.username);
+							// ColorTemp
+							if (params.color.hasOwnProperty('colorTemperature')){
+								message = {"directive":{"header":{"namespace":"Alexa.ColorTemperatureController","name":"SetColorTemperature","payloadVersion":"3","messageId":"769c1c52-fee1-4528-b0e1-ebcf3729aac8"},"endpoint":{"scope":{"type":"BearerToken"},"endpointId":"226","cookie":{}},"payload":{"colorTemperatureInKelvin":params.color.temperature}}};
+							}
+						}
+
+						// Add other supported action paths here
 
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
 							var data = devices.find(obj => obj.endpointId === element.id);
 							logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
-							// Build MQTT command message for each device
-							res.status(500).json({message: "EXEC Not yet supported"});
+							
+							// Set MQTT Topic
+							var topic = "command/" + req.user.username + "/" + element.id;
+							// Set MQTT endpointId
+							message.directive.endpoint.endpointId = "" + element.id;
+
+							// Add "ghome" element to message to show it is a GHome API message, also include params variable
+							message.googlehome = {}
+							message.googlehome.params = params;
+
+							try{
+								mqttClient.publish(topic,message); // Publish Command
+								logger.log('info', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+							} catch (err) {
+								logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
+							}
+							var command = {
+								user: req.user.username,
+								res: res,
+								timestamp: Date.now()
+							};
+					
+							// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+							onGoingCommands[requestId] = command;
+
+							// Add response handler on MQTT message recieved where message hasOwnProperty googlehome, build and send expected response
 						});
-
 					}
-
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Exec API] User not found");
@@ -928,7 +973,7 @@ app.post('/api/v1/action', defaultLimiter,
 
 			break;
 
-
+		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.QUERY' :
 			logger.log('verbose', "[GHome Query API] Running device state query for user:" + req.user.username);
 			var findUser = Account.find({username: req.user.username});
