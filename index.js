@@ -1053,7 +1053,7 @@ app.post('/api/v1/action', defaultLimiter,
 								}
 								// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
 								if (trait == "action.devices.traits.TemperatureSetting") {
-									response.payload.devices[data.endpointId].thermostatMode = data.state.thermostatMode;
+									response.payload.devices[data.endpointId].thermostatMode = data.state.thermostatMode.toLowerCase();
 									response.payload.devices[data.endpointId].thermostatTemperatureSetpoint = data.state.thermostatSetPoint;
 								}
 							});
