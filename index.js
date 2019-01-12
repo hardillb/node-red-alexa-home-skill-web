@@ -888,7 +888,7 @@ app.post('/api/v1/action', defaultLimiter,
 			break;
 
 		///////////////////////////////////////////////////////////////////////////
-		case 'action.devices.EXEC' : 
+		case 'action.devices.EXECUTE' : 
 			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
