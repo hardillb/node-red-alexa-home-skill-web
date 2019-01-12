@@ -986,7 +986,7 @@ app.post('/api/v1/action', defaultLimiter,
 							logger.log('debug', "[GHome Exec API] Ongoing Command:" + JSON.stringify(command));
 
 							//onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
-
+							res.status(500).send();
 							// Add response handler on MQTT message recieved where message hasOwnProperty googlehome, build and send expected response
 						});
 					}
