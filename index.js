@@ -782,11 +782,14 @@ app.post('/auth/exchange',function(req,res,next){
 	oauthModels.Application.findOne({ oauth_id: appID, oauth_secret: appSecret }, function(error, application) {
 		if (application) {
 			req.appl = application;
+			logger.log("debug", "[Oauth2] Exchange application:" + application);
 			next();
 		} else if (!error) {
 			error = new Error("ERROR: Could not find service definition associated with applicationID: " + appID + " or secret: " + appSecret);
+			logger.log("debug", "[Oauth2] Could not find service definition associated with applicationID: " + appID + " or secret: " + appSecret);
 			next(error);
 		} else {
+			logger.log("debug", "[Oauth2] Error:" + error);
 			next(error);
 		}
 	});
