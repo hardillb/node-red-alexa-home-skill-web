@@ -1,6 +1,6 @@
 {
   "name": "node-red-alexa-home-skill-v3",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,8 @@
   "keywords": [
     "alexa",
     "smart",
-    "home"
+    "home",
+    "google"
   ],
   "author": "chrismbradford@gmail.com",
   "license": "Apache-2.0",
