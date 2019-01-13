@@ -922,8 +922,6 @@ app.post('/api/v1/action', defaultLimiter,
 								logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
 							}
 
-							// Params not working propoerly, need to look at why
-
 							// Build success response and include in onGoingCommands
 							var response = {
 								requestId: requestId,
@@ -935,8 +933,6 @@ app.post('/api/v1/action', defaultLimiter,
 									}]
 								}
 							}
-
-							// Need error response, may move both of these into MQTT on message handler and include params in ongoingCommands
 
 							var command = {
 								user: req.user.username,
@@ -1378,19 +1374,28 @@ mqttClient.on('message',function(topic,message){
 		if (commandWaiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
-				// Google Home response
+				// Google Home success response
 				if (commandWaiting.hasOwnProperty('response')) {
 					logger.log('debug', "[Command API] Google Home MQTT command response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 				}
-				// Alexa response sned to Lambda for full response construction
+				// Alexa success response send to Lambda for full response construction
 				else {
 					logger.log('debug', "[Command API] Alexa MQTT command successful");
 					commandWaiting.res.status(200).send();
 				}			
 			} else {
-				commandWaiting.res.status(503).send();
-				logger.log('warn', "[Command API] Failed MQTT Command API response");
+				// Google Home failure response
+				if (commandWaiting.hasOwnProperty('response')) {
+					delete commandWaiting.response.state;
+					commandWaiting.response.status = "FAILED";
+					commandWaiting.res.status(200).json(commandWaiting.response);
+				}
+				// Alexa failure response send to Lambda for full response construction
+				else {
+					commandWaiting.res.status(503).send();
+					logger.log('warn', "[Command API] Failed MQTT Command API response");
+				}
 			}
 			delete onGoingCommands[payload.messageId];
 			var params = {
