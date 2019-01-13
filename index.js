@@ -14,6 +14,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
+const request = require('request');
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
@@ -21,6 +22,7 @@ var ua = require('universal-analytics');
 const { format, createLogger, transports } = require('winston');
 var enableAnalytics = true;
 var consoleLoglevel = "info"; // default console log level
+var enableGoogleHomeSync = true;
 
 // Configure Logging, with Exception Handler
 var debug = (process.env.ALEXA_DEBUG || false);
@@ -60,7 +62,6 @@ if (!(process.env.GOOGLE_ANALYTICS_TID)) {
 else {
 	var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-
 // Validate CRITICAL environment variables passed to container
 if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_USER && process.env.MQTT_PASSWORD && process.env.MQTT_PORT)) {
 	logger.log('error',"[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
@@ -73,6 +74,14 @@ if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
 // Warn on not supply of MAIL username/ password/ server
 if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSWORD)) {
 	logger.log('warn',"[Core] No MAIL_SERVER/ MAIL_USER/ MAIL_PASSWORD environment variable supplied. System generated emails will generate errors");
+}
+// Warn on SYNC_API not being specified/ request SYNC will be disabled
+if (!(process.env.HOMEGRAPH_APIKEY)){
+	logger.log('warn',"[Core] No HOMEGRAPH_APIKEY environment variable supplied. Adding, removing or modifyingg user devices will show in Google Home without this.");
+	enableGoogleHomeSync = false;
+}
+else {
+	var SYNC_API = "https://homegraph.googleapis.com/v1/devices:requestSync?key=" + process.env.HOMEGRAPH_APIKEY;
 }
 
 // NodeJS App Settings
@@ -1046,8 +1055,27 @@ app.post('/api/v1/action', defaultLimiter,
 
 
 		case 'action.devices.DISCONNECT' : 
-			// Remove OAuth tokens for Google Home
-			res.status(200).send();
+			// Find service definition with Google URLs
+			var userId = req.user._id;
+			oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" },function(err, data){
+				if (data) {
+					// Remove OAuth tokens for **Google Home** only
+					logger.log('debug', "[GHome Disconnect API] Would delete GrantCodes, AccessTokens and RefreshTokens for userId:" + userId + ", application:" + data.title);
+
+					// const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId, application: data._id});
+					// const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId, application: data._id});
+					// const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId, application: data._id});
+					// Promise.all([deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
+					// 	//logger.log('info', result);
+					res.status(200).send();
+					// 	logger.log('info', "[GHome Disconnect API] Deleted GrantCodes, RefreshToken and AccessTokens for user account: " + userId)
+
+					// }).catch(err => {
+					// 	logger.log('warn', "[GHome Disconnect API] Failed to delete GrantCodes, RefreshToken and AccessTokens for user account: " + userId);
+					// 	res.status(500).json({error: err});
+					// });
+				}
+			});
 			break; 
 	}
 });
@@ -2257,6 +2285,39 @@ server.listen(port, host, function(){
 	setTimeout(function(){
 	},5000);
 });
+
+// GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync 
+function gHomeSync(userid){
+	oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" },function(err, data){
+		if (data) {
+			// Find User and GrantCode, as DISCONNECT API will delete all Grant Codes for users we can assume if grant code exists user is "active"
+			var userAccount = Account.findOne({_id:userid});
+			var arrGrantCodes = Oauth.GrantCodes.find({user: userid, application: data._id});
+			Promise.all([userAccount, arrGrantCodes]).then(([user, grants]) => {
+				if (user && grants.length > 0) {
+					request(
+						{
+							url: SYNC_API,
+							method: "POST",
+							json: {
+								agentUserId: user._id
+							}
+						},
+						function(err, resp, body) {
+							if (!err) {
+								logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username);
+							} else {
+								logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username);
+							}
+						}
+					);
+				}
+			}).catch(err => {
+				logger.log('error', "[GHome Sync Devices] Error:" + err);
+			});
+		}
+	});
+}
 
 // Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
 function setstate(username, endpointId, payload) {
