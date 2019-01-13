@@ -6,10 +6,17 @@
 		</button>
   </div>
 
+  <div class="alert alert-primary alert-dismissible fade show" role="alert">
+      <strong>Google Assistant support now available for testing!</strong> See <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Use-the-Hosted-Instance'>here</a> for more information.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+      </button>
+  </div>
+
   <div class="container main-content">
     <h1>Node-RED Smart Home Control</h1>
 
-    <p>Welcome to the registration point for the <a href="http://nodered.org">Node-RED</a> Smart Home Control device bridge.</p>
+    <p>Welcome to the registration point for the <a href="http://nodered.org">Node-RED</a> Smart Home Control device bridge - this service works with both Alexa and Google Assistant.</p>
          
     <p>Using this "bridge" you can control a variety of endpoints, as outlined below. Useful target nodes for this skill include:</p>
     <ul>
@@ -39,7 +46,7 @@
           <th scope="row">Channel Control</th>
           <td>Channel number or name etc. </td>
           <td>HTTP Out node</td>
-          <td>"Alexa, set Lounge TV channel to (101 | BBC 1)"</td>
+          <td>"Alexa, set Lounge TV channel to (101 | BBC1)"</td>
         </tr>
         <tr>
           <th scope="row">Color Control</th>
