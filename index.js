@@ -917,10 +917,27 @@ app.post('/api/v1/action', defaultLimiter,
 
 							} catch (err) {
 								logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
+								logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
 							}
+
+							// Build success response and include in onGoingCommands
+							var response = {
+								requestId: requestId,
+								payload: {
+									commands: [{
+										ids: [element.id],
+										status: "SUCCESS",
+										state: params
+									}]
+								}
+							}
+
+							// Need error response, may move both of these into MQTT on message handler and include params in ongoingCommands
+
 							var command = {
 								user: req.user.username,
 								res: res,
+								response: response,
 								timestamp: Date.now()
 							};
 							onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
@@ -1357,8 +1374,16 @@ mqttClient.on('message',function(topic,message){
 		if (commandWaiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
-				commandWaiting.res.status(200).send();
-				logger.log('debug', "[Command API] Successful MQTT Command API response");				
+				// Google Home response
+				if (commandWaiting.hasOwnProperty('response')) {
+					logger.log('debug', "[Command API] Google Home MQTT command response: " + JSON.stringify(commandWaiting.response));
+					commandWaiting.res.status(200).json(commandWaiting.response);
+				}
+				// Alexa response sned to Lambda for full response construction
+				else {
+					logger.log('debug', "[Command API] Alexa MQTT command successful");
+					commandWaiting.res.status(200).send();
+				}			
 			} else {
 				commandWaiting.res.status(503).send();
 				logger.log('warn', "[Command API] Failed MQTT Command API response");
