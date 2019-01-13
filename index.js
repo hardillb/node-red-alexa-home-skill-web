@@ -893,11 +893,13 @@ app.post('/api/v1/action', defaultLimiter,
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (devices) {
-					var arrCommandsDevices =  req.body.inputs[0].payload.commands[0].devices; // Array of devices to execute commands against
-					var arrExecutions = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
-					for (var i=0; i< arrExecutions.length; i++) { // Iterate through commands in payload, against each listed 
-						var params = arrExecutions[i].params; // Google Home Parameters
-						var message; // Placeholder for MQTT Command
+					
+					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
+					
+					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
+						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
+						var params = arrCommands[i].execution[0].params; // Google Home Parameters
+
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
 							var data = devices.find(obj => obj.endpointId === element.id);
@@ -909,7 +911,7 @@ app.post('/api/v1/action', defaultLimiter,
 								var message = JSON.stringify({
 									requestId: requestId,
 									id: element.id,
-									execution: arrExecutions[i]
+									execution: arrCommands[i]
 								});
 								mqttClient.publish(topic,message); // Publish Command
 								logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
@@ -919,6 +921,8 @@ app.post('/api/v1/action', defaultLimiter,
 								logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
 								logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
 							}
+
+							// Params not working propoerly, need to look at why
 
 							// Build success response and include in onGoingCommands
 							var response = {
