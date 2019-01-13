@@ -77,7 +77,7 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 }
 // Warn on SYNC_API not being specified/ request SYNC will be disabled
 if (!(process.env.HOMEGRAPH_APIKEY)){
-	logger.log('warn',"[Core] No HOMEGRAPH_APIKEY environment variable supplied. Adding, removing or modifyingg user devices will show in Google Home without this.");
+	logger.log('warn',"[Core] No HOMEGRAPH_APIKEY environment variable supplied. New devices, removal or device changes will not show in users Google Home App without this");
 	enableGoogleHomeSync = false;
 }
 else {
@@ -1053,27 +1053,23 @@ app.post('/api/v1/action', defaultLimiter,
 			});
 			break;
 
-
 		case 'action.devices.DISCONNECT' : 
 			// Find service definition with Google URLs
 			var userId = req.user._id;
 			oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" },function(err, data){
 				if (data) {
 					// Remove OAuth tokens for **Google Home** only
-					logger.log('debug', "[GHome Disconnect API] Would delete GrantCodes, AccessTokens and RefreshTokens for userId:" + userId + ", application:" + data.title);
-
-					// const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId, application: data._id});
-					// const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId, application: data._id});
-					// const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId, application: data._id});
-					// Promise.all([deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens]).then(result => {
-					// 	//logger.log('info', result);
-					res.status(200).send();
-					// 	logger.log('info', "[GHome Disconnect API] Deleted GrantCodes, RefreshToken and AccessTokens for user account: " + userId)
-
-					// }).catch(err => {
-					// 	logger.log('warn', "[GHome Disconnect API] Failed to delete GrantCodes, RefreshToken and AccessTokens for user account: " + userId);
-					// 	res.status(500).json({error: err});
-					// });
+					logger.log('debug', "[GHome Disconnect API] Disconnect request for userId:" + userId + ", application:" + data.title);
+					var grantCodes = oauthModels.GrantCode.deleteMany({user: userId, application: data._id});
+					var accessTokens = oauthModels.AccessToken.deleteMany({user: userId, application: data._id});
+					var refreshTokens = oauthModels.RefreshToken.deleteMany({user: userId, application: data._id});
+					Promise.all([grantCodes, accessTokens, refreshTokens]).then(result => {
+						logger.log('info', "[GHome Disconnect API] Deleted GrantCodes, RefreshToken and AccessTokens for user account: " + userId)
+						res.status(200).send();
+					}).catch(err => {
+					 	logger.log('warn', "[GHome Disconnect API] Failed to delete GrantCodes, RefreshToken and AccessTokens for user account: " + userId);
+					 	res.status(500).json({error: err});
+					});
 				}
 			});
 			break; 
