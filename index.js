@@ -2293,7 +2293,7 @@ function gHomeSync(userid){
 		if (data) {
 			// Find User and GrantCode, as DISCONNECT API will delete all Grant Codes for users we can assume if grant code exists user is "active"
 			var userAccount = Account.findOne({_id:userid});
-			var arrGrantCodes = Oauth.GrantCodes.find({user: userid, application: data._id});
+			var arrGrantCodes = oauthModels.GrantCode.find({user: userid, application: data._id});
 			Promise.all([userAccount, arrGrantCodes]).then(([user, grants]) => {
 				if (user && grants.length > 0) {
 					request(
