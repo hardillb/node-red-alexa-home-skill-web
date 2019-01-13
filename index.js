@@ -1376,7 +1376,7 @@ mqttClient.on('message',function(topic,message){
 			if (payload.success) {
 				// Google Home success response
 				if (commandWaiting.hasOwnProperty('response')) {
-					logger.log('debug', "[Command API] Google Home MQTT command response: " + JSON.stringify(commandWaiting.response));
+					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 				}
 				// Alexa success response send to Lambda for full response construction
@@ -1389,6 +1389,7 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('response')) {
 					delete commandWaiting.response.state;
 					commandWaiting.response.status = "FAILED";
+					logger.log('warn', "[Command API] Failed Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 				}
 				// Alexa failure response send to Lambda for full response construction
