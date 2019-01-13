@@ -1011,6 +1011,12 @@ app.post('/api/v1/action', defaultLimiter,
 								if (trait == "action.devices.traits.TemperatureSetting") {
 									response.payload.devices[data.endpointId].thermostatMode = data.state.thermostatMode.toLowerCase();
 									response.payload.devices[data.endpointId].thermostatTemperatureSetpoint = data.state.thermostatSetPoint;
+									if (data.state.hasOwnProperty('temperature')) {
+										response.payload.devices[data.endpointId].thermostatTemperatureAmbient = data.state.temperature;
+									}
+									//else {
+									//	response.payload.devices[data.endpointId].thermostatTemperatureAmbient = data.state.thermostatSetPoint;
+									//}
 								}
 							});
 						}
