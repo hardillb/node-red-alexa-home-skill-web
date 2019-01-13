@@ -1878,6 +1878,7 @@ app.put('/devices', defaultLimiter,
 				res.status(201)
 				res.send(dev);
 				logger.log('debug', "[Devices] New device created: " + JSON.stringify(dev));
+				if (enableGoogleHomeSync == true){gHomeSync(req.user._id)}; // Sync changes with Google Home Graph API
 			} else {
 				res.status(500);
 				res.send(err);
@@ -1989,6 +1990,7 @@ app.post('/device/:dev_id', defaultLimiter,
 							res.status(201);
 							res.send(d);
 						});
+						if (enableGoogleHomeSync == true){gHomeSync(req.user._id)}; // Sync changes with Google Home Graph API
 					}
 				});
 		}
@@ -2010,6 +2012,7 @@ app.delete('/device/:dev_id', defaultLimiter,
 						logger.log('info', "[Device] Deleted device id: " + id + " for user: " + req.user.username);
 						res.status(202);
 						res.send();
+						if (enableGoogleHomeSync == true){gHomeSync(req.user._id)}; // Sync changes with Google Home Graph API
 					}
 				});
 		}
@@ -2024,6 +2027,7 @@ app.delete('/device/:dev_id', defaultLimiter,
 						logger.log('info', "[Admin] Superuser deleted device id: " + id);
 						res.status(202);
 						res.send();
+						if (enableGoogleHomeSync == true){gHomeSync(req.user._id)}; // Sync changes with Google Home Graph API
 					}
 				});
 		}
@@ -2046,8 +2050,9 @@ app.post('/api/v1/devices', defaultLimiter,
 					},
 					function(err){
 						//log error
-					});
+				});
 			}
+			if (enableGoogleHomeSync == true){gHomeSync(req.user._id)}; // Sync changes with Google Home Graph API
 		} else {
 			res.error(400);
 		}
@@ -2303,10 +2308,13 @@ function gHomeSync(userid){
 							if (!err) {
 								logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username);
 							} else {
-								logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username);
+								logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username + ", error: " + err);
 							}
 						}
 					);
+				}
+				else if ( grants.length = 0) {
+					logger.log('debug', "[GHome Sync Devices] Not sending Sync Request for user:" + user.username + ", user has not linked Google Account with bridge account");
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Sync Devices] Error:" + err);
