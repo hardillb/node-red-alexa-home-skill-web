@@ -120,8 +120,21 @@
 									<a data-toggle="tooltip" data-placement="right" title="Set temperature, increase, decrease, set mode to heat or cool">Thermostat <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
 								</label>
 							</div>
+							<div id="thermostatModeOptions">
+									<legend>Thermostat Modes</legend>
+									<div class="form-check">
+											<input title="Heat" type="checkbox" class="form-check-input" name="thermostatModes" id="Heat" value="HEAT">
+											<label class="form-check-label" for="Heat">Heat </label>
+											<input title="Cool" type="checkbox" class="form-check-input" name="thermostatModes" id="Cool" value="COOL">
+											<label class="form-check-label" for="Cool">Cool </label>
+											<input title="On" type="checkbox" class="form-check-input" name="thermostatModes" id="On" value="ON">
+											<label class="form-check-label" for="On">On </label>
+											<input title="Off" type="checkbox" class="form-check-input" name="thermostatModes" id="Off" value="OFF">
+											<label class="form-check-label" for="Off">Off </label>
+									</div>	
+								</div>
 							<div id="validRangeOptions">
-								<br>
+									<legend>Thermostat Options</legend>
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 											<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>

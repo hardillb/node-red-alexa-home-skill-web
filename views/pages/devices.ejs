@@ -64,6 +64,7 @@ $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
 		$('#validRangeScaleOptions').hide();
+		$('thermostatModeOptions').hide();
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
 		$('#Celsius').attr("disabled", "disabled"); 
@@ -72,10 +73,15 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',false);
 		$("#Celsius").prop('required',false);
 		$("#Farenheit").prop('required',false);
+		$("#Heat").prop('required',false);
+		$("#Cool").prop('required',false);
+		$("#On").prop('required',false);
+		$("#Off").prop('required',false);
 	}
 	else {
 		$('#validRangeOptions').show();
 		$('#validRangeScaleOptions').show();
+		$('thermostatModeOptions').show();
 		$('#maximumValue').removeAttr("disabled"); 
 		$('#minimumValue').removeAttr("disabled");
 		$('#Celsius').removeAttr("disabled");
@@ -84,6 +90,10 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',true);
 		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
+		$("#Heat").prop('required',true);
+		$("#Cool").prop('required',true);
+		$("#On").prop('required',true);
+		$("#Off").prop('required',true);
 	}
 });
 
@@ -150,7 +160,13 @@ function saveDevice() {
 				temperatureMax: $('#maximumValue').val(),
 			}
 			device.attributes.temperatureScale = scale;
-			device.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; 
+			//device.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"]; 
+			device.attributes.thermostatModes = [];
+			$('input[name=thermostatModes]').each(function(index){
+				if (this.checked) {
+					device.attributes.thermostatModes.push(this.value);
+				}
+			});
 		}
 		
 		if ( $('#TemperatureSensor').prop('checked')) {
@@ -232,7 +248,13 @@ function saveDevice() {
 				temperatureMax: $('#maximumValue').val(),
 			}
 			device.attributes.temperatureScale = scale;
-			device.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"];
+			//device.attributes.thermostatModes = ["HEAT", "COOL", "AUTO"];
+			device.attributes.thermostatModes = [];
+			$('input[name=thermostatModes]').each(function(index){
+				if (this.checked) {
+					device.attributes.thermostatModes.push(this.value);
+				}
+			});
 		}
 		
 		if ( $('#TemperatureSensor').prop('checked')) {
@@ -320,6 +342,7 @@ function clearDevice() {
 	$('#ReportState').prop('checked', false)
 	$('#validRangeOptions').hide();
 	$('#validRangeScaleOptions').hide();
+	$('thermostatModeOptions').hide();
 	$('#maximumValue').val(""); 
 	$('#minimumValue').val("");
 	$('#maximumValue').attr("disabled", "disabled"); 
@@ -388,6 +411,13 @@ function edit(id) {
 				$("#Farenheit").prop('required',true);
 				if (device.attributes.temperatureScale == 'CELSIUS') {$("#Celsius").prop('checked', true)}
 				if (device.attributes.temperatureScale == 'FARENHEIT') {$("#Farenheit").prop('checked', true)}
+			}
+			// Handle user-selected thermostatModes
+			if (device.attributes.hasOwnProperty('thermostatModes')) {
+				$('thermostatModeOptions').show();
+				device.attributes.thermostatModes.forEach(function(mode){
+					$('#' + mode).prop('checked',true);
+				});
 			}
 			if (device.attributes.hasOwnProperty('temperatureRange')) {
 				if (device.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
@@ -583,11 +613,9 @@ function checkCapability(check) {
 		$('#ReportState').prop('checked', true);
 		$('#TemperatureSensor').prop('checked', true);
 		$('#THERMOSTAT').prop('checked', true);
-		//$('#TEMPERATURE_SENSOR').prop('checked', true);
-		
+		$('#Heat').prop('checked', true);
 		// Clear other capability/ type selections
 		$('input[name=appType]').each(function(index){
-			//if ($(this).attr("id") != "THERMOSTAT" && $(this).attr("id") != "TEMPERATURE_SENSOR") {
 			if ($(this).attr("id") != "THERMOSTAT") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
 			}
