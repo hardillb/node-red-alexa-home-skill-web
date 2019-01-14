@@ -1094,7 +1094,7 @@ function gHomeReplaceType(type) {
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
 	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
-	else if (type == "THERMOSTAT") {return "action.devices.types.THERMOSTAT"}
+	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
 	else {return "NA"}
 }
 /////////////////////// End GHome Additions
