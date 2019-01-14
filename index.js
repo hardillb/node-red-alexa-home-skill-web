@@ -815,7 +815,7 @@ app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
-	if (debug) {console.time('ghome-post', "Start")};
+	if (debug == "true") {console.time('ghome-post', "Start")};
 
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
@@ -1076,7 +1076,7 @@ app.post('/api/v1/action', defaultLimiter,
 			});
 			break; 
 	}
-	if (debug) {console.timeEnd('ghome-post')};
+	if (debug == "true") {console.timeEnd('ghome-post')};
 });
 
 // Convert Alexa Device Capabilities to Google Home-compatible
