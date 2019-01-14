@@ -815,8 +815,6 @@ app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
-	if (debug == "true") {console.time('ghome-post', "Start")};
-
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
 
@@ -824,10 +822,12 @@ app.post('/api/v1/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
 			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
-			var findUser = Account.find({username: req.user.username});
+			if (debug == "true") {console.time('ghome-sync')};
+			var findUser = Account.findOne({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
+					if (debug == "true") {console.timeLog('ghome-sync', "User, devices found - building device array")};
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
@@ -873,6 +873,8 @@ app.post('/api/v1/action', defaultLimiter,
 							devs.push(dev);
 						}
 					}
+					if (debug == "true") {console.timeLog('ghome-sync', "Device array built")};
+
 					// Build Response
 					var response = {
 						"requestId": requestId,
@@ -884,18 +886,22 @@ app.post('/api/v1/action', defaultLimiter,
 					logger.log('verbose', "[GHome Sync API] Discovery Response: " + JSON.stringify(response));
 					// Send Response
 					res.status(200).json(response);
+					if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Sync API] User not found");
 					res.status(500).json({message: "User not found"});
+					if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Sync API] Device not found");
 					res.status(500).json({message: "Device not found"});
+					if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Sync API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
+				if (debug == "true") {console.timeEnd('ghome-sync')};
 			});
 			break;
 
@@ -1076,7 +1082,6 @@ app.post('/api/v1/action', defaultLimiter,
 			});
 			break; 
 	}
-	if (debug == "true") {console.timeEnd('ghome-post')};
 });
 
 // Convert Alexa Device Capabilities to Google Home-compatible
