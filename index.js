@@ -2365,9 +2365,25 @@ function setstate(username, endpointId, payload) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						var newMode;
 						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
-						if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-						else {newMode = "HEAT"}
-
+						// Get Supported Ranges and work-out new value for thermostatMode
+						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
+							var arrModes = deviceJSON.attributes.thermostatModes;
+							// If HEAT and OFF supported
+							if (arrModes.indexOf('HEAT') > -1 && arrModes.indexOf('OFF') > -1) {
+								if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
+								else {newMode = "HEAT"}
+							}
+							// If HEAT and COOL supported
+							else if (arrModes.indexOf('HEAT') > -1 && arrModes.indexOf('COOL') > -1) {
+								if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
+								else {newMode = "HEAT"}
+							}
+							// If ON and OFF supported
+							else if (arrModes.indexOf('ON') > -1 && arrModes.indexOf('OFF') > -1) {
+								if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
+								else {newMode = "ON"}
+							}
+						}
 						// Check within supported range of device
 						if (deviceJSON.hasOwnProperty('attributes')) {
 							if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
@@ -2388,12 +2404,33 @@ function setstate(username, endpointId, payload) {
 				};
 				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						// Compare stored vs requested temperature, set state to HEAT/ COOl depending on difference
-						if (dev.state.thermostatSetPoint < payload.state.thermostatSetPoint) {dev.state.thermostatMode = "HEAT"}
-						else if (dev.state.thermostatSetPoint > payload.state.thermostatSetPoint) {dev.state.thermostatMode = "COOL"}
-						dev.state.thermostatSetPoint = payload.state.thermostatSetPoint;
+						var newMode;
+						var newTemp = payload.state.thermostatSetPoint;
+						// Get Supported Ranges and work-out new value for thermostatMode
+						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
+							var arrModes = deviceJSON.attributes.thermostatModes;
+							// If HEAT and OFF supported
+							if (arrModes.indexOf('HEAT') > -1 && arrModes.indexOf('OFF') > -1) {
+								if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
+								else {newMode = "HEAT"}
+							}
+							// If HEAT and COOL supported
+							else if (arrModes.indexOf('HEAT') > -1 && arrModes.indexOf('COOL') > -1) {
+								if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
+								else {newMode = "HEAT"}
+							}
+							// If ON and OFF supported
+							else if (arrModes.indexOf('ON') > -1 && arrModes.indexOf('OFF') > -1) {
+								if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
+								else {newMode = "ON"}
+							}
+							// Fallback, set thermostatSetPoint to new value, set mode to HEAT
+							else {
+								dev.state.thermostatSetPoint = newTemp;
+								dev.state.thermostatMode = "HEAT";
+							}
+						}
 					}
-					else {dev.state.thermostatMode = "HEAT"}
 				}
 				if (payload.state.hasOwnProperty('volume')) {dev.state.volume = payload.state.volume}
 				if (payload.state.hasOwnProperty('volumeDelta')) {
