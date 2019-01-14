@@ -64,7 +64,7 @@ $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
 		$('#validRangeScaleOptions').hide();
-		$('thermostatModeOptions').hide();
+		$('#thermostatModeOptions').hide();
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
 		$('#Celsius').attr("disabled", "disabled"); 
@@ -81,7 +81,7 @@ $("#ThermostatController").change(function(e) {
 	else {
 		$('#validRangeOptions').show();
 		$('#validRangeScaleOptions').show();
-		$('thermostatModeOptions').show();
+		$('#thermostatModeOptions').show();
 		$('#maximumValue').removeAttr("disabled"); 
 		$('#minimumValue').removeAttr("disabled");
 		$('#Celsius').removeAttr("disabled");
