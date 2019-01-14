@@ -1671,7 +1671,7 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 									"timeOfSample": deviceJSON.state.time,
 									"uncertaintyInMilliseconds": 10000
 								});
-
+								logger.log('debug', "[State API] State response properties: " + JSON.stringify(properties));
 								res.status(200).json(properties);
 								}
 							else {
