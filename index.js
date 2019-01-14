@@ -2298,6 +2298,10 @@ function gHomeSync(userid){
 				if (user && grants.length > 0) {
 					request(
 						{
+							headers: {
+								"User-Agent": "request",
+								"Referer": "https://" + process.env.WEB_HOSTNAME
+							  },
 							url: SYNC_API,
 							method: "POST",
 							json: {
@@ -2306,7 +2310,7 @@ function gHomeSync(userid){
 						},
 						function(err, resp, body) {
 							if (!err) {
-								logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username);
+								logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username + ", userid" + user._id);
 							} else {
 								logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username + ", error: " + err);
 							}
