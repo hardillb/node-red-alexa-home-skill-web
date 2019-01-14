@@ -73,10 +73,11 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',false);
 		$("#Celsius").prop('required',false);
 		$("#Farenheit").prop('required',false);
-		$("#Heat").prop('required',false);
-		$("#Cool").prop('required',false);
-		$("#On").prop('required',false);
-		$("#Off").prop('required',false);
+		$("#HEAT").prop('required',false);
+		$("#COOL").prop('required',false);
+		$("#ON").prop('required',false);
+		$("#OFF").prop('required',false);
+		$("#AUTO").prop('required',false);
 	}
 	else {
 		$('#validRangeOptions').show();
@@ -90,10 +91,11 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',true);
 		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
-		$("#Heat").prop('required',true);
-		$("#Cool").prop('required',true);
-		$("#On").prop('required',true);
-		$("#Off").prop('required',true);
+		$("#HEAT").prop('required',true);
+		$("#COOL").prop('required',true);
+		$("#ON").prop('required',true);
+		$("#OFF").prop('required',true);
+		$("#AUTO").prop('required',true);
 	}
 });
 
@@ -613,7 +615,7 @@ function checkCapability(check) {
 		$('#ReportState').prop('checked', true);
 		$('#TemperatureSensor').prop('checked', true);
 		$('#THERMOSTAT').prop('checked', true);
-		$('#Heat').prop('checked', true);
+		$('#AUTO').prop('checked', true);
 		// Clear other capability/ type selections
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "THERMOSTAT") {
