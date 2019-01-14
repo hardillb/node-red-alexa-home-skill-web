@@ -906,6 +906,7 @@ app.post('/api/v1/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' : 
 			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
+			if (debug == "true") {console.time('ghome-exec')};
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (devices) {
@@ -959,14 +960,17 @@ app.post('/api/v1/action', defaultLimiter,
 							onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
 						});
 					}
+					if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Exec API] Device not found");
 					res.status(500).json({message: "Device not found"});
+					if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Exec API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
+				if (debug == "true") {console.timeEnd('ghome-exec')};
 			});
 
 			break;
@@ -1410,6 +1414,7 @@ mqttClient.on('message',function(topic,message){
 
 	if (topic.startsWith('response/')){
 		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
+		if (debug == "true") {console.time('mqtt-response')};
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
@@ -1448,9 +1453,11 @@ mqttClient.on('message',function(topic,message){
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
+		if (debug == "true") {console.timeEnd('mqtt-response')};
 	}
 	else if (topic.startsWith('state/')){
 		logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
+		if (debug == "true") {console.time('mqtt-state')};
 		// Split topic/ get username and endpointId
 		var messageJSON = JSON.parse(message);
 		var payload = messageJSON.payload;
@@ -1475,6 +1482,7 @@ mqttClient.on('message',function(topic,message){
 			uid: username,
 		  }
 		if (enableAnalytics) {visitor.event(params).send()};
+		if (debug == "true") {console.timeEnd('mqtt-state')};
 	}
 	else {
 		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
