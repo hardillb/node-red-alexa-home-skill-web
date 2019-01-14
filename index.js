@@ -976,10 +976,12 @@ app.post('/api/v1/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.QUERY' :
 			logger.log('verbose', "[GHome Query API] Running device state query for user:" + req.user.username);
-			var findUser = Account.find({username: req.user.username});
+			if (debug == "true") {console.time('ghome-query')};
+			var findUser = Account.findOne({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
+					if (debug == "true") {console.timeLog('ghome-query', "Found user and devices, building device response")};
 					var arrQueryDevices = req.body.inputs[0].payload.devices;
 					var response = {
 						"requestId": requestId,
@@ -1042,22 +1044,27 @@ app.post('/api/v1/action', defaultLimiter,
 							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
 						}
 					}
+					if (debug == "true") {console.timeLog('ghome-query', "Built device response")};
 					// Send Response
 					logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 					res.status(200).json(response);
+					if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Query API] User not found");
 					res.status(500).json({message: "User not found"});
+					if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Query API] Device not found");
 					res.status(500).json({message: "Device not found"});
+					if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 
 			}).catch(err => {
 				logger.log('error', "[GHome Query API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
+				if (debug == "true") {console.timeEnd('ghome-query')};
 			});
 			break;
 
