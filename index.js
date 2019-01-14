@@ -1636,7 +1636,7 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 													"uncertaintyInMilliseconds": 10000
 												});
 											}
-											break
+											break;
 										case "ThermostatController":
 											// Return thermostatSetPoint
 											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
