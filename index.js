@@ -827,7 +827,6 @@ app.post('/api/v1/action', defaultLimiter,
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
-					if (debug == "true") {console.timeLog('ghome-sync', "User, devices found - building device array")};
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
@@ -873,7 +872,6 @@ app.post('/api/v1/action', defaultLimiter,
 							devs.push(dev);
 						}
 					}
-					if (debug == "true") {console.timeLog('ghome-sync', "Device array built")};
 
 					// Build Response
 					var response = {
@@ -981,7 +979,6 @@ app.post('/api/v1/action', defaultLimiter,
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
-					if (debug == "true") {console.timeLog('ghome-query', "Found user and devices, building device response")};
 					var arrQueryDevices = req.body.inputs[0].payload.devices;
 					var response = {
 						"requestId": requestId,
@@ -1044,7 +1041,6 @@ app.post('/api/v1/action', defaultLimiter,
 							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
 						}
 					}
-					if (debug == "true") {console.timeLog('ghome-query', "Built device response")};
 					// Send Response
 					logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 					res.status(200).json(response);
