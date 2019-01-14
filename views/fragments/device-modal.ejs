@@ -23,7 +23,7 @@
 				<div class="row" align="justify">
 					<div class="col-sm">
 						<fieldset class="form-group" id="capabilityType">
-							<legend>Capabilities</legend>
+							<legend><h3>Capabilities</h3></legend>
 							<div class="form-check">
 									<input title="Brightness Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
 									<label class="form-check-label" for="BrightnessController"> 
@@ -119,9 +119,10 @@
 								<label class="form-check-label" for="ThermostatController">
 									<a data-toggle="tooltip" data-placement="right" title="Set temperature, increase, decrease, set mode to heat or cool">Thermostat <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
 								</label>
+								<br />
 							</div>
 							<div id="thermostatModeOptions">
-								<legend>Thermostat Modes</legend>
+								<legend><h4>Thermostat Modes</h4></legend>
 								<div class="form-check">
 										<input title="Heat" type="checkbox" class="form-check-input" name="thermostatModes" id="Heat" value="HEAT">
 										<label class="form-check-label" for="Heat">Heat </label>
@@ -137,7 +138,7 @@
 								</div>	
 							</div>
 							<div id="validRangeOptions">
-									<legend>Thermostat Options</legend>
+									<legend><h4>Thermostat Options</h4></legend>
 								<div class="input-group mb-3">
 									<div class="input-group-prepend">
 											<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>
@@ -166,7 +167,7 @@
 					</div>
 					<div class="col-sm">
 					<fieldset class="form-group">
-						<legend>Device Type</legend>
+						<legend><h3>Device Type</h3></legend>
 						<!-- <fieldset class="action" id="capabilityType"> -->
 						<div class="form-check">
 							<input title="Activity/ Scene" type="checkbox" class="form-check-input" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER">
@@ -218,7 +219,7 @@
 						</div>
 					</fieldset>
 					<fieldset class="form-group">
-						<legend>State Reporting</legend>
+						<legend><h3>State Reporting</h3></legend>
 						<div class="form-check">
 							<input title="Report State" type="checkbox" class="form-check-input" id="ReportState">
 							<label class="form-check-label" for="ReportState">Report State </label>
