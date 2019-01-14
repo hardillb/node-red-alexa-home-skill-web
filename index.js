@@ -822,6 +822,15 @@ app.post('/api/v1/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
 			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
+			var params = {
+				ec: "SYNC",
+				ea: "GHome SYNC event for username: " + req.user.username,
+				uid: req.user.username,
+				uip: req.ip,
+				dp: "/api/v1/action"
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
+
 			if (debug == "true") {console.time('ghome-sync')};
 			var findUser = Account.findOne({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
@@ -906,6 +915,15 @@ app.post('/api/v1/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' : 
 			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
+			var params = {
+				ec: "EXECUTE",
+				ea: "GHome EXECUTE event for username: " + req.user.username,
+				uid: req.user.username,
+				uip: req.ip,
+				dp: "/api/v1/action"
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
+
 			if (debug == "true") {console.time('ghome-exec')};
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
@@ -978,6 +996,16 @@ app.post('/api/v1/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.QUERY' :
 			logger.log('verbose', "[GHome Query API] Running device state query for user:" + req.user.username);
+
+			var params = {
+				ec: "QUERY",
+				ea: "GHome QUERY event for username: " + req.user.username,
+				uid: req.user.username,
+				uip: req.ip,
+				dp: "/api/v1/action"
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
+
 			if (debug == "true") {console.time('ghome-query')};
 			var findUser = Account.findOne({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
@@ -1071,6 +1099,15 @@ app.post('/api/v1/action', defaultLimiter,
 		case 'action.devices.DISCONNECT' : 
 			// Find service definition with Google URLs
 			var userId = req.user._id;
+			var params = {
+				ec: "DISCONNECT",
+				ea: "GHome Disconnect event for username: " + req.user.username,
+				uid: req.user.username,
+				uip: req.ip,
+				dp: "/api/v1/action"
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
+
 			oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" },function(err, data){
 				if (data) {
 					// Remove OAuth tokens for **Google Home** only
@@ -1120,8 +1157,6 @@ function gHomeReplaceType(type) {
 app.get('/api/v1/devices', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-
-		//console.log("all good, doing discover devices");
 		var params = {
 			ec: "Discovery",
 			ea: "Running device discovery for username: " + req.user.username,
