@@ -605,10 +605,11 @@ function checkCapability(check) {
 		$('#ReportState').prop('checked', true);
 		$('#TemperatureSensor').prop('checked', true);
 		$('#THERMOSTAT').prop('checked', true);
+		$('#TEMPERATURE_SENSOR').prop('checked', true);
 		$('#AUTO').prop('checked', true);
 		// Clear other capability/ type selections
 		$('input[name=appType]').each(function(index){
-			if ($(this).attr("id") != "THERMOSTAT") {
+			if ($(this).attr("id") != "THERMOSTAT" && $(this).attr("id") != "TEMPERATURE_SENSOR") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
 			}
 		});
