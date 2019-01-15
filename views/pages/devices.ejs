@@ -165,7 +165,7 @@ function saveDevice() {
 			}
 			if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
 				$('#HEAT').prop('checked', true)
-		}
+			}
 
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
@@ -266,7 +266,7 @@ function saveDevice() {
 			}
 			if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
 				$('#HEAT').prop('checked', true)
-				
+			}
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
 					device.attributes.thermostatModes.push(this.value);
