@@ -1197,8 +1197,6 @@ app.get('/api/v1/devices', defaultLimiter,
 
 // Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
 function replaceCapability(capability, reportState) {
-	// console.log(capability)
-
 	// BrightnessController
 	if(capability == "BrightnessController")  {
 		return {
@@ -1214,7 +1212,6 @@ function replaceCapability(capability, reportState) {
 				}
 			};
 	}
-
 	// ChannelController
 	if(capability == "ChannelController") {
 		return {
@@ -1223,7 +1220,6 @@ function replaceCapability(capability, reportState) {
 			"version": "3",
 			};
 	}
-
 	// ColorController
 	if(capability == "ColorController")  {
 		return {
@@ -1239,7 +1235,6 @@ function replaceCapability(capability, reportState) {
 				}
 			};
 	}
-	
 	// ColorTemperatureController
 	if(capability == "ColorTemperatureController")  {
 		return {
@@ -1255,8 +1250,6 @@ function replaceCapability(capability, reportState) {
 				}
 			};
 	}
-
-
 	// InputController, pre-defined 4x HDMI inputs and phono
 	if(capability == "InputController") {
 		return {
@@ -1289,7 +1282,6 @@ function replaceCapability(capability, reportState) {
 			  }
 			]};
 	}
-
 	// LockController
 	if(capability == "LockController")  {
 		return {
@@ -1305,7 +1297,6 @@ function replaceCapability(capability, reportState) {
 				}
 			};
 	}
-
 	// PercentageController
 	if(capability == "PercentageController") {
 		return {
@@ -1321,7 +1312,6 @@ function replaceCapability(capability, reportState) {
 			}
 		};
 	}
-
 	// PlaybackController
 	if(capability == "PlaybackController") {
 		return {
@@ -1331,7 +1321,6 @@ function replaceCapability(capability, reportState) {
 			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
 			};
 	}
-
 	// PowerController
 	if(capability == "PowerController") {
 		return {
@@ -1347,7 +1336,6 @@ function replaceCapability(capability, reportState) {
 				}
 			};
 	}
-
 	// Speaker
 	if(capability == "Speaker") {
 		return {
