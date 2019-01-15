@@ -2490,6 +2490,7 @@ function setstate(username, endpointId, payload) {
 								if (arrModes.indexOf('COOL') > -1){cool = true};
 								if (arrModes.indexOf('ON') > -1){on = true};
 								if (arrModes.indexOf('OFF') > -1){off = true};
+								logger.log('debug', "[State API] thermostatSetPoint, modes: " + JSON.stringify(deviceJSON.attributes.thermostatModes) + ", countModes: " + countModes);
 								// Supported combos
 									// ON and OFF
 									// HEAT and COOL
@@ -2515,6 +2516,8 @@ function setstate(username, endpointId, payload) {
 									dev.state.thermostatSetPoint = newTemp;
 									dev.state.thermostatMode = "HEAT";
 								}
+								logger.log('debug', "[State API] thermostatSetPoint, newMode: " + newMode);
+
 							}
 						}
 					}
