@@ -309,10 +309,8 @@ function checkType(type) {
 	else if ($('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController"){
-				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-			}
+			$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 		});
 	}
 	else {
