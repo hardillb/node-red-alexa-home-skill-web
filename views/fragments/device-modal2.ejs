@@ -1,0 +1,419 @@
+<!-- Modal Start -->
+<div class="modal fade" id="newDeviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="newDeviceModalTitle">Add Device</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<form class="form-device" id="form-device">
+				<div class="modal-body">
+					<div class="form-group">
+						<input id="devID" type="hidden">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="basic-addon1">Name</span>
+							</div>
+							<input type="text" class="form-control" id="friendlyName" required>
+						</div>
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="basic-addon2">Description</span>
+							</div>
+							<input type="text" class="form-control" id="description" required>
+						</div>
+					</div>
+					<div class="row" align="justify">
+						<div class="col-sm">
+							<div class="form-group" id="simpleTypes">
+								<div class="form-check">
+									<input title="Activity/ Scene" type="checkbox" class="form-check-input" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" onclick='checkType(this)'>
+									<label class="form-check-label" for="ACTIVITY_TRIGGER">Activity/ Scene </label>
+									<br />
+								</div>
+								<div class="form-check">
+										<input title="Light" type="checkbox" class="form-check-input" id="LIGHT" name="appType" value="LIGHT" onclick='checkType(this)'>
+										<label class="form-check-label" for="LIGHT">Light/ Bulb </label>
+										<br />
+								</div>
+								<div class="form-check">
+										<input title="Smart Lock" type="checkbox" class="form-check-input" id="SMARTLOCK" name="appType" value="SMARTLOCK" onclick='checkType(this)'>
+										<label class="form-check-label" for="SMARTLOCK">Smart Lock </label>
+										<br />
+								</div>
+								<div class="form-check">
+										<input title="Smart Plug" type="checkbox" class="form-check-input" id="SMARTPLUG" name="appType" value="SMARTPLUG" onclick='checkType(this)'>
+										<label class="form-check-label" for="SMARTPLUG">Smart Plug </label>
+										<br />
+									</div>
+								<div class="form-check">
+									<input title="Smart Switch" type="checkbox" class="form-check-input" id="SWITCH" name="appType" value="SWITCH" onclick='checkType(this)'>
+									<label class="form-check-label" for="SWITCH">Smart Switch </label>
+									<br />
+								</div>
+								<div class="form-check">
+									<input title="Speaker" type="checkbox" class="form-check-input" id="SPEAKER" name="appType" value="SPEAKER" onclick='checkType(this)'>
+									<label class="form-check-label" for="SPEAKER">Speaker </label>
+									<br />
+								</div>
+								<div class="form-check">
+									<input title="Temperature Sensor" type="checkbox" class="form-check-input" id="TEMPERATURE_SENSOR" name="appType" value="TEMPERATURE_SENSOR" onclick='checkType(this)'>
+									<label class="form-check-label" for="TEMPERATURE_SENSOR">Temperature Sensor </label>
+								</div>
+								<div class="form-check">
+									<input title="Thermostat" type="checkbox" class="form-check-input" id="THERMOSTAT" name="appType" value="THERMOSTAT" onclick='checkType(this)'>
+									<label class="form-check-label" for="THERMOSTAT">Thermostat </label>
+								</div>
+								<div class="form-check">
+									<input title="TV" type="checkbox" class="form-check-input" id="TV" name="appType" value="TV" onclick='checkType(this)'>
+									<label class="form-check-label" for="TV">Multi-Media </label>
+									<br />
+								</div>
+								<div class="form-check">
+										<input title="ADVANCED" type="checkbox" class="form-check-input" id="ADVANCED" name="appType" value="ADVANCED" onclick='checkType(this)'>
+										<label class="form-check-label" for="ADVANCED">Advanced </label>
+									<br />
+								</div>
+							</div>
+						</div>
+						<!-- Enable/ disable capabilities based on types, hide this div if Advanced selected above -->
+						<div class="col-sm">
+							<div class="form-group" id="simpleOptions">
+								<fieldset class="form-group" id="capabilityType">
+									<div class="form-check">
+										<input title="Brightness Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController">
+										<label class="form-check-label" for="BrightnessController"> 
+											<a data-toggle="tooltip" data-placement="right" title="Set percentage, increase, decrease, dim">Brightness <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Channel Control" type="checkbox" class="form-check-input" name="capabilities" id="ChannelController" value="ChannelController">
+										<label class="form-check-label" for="ChannelController">
+												<a data-toggle="tooltip" data-placement="right" title="Change channel by name or number">Channel <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+									<br />
+									</div>
+									<div class="form-check">
+										<input title="Color Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorController" value="ColorController">
+										<label class="form-check-label" for="ColorController">
+												<a data-toggle="tooltip" data-placement="right" title="Set color by name">Color <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Color Temperature Control" type="checkbox" class="form-check-input" name="capabilities" id="ColorTemperatureController" value="ColorTemperatureController">
+										<label class="form-check-label" for="ColorTemperatureController">
+												<a data-toggle="tooltip" data-placement="right" title="Set color temperature, increase, decrease, cooler, warmer">Color Temperature <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+											<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController">
+										<label class="form-check-label" for="InputController">
+												<a data-toggle="tooltip" data-placement="right" title="Set input by name, i.e. HDMI1, Phono">Input <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+											<input title="Lock Control" type="checkbox" class="form-check-input" name="capabilities" id="LockController" value="LockController">
+										<label class="form-check-label" for="LockController">
+											<a data-toggle="tooltip" data-placement="right" title="Lock and unlock">Lock <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Percentage Control" type="checkbox" class="form-check-input" name="capabilities" id="PercentageController" value="PercentageController">
+									<label class="form-check-label" for="PercentageController">
+											<a data-toggle="tooltip" data-placement="right" title="Set percentage, reduce, increase">Percentage <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+									</label>
+									<br />
+									</div>
+									<div class="form-check">
+											<input title="Playback Control" type="checkbox" class="form-check-input" name="capabilities" id="PlaybackController" value="PlaybackController">
+										<label class="form-check-label" for="PlaybackController">
+												<a data-toggle="tooltip" data-placement="right" title="Play, pause, stop, rewind, fast-forword, next, previous">Playback <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+											<input title="Power Control" type="checkbox" class="form-check-input" name="capabilities" id="PowerController" value="PowerController">
+										<label class="form-check-label" for="PowerController">
+												<a data-toggle="tooltip" data-placement="right" title="Turn on, turn off">Power <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+											<input title="Scene Control" type="checkbox" class="form-check-input" name="capabilities" id="SceneController" value="SceneController">
+										<label class="form-check-label" for="SceneController">
+												<a data-toggle="tooltip" data-placement="right" title="Enable scene or activity (collection of actions)">Scene <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="Speaker" value="Speaker">
+										<label class="form-check-label" for="StepSpeaker">
+												<a data-toggle="tooltip" data-placement="right" title="'Smart' speaker, set volume to specific value, increase, decrease, mute and unmute">Speaker <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="capabilities" id="StepSpeaker" value="StepSpeaker">
+										<label class="form-check-label" for="StepSpeaker">
+											<a data-toggle="tooltip" data-placement="right" title="'Dumb'-speaker, increase, decrease volume, mute and unmute">Speaker (basic) <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Temperature Sensor" type="checkbox" class="form-check-input" name="capabilities" id="TemperatureSensor" value="TemperatureSensor">
+										<label class="form-check-label" for="TemperatureSensor">
+											<a data-toggle="tooltip" data-placement="right" title="Make sensor data retrievable">Temperature Sensor <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+									</div>
+									<div class="form-check">
+										<input title="Thermostat Control" type="checkbox" class="form-check-input" name="capabilities" id="ThermostatController" value="ThermostatController">
+										<label class="form-check-label" for="ThermostatController">
+											<a data-toggle="tooltip" data-placement="right" title="Set temperature, increase, decrease, set mode to heat or cool">Thermostat <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+								</fieldset>
+							</div>
+						</div>
+					</div>
+					<!-- Advanced Configuration -->
+					<div class="row" align="justify">
+						<div class="col-sm">
+							<div class="form-group" id="advancedCapabilities" hidden>
+								<fieldset class="form-group" id="capabilityType">
+									<!-- <legend><h3>Capabilities</h3></legend> -->
+									<div class="form-check">
+										<input title="Brightness Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advBrightnessController" value="BrightnessController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advBrightnessController"> 
+											<a data-toggle="tooltip" data-placement="right" title="Set percentage, increase, decrease, dim">Brightness <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Channel Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advChannelController" value="ChannelController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advChannelController">
+												<a data-toggle="tooltip" data-placement="right" title="Change channel by name or number">Channel <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Color Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advColorController" value="ColorController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advColorController">
+												<a data-toggle="tooltip" data-placement="right" title="Set color by name">Color <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Color Temperature Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advColorTemperatureController" value="ColorTemperatureController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advColorTemperatureController">
+												<a data-toggle="tooltip" data-placement="right" title="Set color temperature, increase, decrease, cooler, warmer">Color Temperature <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Input Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advInputController" value="InputController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advInputController">
+											<a data-toggle="tooltip" data-placement="right" title="Set input by name, i.e. HDMI1, Phono">Input <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Lock Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advLockController" value="LockController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advLockController">
+											<a data-toggle="tooltip" data-placement="right" title="Lock and unlock">Lock <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Percentage Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advPercentageController" value="PercentageController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advPercentageController">
+											<a data-toggle="tooltip" data-placement="right" title="Set percentage, reduce, increase">Percentage <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Playback Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advPlaybackController" value="PlaybackController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advPlaybackController">
+											<a data-toggle="tooltip" data-placement="right" title="Play, pause, stop, rewind, fast-forword, next, previous">Playback <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Power Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advPowerController" value="PowerController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advPowerController">
+											<a data-toggle="tooltip" data-placement="right" title="Turn on, turn off">Power <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Scene Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advSceneController" value="SceneController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advSceneController">
+											<a data-toggle="tooltip" data-placement="right" title="Enable scene or activity (collection of actions)">Scene <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Speaker Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advSpeaker" value="Speaker" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advStepSpeaker">
+											<a data-toggle="tooltip" data-placement="right" title="'Smart' speaker, set volume to specific value, increase, decrease, mute and unmute">Speaker <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Step Speaker Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advStepSpeaker" value="StepSpeaker" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advStepSpeaker">
+											<a data-toggle="tooltip" data-placement="right" title="'Dumb'-speaker, increase, decrease volume, mute and unmute">Speaker (basic) <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Temperature Sensor" type="checkbox" class="form-check-input" name="advCapabilities" id="advTemperatureSensor" value="TemperatureSensor" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advTemperatureSensor">
+											<a data-toggle="tooltip" data-placement="right" title="Make sensor data retrievable">Temperature Sensor <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+									</div>
+									<div class="form-check">
+										<input title="Thermostat Control" type="checkbox" class="form-check-input" name="advCapabilities" id="advThermostatController" value="ThermostatController" onclick='checkCapability(this)'>
+										<label class="form-check-label" for="advThermostatController">
+											<a data-toggle="tooltip" data-placement="right" title="Set temperature, increase, decrease, set mode to heat or cool">Thermostat <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+										<br />
+									</div>
+								</fieldset>
+							</div>
+							<div class="form-group" id="advancedOptions" hidden>
+								<fieldset class="form-group">
+									<div id="thermostatModeOptions">
+										<legend><h5>Thermostat Modes</h5></legend>
+										<div class="form-check">
+											<input title="AUTO" type="checkbox" class="form-check-input" name="advThermostatModes" id="advAUTO" value="AUTO">
+											<label class="form-check-label" for="advAUTO">Auto </label>
+											<br />
+											<input title="COOL" type="checkbox" class="form-check-input" name="advThermostatModes" id="advCOOL" value="COOL">
+											<label class="form-check-label" for="advCOOL">Cool </label>
+											<br />	
+											<input title="HEAT" type="checkbox" class="form-check-input" name="advThermostatModes" id="advHEAT" value="HEAT">
+											<label class="form-check-label" for="advHEAT">Heat </label>
+											<br />
+											<input title="ON" type="checkbox" class="form-check-input" name="advThermostatModes" id="advON" value="ON">
+											<label class="form-check-label" for="advON">On </label>
+											<br />
+											<input title="OFF" type="checkbox" class="form-check-input" name="advthermostatModes" id="advOFF" value="OFF">
+											<label class="form-check-label" for="advOFF">Off </label>
+										</div>	
+									</div>
+								</fieldset>
+								<fieldset class="form-group">
+									<div id="validRangeOptions">
+											<legend><h5>Device Options</h5></legend>
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>
+											</div>		
+											<input id="minimumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
+										</div>
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="inputGroup-sizing-default">Max Value (°/K)</span>
+											</div>		
+											<input id="maximumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
+										</div>
+									</div>
+									<div id="validRangeScaleOptions">
+										<div class="form-check form-check-inline" style="padding-left:5px;">
+											<input class="form-check-input" type="radio" name="radioScale" id="Celsius" value="CELSIUS" disabled>
+											<br>
+											<label class="form-check-label" id="lblCelsius" for="Celsius">°Celsius</label>
+										</div>
+										<div class="form-check form-check-inline" style="padding-top: 10px;">
+											<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
+											<label class="form-check-label" id="lblFarenheit" for="Farenheit">°Farenheit</label>
+										</div>
+									</div>
+								</fieldset>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="form-group" id="advancedTypes" hidden>
+								<fieldset class="form-group">
+									<legend><h3>Device Type</h3></legend>
+									<!-- <fieldset class="action" id="capabilityType"> -->
+									<div class="form-check">
+										<input title="Activity/ Scene" type="checkbox" class="form-check-input" id="advACTIVITY_TRIGGER" name="advAppType" value="advACTIVITY_TRIGGER">
+										<label class="form-check-label" for="advACTIVITY_TRIGGER">Activity/ Scene </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Light" type="checkbox" class="form-check-input" id="advLIGHT" name="advAppType" value="advLIGHT">
+										<label class="form-check-label" for="advLIGHT">Light </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Other" type="checkbox" class="form-check-input" id="advOTHER" name="advAppType" value="advOTHER">
+										<label class="form-check-label" for="advOTHER">Other </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Smart Lock" type="checkbox" class="form-check-input" id="advSMARTLOCK" name="advAppType" value="advSMARTLOCK">
+										<label class="form-check-label" for="advSMARTLOCK">Smart Lock </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Smart Plug" type="checkbox" class="form-check-input" id="advSMARTPLUG" name="advAppType" value="advSMARTPLUG">
+										<label class="form-check-label" for="advSMARTPLUG">Smart Plug </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Smart Switch" type="checkbox" class="form-check-input" id="advSWITCH" name="advAppType" value="advSWITCH">
+										<label class="form-check-label" for="advSWITCH">Smart Switch </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Speaker" type="checkbox" class="form-check-input" id="advSPEAKER" name="advAppType" value="advSPEAKER">
+										<label class="form-check-label" for="advSPEAKER">Speaker </label>
+										<br />
+									</div>
+									<div class="form-check">
+										<input title="Temperature Sensor" type="checkbox" class="form-check-input" id="advTEMPERATURE_SENSOR" name="advAppType" value="advTEMPERATURE_SENSOR">
+										<label class="form-check-label" for="advTEMPERATURE_SENSOR">Temperature Sensor </label>
+									</div>
+									<div class="form-check">
+										<input title="Thermostat" type="checkbox" class="form-check-input" id="advTHERMOSTAT" name="advAppType" value="advTHERMOSTAT">
+										<label class="form-check-label" for="advTHERMOSTAT">Thermostat </label>
+									</div>
+									<div class="form-check">
+										<input title="TV" type="checkbox" class="form-check-input" id="advTV" name="advAppType" value="advTV">
+										<label class="form-check-label" for="advTV">TV </label>
+										<br />
+									</div>
+								</fieldset>
+							</div>
+							<div class="form-group" id="advancedStateReporting" hidden>
+								<fieldset class="form-group">
+									<legend><h3>State Reporting</h3></legend>
+									<div class="form-check">
+										<input title="Report State" type="checkbox" class="form-check-input" id="ReportState">
+										<label class="form-check-label" for="ReportState">Report State </label>
+										<small id="reportStateInfo" class="form-text text-muted"><a href="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/State-Reporting">See State Reporting help for more information</a></small>
+									</div>
+								</fieldset>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+						<!-- <button class="btn btn-primary" id="submit" type="submit" value="submit">Save</button>-->
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div> 
+<!-- Modal End -->

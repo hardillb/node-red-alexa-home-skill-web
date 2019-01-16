@@ -810,7 +810,7 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
-/////////////////////// Start GHome Additions
+/////////////////////// Start GHome
 app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -1096,6 +1096,7 @@ app.post('/api/v1/action', defaultLimiter,
 			});
 			break;
 
+		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.DISCONNECT' : 
 			// Find service definition with Google URLs
 			var userId = req.user._id;
@@ -1149,11 +1150,14 @@ function gHomeReplaceType(type) {
 	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
 	else {return "NA"}
 }
-/////////////////////// End GHome Additions
+/////////////////////// End GHome
 
 
+/////////////////////// Start Amazon
 
-// Discovery API, can be tested via credentials of an account/ browsing to http://<ip address>:3000/api/v1/devices
+///////////////////////////////////////////////////////////////////////////
+// Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
+///////////////////////////////////////////////////////////////////////////
 app.get('/api/v1/devices', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -1423,6 +1427,9 @@ function replaceCapability(capability, reportState) {
 	}
 };
 
+///////////////////////////////////////////////////////////////////////////
+// MQTT Message Handlers
+///////////////////////////////////////////////////////////////////////////
 var onGoingCommands = {};
 
 // Event handler for received MQTT messages - note subscribe near top of script.
@@ -1532,7 +1539,9 @@ var timeout = setInterval(function(){
 	}
 },500);
 
-// Get State API, gets device "state" element from MongoDB, used for device status review in Alexa App
+///////////////////////////////////////////////////////////////////////////
+// Get State API
+///////////////////////////////////////////////////////////////////////////
 app.get('/api/v1/getstate/:dev_id', getStateLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -1746,7 +1755,9 @@ app.get('/api/v1/getstate/:dev_id', getStateLimiter,
  	}
 );
 
-// API to set device state in MongoDB
+///////////////////////////////////////////////////////////////////////////
+// Set State API (Not in Use)
+///////////////////////////////////////////////////////////////////////////
 app.post('/api/v1/setstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -1754,7 +1765,9 @@ app.post('/api/v1/setstate/:dev_id',
 	}
 );
 
-// API to process/ execute inbound command
+///////////////////////////////////////////////////////////////////////////
+// Alexa Command API
+///////////////////////////////////////////////////////////////////////////
 app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
@@ -1902,6 +1915,52 @@ app.get('/devices', defaultLimiter,
 			res.status(500).json({error: err});
 		});
 });
+
+app.get('/devices2', defaultLimiter,
+	ensureAuthenticated,
+	function(req,res){
+		var view = {
+			dp: req.path, 
+			dh: 'https://' + process.env.WEB_HOSTNAME,
+			dt: 'Devices',
+			uid: req.user.username,
+			uip: req.ip,
+			ua: req.headers['user-agent']
+		}
+		if (enableAnalytics) {visitor.pageview(view).send()};
+		var user = req.user.username;
+		const userDevices = Devices.find({username:user});
+		const countDevices = Devices.countDocuments({username:user});
+		const countGrants = Account.aggregate([
+			{ "$match": {
+				"username" : user
+			}},
+			{ "$lookup": {
+				"from": "grantcodes",
+				"let": { "user_id": "$_id" },
+				"pipeline": [
+					{ "$match": {
+					"$expr": { "$eq": [ "$$user_id", "$user" ] }
+					}},
+					{ "$count": "count" }
+				],
+				"as": "grantCount"    
+			}},
+			{ "$addFields": {
+			"countGrants": { "$sum": "$grantCount.count" }
+			}}
+		]);
+
+		Promise.all([userDevices, countDevices, countGrants]).then(([devices, countDevs, countUserGrants]) => {
+			//logger.log('info', "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
+			//logger.log('info', "countUserGrants: " + JSON.stringify(countUserGrants));
+			res.render('pages/devices2',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, devs: true});
+		}).catch(err => {
+			res.status(500).json({error: err});
+		});
+});
+
+
 
 app.put('/devices', defaultLimiter,
 	ensureAuthenticated,
