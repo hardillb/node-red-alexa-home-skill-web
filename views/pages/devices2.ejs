@@ -213,7 +213,7 @@ function checkType(type) {
 		$('#ReportState').prop('checked', false);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "SpeakerController" && $(this).attr("id") != "StepSpeakerController"){
+			if ($(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
@@ -257,7 +257,7 @@ function checkType(type) {
 			}
 			else {
 				if ($(this).attr("id") == "ThermostatController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
-				else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
+				//else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
@@ -272,12 +272,13 @@ function checkType(type) {
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "PlaybackController"){
+			if ($(this).attr("id") != "PlaybackController" && $(this).attr("id") != "ChannelController" && $(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 			else {
-				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				if ($(this).attr("id") == "PlaybackController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
+				else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)};
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
