@@ -3,7 +3,7 @@
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="newDeviceModalTitle">Add Device</h5>
+				<h4 class="modal-title" id="newDeviceModalTitle">Device</h4>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -27,6 +27,7 @@
 					</div>
 					<div class="row" align="justify">
 						<div class="col-sm">
+							<h5 class="modal-title" id="newDeviceModalTitle">Device Type</h5>
 							<div class="form-group" id="simpleTypes">
 								<div class="form-check">
 									<input title="Activity/ Scene" type="checkbox" class="form-check-input" id="ACTIVITY_TRIGGER" name="appType" value="ACTIVITY_TRIGGER" onclick='checkType(this)'>
@@ -78,13 +79,14 @@
 								</div>
 								<div class="form-check">
 										<input title="ADVANCED" type="checkbox" class="form-check-input" id="ADVANCED" name="appType" value="OTHER" onclick='checkType(this)'>
-										<label class="form-check-label" for="ADVANCED">Advanced </label>
+										<label class="form-check-label" for="ADVANCED">Advanced/ Other </label>
 									<br />
 								</div>
 							</div>
 						</div>
 						<!-- Enable/ disable capabilities based on types, hide this div if Advanced selected above -->
 						<div class="col-sm">
+							<h5 class="modal-title" id="newDeviceModalTitle">Interfaces</h5>
 							<div class="form-group" id="simpleOptions">
 								<fieldset class="form-group" id="capabilityType">
 									<div class="form-check">
