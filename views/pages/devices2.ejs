@@ -127,8 +127,7 @@ $("#form-device").submit(function(e) {
 
 function checkType(type) {
 	if ($('#ACTIVITY_TRIGGER').prop('checked')) {
-		//$('#simpleOptions').removeAttr("hidden");
-		
+		$('#simpleOptions').show();
 		$("#SceneController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
@@ -154,7 +153,8 @@ function checkType(type) {
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 			else {
-				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				if ($(this).attr("id") == "PowerController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
+				else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
@@ -223,7 +223,7 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#TEMPERATURE_SENSOR').prop('checked')) {
+	else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#TemperatureSensor").prop('checked',true);
@@ -242,8 +242,8 @@ function checkType(type) {
 	else if ($('#THERMOSTAT').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#TEMPERATURE_SENSOR').prop('checked', true);
-		$("#TemperatureSensor").prop('checked',true);
+		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
+		else {$("#TemperatureSensor").prop('checked',false)}
 		$("#ThermostatController").prop('checked',true);
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
@@ -256,7 +256,8 @@ function checkType(type) {
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 			else {
-				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				if ($(this).attr("id") == "ThermostatController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
+				else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
@@ -285,7 +286,6 @@ function checkType(type) {
 		$('#simpleOptions').hide();
 	}
 }
-
 
 function saveDevice() {
 	var devID = $('#devID').val();
