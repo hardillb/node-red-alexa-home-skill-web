@@ -126,155 +126,163 @@ $("#form-device").submit(function(e) {
 // });
 
 function checkType(type) {
-	$('#simpleOptions').show();
-	switch (type) {
-		case "ACTIVITY_TRIGGER" : // Select SceneController, disable everything else
-			$("#SceneController").prop('checked',true);
-			$('#ReportState').prop('checked', false);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "SceneController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "LIGHT" :
-			$('#ReportState').prop('checked', true);
-			$("#PowerController").prop('checked',true);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "PowerController" && $(this).attr("id") != "BrightnessController" && $(this).attr("id") != "ColorController" && $(this).attr("id") != "ColorTemperatureController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "SMARTLOCK" :
-			$('#ReportState').prop('checked', true);
-			$("#LockController").prop('checked',true);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTLOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "LockController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "SMARTPLUG" :
-			$('#ReportState').prop('checked', true);
-			$("#PowerController").prop('checked',true);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTPLUG") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "PowerController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "SWITCH" :
-			$('#ReportState').prop('checked', true);
-			$("#PowerController").prop('checked',true);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "PowerController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "SPEAKER" :
-			$("#SpeakerController").prop('checked',true);
-			$('#ReportState').prop('checked', false);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "SpeakerController" && $(this).attr("id") != "StepSpeakerController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					//$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "TEMPERATURE_SENSOR" :
-			$('#ReportState').prop('checked', true);
-			$("#TemperatureSensor").prop('checked',true);
-			$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TEMPERATURE_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "TemperatureSensor"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "THERMOSTAT" :
-			$('#ReportState').prop('checked', true);
-			$('#TEMPERATURE_SENSOR').prop('checked', true);
-			$("#TemperatureSensor").prop('checked',true);
-			$("#ThermostatController").prop('checked',true);
-			$('input[name=appType]').each(function(index){
-				if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-				}
-			});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
-		case "TV" :
-			$('#ReportState').prop('checked', false);
-			$("#PlaybackController").prop('checked',true);
-			$('input[name=appType]').each(function(index){
-				if ($(this).attr("id") != "TV") {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-				}
-			});
-			$('input[name=capabilities]').each(function(index){
-				if ($(this).attr("id") != "PlaybackController"){
-					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-				}
-				else {
-					$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-				}
-			});
-		break;
+	if ($('#ACTIVITY_TRIGGER').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$("#SceneController").prop('checked',true);
+		$('#ReportState').prop('checked', false);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "SceneController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
 	}
-
+	else if ($('#LIGHT').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$("#PowerController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "PowerController" && $(this).attr("id") != "BrightnessController" && $(this).attr("id") != "ColorController" && $(this).attr("id") != "ColorTemperatureController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#SMARTLOCK').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$("#LockController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTLOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "LockController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#SMARTPLUG').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$("#PowerController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTPLUG") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "PowerController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#SWITCH').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$("#PowerController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "PowerController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#SPEAKER').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$("#SpeakerController").prop('checked',true);
+		$('#ReportState').prop('checked', false);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "SpeakerController" && $(this).attr("id") != "StepSpeakerController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				//$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#TEMPERATURE_SENSOR').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$("#TemperatureSensor").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TEMPERATURE_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "TemperatureSensor"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#THERMOSTAT').prop('checked',true)) { // Flash ToolTip ref TempSensor
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$('#TEMPERATURE_SENSOR').prop('checked', true);
+		$("#TemperatureSensor").prop('checked',true);
+		$("#ThermostatController").prop('checked',true);
+		$('input[name=appType]').each(function(index){
+			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
+			}
+		});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if ($('#TV').prop('checked',true)) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', false);
+		$("#PlaybackController").prop('checked',true);
+		$('input[name=appType]').each(function(index){
+			if ($(this).attr("id") != "TV") {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
+			}
+		});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "PlaybackController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else {
+		$('#simpleOptions').hide();
+	}
 }
 
 
