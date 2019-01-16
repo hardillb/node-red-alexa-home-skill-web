@@ -45,7 +45,7 @@
 								</div>
 								<div class="form-check">
 										<input title="Smart Plug" type="checkbox" class="form-check-input" id="SMARTPLUG" name="appType" value="SMARTPLUG" onclick='checkType(this)'>
-										<label class="form-check-label" for="SMARTPLUG">Smart Plug </label>
+										<label class="form-check-label" for="SMARTPLUG">Smart Plug/ Outlet </label>
 										<br />
 									</div>
 								<div class="form-check">
@@ -80,7 +80,7 @@
 						</div>
 						<!-- Enable/ disable capabilities based on types, hide this div if Advanced selected above -->
 						<div class="col-sm">
-							<div class="form-group" id="simpleOptions" hidden>
+							<div class="form-group" id="simpleOptions">
 								<fieldset class="form-group" id="capabilityType">
 									<div class="form-check">
 										<input title="Brightness Control" type="checkbox" class="form-check-input" name="capabilities" id="BrightnessController" value="BrightnessController">
@@ -186,7 +186,7 @@
 					<!-- Advanced Configuration -->
 					<div class="row" align="justify">
 						<div class="col-sm">
-							<div class="form-group" id="advancedCapabilities" hidden>
+							<div class="form-group" id="advancedCapabilities">
 								<fieldset class="form-group" id="capabilityType">
 									<!-- <legend><h3>Capabilities</h3></legend> -->
 									<div class="form-check">
@@ -288,7 +288,7 @@
 									</div>
 								</fieldset>
 							</div>
-							<div class="form-group" id="advancedOptions" hidden>
+							<div class="form-group" id="advancedOptions">
 								<fieldset class="form-group">
 									<div id="thermostatModeOptions">
 										<legend><h5>Thermostat Modes</h5></legend>
@@ -341,7 +341,7 @@
 							</div>
 						</div>
 						<div class="col-sm">
-							<div class="form-group" id="advancedTypes" hidden>
+							<div class="form-group" id="advancedTypes">
 								<fieldset class="form-group">
 									<legend><h3>Device Type</h3></legend>
 									<!-- <fieldset class="action" id="capabilityType"> -->
@@ -395,7 +395,7 @@
 									</div>
 								</fieldset>
 							</div>
-							<div class="form-group" id="advancedStateReporting" hidden>
+							<div class="form-group" id="advancedStateReporting">
 								<fieldset class="form-group">
 									<legend><h3>State Reporting</h3></legend>
 									<div class="form-check">

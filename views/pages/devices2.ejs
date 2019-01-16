@@ -51,7 +51,7 @@
 <script>
 
 $(document).ready(function () {
-    $('[data-toggle="tooltip"]').tooltip();
+	$('[data-toggle="tooltip"]').tooltip();
 });
 		
 $("#form-device").submit(function(e) {
@@ -127,7 +127,8 @@ $("#form-device").submit(function(e) {
 
 function checkType(type) {
 	if ($('#ACTIVITY_TRIGGER').prop('checked')) {
-		$('#simpleOptions').show();
+		//$('#simpleOptions').removeAttr("hidden");
+		
 		$("#SceneController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "ACTIVITY_TRIGGER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
@@ -503,10 +504,17 @@ function addDevice() {
 	clearDevice();
 	//checkCapability();
 	$("#newDeviceModal").modal();
-	//$("#dialog").dialog("open");
+
 }
 
 function clearDevice() {
+	$('#simpleOptions').hide(); 
+	$('#advancedCapabilities').hide(); 
+	$('#advancedOptions').hide(); 
+	$('#advancedTypes').hide(); 
+	$('#advancedStateReporting').hide(); 
+	
+
 	$('#devID').val("");
 	$('#friendlyName').val("");
 	$('#friendlyName').prop('readonly', false);
