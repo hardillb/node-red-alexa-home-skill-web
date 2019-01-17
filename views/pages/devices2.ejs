@@ -75,6 +75,8 @@ $("#ThermostatController").change(function(e) {
 		$("#Farenheit").prop('required',false);
 	}
 	else {
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$('#validRangeOptions').show();
 		$('#validRangeScaleOptions').show();
 		$('#thermostatModeOptions').show();
@@ -97,8 +99,11 @@ $("#TemperatureSensor").change(function(e) {
 		$("#Farenheit").prop('required',false);
 		$('#Celsius').attr("disabled", "disabled"); 
 		$('#Farenheit').attr("disabled", "disabled");
+		if ($('#THERMOSTAT').prop('checked')){$('#TEMPERATURE_SENSOR').prop('checked', false)};
 	}
 	else {
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$('#validRangeScaleOptions').show();
 		$('#Celsius').removeAttr("disabled");
 		$('#Farenheit').removeAttr("disabled");
@@ -118,11 +123,77 @@ $("#ColorTemperatureController").change(function(e) {
 		$("#minimumValue").prop('required',false);
 	}
 	else {
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$('#validRangeOptions').show();
 		$('#maximumValue').removeAttr("disabled"); 
 		$('#minimumValue').removeAttr("disabled");
 		$("#maximumValue").prop('required',true);
 		$("#minimumValue").prop('required',true);
+	}
+});
+
+// Prevent Step Speaker and Speaker being enabled at the same time
+$("#Speaker").change(function(e) {
+	$('#ReportState').prop('checked', true);
+	$('#stateReporting').show(); 
+	if ( $(this).is(':checked') == true ) {
+		$('#StepSpeaker').prop('checked', false)
+	}
+});
+$("#StepSpeaker").change(function(e) {
+	if ( $(this).is(':checked') == true ) {
+		$('#Speaker').prop('checked', false)
+	}
+});
+
+// Prevent Lock Controller co-exist
+$("#LockController").change(function(e) {
+	if ($('input[id^='+$(this).attr("id")+']').prop("checked")) {
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$("#LockController").prop('checked',true);
+		// Disable other capabilities
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "LockController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else {
+		// Enable other capabilities
+		$('input[name=capabilities]').each(function(index){
+			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+		});	
+	}
+});
+
+// Prevent Scene Controller co-exist
+$("#SceneController").change(function(e) {
+	if ($('input[id^='+$(this).attr("id")+']').prop("checked")) {
+		$('#ReportState').prop('checked', false);
+		// Disable other capabilities
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "SceneController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else {
+		// Enable other capabilities
+		$('input[name=capabilities]').each(function(index){
+			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+		});	
 	}
 });
 
@@ -158,19 +229,22 @@ function checkType(type) {
 	else if ($('#HVAC').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 	//else if (type.id== "HVAC" && type.checked && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
-		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
-		$('#thermostatModeOptions').show();
-		$('#validRangeOptions').show();
-		$('#validRangeScaleOptions').show();
-		$('#maximumValue').removeAttr("disabled"); 
-		$('#minimumValue').removeAttr("disabled");
-		$('#Celsius').removeAttr("disabled");
-		$('#Farenheit').removeAttr("disabled");
-		$("#maximumValue").prop('required',true);
-		$("#minimumValue").prop('required',true);
-		$("#Celsius").prop('required',true);
-		$("#Farenheit").prop('required',true);
+		// $('#ReportState').prop('checked', true);
+		// $('#stateReporting').show(); 
+		// $('#thermostatModeOptions').show();
+		// $('#validRangeOptions').show();
+		// $('#validRangeScaleOptions').show();
+		// $('#maximumValue').removeAttr("disabled"); 
+		// $('#minimumValue').removeAttr("disabled");
+		// $('#Celsius').removeAttr("disabled");
+		// $('#Farenheit').removeAttr("disabled");
+		// $("#maximumValue").prop('required',true);
+		// $("#minimumValue").prop('required',true);
+		// $("#Celsius").prop('required',true);
+		// $("#Farenheit").prop('required',true);
+
+		$("#ThermostatController").trigger("change");
+
 
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
