@@ -52,39 +52,6 @@
 
 $(document).ready(function () {
 	$('[data-toggle="tooltip"]').tooltip();
-
-	//Enable/ disable minimumValue/ maximumValue and scale elements
-	$("#ThermostatController").change(function(e) {
-		if ( $(this).is(':checked') == false) {
-			$('#validRangeOptions').hide();
-			$('#validRangeScaleOptions').hide();
-			$('#thermostatModeOptions').hide();
-			$('#maximumValue').attr("disabled", "disabled"); 
-			$('#minimumValue').attr("disabled", "disabled");
-			$('#Celsius').attr("disabled", "disabled"); 
-			$('#Farenheit').attr("disabled", "disabled");
-			$("#maximumValue").prop('required',false);
-			$("#minimumValue").prop('required',false);
-			$("#Celsius").prop('required',false);
-			$("#Farenheit").prop('required',false);
-		}
-		else {
-			$('#ReportState').prop('checked', true);
-			$('#stateReporting').show(); 
-			$('#validRangeOptions').show();
-			$('#validRangeScaleOptions').show();
-			$('#thermostatModeOptions').show();
-			$('#maximumValue').removeAttr("disabled"); 
-			$('#minimumValue').removeAttr("disabled");
-			$('#Celsius').removeAttr("disabled");
-			$('#Farenheit').removeAttr("disabled");
-			$("#maximumValue").prop('required',true);
-			$("#minimumValue").prop('required',true);
-			$("#Celsius").prop('required',true);
-			$("#Farenheit").prop('required',true);
-		}
-	});
-
 });
 		
 $("#form-device").submit(function(e) {
@@ -92,7 +59,37 @@ $("#form-device").submit(function(e) {
 	saveDevice()
 });
 
-
+//Enable/ disable minimumValue/ maximumValue and scale elements
+$("#ThermostatController").change(function(e) {
+	if ( $(this).is(':checked') == false) {
+		$('#validRangeOptions').hide();
+		$('#validRangeScaleOptions').hide();
+		$('#thermostatModeOptions').hide();
+		$('#maximumValue').attr("disabled", "disabled"); 
+		$('#minimumValue').attr("disabled", "disabled");
+		$('#Celsius').attr("disabled", "disabled"); 
+		$('#Farenheit').attr("disabled", "disabled");
+		$("#maximumValue").prop('required',false);
+		$("#minimumValue").prop('required',false);
+		$("#Celsius").prop('required',false);
+		$("#Farenheit").prop('required',false);
+	}
+	else {
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$('#validRangeOptions').show();
+		$('#validRangeScaleOptions').show();
+		$('#thermostatModeOptions').show();
+		$('#maximumValue').removeAttr("disabled"); 
+		$('#minimumValue').removeAttr("disabled");
+		$('#Celsius').removeAttr("disabled");
+		$('#Farenheit').removeAttr("disabled");
+		$("#maximumValue").prop('required',true);
+		$("#minimumValue").prop('required',true);
+		$("#Celsius").prop('required',true);
+		$("#Farenheit").prop('required',true);
+	}
+});
 
 //Enable Celsius and Farenheit options for Temperature Sesnor
 $("#TemperatureSensor").change(function(e) {
@@ -246,7 +243,7 @@ function checkType(type) {
 		// $("#Celsius").prop('required',true);
 		// $("#Farenheit").prop('required',true);
 
-		$("#ThermostatController").trigger("change");
+		$("#ThermostatController").change();
 
 
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
