@@ -59,6 +59,9 @@ $("#form-device").submit(function(e) {
 	saveDevice()
 });
 
+///////////////////////////////////////////////////////////////////////////
+// Interface/ Capability-specific validation/ element show and hide
+///////////////////////////////////////////////////////////////////////////
 //Enable/ disable minimumValue/ maximumValue and scale elements
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
@@ -73,6 +76,11 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',false);
 		$("#Celsius").prop('required',false);
 		$("#Farenheit").prop('required',false);
+		$('#HEAT').prop('checked', false);
+		$('#COOL').prop('checked', false);
+		$('#AUTO').prop('checked', false);
+		$('#ON').prop('checked', false);
+		$('#OFF').prop('checked', false);
 	}
 	else {
 		$('#ReportState').prop('checked', true);
@@ -88,9 +96,9 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',true);
 		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
+		$('#AUTO').prop('checked', true);
 	}
 });
-
 //Enable Celsius and Farenheit options for Temperature Sesnor
 $("#TemperatureSensor").change(function(e) {
 	if ( $(this).is(':checked') == false) {
@@ -195,7 +203,11 @@ $("#SceneController").change(function(e) {
 	}
 });
 
+///////////////////////////////////////////////////////////////////////////
+// Device type-specific validation/ element show and hide
+///////////////////////////////////////////////////////////////////////////
 function checkType(type) {
+	// Clean-up modal elemts in-case they are no longer needed
 	$('#thermostatModeOptions').hide();
 	$('#validRangeOptions').hide();
 	$('#validRangeScaleOptions').hide();
@@ -443,6 +455,9 @@ function saveDevice() {
 		if ($('#roomHint').val() != "Optional") {
 			device.attributes.roomHint = $('#roomHint').val();
 		}
+		///////////////////////////////////////////////////////////////////////////
+		// Interface/ capability-specific device data-generation
+		///////////////////////////////////////////////////////////////////////////
 		// Get user-defined temperature scale
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 			var scale;
@@ -539,6 +554,9 @@ function saveDevice() {
 		if ($('#roomHint').val() != "Optional") {
 			device.attributes.roomHint = $('#roomHint').val();
 		}
+		///////////////////////////////////////////////////////////////////////////
+		// Interface/ capability-specific device data-generation
+		///////////////////////////////////////////////////////////////////////////
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
@@ -635,7 +653,7 @@ function addDevice() {
 }
 
 function clearDevice() {
-	// Hide modals
+	// Hide modal elements
 	$('#simpleOptions').hide(); 
 	$('#advancedCapabilities').hide(); 
 	$('#advancedOptions').hide(); 
@@ -703,6 +721,9 @@ function edit(id) {
 	device.displayCategories.forEach(function(type){
 		$('#' + type).prop('checked',true);
 	});
+	///////////////////////////////////////////////////////////////////////////
+	// Device type-specific enabling of interfaces/ capabilities
+	///////////////////////////////////////////////////////////////////////////
 	// Re-enable specific interfaces/ capabilities based on displayCategories
 	if ($('#THERMOSTAT').prop('checked')){
 		$('#ThermostatController').removeAttr("disabled");
@@ -811,6 +832,9 @@ function deleteDevice(id) {
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////
+// Interface/ capability-specific state-generation
+///////////////////////////////////////////////////////////////////////////
 function generateState(deviceState) {
 	var dt = new Date().toISOString();
 	var dummyState = {};
