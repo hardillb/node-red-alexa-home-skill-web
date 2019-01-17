@@ -229,27 +229,11 @@ function checkType(type) {
 	else if ($('#HVAC').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 	//else if (type.id== "HVAC" && type.checked && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
-		// $('#ReportState').prop('checked', true);
-		// $('#stateReporting').show(); 
-		// $('#thermostatModeOptions').show();
-		// $('#validRangeOptions').show();
-		// $('#validRangeScaleOptions').show();
-		// $('#maximumValue').removeAttr("disabled"); 
-		// $('#minimumValue').removeAttr("disabled");
-		// $('#Celsius').removeAttr("disabled");
-		// $('#Farenheit').removeAttr("disabled");
-		// $("#maximumValue").prop('required',true);
-		// $("#minimumValue").prop('required',true);
-		// $("#Celsius").prop('required',true);
-		// $("#Farenheit").prop('required',true);
-		
+		// Trigger ThermostatController onchange
 		$("#ThermostatController").prop('checked',true);
 		$("#ThermostatController").change();
-
-
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
-		else {$("#TemperatureSensor").prop('checked',false)}
-		
+		else {$("#TemperatureSensor").prop('checked',false)}	
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "HVAC") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
@@ -361,14 +345,16 @@ function checkType(type) {
 	else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 	//else if (type.id== "TEMPERATURE_SENSOR" && type.checked && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
-		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		// $('#ReportState').prop('checked', true);
+		// $('#stateReporting').show(); 
+		// $('#validRangeScaleOptions').show();
+		// $('#Celsius').removeAttr("disabled");
+		// $('#Farenheit').removeAttr("disabled");
+		// $("#Celsius").prop('required',true);
+		// $("#Farenheit").prop('required',true);
+		// Trigger TemperatureSensor onchange
 		$("#TemperatureSensor").prop('checked',true);
-		$('#validRangeScaleOptions').show();
-		$('#Celsius').removeAttr("disabled");
-		$('#Farenheit').removeAttr("disabled");
-		$("#Celsius").prop('required',true);
-		$("#Farenheit").prop('required',true);
+		$("#TemperatureSensor").change();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TEMPERATURE_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "TemperatureSensor"){
@@ -384,22 +370,11 @@ function checkType(type) {
 	else if ($('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 	//else if (type.id== "THERMOSTAT" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
-		$('#thermostatModeOptions').show();
-		$('#validRangeOptions').show();
-		$('#validRangeScaleOptions').show();
-		$('#maximumValue').removeAttr("disabled"); 
-		$('#minimumValue').removeAttr("disabled");
-		$('#Celsius').removeAttr("disabled");
-		$('#Farenheit').removeAttr("disabled");
-		$("#maximumValue").prop('required',true);
-		$("#minimumValue").prop('required',true);
-		$("#Celsius").prop('required',true);
-		$("#Farenheit").prop('required',true);
-		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		// Trigger ThermostatController onchange
+		$("#ThermostatController").prop('checked',true);
+		$("#ThermostatController").change();
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
-		$("#ThermostatController").prop('checked',true);
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
