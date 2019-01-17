@@ -860,7 +860,8 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.willReportState = devices[i].reportState;
 						dev.attributes = devices[i].attributes;
 						delete dev.attributes.roomHint; // This is stored in attributes, but should be presented at device root level
-						dev.roomHint = devices[i].attributes.roomHint; // Optional, will require schema extension
+						if (JSON.parse(JSON.stringify(devices[i].attributes).hasOwnProperty('roomHint'))){dev.roomHint = devices[i].attributes.roomHint};
+
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
