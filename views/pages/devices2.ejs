@@ -158,7 +158,7 @@ function checkType(type) {
 		else {$("#TemperatureSensor").prop('checked',false)}
 		$("#ThermostatController").prop('checked',true);
 		$('input[name=appType]').each(function(index){
-			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
+			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "HVAC") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
 			}
 		});

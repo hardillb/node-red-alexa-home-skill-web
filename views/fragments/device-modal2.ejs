@@ -200,57 +200,55 @@
 					<!-- Advanced Configuration -->
 					<div class="row" align="justify">
 						<div class="col-sm">
-							<div class="form-group" id="advancedOptions">
-								<fieldset class="form-group">
-									<div id="thermostatModeOptions">
-										<legend><h5>Thermostat Modes</h5></legend>
-										<div class="form-check">
-											<input title="AUTO" type="checkbox" class="form-check-input" name="advThermostatModes" id="advAUTO" value="AUTO">
-											<label class="form-check-label" for="advAUTO">Auto </label>
-											<br />
-											<input title="COOL" type="checkbox" class="form-check-input" name="advThermostatModes" id="advCOOL" value="COOL">
-											<label class="form-check-label" for="advCOOL">Cool </label>
-											<br />	
-											<input title="HEAT" type="checkbox" class="form-check-input" name="advThermostatModes" id="advHEAT" value="HEAT">
-											<label class="form-check-label" for="advHEAT">Heat </label>
-											<br />
-											<input title="ON" type="checkbox" class="form-check-input" name="advThermostatModes" id="advON" value="ON">
-											<label class="form-check-label" for="advON">On </label>
-											<br />
-											<input title="OFF" type="checkbox" class="form-check-input" name="advthermostatModes" id="advOFF" value="OFF">
-											<label class="form-check-label" for="advOFF">Off </label>
-										</div>	
+							<fieldset class="form-group">
+								<div id="thermostatModeOptions">
+									<legend><h5>Thermostat Modes</h5></legend>
+									<div class="form-check">
+										<input title="AUTO" type="checkbox" class="form-check-input" name="advThermostatModes" id="advAUTO" value="AUTO">
+										<label class="form-check-label" for="advAUTO">Auto </label>
+										<br />
+										<input title="COOL" type="checkbox" class="form-check-input" name="advThermostatModes" id="advCOOL" value="COOL">
+										<label class="form-check-label" for="advCOOL">Cool </label>
+										<br />	
+										<input title="HEAT" type="checkbox" class="form-check-input" name="advThermostatModes" id="advHEAT" value="HEAT">
+										<label class="form-check-label" for="advHEAT">Heat </label>
+										<br />
+										<input title="ON" type="checkbox" class="form-check-input" name="advThermostatModes" id="advON" value="ON">
+										<label class="form-check-label" for="advON">On </label>
+										<br />
+										<input title="OFF" type="checkbox" class="form-check-input" name="advthermostatModes" id="advOFF" value="OFF">
+										<label class="form-check-label" for="advOFF">Off </label>
+									</div>	
+								</div>
+							</fieldset>
+							<fieldset class="form-group">
+								<div id="validRangeOptions">
+									<legend><h5>Device Options</h5></legend>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>
+										</div>		
+										<input id="minimumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
 									</div>
-								</fieldset>
-								<fieldset class="form-group">
-									<div id="validRangeOptions">
-										<legend><h5>Device Options</h5></legend>
-										<div class="input-group mb-3">
-											<div class="input-group-prepend">
-												<span class="input-group-text" id="inputGroup-sizing-default">Min Value (°/K)</span>
-											</div>		
-											<input id="minimumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
-										</div>
-										<div class="input-group mb-3">
-											<div class="input-group-prepend">
-												<span class="input-group-text" id="inputGroup-sizing-default">Max Value (°/K)</span>
-											</div>		
-											<input id="maximumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
-										</div>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="inputGroup-sizing-default">Max Value (°/K)</span>
+										</div>		
+										<input id="maximumValue" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" disabled>
 									</div>
-									<div id="validRangeScaleOptions">
-										<div class="form-check form-check-inline" style="padding-left:5px;">
-											<input class="form-check-input" type="radio" name="radioScale" id="Celsius" value="CELSIUS" disabled>
-											<br>
-											<label class="form-check-label" id="lblCelsius" for="Celsius">°Celsius</label>
-										</div>
-										<div class="form-check form-check-inline" style="padding-top: 10px;">
-											<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
-											<label class="form-check-label" id="lblFarenheit" for="Farenheit">°Farenheit</label>
-										</div>
+								</div>
+								<div id="validRangeScaleOptions">
+									<div class="form-check form-check-inline" style="padding-left:5px;">
+										<input class="form-check-input" type="radio" name="radioScale" id="Celsius" value="CELSIUS" disabled>
+										<br>
+										<label class="form-check-label" id="lblCelsius" for="Celsius">°Celsius</label>
 									</div>
-								</fieldset>
-							</div>
+									<div class="form-check form-check-inline" style="padding-top: 10px;">
+										<input class="form-check-input" type="radio" name="radioScale" id="Farenheit" value="Farenheit" disabled>
+										<label class="form-check-label" id="lblFarenheit" for="Farenheit">°Farenheit</label>
+									</div>
+								</div>
+							</fieldset>
 						</div>
 						<div class="col-sm">
 							<div class="form-group" id="stateReporting">
