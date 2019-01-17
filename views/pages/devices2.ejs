@@ -129,6 +129,13 @@ function checkType(type) {
 	$('#thermostatModeOptions').hide();
 	$('#validRangeOptions').hide();
 	$('#validRangeScaleOptions').hide();
+	$('#stateReporting').hide(); 
+	$('#Celsius').attr("disabled", "disabled"); 
+	$('#Farenheit').attr("disabled", "disabled");
+	$("#maximumValue").prop('required',false);
+	$("#minimumValue").prop('required',false);
+	$("#Celsius").prop('required',false);
+	$("#Farenheit").prop('required',false);
 
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#ADVANCED').prop('checked')) {
 	if (type.value == "ACTIVITY_TRIGGER" && type.checked && !$('#ADVANCED').prop('checked')) {
@@ -151,9 +158,19 @@ function checkType(type) {
 	else if (type.value == "HVAC" && type.checked && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$('#thermostatModeOptions').show();
 		$('#validRangeOptions').show();
 		$('#validRangeScaleOptions').show();
+		$('#maximumValue').removeAttr("disabled"); 
+		$('#minimumValue').removeAttr("disabled");
+		$('#Celsius').removeAttr("disabled");
+		$('#Farenheit').removeAttr("disabled");
+		$("#maximumValue").prop('required',true);
+		$("#minimumValue").prop('required',true);
+		$("#Celsius").prop('required',true);
+		$("#Farenheit").prop('required',true);
+
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
 		$("#ThermostatController").prop('checked',true);
@@ -177,6 +194,7 @@ function checkType(type) {
 	else if (type.value == "LIGHT" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$("#PowerController").prop('checked',true);
 		$('#validRangeOptions').show();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
@@ -196,6 +214,7 @@ function checkType(type) {
 	else if (type.value == "SMARTLOCK" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$("#LockController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTLOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -213,6 +232,7 @@ function checkType(type) {
 	else if (type.value == "SMARTPLUG" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$("#PowerController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTPLUG") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -230,6 +250,7 @@ function checkType(type) {
 	else if (type.value == "SWITCH" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$("#PowerController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -248,6 +269,7 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$("#SpeakerController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
+		$('#stateReporting').show(); 
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
@@ -264,8 +286,14 @@ function checkType(type) {
 	else if (type.value == "TEMPERATURE_SENSOR" && type.checked && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		$("#TemperatureSensor").prop('checked',true);
 		$('#validRangeScaleOptions').show();
+		$('#validRangeScaleOptions').show();
+		$('#Celsius').removeAttr("disabled");
+		$('#Farenheit').removeAttr("disabled");
+		$("#Celsius").prop('required',true);
+		$("#Farenheit").prop('required',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TEMPERATURE_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "TemperatureSensor"){
@@ -284,7 +312,17 @@ function checkType(type) {
 		$('#thermostatModeOptions').show();
 		$('#validRangeOptions').show();
 		$('#validRangeScaleOptions').show();
+		$('#maximumValue').removeAttr("disabled"); 
+		$('#minimumValue').removeAttr("disabled");
+		$('#Celsius').removeAttr("disabled");
+		$('#Farenheit').removeAttr("disabled");
+		$("#maximumValue").prop('required',true);
+		$("#minimumValue").prop('required',true);
+		$("#Celsius").prop('required',true);
+		$("#Farenheit").prop('required',true);
+
 		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
 		$("#ThermostatController").prop('checked',true);
@@ -309,6 +347,7 @@ function checkType(type) {
 	else if (type.value == "TV" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
+		$('#stateReporting').show(); 
 		$("#PlaybackController").prop('checked',true);
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TV") {
@@ -330,6 +369,15 @@ function checkType(type) {
 	//else if ($('#ADVANCED').prop('checked')) {
 	else if (type.value == "ADVANCED" && type.checked) {
 		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', false);
+		$('#stateReporting').show(); 
+		$("#TemperatureSensor").prop('checked',true);
+		$('#validRangeScaleOptions').show();
+		$('#validRangeScaleOptions').show();
+		$('#Celsius').removeAttr("disabled");
+		$('#Farenheit').removeAttr("disabled");
+		$("#Celsius").prop('required',true);
+		$("#Farenheit").prop('required',true);
 		$('input[name=capabilities]').each(function(index){
 			$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
