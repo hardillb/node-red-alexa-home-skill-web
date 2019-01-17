@@ -202,6 +202,39 @@ $("#SceneController").change(function(e) {
 		});	
 	}
 });
+// Ensure Thermostat Mode co-exist
+$("#HEAT").change(function(e) {
+	if ($(this).is(':checked')) {
+		$("#COOL").prop("checked", true);
+	}
+	else {
+		$("#COOL").prop("checked", false);
+	}
+});
+$("#COOL").change(function(e) {
+	if ($(this).is(':checked')) {
+		$("#HEAT").prop("checked", true);
+	}
+	else {
+		$("#HEAT").prop("checked", false);
+	}
+});
+$("#ON").change(function(e) {
+	if ($(this).is(':checked')) {
+		$("#OFF").prop("checked", true);
+	}
+	else {
+		$("#OFF").prop("checked", false);
+	}
+});
+$("#OFF").change(function(e) {
+	if ($(this).is(':checked')) {
+		$("#ON").prop("checked", true);
+	}
+	else {
+		$("#ON").prop("checked", false);
+	}
+});
 
 ///////////////////////////////////////////////////////////////////////////
 // Device type-specific validation/ element show and hide
