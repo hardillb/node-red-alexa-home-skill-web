@@ -166,6 +166,7 @@ $("#LockController").change(function(e) {
 		});
 	}
 	else {
+		$('#ReportState').prop('checked', false);
 		// Enable other capabilities
 		$('input[name=capabilities]').each(function(index){
 			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
@@ -708,6 +709,10 @@ function clearDevice() {
 function edit(id) {
 	clearDevice();
 	$("#newDeviceModal").modal();
+	$('#simpleOptions').show();
+
+	// work out logic to show other divs/ elements
+
 	var device = devices[id];
 	$('#devID').val(device._id);
 	$('#friendlyName').val(device.friendlyName);
