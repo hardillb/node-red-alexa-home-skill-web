@@ -377,7 +377,11 @@ function checkType(type) {
 		// $('#minimumValue').removeAttr("disabled");
 		// $('#Celsius').removeAttr("disabled");
 		// $('#Farenheit').removeAttr("disabled");
-
+		$('input[name=appType]').each(function(index){
+			if ($(this).attr("id") != "ADVANCED") {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
+			}
+		});
 		$('input[name=capabilities]').each(function(index){
 			$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
