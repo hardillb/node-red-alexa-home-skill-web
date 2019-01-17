@@ -380,6 +380,7 @@ function checkType(type) {
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "ADVANCED") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
@@ -389,6 +390,9 @@ function checkType(type) {
 	}
 	else {
 		$('#simpleOptions').hide();
+		$('input[name=appType]').each(function(index){
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+		});
 	}
 }
 
