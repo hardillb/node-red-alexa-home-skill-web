@@ -175,7 +175,7 @@ $("#LockController").change(function(e) {
 
 // Prevent Scene Controller co-exist
 $("#SceneController").change(function(e) {
-	if (($(this).is(':checked') == false)) {
+	if ($(this).is(':checked')) {
 		$('#ReportState').prop('checked', false);
 		// Disable other capabilities
 		$('input[name=capabilities]').each(function(index){
