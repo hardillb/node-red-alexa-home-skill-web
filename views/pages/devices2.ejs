@@ -439,6 +439,11 @@ function saveDevice() {
 		};
 		device.friendlyName = $('#friendlyName').val();
 		device.description = $('#description').val();
+		// Google Home Room Hint
+		if ($('#roomHint').val() != "Optional") {
+			device.attributes.roomHint = $('#roomHint').val();
+		}
+		// Get user-defined temperature scale
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked') || $('#ColorTemperatureController').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
@@ -467,7 +472,7 @@ function saveDevice() {
 			if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
 				$('#HEAT').prop('checked', true)
 			}
-
+			// ThermostatMode validation
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
 					device.attributes.thermostatModes.push(this.value);
@@ -530,6 +535,10 @@ function saveDevice() {
 		var device = devices[devID];
 		device.attributes = {};
 		device.description = $('#description').val();
+		// Google Home Room Hint
+		if ($('#roomHint').val() != "Optional") {
+			device.attributes.roomHint = $('#roomHint').val();
+		}
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
@@ -618,7 +627,6 @@ function saveDevice() {
 			alert("Name or desciption can not be empty and at least one action is needed");
 		}
 	}
-	//$('#newDeviceModal').hide();
 }
 
 function addDevice() {
@@ -627,14 +635,22 @@ function addDevice() {
 }
 
 function clearDevice() {
+	// Hide modals
 	$('#simpleOptions').hide(); 
 	$('#advancedCapabilities').hide(); 
 	$('#advancedOptions').hide(); 
 	$('#stateReporting').hide(); 
+	$('#validRangeOptions').hide();
+	$('#validRangeScaleOptions').hide();
+	$('#thermostatModeOptions').hide();
+	// Set default values
 	$('#devID').val("");
 	$('#friendlyName').val("");
-	$('#friendlyName').prop('readonly', false);
 	$('#description').val("");
+	$('#roomHint').val("");
+	$('#maximumValue').val(""); 
+	$('#minimumValue').val("");
+	// Reset checkboxes
 	$('input[name=appType]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false)
 		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
@@ -647,15 +663,14 @@ function clearDevice() {
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 	});
 	$('#ReportState').prop('checked', false)
-	$('#validRangeOptions').hide();
-	$('#validRangeScaleOptions').hide();
-	$('#thermostatModeOptions').hide();
-	$('#maximumValue').val(""); 
-	$('#minimumValue').val("");
+	// Remove read-only property for new devices
+	$('#friendlyName').prop('readonly', false);
+	// Remove "required" property
 	$('#maximumValue').attr("disabled", "disabled"); 
 	$('#minimumValue').attr("disabled", "disabled");
 	$('#Celsius').attr("disabled", "disabled"); 
 	$('#Farenheit').attr("disabled", "disabled");
+	// Remove "required" property
 	$("#maximumValue").prop('required',false);
 	$("#minimumValue").prop('required',false);
 	$("#Celsius").prop('required',false);
@@ -728,6 +743,10 @@ function edit(id) {
 		if (device.reportState == false) {$('#ReportState').prop('checked', false)};
 	}
 	if (device.hasOwnProperty('attributes')){
+		// Google Home Room Hint
+		if (device.attributes.hasOwnProperty('roomHint')) {
+			$("#roomHint").val(device.attributes.roomHint);
+		}
 		// Color Controller
 		if (colorTemperature && device.attributes.hasOwnProperty('colorTemperatureRange')) {
 			if (device.attributes.colorTemperatureRange.hasOwnProperty('temperatureMaxK')) {
