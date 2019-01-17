@@ -393,7 +393,7 @@ function checkType(type) {
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "PlaybackController" && $(this).attr("id") != "ChannelController" && $(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
+			if ($(this).attr("id") != "PlaybackController" && $(this).attr("id") != "ChannelController" && $(this).attr("id") != "PowerController" && $(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
@@ -688,6 +688,31 @@ function edit(id) {
 	device.displayCategories.forEach(function(type){
 		$('#' + type).prop('checked',true);
 	});
+	// Re-enable specific interfaces/ capabilities based on displayCategories
+	if ($('#THERMOSTAT').prop('checked')){
+		$('#ThermostatController').removeAttr("disabled");
+		$('#TemperatureSensor').removeAttr("disabled");
+	}
+	else if ($('#HVAC').prop('checked')){
+		$('#PercentageController').removeAttr("disabled");
+		$('#ThermostatController').removeAttr("disabled");
+		$('#TemperatureSensor').removeAttr("disabled");
+	}
+	else if ($('#LIGHT').prop('checked')){
+		$('#BrightnessController').removeAttr("disabled");
+		$('#ColorController').removeAttr("disabled");
+		$('#ColorTemperatureController').removeAttr("disabled");
+	}
+	else if ($('#SPEAKER').prop('checked')){
+		$('#Speaker').removeAttr("disabled");
+		$('#StepSpeaker').removeAttr("disabled");
+	}
+	else if ($('#TV').prop('checked')){
+		$('#PowerController').removeAttr("disabled");
+		$('#ChannelController').removeAttr("disabled");
+		$('#Speaker').removeAttr("disabled");
+		$('#StepSpeaker').removeAttr("disabled");
+	}
 	// Show State Reporting options unless Scene Controller
 	if (device.capabilities.indexOf('SceneController') == -1) {
 		$('#stateReporting').show(); 
