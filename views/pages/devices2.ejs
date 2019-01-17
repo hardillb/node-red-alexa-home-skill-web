@@ -126,6 +126,9 @@ $("#form-device").submit(function(e) {
 // });
 
 function checkType(type) {
+	$('#thermostatModeOptions').hide();
+	$('#validRangeOptions').hide();
+	$('#validRangeScaleOptions').hide();
 
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#ADVANCED').prop('checked')) {
 	if (type.value == "ACTIVITY_TRIGGER" && type.checked && !$('#ADVANCED').prop('checked')) {
@@ -148,6 +151,9 @@ function checkType(type) {
 	else if (type.value == "HVAC" && type.checked && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
+		$('#thermostatModeOptions').show();
+		$('#validRangeOptions').show();
+		$('#validRangeScaleOptions').show();
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
 		$("#ThermostatController").prop('checked',true);
@@ -172,6 +178,7 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#PowerController").prop('checked',true);
+		$('#validRangeOptions').show();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "PowerController" && $(this).attr("id") != "BrightnessController" && $(this).attr("id") != "ColorController" && $(this).attr("id") != "ColorTemperatureController"){
@@ -204,7 +211,6 @@ function checkType(type) {
 	}
 	//else if ($('#SMARTPLUG').prop('checked') && !$('#ADVANCED').prop('checked')) {
 	else if (type.value == "SMARTPLUG" && type.checked &&  !$('#ADVANCED').prop('checked')) {
-
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#PowerController").prop('checked',true);
@@ -259,6 +265,7 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#TemperatureSensor").prop('checked',true);
+		$('#validRangeScaleOptions').show();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TEMPERATURE_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "TemperatureSensor"){
@@ -274,6 +281,9 @@ function checkType(type) {
 	//else if ($('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 	else if (type.value == "THERMOSTAT" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
+		$('#thermostatModeOptions').show();
+		$('#validRangeOptions').show();
+		$('#validRangeScaleOptions').show();
 		$('#ReportState').prop('checked', true);
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
@@ -554,8 +564,7 @@ function clearDevice() {
 	$('#simpleOptions').hide(); 
 	$('#advancedCapabilities').hide(); 
 	$('#advancedOptions').hide(); 
-	$('#advancedTypes').hide(); 
-	$('#advancedStateReporting').hide(); 
+	$('#stateReporting').hide(); 
 	
 
 	$('#devID').val("");
