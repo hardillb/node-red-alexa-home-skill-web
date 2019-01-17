@@ -115,7 +115,7 @@ $("#TemperatureSensor").change(function(e) {
 
 //Enable/ disable minimumValue/ maximumValue elements
 $("#ColorTemperatureController").change(function(e) {
-	if ( $(this).is(':checked') == false ) {
+	if ($(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
@@ -149,7 +149,7 @@ $("#StepSpeaker").change(function(e) {
 
 // Prevent Lock Controller co-exist
 $("#LockController").change(function(e) {
-	if ($('input[id^='+$(this).attr("id")+']').prop("checked")) {
+	if ($(this).is(':checked')) {
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
 		$("#LockController").prop('checked',true);
@@ -175,7 +175,7 @@ $("#LockController").change(function(e) {
 
 // Prevent Scene Controller co-exist
 $("#SceneController").change(function(e) {
-	if ($('input[id^='+$(this).attr("id")+']').prop("checked")) {
+	if (($(this).is(':checked') == false)) {
 		$('#ReportState').prop('checked', false);
 		// Disable other capabilities
 		$('input[name=capabilities]').each(function(index){
@@ -242,13 +242,14 @@ function checkType(type) {
 		// $("#minimumValue").prop('required',true);
 		// $("#Celsius").prop('required',true);
 		// $("#Farenheit").prop('required',true);
-
+		
+		$("#ThermostatController").prop('checked',true);
 		$("#ThermostatController").change();
 
 
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
 		else {$("#TemperatureSensor").prop('checked',false)}
-		$("#ThermostatController").prop('checked',true);
+		
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "HVAC") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
