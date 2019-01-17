@@ -627,7 +627,7 @@ function clearDevice() {
 
 	$('input[name=appType]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-		$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 	});
 	$('input[name=capabilities]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false);
