@@ -138,7 +138,7 @@ function checkType(type) {
 	$("#Farenheit").prop('required',false);
 
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	if (type.name== "ACTIVITY_TRIGGER" && type.checked && !$('#ADVANCED').prop('checked')) {
+	if (type.id== "ACTIVITY_TRIGGER" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#SceneController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
@@ -155,7 +155,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#HVAC').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
-	else if (type.name== "HVAC" && type.checked && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
+	else if (type.id== "HVAC" && type.checked && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
@@ -191,7 +191,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#LIGHT').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "LIGHT" && type.checked &&  !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "LIGHT" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
@@ -211,7 +211,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#SMARTLOCK').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "SMARTLOCK" && type.checked && !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "SMARTLOCK" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
@@ -229,7 +229,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#SMARTPLUG').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "SMARTPLUG" && type.checked &&  !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "SMARTPLUG" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
@@ -247,7 +247,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#SWITCH').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "SWITCH" && type.checked &&  !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "SWITCH" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
@@ -265,7 +265,7 @@ function checkType(type) {
 		});
 	}
 	// else if ($('#SPEAKER').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "SPEAKER" && type.checked &&  !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "SPEAKER" && type.checked &&  !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#SpeakerController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
@@ -283,7 +283,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "TEMPERATURE_SENSOR" && type.checked && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
@@ -307,7 +307,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
-	else if (type.name== "THERMOSTAT" && type.checked && !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "THERMOSTAT" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#thermostatModeOptions').show();
 		$('#validRangeOptions').show();
@@ -344,7 +344,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#TV').prop('checked') && !$('#ADVANCED').prop('checked')) {
-	else if (type.name== "TV" && type.checked && !$('#ADVANCED').prop('checked')) {
+	else if (type.id== "TV" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
 		$('#stateReporting').show(); 
@@ -367,7 +367,7 @@ function checkType(type) {
 		});
 	}
 	//else if ($('#ADVANCED').prop('checked')) {
-	else if (type.name== "ADVANCED" && type.checked) {
+	else if (type.id== "ADVANCED" && type.checked) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
 		$('#stateReporting').show(); 
