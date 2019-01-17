@@ -393,7 +393,7 @@ function checkType(type) {
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "PlaybackController" && $(this).attr("id") != "ChannelController" && $(this).attr("id") != "PowerController" && $(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
+			if ($(this).attr("id") != "PlaybackController" && $(this).attr("id") != "ChannelController" && $(this).attr("id") != "InputController" && $(this).attr("id") != "PowerController" && $(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
@@ -709,6 +709,7 @@ function edit(id) {
 	}
 	else if ($('#TV').prop('checked')){
 		$('#PowerController').removeAttr("disabled");
+		$('#InputController').removeAttr("disabled");
 		$('#ChannelController').removeAttr("disabled");
 		$('#Speaker').removeAttr("disabled");
 		$('#StepSpeaker').removeAttr("disabled");
