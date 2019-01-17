@@ -508,18 +508,18 @@ function saveDevice() {
 			device.attributes.temperatureScale = scale;
 			device.attributes.thermostatModes = [];
 			// ThermostatMode validation
-			if ($('#ON').prop('checked') && !$('#OFF').prop('checked') ) {
-				$('#OFF').prop('checked', true)
-			}
-			if ($('#OFF').prop('checked') && !$('#ON').prop('checked') ) {
-				$('#ON').prop('checked', true)
-			}
-			if ($('#HEAT').prop('checked') && !$('#COOL').prop('checked') ) {
-				$('#COOL').prop('checked', true)
-			}
-			if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
-				$('#HEAT').prop('checked', true)
-			}
+			// if ($('#ON').prop('checked') && !$('#OFF').prop('checked') ) {
+			// 	$('#OFF').prop('checked', true)
+			// }
+			// if ($('#OFF').prop('checked') && !$('#ON').prop('checked') ) {
+			// 	$('#ON').prop('checked', true)
+			// }
+			// if ($('#HEAT').prop('checked') && !$('#COOL').prop('checked') ) {
+			// 	$('#COOL').prop('checked', true)
+			// }
+			// if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
+			// 	$('#HEAT').prop('checked', true)
+			// }
 			// ThermostatMode validation
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
@@ -606,18 +606,18 @@ function saveDevice() {
 			device.attributes.temperatureScale = scale;
 			device.attributes.thermostatModes = [];
 			// ThermostatMode validation
-			if ($('#ON').prop('checked') && !$('#OFF').prop('checked') ) {
-				$('#OFF').prop('checked', true)
-			}
-			if ($('#OFF').prop('checked') && !$('#ON').prop('checked') ) {
-				$('#ON').prop('checked', true)
-			}
-			if ($('#HEAT').prop('checked') && !$('#COOL').prop('checked') ) {
-				$('#COOL').prop('checked', true)
-			}
-			if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
-				$('#HEAT').prop('checked', true)
-			}
+			// if ($('#ON').prop('checked') && !$('#OFF').prop('checked') ) {
+			// 	$('#OFF').prop('checked', true)
+			// }
+			// if ($('#OFF').prop('checked') && !$('#ON').prop('checked') ) {
+			// 	$('#ON').prop('checked', true)
+			// }
+			// if ($('#HEAT').prop('checked') && !$('#COOL').prop('checked') ) {
+			// 	$('#COOL').prop('checked', true)
+			// }
+			// if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
+			// 	$('#HEAT').prop('checked', true)
+			// }
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
 					device.attributes.thermostatModes.push(this.value);
