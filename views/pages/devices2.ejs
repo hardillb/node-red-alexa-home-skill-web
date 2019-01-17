@@ -104,6 +104,7 @@ $("#TemperatureSensor").change(function(e) {
 		$('#Farenheit').removeAttr("disabled");
 		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
+		if ($('#THERMOSTAT').prop('checked')){$('#TEMPERATURE_SENSOR').prop('checked', true)};
 	}
 });
 
