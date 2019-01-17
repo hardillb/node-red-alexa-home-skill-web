@@ -682,11 +682,11 @@ function edit(id) {
 	// Pre-select and enable specific capabilities
 	device.capabilities.forEach(function(action){
 		$('#' + action).prop('checked',true);
+		$('#' + action).removeAttr("disabled");
 	});
 	// Pre-select and enable specific device types
 	device.displayCategories.forEach(function(type){
 		$('#' + type).prop('checked',true);
-		$('#' + type).removeAttr("disabled");
 	});
 	// Show State Reporting options unless Scene Controller
 	if (device.capabilities.indexOf('SceneController') == -1) {
