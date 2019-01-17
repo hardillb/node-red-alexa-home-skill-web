@@ -94,7 +94,7 @@ $("#ThermostatController").change(function(e) {
 //Enable Celsius and Farenheit options for Temperature Sesnor
 $("#TemperatureSensor").change(function(e) {
 	if ( $(this).is(':checked') == false) {
-		$('#validRangeScaleOptions').hide();
+		if ($('#THERMOSTAT').prop('checked') == false){$('#validRangeScaleOptions').hide()};
 		$("#Celsius").prop('required',false);
 		$("#Farenheit").prop('required',false);
 		$('#Celsius').attr("disabled", "disabled"); 
@@ -112,7 +112,6 @@ $("#TemperatureSensor").change(function(e) {
 		if ($('#THERMOSTAT').prop('checked')){$('#TEMPERATURE_SENSOR').prop('checked', true)};
 	}
 });
-
 //Enable/ disable minimumValue/ maximumValue elements
 $("#ColorTemperatureController").change(function(e) {
 	if ($(this).is(':checked') == false) {
@@ -132,7 +131,6 @@ $("#ColorTemperatureController").change(function(e) {
 		$("#minimumValue").prop('required',true);
 	}
 });
-
 // Prevent Step Speaker and Speaker being enabled at the same time
 $("#Speaker").change(function(e) {
 	$('#ReportState').prop('checked', true);
@@ -147,7 +145,6 @@ $("#StepSpeaker").change(function(e) {
 		$('#Speaker').prop('checked', false)
 	}
 });
-
 // Prevent Lock Controller co-exist
 $("#LockController").change(function(e) {
 	if ($(this).is(':checked')) {
@@ -174,7 +171,6 @@ $("#LockController").change(function(e) {
 		});	
 	}
 });
-
 // Prevent Scene Controller co-exist
 $("#SceneController").change(function(e) {
 	if ($(this).is(':checked')) {
@@ -210,7 +206,6 @@ function checkType(type) {
 	$("#minimumValue").prop('required',false);
 	$("#Celsius").prop('required',false);
 	$("#Farenheit").prop('required',false);
-
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#ADVANCED').prop('checked')) {
 	if (type.id== "ACTIVITY_TRIGGER" && type.checked && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
@@ -435,7 +430,6 @@ function checkType(type) {
 
 function saveDevice() {
 	var devID = $('#devID').val();
-
 	// Add New Device
 	if ( devID === "") {
 		var device = {
@@ -453,7 +447,6 @@ function saveDevice() {
 				}
 			});
 		}
-
 		if ($('#ThermostatController').prop('checked')) {
 			device.attributes.temperatureRange = {
 				temperatureMin: $('#minimumValue').val(),
@@ -481,15 +474,12 @@ function saveDevice() {
 				}
 			});
 		}
-		
 		if ( $('#TemperatureSensor').prop('checked')) {
 			device.attributes.temperatureScale = scale;
 		}
-		
 		if ($('#ColorController').prop('checked')) {
 			device.attributes.commandOnlyColorSetting = false;
 		}
-
 		if ($('#ColorTemperatureController').prop('checked')) {	
 			device.attributes.colorTemperatureRange = {
 				temperatureMinK: $('#minimumValue').val(),
@@ -497,11 +487,9 @@ function saveDevice() {
 			}
 			device.attributes.commandOnlyColorSetting = false;
 		}	
-
 		if ($('#SceneController').prop('checked')) {
 			device.attributes.sceneReversible = false;
 		}
-		
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
 				device.capabilities.push(this.value);
@@ -512,16 +500,13 @@ function saveDevice() {
 				device.displayCategories.push(this.value);
 			}
 		});
-
 		if ($('#ReportState').prop('checked')) {
 			device.reportState = true;
 		}
 		else {device.reportState = false}
-
 		// Generate/ save dummy state data for new device
 		// This will significantly reduce getstate API traffic and make usability far easier
 		device.state = generateState(null);
-
 		if (device.friendlyName && device.description && device.capabilities.length > 0) {
 			$.ajax({
 				url:"/devices",
@@ -545,7 +530,6 @@ function saveDevice() {
 		var device = devices[devID];
 		device.attributes = {};
 		device.description = $('#description').val();
-
 		if ($('#ThermostatController').prop('checked') || $('#TemperatureSensor').prop('checked')) {
 			var scale;
 			$('input[name=radioScale]').each(function(index){
@@ -554,7 +538,6 @@ function saveDevice() {
 				}
 			});
 		}
-
 		if ($('#ThermostatController').prop('checked')) {
 			device.attributes.temperatureRange = {
 				temperatureMin: $('#minimumValue').val(),
@@ -581,15 +564,12 @@ function saveDevice() {
 				}
 			});
 		}
-		
 		if ( $('#TemperatureSensor').prop('checked')) {
 			device.attributes.temperatureScale = scale;
 		}
-
 		if ($('#ColorController').prop('checked')) {
 			device.attributes.commandOnlyColorSetting = false;
 		}
-
 		if ($('#ColorTemperatureController').prop('checked')) {		
 			device.attributes.colorTemperatureRange = {
 				temperatureMinK: $('#minimumValue').val(),
@@ -597,11 +577,9 @@ function saveDevice() {
 			}
 			device.attributes.commandOnlyColorSetting = false;
 		}
-
 		if ($('#SceneController').prop('checked')) {
 			device.attributes.sceneReversible = false;
 		}
-
 		device.capabilities = [];
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
@@ -614,15 +592,12 @@ function saveDevice() {
 				device.displayCategories.push(this.value);
 			}
 		});
-
 		if ($('#ReportState').prop('checked')) {
 			device.reportState = true;
 		}
 		else {device.reportState = false}
-
 		// validate state data, create dummy state data in the event user added new capabilities
 		device.state = generateState(device.state);
-
 		if (device.friendlyName && device.description && device.capabilities.length > 0) {
 			//post update
 			$.ajax({
@@ -649,7 +624,6 @@ function saveDevice() {
 function addDevice() {
 	clearDevice();
 	$("#newDeviceModal").modal();
-
 }
 
 function clearDevice() {
@@ -661,7 +635,6 @@ function clearDevice() {
 	$('#friendlyName').val("");
 	$('#friendlyName').prop('readonly', false);
 	$('#description').val("");
-
 	$('input[name=appType]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false)
 		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
@@ -673,7 +646,6 @@ function clearDevice() {
 	$('input[name=radioScale]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 	});
-
 	$('#ReportState').prop('checked', false)
 	$('#validRangeOptions').hide();
 	$('#validRangeScaleOptions').hide();
@@ -688,45 +660,47 @@ function clearDevice() {
 	$("#minimumValue").prop('required',false);
 	$("#Celsius").prop('required',false);
 	$("#Farenheit").prop('required',false);
-
 }
 
 function edit(id) {
+	// Flush Modal
 	clearDevice();
+	// Show modal, with Interfaces/ Capability options
 	$("#newDeviceModal").modal();
 	$('#simpleOptions').show();
-
-	// work out logic to show other divs/ elements
-
+	// Load basic device data into modal
 	var device = devices[id];
 	$('#devID').val(device._id);
 	$('#friendlyName').val(device.friendlyName);
 	$('#friendlyName').prop('readonly', true);
 	$('#description').val(device.description);
-
+	// Disable all Interfaces/ Capabilities
+	$('input[name=capabilities]').each(function(index){
+		//$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+		$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+	});
+	// Pre-select and enable specific capabilities
 	device.capabilities.forEach(function(action){
 		$('#' + action).prop('checked',true);
 	});
+	// Pre-select and enable specific device types
 	device.displayCategories.forEach(function(type){
 		$('#' + type).prop('checked',true);
+		$('#' + type).removeAttr("disabled");
 	});
-
 	// Show State Reporting options unless Scene Controller
 	if (device.capabilities.indexOf('SceneController') == -1) {
 		$('#stateReporting').show(); 
 	}
-
-	// Capabilities with range/ scale
+	// Capabilities with range/ scale for element un-hide/ population
 	var colorTemperature = $('#ColorTemperatureController').prop('checked');
 	var thermostat = $('#ThermostatController').prop('checked');
 	var temperature = $('#TemperatureSensor').prop('checked');
-
 	// ReportState Boolean
 	if (device.hasOwnProperty('reportState')) {
 		if (device.reportState == true) {$('#ReportState').prop('checked', true)};
 		if (device.reportState == false) {$('#ReportState').prop('checked', false)};
 	}
-
 	if (device.hasOwnProperty('attributes')){
 		// Color Controller
 		if (colorTemperature && device.attributes.hasOwnProperty('colorTemperatureRange')) {
@@ -800,139 +774,139 @@ function generateState(deviceState) {
 	if (deviceState == null) { // new device, no existing state
 		//console.log("No device state, generating dummy state");
 		$('input[name=capabilities]:checked').each(function(index){
-				switch ($(this).attr("id"))  {
-					case "BrightnessController":
-						dummyState.brightness = 75;
-						break;
-					case "ColorController": // set to green
-						dummyState.colorHue = 120;
-						dummyState.colorSaturation = 1;
-						dummyState.brightness = 1;
-						break;
-					case "ColorTemperatureController": // set to warm white
-						dummyState.colorTemperature = 2200;
-						break;
-					case "LockController":
-						dummyState.lock = "UNLOCKED";
-						break;
-					case "PercentageController":
-						dummyState.percentage = 100;
-						break;
-					case "PowerController":
-						dummyState.power = "OFF";
-						break;
-					case "Speaker":
-						dummyState.volume = 50;
-						break;
-					case "TemperatureSensor":
-						dummyState.temperature = 22;
-						break;
-					case "ThermostatController":
-						if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22};
-						if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
-						dummyState.thermostatMode = "HEAT";
-						break;
-					}		
+			switch ($(this).attr("id"))  {
+				case "BrightnessController":
+					dummyState.brightness = 75;
+					break;
+				case "ColorController": // set to green
+					dummyState.colorHue = 120;
+					dummyState.colorSaturation = 1;
+					dummyState.brightness = 1;
+					break;
+				case "ColorTemperatureController": // set to warm white
+					dummyState.colorTemperature = 2200;
+					break;
+				case "LockController":
+					dummyState.lock = "UNLOCKED";
+					break;
+				case "PercentageController":
+					dummyState.percentage = 100;
+					break;
+				case "PowerController":
+					dummyState.power = "OFF";
+					break;
+				case "Speaker":
+					dummyState.volume = 50;
+					break;
+				case "TemperatureSensor":
+					dummyState.temperature = 22;
+					break;
+				case "ThermostatController":
+					if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22};
+					if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
+					dummyState.thermostatMode = "HEAT";
+					break;
+				}		
 		});
 	}
 	else { // device has some state data already, ensure each capability has valid state data
 		$('input[name=capabilities]:checked').each(function(index){
 			//console.log("Existing device state, generating dummy state");
-				switch ($(this).attr("id"))  {
-					case "BrightnessController":
-							if (deviceState.hasOwnProperty('brightness')) {
-								if (typeof deviceState.brightness == 'number' && (deviceState.brightness >= 0 || deviceState.brightness <= 100)) {
-									dummyState.brightness = deviceState.brightness;
-								}
-							}
-							else {dummyState.brightness = 75}
-							break;
-					case "ColorController": // if no existing state set to green
-						if (deviceState.hasOwnProperty('colorHue')) {
-								if (typeof deviceState.colorHue == 'number' && (deviceState.colorHue >= 0 || deviceState.colorHue <= 360)) {
-									dummyState.colorHue = deviceState.colorHue;
-								}
-						}
-						else {dummyState.colorHue = 120}
-						if (deviceState.hasOwnProperty('colorSaturation')) {
-							if (typeof deviceState.colorSaturation == 'number' && (deviceState.colorSaturation >= 0 || deviceState.colorSaturation <= 1)) {
-								dummyState.colorSaturation = deviceState.colorSaturation;
-							}
-						}
-						else {dummyState.colorSaturation = 1}
+			switch ($(this).attr("id"))  {
+				case "BrightnessController":
 						if (deviceState.hasOwnProperty('brightness')) {
-							if (typeof deviceState.brightness == 'number' && (deviceState.brightness >= 0 || deviceState.brightness <= 1)) {
+							if (typeof deviceState.brightness == 'number' && (deviceState.brightness >= 0 || deviceState.brightness <= 100)) {
 								dummyState.brightness = deviceState.brightness;
 							}
 						}
-						else {dummyState.brightness = 1}
+						else {dummyState.brightness = 75}
 						break;
-					case "ColorTemperatureController": // if no existing state set to warm white
-						if (deviceState.hasOwnProperty('colorTemperature')) {
-							if (typeof deviceState.colorTemperature == 'number' && (deviceState.colorTemperature >= 1000 || deviceState.colorTemperature <= 10000)) {
-								dummyState.colorTemperature = deviceState.colorTemperature;
+				case "ColorController": // if no existing state set to green
+					if (deviceState.hasOwnProperty('colorHue')) {
+							if (typeof deviceState.colorHue == 'number' && (deviceState.colorHue >= 0 || deviceState.colorHue <= 360)) {
+								dummyState.colorHue = deviceState.colorHue;
 							}
-						}
-						else {dummyState.colorTemperature = 2200}
-						break;
-					case "LockController":
-						if (deviceState.hasOwnProperty('lock')) {
-							if (typeof deviceState.lock == 'string' && (deviceState.lock == 'UNLOCKED' || deviceState.lock == 'LOCKED')) {
-								dummyState.lock = deviceState.lock;
-							}
-						}
-						else {dummyState.lock = "UNLOCKED"}
-						break;
-					case "PercentageController":
-						if (deviceState.hasOwnProperty('percentage')) {
-							if (typeof deviceState.percentage == 'number') {
-								dummyState.percentage = deviceState.percentage;
-							}
-						}
-						else {dummyState.percentage = 100}
-						break;
-					case "PowerController":
-						if (deviceState.hasOwnProperty('power')) {
-							if (typeof deviceState.power == 'string' && (deviceState.power == 'ON' || deviceState.power == 'OFF')) {
-								dummyState.power = deviceState.power;
-							}
-						}
-						else {dummyState.power = "OFF"}
-						break;
-					case "Speaker":
-						if (deviceState.hasOwnProperty('volume')) {
-							if (typeof deviceState.volume == 'number') {
-								dummyState.volume = deviceState.volume;
-							}
-						}
-						else {dummyState.volume = 50}
-						break;
-					case "TemperatureSensor":
-						if (deviceState.hasOwnProperty('temperature')) {
-							if (typeof deviceState.temperature == 'number') {
-								dummyState.power = deviceState.temperature;
-							}
-						}
-						else {dummyState.temperature = 22}
-						break;
-					case "ThermostatController":
-						if (deviceState.hasOwnProperty('thermostatSetPoint')) {
-							if (typeof deviceState.thermostatSetPoint == 'number') {
-								dummyState.thermostatSetPoint = deviceState.thermostatSetPoint;
-							}
-						}
-						else {
-							if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22}
-							else if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74}
-						}
-						if (deviceState.hasOwnProperty('thermostatMode')) {
-							if (typeof deviceState.thermostatMode == 'string') {
-								dummyState.thermostatMode = deviceState.thermostatMode;
-							}
-						}
-						else {dummyState.thermostatMode = "HEAT"}
-						break;
 					}
+					else {dummyState.colorHue = 120}
+					if (deviceState.hasOwnProperty('colorSaturation')) {
+						if (typeof deviceState.colorSaturation == 'number' && (deviceState.colorSaturation >= 0 || deviceState.colorSaturation <= 1)) {
+							dummyState.colorSaturation = deviceState.colorSaturation;
+						}
+					}
+					else {dummyState.colorSaturation = 1}
+					if (deviceState.hasOwnProperty('brightness')) {
+						if (typeof deviceState.brightness == 'number' && (deviceState.brightness >= 0 || deviceState.brightness <= 1)) {
+							dummyState.brightness = deviceState.brightness;
+						}
+					}
+					else {dummyState.brightness = 1}
+					break;
+				case "ColorTemperatureController": // if no existing state set to warm white
+					if (deviceState.hasOwnProperty('colorTemperature')) {
+						if (typeof deviceState.colorTemperature == 'number' && (deviceState.colorTemperature >= 1000 || deviceState.colorTemperature <= 10000)) {
+							dummyState.colorTemperature = deviceState.colorTemperature;
+						}
+					}
+					else {dummyState.colorTemperature = 2200}
+					break;
+				case "LockController":
+					if (deviceState.hasOwnProperty('lock')) {
+						if (typeof deviceState.lock == 'string' && (deviceState.lock == 'UNLOCKED' || deviceState.lock == 'LOCKED')) {
+							dummyState.lock = deviceState.lock;
+						}
+					}
+					else {dummyState.lock = "UNLOCKED"}
+					break;
+				case "PercentageController":
+					if (deviceState.hasOwnProperty('percentage')) {
+						if (typeof deviceState.percentage == 'number') {
+							dummyState.percentage = deviceState.percentage;
+						}
+					}
+					else {dummyState.percentage = 100}
+					break;
+				case "PowerController":
+					if (deviceState.hasOwnProperty('power')) {
+						if (typeof deviceState.power == 'string' && (deviceState.power == 'ON' || deviceState.power == 'OFF')) {
+							dummyState.power = deviceState.power;
+						}
+					}
+					else {dummyState.power = "OFF"}
+					break;
+				case "Speaker":
+					if (deviceState.hasOwnProperty('volume')) {
+						if (typeof deviceState.volume == 'number') {
+							dummyState.volume = deviceState.volume;
+						}
+					}
+					else {dummyState.volume = 50}
+					break;
+				case "TemperatureSensor":
+					if (deviceState.hasOwnProperty('temperature')) {
+						if (typeof deviceState.temperature == 'number') {
+							dummyState.power = deviceState.temperature;
+						}
+					}
+					else {dummyState.temperature = 22}
+					break;
+				case "ThermostatController":
+					if (deviceState.hasOwnProperty('thermostatSetPoint')) {
+						if (typeof deviceState.thermostatSetPoint == 'number') {
+							dummyState.thermostatSetPoint = deviceState.thermostatSetPoint;
+						}
+					}
+					else {
+						if ($("#Celsius").prop('checked') == true){dummyState.thermostatSetPoint = 22}
+						else if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74}
+					}
+					if (deviceState.hasOwnProperty('thermostatMode')) {
+						if (typeof deviceState.thermostatMode == 'string') {
+							dummyState.thermostatMode = deviceState.thermostatMode;
+						}
+					}
+					else {dummyState.thermostatMode = "HEAT"}
+					break;
+				}
 			}
 		);
 	}
