@@ -22,8 +22,7 @@ var Devices = new Schema({
     },
     reportState: Boolean,
     state: Schema.Types.Mixed,
-    attributes : Schema.Types.Mixed,
-    room : String
+    attributes : Schema.Types.Mixed
 });
 
 Devices.plugin(AutoIncrement, {inc_field: 'endpointId'});
@@ -46,5 +45,6 @@ module.exports = mongoose.model('Devices', Devices);
     //     availableModes: Schema.Types.Mixed,
     //     availableToggles: Schema.Types.Mixed,
     //     availableFanSpeeds: Schema.Types.Mixed,
-    //     sceneReversible: Boolean
+    //     sceneReversible: Boolean,
+    //     roomHint: String
     // }

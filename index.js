@@ -858,9 +858,9 @@ app.post('/api/v1/action', defaultLimiter,
 							name : devices[i].friendlyName
 							}
 						dev.willReportState = devices[i].reportState;
-						//dev.roomHint = devices[i].room; // Optional, will require schema extension
-						dev.attributes = devices[i].attributes; // Disabled until attribute supported traits enabled
-
+						dev.attributes = devices[i].attributes;
+						delete dev.attributes.roomHint; // This is stored in attributes, but should be presented at device root level
+						dev.roomHint = devices[i].attributes.roomHint; // Optional, will require schema extension
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
