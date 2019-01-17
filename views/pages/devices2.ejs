@@ -142,6 +142,7 @@ $("#Speaker").change(function(e) {
 	}
 });
 $("#StepSpeaker").change(function(e) {
+	$('#ReportState').prop('checked', false);
 	if ( $(this).is(':checked') == true ) {
 		$('#Speaker').prop('checked', false)
 	}
@@ -346,14 +347,6 @@ function checkType(type) {
 	else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 	//else if (type.id== "TEMPERATURE_SENSOR" && type.checked && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
-		// $('#ReportState').prop('checked', true);
-		// $('#stateReporting').show(); 
-		// $('#validRangeScaleOptions').show();
-		// $('#Celsius').removeAttr("disabled");
-		// $('#Farenheit').removeAttr("disabled");
-		// $("#Celsius").prop('required',true);
-		// $("#Farenheit").prop('required',true);
-		// Trigger TemperatureSensor onchange
 		$("#TemperatureSensor").prop('checked',true);
 		$("#TemperatureSensor").change();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "TEMPERATURE_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
@@ -421,14 +414,6 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
 		$('#stateReporting').show(); 
-		// $('#thermostatModeOptions').show();
-		// $('#validRangeOptions').show();
-		// $('#validRangeScaleOptions').show();
-		// $('#stateReporting').show(); 
-		// $('#maximumValue').removeAttr("disabled"); 
-		// $('#minimumValue').removeAttr("disabled");
-		// $('#Celsius').removeAttr("disabled");
-		// $('#Farenheit').removeAttr("disabled");
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "ADVANCED") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
@@ -718,6 +703,7 @@ function edit(id) {
 	$('#friendlyName').val(device.friendlyName);
 	$('#friendlyName').prop('readonly', true);
 	$('#description').val(device.description);
+
 	device.capabilities.forEach(function(action){
 		$('#' + action).prop('checked',true);
 	});
@@ -725,11 +711,15 @@ function edit(id) {
 		$('#' + type).prop('checked',true);
 	});
 
+	// Show State Reporting options unless Scene Controller
+	if (device.capabilities.indexOf('SceneController') == -1) {
+		$('#stateReporting').show(); 
+	}
+
 	// Capabilities with range/ scale
 	var colorTemperature = $('#ColorTemperatureController').prop('checked');
 	var thermostat = $('#ThermostatController').prop('checked');
 	var temperature = $('#TemperatureSensor').prop('checked');
-
 
 	// ReportState Boolean
 	if (device.hasOwnProperty('reportState')) {
