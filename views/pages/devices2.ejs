@@ -126,7 +126,9 @@ $("#form-device").submit(function(e) {
 // });
 
 function checkType(type) {
-	if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#ADVANCED').prop('checked')) {
+
+	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	if (type.value == "ACTIVITY_TRIGGER" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#SceneController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
@@ -142,7 +144,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#HVAC').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
+	//else if ($('#HVAC').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
+	else if (type.value == "HVAC" && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
@@ -159,13 +162,13 @@ function checkType(type) {
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 			else {
-				if ($(this).attr("id") == "ThermostatController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
-				//else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
 	}
-	else if ($('#LIGHT').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	//else if ($('#LIGHT').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "LIGHT" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#PowerController").prop('checked',true);
@@ -182,7 +185,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#SMARTLOCK').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	//else if ($('#SMARTLOCK').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "SMARTLOCK" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#LockController").prop('checked',true);
@@ -198,7 +202,9 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#SMARTPLUG').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	//else if ($('#SMARTPLUG').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "SMARTPLUG" && !$('#ADVANCED').prop('checked')) {
+
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#PowerController").prop('checked',true);
@@ -214,7 +220,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#SWITCH').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	//else if ($('#SWITCH').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "SWITCH" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#PowerController").prop('checked',true);
@@ -230,7 +237,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#SPEAKER').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	// else if ($('#SPEAKER').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "SPEAKER" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#SpeakerController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
@@ -246,7 +254,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	//else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "TEMPERATURE_SENSOR" && !$('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$("#TemperatureSensor").prop('checked',true);
@@ -262,7 +271,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
+	//else if ($('#THERMOSTAT').prop('checked') && !$('#ADVANCED').prop('checked')) { // Flash ToolTip ref TempSensor
+	else if (type.value == "THERMOSTAT" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
@@ -285,7 +295,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#TV').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	//else if ($('#TV').prop('checked') && !$('#ADVANCED').prop('checked')) {
+	else if (type.value == "TV" && !$('#ADVANCED').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
 		$("#PlaybackController").prop('checked',true);
@@ -306,7 +317,8 @@ function checkType(type) {
 			}
 		});
 	}
-	else if ($('#ADVANCED').prop('checked')) {
+	//else if ($('#ADVANCED').prop('checked')) {
+	else if (type.value == "ADVANCED") {
 		$('#simpleOptions').show();
 		$('input[name=capabilities]').each(function(index){
 			$('input[id^='+$(this).attr("id")+']').prop("checked", false);
