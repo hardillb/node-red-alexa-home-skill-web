@@ -836,6 +836,8 @@ app.post('/api/v1/action', defaultLimiter,
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
+					logger.log('debug', "[GHome Sync API] User: " + JSON.stringify(user[0]));
+					logger.log('debug', "[GHome Sync API] Devices: " + JSON.stringify(devices));
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
