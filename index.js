@@ -866,8 +866,8 @@ app.post('/api/v1/action', defaultLimiter,
 						// Populate attributes, remap roomHint to device root
 						if (deviceJSON.hasOwnProperty('attributes')) {
 							if (deviceJSON.attributes.hasOwnProperty('roomHint')){
-								delete dev.attributes.roomHint
-								dev.roomHint = devices[i].attributes.roomHint
+								delete dev.attributes.roomHint;
+								dev.roomHint = deviceJSON.attributes.roomHint;
 							}
 						}
 
