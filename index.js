@@ -1926,52 +1926,6 @@ app.get('/devices', defaultLimiter,
 		});
 });
 
-app.get('/devices2', defaultLimiter,
-	ensureAuthenticated,
-	function(req,res){
-		var view = {
-			dp: req.path, 
-			dh: 'https://' + process.env.WEB_HOSTNAME,
-			dt: 'Devices',
-			uid: req.user.username,
-			uip: req.ip,
-			ua: req.headers['user-agent']
-		}
-		if (enableAnalytics) {visitor.pageview(view).send()};
-		var user = req.user.username;
-		const userDevices = Devices.find({username:user});
-		const countDevices = Devices.countDocuments({username:user});
-		const countGrants = Account.aggregate([
-			{ "$match": {
-				"username" : user
-			}},
-			{ "$lookup": {
-				"from": "grantcodes",
-				"let": { "user_id": "$_id" },
-				"pipeline": [
-					{ "$match": {
-					"$expr": { "$eq": [ "$$user_id", "$user" ] }
-					}},
-					{ "$count": "count" }
-				],
-				"as": "grantCount"    
-			}},
-			{ "$addFields": {
-			"countGrants": { "$sum": "$grantCount.count" }
-			}}
-		]);
-
-		Promise.all([userDevices, countDevices, countGrants]).then(([devices, countDevs, countUserGrants]) => {
-			//logger.log('info', "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
-			//logger.log('info', "countUserGrants: " + JSON.stringify(countUserGrants));
-			res.render('pages/devices2',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, devs: true});
-		}).catch(err => {
-			res.status(500).json({error: err});
-		});
-});
-
-
-
 app.put('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
