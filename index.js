@@ -1106,6 +1106,12 @@ app.post('/api/v1/action', defaultLimiter,
 								if (trait == "action.devices.traits.Brightness"){
 									response.payload.devices[data.endpointId].brightness = data.state.brightness;
 								}
+
+								// if (data.capabilities.indexOf('ColorController') > -1 ){
+								// }
+								// if (data.capabilities.indexOf('ColorTemperatureController') > -1){
+								// }
+
 								if (trait == "action.devices.traits.ColorSetting") {
 									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
 										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
