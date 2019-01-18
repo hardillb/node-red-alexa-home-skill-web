@@ -857,16 +857,11 @@ app.post('/api/v1/action', defaultLimiter,
 								}
 							});
 						}
-						// if (dev.traits.indexOf('action.devices.traits.ColorSetting') > -1 && dev.traits.indexOf('action.devices.traits.OnOff' > -1)){
-						// 	dev.traits = dev.traits.filter(obj => obj != 'action.devices.traits.OnOff');
-						// }
-
 						dev.name = {
 							name : devices[i].friendlyName
 							}
 						dev.willReportState = devices[i].reportState;
 						dev.attributes = devices[i].attributes;
-
 						// Populate attributes, remap roomHint to device root
 						if (deviceJSON.hasOwnProperty('attributes')) {
 							if (deviceJSON.attributes.hasOwnProperty('roomHint')){
@@ -874,7 +869,10 @@ app.post('/api/v1/action', defaultLimiter,
 								dev.roomHint = deviceJSON.attributes.roomHint;
 							}
 						}
-
+						// Add colorModel attribute
+						if (dev.traits.indexOf("action.devices.traits.ColorSetting") > -1 ){
+							dev.attributes.colorModel = "hsv";
+						}
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
@@ -883,7 +881,6 @@ app.post('/api/v1/action', defaultLimiter,
 							delete dev.attributes.temperatureScale;
 							delete dev.attributes.thermostatModes;
 						}
-
 						dev.deviceInfo = {
 							manufacturer : "Node-RED",
 							model : "Node-RED",
