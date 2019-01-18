@@ -869,9 +869,10 @@ app.post('/api/v1/action', defaultLimiter,
 								if (deviceJSON.attributes.roomHint != ""){dev.roomHint = deviceJSON.attributes.roomHint};
 							}
 						}
-						// Add colorModel attribute
-						if (dev.traits.indexOf("action.devices.traits.ColorSetting") > -1 ){
+						// Add colorModel attribute if color is supported interface/ trait
+						if (devices[i].capabilities.indexOf("ColorController") > -1 ){
 							dev.attributes.colorModel = "hsv";
+							delete dev.attributes.commandOnlyColorSetting; // defaults to false anyway
 						}
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
@@ -1103,19 +1104,13 @@ app.post('/api/v1/action', defaultLimiter,
 									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
 										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
 									}
-
-									// "hue": parseFloat((data.state.colorHue).toFixed(1)),
-									// "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
-									// "value": parseFloat((data.state.colorBrightness).toFixed(1))
-
 									response.payload.devices[data.endpointId].color = {
 											"temperatureK":data.state.colorTemperature,
 											"spectrumHsv": {
-											  "hue": 120.0,
-											  "saturation": 1.0,
-											  "value": 1.0
+											  "hue": parseFloat((data.state.colorHue).toFixed(1)),
+											  "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
+											  "value": parseFloat((data.state.colorBrightness).toFixed(1))
 											}
-											
 										}
 								}
 								if (trait == "action.devices.traits.OnOff") {
