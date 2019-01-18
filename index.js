@@ -1103,13 +1103,19 @@ app.post('/api/v1/action', defaultLimiter,
 									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
 										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
 									}
+
+									// "hue": parseFloat((data.state.colorHue).toFixed(1)),
+									// "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
+									// "value": parseFloat((data.state.colorBrightness).toFixed(1))
+
 									response.payload.devices[data.endpointId].color = {
 											"temperatureK":data.state.colorTemperature,
 											"spectrumHsv": {
-											  "hue": parseFloat((data.state.colorHue).toFixed(1)),
-											  "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
-											  "value": parseFloat((data.state.colorBrightness).toFixed(1))
+											  "hue": 120.0,
+											  "saturation": 1.0,
+											  "value": 1.0
 											}
+											
 										}
 								}
 								if (trait == "action.devices.traits.OnOff") {
