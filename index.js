@@ -874,6 +874,12 @@ app.post('/api/v1/action', defaultLimiter,
 							dev.attributes.colorModel = "hsv";
 							delete dev.attributes.commandOnlyColorSetting; // defaults to false anyway
 						}
+						// Pass min/ max values as float
+						if (devices[i].capabilities.indexOf("ColorTemperatureController") > -1 ){
+							dev.attributes.colorTemperatureRange.temperatureMinK = parseInt(dev.attributes.colorTemperatureRange.temperatureMinK);
+							dev.attributes.colorTemperatureRange.temperatureMaxK = parseInt(dev.attributes.colorTemperatureRange.temperatureMaxK);
+						}
+
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
