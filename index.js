@@ -1106,9 +1106,9 @@ app.post('/api/v1/action', defaultLimiter,
 									response.payload.devices[data.endpointId].color = {
 											"temperatureK":data.state.colorTemperature,
 											"spectrumHsv": {
-											  "hue": parseFloat(data.state.colorHue).toFixed(1),
-											  "saturation": parseFloat(data.state.colorSaturation).toFixed(1),
-											  "value": parseFloat(data.state.colorBrightness).toFixed(1)
+											  "hue": parseFloat(data.state.colorHue),
+											  "saturation": parseFloat(data.state.colorSaturation),
+											  "value": parseFloat(data.state.colorBrightness)
 											}
 										}
 								}
