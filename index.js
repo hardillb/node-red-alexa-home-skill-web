@@ -946,47 +946,60 @@ app.post('/api/v1/action', defaultLimiter,
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
 						var validationStatus = true;
-
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
 							//logger.log('debug', "[GHome Exec API] Attempting to matching command device: " + element.id + ", against devicesJSON");
 							var data = devices.find(obj => obj.endpointId == element.id);
 							if (data == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
 							else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data))}
-
-							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
-							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
-							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
-
-							if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
-								var temperatureMin = data.attributes.temperatureRange.temperatureMin;
-								var temperatureMax = data.attributes.temperatureRange.temperatureMax;
-								logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
-								if (params.thermostatTemperatureSetpoint > temperatureMax || params.thermostatTemperatureSetpoint < temperatureMin){
-									// Build valueOutOfRange error response
-									validationStatus = false;
-									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
-									// var errResponse = {
-									// 	"requestId": req.body.requestId,
-									// 	"payload": {
-									// 		"devices": {} 
-									// 	}
-									// }
-									// push deviceid with properties, i.e. {90: {"errorCode": valueOutOfRange}}
-									//errResponse.payload.devices[element.id] = {"errorCode": "valueOutOfRange"}
-
-									// Global error response
-									var errResponse = {
-										"requestId": req.body.requestId,
-										"payload": {
-											"errorCode": "valueOutOfRange"
+							// Handle Thermostat valueOutOfRange
+							if (arrCommands[i].execution[0].command == "action.devices.commands.ThermostatTemperatureSetpoint") {
+								var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
+								var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
+								if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
+									var temperatureMin = data.attributes.temperatureRange.temperatureMin;
+									var temperatureMax = data.attributes.temperatureRange.temperatureMax;
+									logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
+									if (params.thermostatTemperatureSetpoint > temperatureMax || params.thermostatTemperatureSetpoint < temperatureMin){
+										// Build valueOutOfRange error response
+										validationStatus = false;
+										logger.log('warn', "[GHome Exec API] Temperature valueOutOfRange error for endpointId:" + element.id);
+										// Global error response
+										var errResponse = {
+											"requestId": req.body.requestId,
+											"payload": {
+												"errorCode": "valueOutOfRange"
+											}
 										}
+										logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
+										res.status(200).json(errResponse);
 									}
-									logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
-									res.status(200).json(errResponse);
 								}
 							}
-
+							// Handle Color Temperature valueOutOfRange
+							if (arrCommands[i].execution[0].command == "action.devices.commands.ColorAbsolute") {
+								var hastemperatureMaxK = getSafe(() => data.attributes.colorTemperatureRange.temperatureMaxK);
+								var hastemperatureMinK = getSafe(() => data.attributes.colorTemperatureRange.temperatureMinK);
+								if (hastemperatureMinK != undefined && hastemperatureMaxK != undefined) {
+									var temperatureMinK = data.attributes.colorTemperatureRange.temperatureMinK;
+									var temperatureMaxK = data.attributes.colorTemperatureRange.temperatureMaxK;
+									logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.color.temperature + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
+									if (params.color.temperature > temperatureMaxK || params.color.temperature < temperatureMinK){
+										// Build valueOutOfRange error response
+										validationStatus = false;
+										logger.log('warn', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
+										// Global error response
+										var errResponse = {
+											"requestId": req.body.requestId,
+											"payload": {
+												"errorCode": "valueOutOfRange"
+											}
+										}
+										logger.log('debug', "[GHome Exec API] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
+										res.status(200).json(errResponse);
+									}
+								}
+							}
 							if (validationStatus == true) {
 								logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
 								// Set MQTT Topic
