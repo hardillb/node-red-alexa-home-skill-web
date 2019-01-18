@@ -883,7 +883,7 @@ app.post('/api/v1/action', defaultLimiter,
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							//dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
-							dev.attributes.availableThermostatModes = dev.attributes.availableThermostatModes.join().toLowerCase(); // Make string, not array
+							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.join().toLowerCase(); // Make string, not array
 
 							dev.attributes.thermostatTemperatureUnit = dev.attributes.temperatureScale.substring(0, 1); // >> Need to make this upper F or C, so trim
 							delete dev.attributes.temperatureRange;
