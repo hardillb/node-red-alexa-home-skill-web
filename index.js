@@ -19,7 +19,9 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
-const { format, createLogger, transports } = require('winston');
+//const { format, createLogger, transports } = require('winston');
+var logger = require('./config/winston');
+
 var enableAnalytics = true;
 var consoleLoglevel = "info"; // default console log level
 var enableGoogleHomeSync = true;
@@ -28,31 +30,31 @@ var enableGoogleHomeSync = true;
 var debug = (process.env.ALEXA_DEBUG || false);
 if (debug == "true") {consoleLoglevel = "debug"};
 
-const logger = createLogger({
-	transports: [
-	  // Console Transport
-	  new transports.Console({
-		level: consoleLoglevel,
-		format: format.combine(
-		  format.timestamp(),
-		  format.colorize(),
-		  format.simple()
-		),
-		handleExceptions: true
-	  })
-	  // Will add AWS CloudWatch capability here as well
-	]
-  });
+// const logger = createLogger({
+// 	transports: [
+// 	  // Console Transport
+// 	  new transports.Console({
+// 		level: consoleLoglevel,
+// 		format: format.combine(
+// 		  format.timestamp(),
+// 		  format.colorize(),
+// 		  format.simple()
+// 		),
+// 		handleExceptions: true
+// 	  })
+// 	  // Will add AWS CloudWatch capability here as well
+// 	]
+//   });
 
 logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
 
 // Create logger stream object for use with morgan
-logger.stream = {
-	write: function(message, encoding) {
-	  // use the 'verbose' log level
-	  logger.verbose(message);
-	},
-  };
+// logger.stream = {
+// 	write: function(message, encoding) {
+// 	  // use the 'verbose' log level
+// 	  logger.verbose(message);
+// 	},
+//   };
 
 // Use GA account ID specified in container definition
 if (!(process.env.GOOGLE_ANALYTICS_TID)) {
@@ -884,7 +886,6 @@ app.post('/api/v1/action', defaultLimiter,
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							//dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.join().toLowerCase(); // Make string, not array
-
 							dev.attributes.thermostatTemperatureUnit = dev.attributes.temperatureScale.substring(0, 1); // >> Need to make this upper F or C, so trim
 							delete dev.attributes.temperatureRange;
 							delete dev.attributes.temperatureScale;
@@ -1044,6 +1045,7 @@ app.post('/api/v1/action', defaultLimiter,
 									user: req.user.username,
 									res: res,
 									response: response,
+									source: "Google",
 									timestamp: Date.now()
 								};
 								onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
@@ -1527,7 +1529,7 @@ mqttClient.on('message',function(topic,message){
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				// Google Home success response
-				if (commandWaiting.hasOwnProperty('response')) {
+				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 				}
@@ -1538,7 +1540,7 @@ mqttClient.on('message',function(topic,message){
 				}			
 			} else {
 				// Google Home failure response
-				if (commandWaiting.hasOwnProperty('response')) {
+				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					delete commandWaiting.response.state;
 					commandWaiting.response.status = "FAILED";
 					logger.log('warn', "[Command API] Failed Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
@@ -1918,6 +1920,7 @@ app.post('/api/v1/command',
 					var command = {
 						user: req.user.username,
 						res: res,
+						source: "Alexa",
 						timestamp: Date.now()
 					};
 			
@@ -1928,6 +1931,495 @@ app.post('/api/v1/command',
 		});
 	}
 );
+
+
+///////////////////////////////////////////////////////////////////////////
+// Start Alexa Command API v2 (replaces Lambda functionality)
+///////////////////////////////////////////////////////////////////////////
+app.post('/api/v1/command2',
+	passport.authenticate('bearer', { session: false }),
+	function(req,res,next){
+
+		var params = {
+			ec: "Command",
+			ea: req.body.directive.header ? "Command API directive:" + req.body.directive.header.name + ", username: " + req.user.username + ", endpointId:" + req.body.directive.endpoint.endpointId : "Command API directive",
+			uid: req.user.username,
+			uip: req.ip,
+			dp: "/api/v1/command"
+		  }
+		if (enableAnalytics) {visitor.event(params).send()};
+
+		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
+			if (err) {
+				logger.log('warn', "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				res.status(404).send();	
+			}
+			if (data) {
+				// Revised Command API Router, offloading from Lambda to avoid multiple requests/ data comparison
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				logger.log('debug', "[Command API] Received command: " + JSON.stringify(req.body));
+				// Convert "model" object class to JSON object
+				var deviceJSON = JSON.parse(JSON.stringify(data));
+				var endpointId = req.body.directive.endpoint.endpointId;
+				var messageId = req.body.directive.header.messageId;
+				var oauth_id = req.body.directive.endpoint.scope.token;
+				var correlationToken = req.body.directive.header.correlationToken;
+				var dt = new Date();
+				var name = req.body.directive.header.name;
+				var namespace = req.body.directive.header.namespace;
+				// Build Header
+				var header = {
+					"namespace": "Alexa",
+					"name": "Response",
+					"payloadVersion": "3",
+					"messageId": messageId + "-R",
+					"correlationToken": correlationToken
+				}
+				// Build Default Endpoint Response
+				var endpoint = {
+					"scope": {
+						"type": "BearerToken",
+						"token": oauth_id
+					},
+					"endpointId": endpointId
+				}
+				// Build Brightness Controller Response Context
+				if (namespace == "Alexa.BrightnessController" && (name == "AdjustBrightness" || name == "SetBrightness")) {
+					if (name == "AdjustBrightness") {
+						var brightness;
+						if (req.body.directive.payload.brightnessDelta < 0) {
+							brightness = req.body.directive.payload.brightnessDelta + 100;
+						}
+						else {
+							brightness = req.body.directive.payload.brightnessDelta;
+						}
+						// Return Percentage Delta (NOT in-line with spec)
+						var contextResult = {
+							"properties": [{
+								"namespace" : "Alexa.BrightnessController",
+								"name": "brightness",
+								"value": brightness,
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 50
+							}]
+						};
+
+					}
+					if (name == "SetBrightness") {
+						// Return Percentage
+						var contextResult = {
+							"properties": [{
+								"namespace" : "Alexa.BrightnessController",
+								"name": "brightness",
+								"value": req.body.directive.payload.brightness,
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 50
+							}]
+						}                
+					};
+				}
+				// Build Channel Controller Response Context
+				if (namespace == "Alexa.ChannelController") {
+					if (name == "ChangeChannel") { 
+						if (req.body.directive.payload.channel.hasOwnProperty('number')) {
+						var contextResult = {
+						"properties": [
+							{
+							"namespace": "Alexa.ChannelController",
+							"name": "channel",
+							"value": {
+								"number": req.body.directive.payload.channel.number
+							},
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+							}
+						]}
+						}
+						else if (req.body.directive.payload.channel.hasOwnProperty('callSign')) {
+							var contextResult = {
+								"properties": [
+									{
+									"namespace": "Alexa.ChannelController",
+									"name": "channel",
+									"value": {
+										"callSign": req.body.directive.payload.channel.callSign                                
+									},
+									"timeOfSample": dt.toISOString(),
+									"uncertaintyInMilliseconds": 50
+									}
+								]}
+						}
+					}
+				}
+				// ColorController
+				if (namespace == "Alexa.ColorController") {
+					var contextResult = {
+						"properties": [{
+							"namespace" : "Alexa.ColorController",
+							"name": "color",
+							"value": {
+								"hue": req.body.directive.payload.color.hue,
+								"saturation": req.body.directive.payload.color.saturation,
+								"brightness": req.body.directive.payload.color.brightness
+							},
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						}]
+					};
+				}
+				// Build ColorTemperatureController Response Context
+				if (namespace == "Alexa.ColorTemperatureController") {
+					var strPayload = req.body.directive.payload.colorTemperatureInKelvin;
+					var colorTemp;
+					if (typeof strPayload != 'number') {
+						if (strPayload == "warm" || strPayload == "warm white") {colorTemp = 2200};
+						if (strPayload == "incandescent" || strPayload == "soft white") {colorTemp = 2700};
+						if (strPayload == "white") {colorTemp = 4000};
+						if (strPayload == "daylight" || strPayload == "daylight white") {colorTemp = 5500};
+						if (strPayload == "cool" || strPayload == "cool white") {colorTemp = 7000};
+					}
+					else {
+						colorTemp = req.body.directive.payload.colorTemperatureInKelvin;
+					}
+					var contextResult = {
+						"properties": [{
+							"namespace" : "Alexa.ColorTemperatureController",
+							"name": "colorTemperatureInKelvin",
+							"value": colorTemp,
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						}]
+					}
+				}
+				// Build Input Controller Response Context
+				if (namespace == "Alexa.InputController") {
+					var contextResult = {
+						"properties": [{
+							"namespace" : "Alexa.InputController",
+							"name": "input",
+							"value": req.body.directive.payload.input,
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						}]
+					}
+					endpoint = {
+						"endpointId": endpointId
+					}
+				}
+				// Build Lock Controller Response Context - SetThermostatMode
+				if (namespace == "Alexa.LockController") {
+					var lockState;
+					if (name == "Lock") {lockState = "LOCKED"};
+					if (name == "Unlock") {lockState = "UNLOCKED"};
+					var contextResult = {
+						"properties": [{
+						"namespace": "Alexa.LockController",
+						"name": "lockState",
+						"value": lockState,
+						"timeOfSample": dt.toISOString(),
+						"uncertaintyInMilliseconds": 500
+						}]
+					};
+				}
+				// Build PercentageController Response Context
+				if (namespace == "Alexa.PercentageController") {
+					if (name == "SetPercentage") {
+						var contextResult = {
+							"properties": [{
+								"namespace": "Alexa.PercentageController",
+								"name": "percentage",
+								"value": req.body.directive.payload.percentage,
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 500
+							}]
+						};
+					}
+					if (name == "AdjustPercentage") {
+						var percentage;
+						var hasPercentage = getSafe(() => deviceJSON.state.percentage);
+						if (hasPercentage != undefined) {
+							if (deviceJSON.state.percentage + req.body.directive.payload.percentageDelta > 100) {percentage = 100}
+							else if (deviceJSON.state.percentage - req.body.directive.payload.percentageDelta < 0) {percentage = 0}
+							else {percentage = deviceJSON.state.percentage + req.body.directive.payload.percentageDelta}
+							var contextResult = {
+								"properties": [{
+									"namespace": "Alexa.PercentageController",
+									"name": "percentage",
+									"value": percentage,
+									"timeOfSample": dt.toISOString(),
+									"uncertaintyInMilliseconds": 500
+									}]
+								};
+							}
+					}
+				}
+				// Build PlaybackController Response Context
+				if (namespace == "Alexa.PlaybackController") {
+					var contextResult = {
+						"properties": []
+					};
+				}
+				// Build PowerController Response Context
+				if (namespace == "Alexa.PowerController") {
+					if (name == "TurnOn") {var newState = "ON"};
+					if (name == "TurnOff") {var newState = "OFF"};
+					var contextResult = {
+						"properties": [{
+							"namespace": "Alexa.PowerController",
+							"name": "powerState",
+							"value": newState,
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						}]
+					};
+				}
+				// Build Scene Controller Activation Started Event
+				if (namespace == "Alexa.SceneController") {
+					header.namespace = "Alexa.SceneController";
+					header.name = "ActivationStarted";
+					var contextResult = {};
+					var payload = {
+							"cause" : {
+								"type" : "VOICE_INTERACTION"
+								},
+							"timestamp": dt.toISOString()
+							};
+				}
+				// Build Speaker Response Context
+				if (namespace == "Alexa.Speaker") {
+					if (name == "SetVolume") {
+						var contextResult = {
+							"properties": [
+								{
+								"namespace": "Alexa.Speaker",
+								"name": "volume",
+								"value":  req.body.directive.payload.volume,
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 50
+								}
+							]}
+						}
+					else if (name == "SetMute") {
+						var contextResult = {
+							"properties": [
+								{
+									"namespace": "Alexa.Speaker",
+									"name": "muted",
+									"value": req.body.directive.payload.mute,
+									"timeOfSample": dt.toISOString(),
+									"uncertaintyInMilliseconds": 50
+								}
+							]}
+					}
+					else {
+						var contextResult = {
+							"properties": []
+						};
+					}
+				}
+				// Build StepSpeaker Response Context
+				if (namespace == "Alexa.StepSpeaker") {
+					var contextResult = {
+						"properties": []
+						};
+				}
+				//Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
+				if (namespace == "Alexa.ThermostatController" 
+					&& (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
+					// Workout new targetSetpoint
+					if (name == "AdjustTargetTemperature") {
+						var newTemp, scale, newMode;
+						// Use existing state data to build response
+						if (deviceJSON.reportState == true) {
+							// Workout values for targetTemperature
+							var hasTemperature = getSafe(() => deviceJSON.state.temperature);
+							var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
+							if (hasTemperature != undefined){newTemp = deviceJSON.state.temperature + req.body.directive.payload.targetSetpointDelta.value}
+							else {newTemp = req.body.directive.payload.targetSetpointDelta.value}
+							if (hasTemperatureScale != undefined){scale = deviceJSON.attributes.temperatureScale}
+							else {scale = req.body.directive.payload.targetSetpointDelta.scale}
+						}
+						else { // Device doesn't support state reporting, unlikely to have state data
+							newTemp = req.body.directive.payload.targetSetpointDelta.value;
+							scale = req.body.directive.payload.targetSetpointDelta.scale;
+						}
+					}
+					else if (name == "SetTargetTemperature") { // Use command-supplied fields
+						newTemp = req.body.directive.payload.targetSetpoint.value;
+						sclae = req.body.directive.payload.targetSetpoint.scale;
+					}
+					// Workout new thermostatMode
+					var hasThermostatModes = getSafe(() => deviceJSON.attributes.thermostatModes);
+					if (hasThermostatModes != undefined){
+						var countModes = deviceJSON.attributes.thermostatModes.length;
+						var arrModes = deviceJSON.attributes.thermostatModes;
+						if (countModes == 1){ // If single mode is supported leave as-is
+							newMode = deviceJSON.state.thermostatMode;
+						}
+						else {
+							var auto, heat, cool, on, off = false;
+							if (arrModes.indexOf('AUTO') > -1){auto = true};
+							if (arrModes.indexOf('HEAT') > -1){heat = true};
+							if (arrModes.indexOf('COOL') > -1){cool = true};
+							if (arrModes.indexOf('ON') > -1){on = true};
+							if (arrModes.indexOf('OFF') > -1){off = true};
+							if (countModes == 2 && (on && off)) { // On and Off Supported
+								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "OFF"}
+								else {newMode = "ON"}
+							}
+							else if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
+								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
+								else {newMode = "HEAT"}
+							}
+							else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
+								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
+								else {newMode = "HEAT"}
+							}
+							else if (countModes == 5 && (on && off && on && off && auto)) { // All Modes Supported
+								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
+								else {newMode = "HEAT"}
+							}
+							else { // Fallback position
+								newMode = "HEAT";
+							}
+						}
+					}
+					else {
+						newMode = "HEAT";
+					}
+					var targetSetPointValue = {
+						"value": newTemp,
+						"scale": scale
+					};
+					var contextResult = {
+						"properties": [{
+							"namespace": "Alexa.ThermostatController",
+							"name": "targetSetpoint",
+							"value": targetSetPointValue,
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						},
+						{
+							"namespace": "Alexa.ThermostatController",
+							"name": "thermostatMode",
+							"value": newMode,
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						},
+						{
+							"namespace": "Alexa.EndpointHealth",
+							"name": "connectivity",
+							"value": {
+								"value": "OK"
+							},
+							"timeOfSample": dt.toISOString(),
+							"uncertaintyInMilliseconds": 50
+						}]
+					};
+				}
+				// Build Thermostat Controller Response Context - SetThermostatMode
+				if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
+					var contextResult = {
+						"properties": [{
+						"namespace": "Alexa.ThermostatController",
+						"name": "thermostatMode",
+						"value": req.body.directive.payload.thermostatMode.value,
+						"timeOfSample": dt.toISOString(),
+						"uncertaintyInMilliseconds": 500
+					}]
+					};
+				}
+				// Default Response Format (payload is empty)
+				if (namespace != "Alexa.SceneController"){
+					// Compile Final Response Message
+					var response = {
+						context: contextResult,
+						event: {
+						header: header,
+						endpoint: endpoint,
+						payload: {}
+						}
+					};
+				}
+				// SceneController Specific Event
+				else {
+					var response = {
+						context: contextResult,
+						event: {
+						header: header,
+						endpoint: endpoint,
+						payload: payload
+						}
+					};                
+				}
+
+				// Prepare MQTT topic/ message validation
+				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
+				var validationStatus = true;
+
+				// Cleanup MQTT message
+				delete req.body.directive.header.correlationToken;
+				delete req.body.directive.endpoint.scope.token;
+				var message = JSON.stringify(req.body);
+				logger.log('debug', "[Command API] Received command API request for user: " + req.user.username + " command: " + message);
+
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+				// Check attributes.colorTemperatureRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
+				if (namespace == "Alexa.ColorTemperatureController" && name == "SetColorTemperature") {
+					var compare = req.body.directive.payload.colorTemperatureInKelvin;
+					// Handle Out of Range
+					var hasColorTemperatureRange = getSafe(() => deviceJSON.attributes.colorTemperatureRange);
+					if (hasColorTemperatureRange != undefined) {
+						if (compare < deviceJSON.attributes.colorTemperatureRange.temperatureMinK || compare > deviceJSON.attributes.colorTemperatureRange.temperatureMaxK) {
+							logger.log('warn', "[Command API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
+							// Send 417 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
+							res.status(417).send();
+							validationStatus = false;
+						}
+					}
+					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
+				}
+
+				// Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
+				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
+					var compare = req.body.directive.payload.targetSetpoint.value;
+					// Handle Temperature Out of Range
+					var hasTemperatureRange = getSafe(() => deviceJSON.attributes.temperatureRange);
+					if (hasTemperatureRange != undefined) {
+						logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
+						// Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
+						res.status(416).send();
+						validationStatus = false;
+					}
+					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
+				}
+				
+				if (validationStatus) {
+					try{
+						mqttClient.publish(topic,message);
+						logger.log('info', "[Command API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+					} catch (err) {
+						logger.log('warn', "[Command API] Failed to publish MQTT command for user: " + req.user.username);
+					}
+					var command = {
+						user: req.user.username,
+						res: res,
+						response: response,
+						source: "Alexa",
+						timestamp: Date.now()
+					};
+			
+					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+					onGoingCommands[req.body.directive.header.messageId] = command;
+				}
+			}
+		});
+	}
+);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// End Command API v2
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get('/my-account', defaultLimiter,
 	ensureAuthenticated,
