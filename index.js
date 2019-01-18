@@ -983,7 +983,7 @@ app.post('/api/v1/action', defaultLimiter,
 										}
 									}
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
-									res.status(200).json(response);
+									res.status(200).json(errResponse);
 								}
 							}
 
