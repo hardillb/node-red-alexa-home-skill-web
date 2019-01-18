@@ -1116,14 +1116,26 @@ app.post('/api/v1/action', defaultLimiter,
 									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
 										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
 									}
-									response.payload.devices[data.endpointId].color = {
-											"temperatureK":data.state.colorTemperature,
+									if (data.capabilities.indexOf('ColorController') > -1 ){
+										response.payload.devices[data.endpointId].color = {
 											"spectrumHsv": {
-											  "hue": parseFloat((data.state.colorHue).toFixed(1)),
-											  "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
-											  "value": parseFloat((data.state.colorBrightness).toFixed(1))
-											}
+												"hue": parseFloat((data.state.colorHue).toFixed(1)),
+												"saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
+												"value": parseFloat((data.state.colorBrightness).toFixed(1))
+											  }
 										}
+									}
+									if (data.capabilities.indexOf('ColorTemperatureController') > -1){
+										response.payload.devices[data.endpointId].color.temperatureK = data.state.colorTemperature;
+									}
+									// response.payload.devices[data.endpointId].color = {
+									// 		"temperatureK":data.state.colorTemperature,
+									// 		"spectrumHsv": {
+									// 		  "hue": parseFloat((data.state.colorHue).toFixed(1)),
+									// 		  "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
+									// 		  "value": parseFloat((data.state.colorBrightness).toFixed(1))
+									// 		}
+									// 	}
 								}
 								if (trait == "action.devices.traits.OnOff") {
 									if (data.state.power.toLowerCase() == 'on') {
