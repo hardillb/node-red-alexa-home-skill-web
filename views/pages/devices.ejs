@@ -926,12 +926,12 @@ function generateState(deviceState) {
 						}
 					}
 					else {dummyState.colorSaturation = 1}
-					if (deviceState.hasOwnProperty('brightness')) {
-						if (typeof deviceState.brightness == 'number' && (deviceState.brightness >= 0 || deviceState.brightness <= 1)) {
-							dummyState.brightness = deviceState.brightness;
+					if (deviceState.hasOwnProperty('colorBrightness')) {
+						if (typeof deviceState.colorBrightness == 'number' && (deviceState.colorBrightness >= 0 || deviceState.colorBrightness <= 1)) {
+							dummyState.colorBrightness = deviceState.colorBrightness;
 						}
 					}
-					else {dummyState.brightness = 1}
+					else {dummyState.colorBrightness = 1}
 					break;
 				case "ColorTemperatureController": // if no existing state set to warm white
 					if (deviceState.hasOwnProperty('colorTemperature')) {
