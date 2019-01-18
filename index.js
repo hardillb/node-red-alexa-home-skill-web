@@ -1128,7 +1128,13 @@ app.post('/api/v1/action', defaultLimiter,
 										}
 									}
 									if (data.capabilities.indexOf('ColorTemperatureController') > -1){
-										response.payload.devices[data.endpointId].color.temperatureK = data.state.colorTemperature;
+										var hasColorElement = getSafe(() => response.payload.devices[data.endpointId].color);
+										if (hasColorElement != undefined) {response.payload.devices[data.endpointId].color.temperatureK = data.state.colorTemperature}
+										else {
+											response.payload.devices[data.endpointId].color = {
+												"temperatureK" : data.state.colorTemperature
+											}
+										}
 									}
 									// response.payload.devices[data.endpointId].color = {
 									// 		"temperatureK":data.state.colorTemperature,
