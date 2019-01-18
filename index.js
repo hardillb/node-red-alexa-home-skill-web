@@ -946,11 +946,12 @@ app.post('/api/v1/action', defaultLimiter,
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
 							var data = devices.find(obj => obj.endpointId === element.id); 
-							var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
+							//var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
 
+							logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data));
 							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
-							var hastemperatureMax = getSafe(() => deviceJSON.attributes.temperatureRange.temperatureMax);
-							var hastemperatureMin = getSafe(() => deviceJSON.attributes.temperatureRange.temperatureMin);
+							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
+							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
 
 							if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
 								var temperatureMin = data.attributes.temperatureRange.temperatureMin;
