@@ -940,15 +940,16 @@ app.post('/api/v1/action', defaultLimiter,
 				if (devices) {
 					logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devices));
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
+
+					var devicesJSON = JSON.parse(JSON.stringify(devices));
+
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
 
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
-							var data = devices.find(obj => obj.endpointId === element.id); 
-							//var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
-
+							var data = devicesJSON.find(obj => obj.endpointId === element.id); 
 							logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data));
 							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
 							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
