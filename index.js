@@ -946,7 +946,7 @@ app.post('/api/v1/action', defaultLimiter,
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
 							var data = devices.find(obj => obj.endpointId === element.id); 
-							var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
+							//var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
 
 							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
 							var hasRange = getSafe(() => deviceJSON.attributes.temperatureRange);
