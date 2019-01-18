@@ -949,9 +949,11 @@ app.post('/api/v1/action', defaultLimiter,
 							//var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
 
 							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
-							var hasRange = getSafe(() => data.attributes.temperatureRange);
-							if (hasRange == true) {
-								if (params.thermostatTemperatureSetpoint > data.attributes.temperatureRange.temperatureMax || params.thermostatTemperatureSetpoint < deviceJSON.attributes.temperatureRange.temperatureMin){
+							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
+							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
+
+							if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
+								if (params.thermostatTemperatureSetpoint > hastemperatureMax || params.thermostatTemperatureSetpoint < hastemperatureMin){
 									// Build valueOutOfRange error response
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
 									var errResponse = {
@@ -2600,8 +2602,8 @@ function setstate(username, endpointId, payload) {
 // Nested attribute/ element tester
 function getSafe(fn) {
     try {
-        return true;
+		return fn();
     } catch (e) {
-        return false;
+        return undefined;
     }
 }
