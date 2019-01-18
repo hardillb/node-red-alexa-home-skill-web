@@ -841,6 +841,7 @@ app.post('/api/v1/action', defaultLimiter,
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
+						var deviceJSON = JSON.parse(JSON.stringify(devices[i])); 
 						var dev = {}
 						dev.id = "" + devices[i].endpointId;
 						dev.type = gHomeReplaceType(devices[i].displayCategories);
@@ -860,11 +861,11 @@ app.post('/api/v1/action', defaultLimiter,
 							name : devices[i].friendlyName
 							}
 						dev.willReportState = devices[i].reportState;
-						
+						dev.attributes = devices[i].attributes;
+
 						// Populate attributes, remap roomHint to device root
-						if (devices[i].hasOwnProperty('attributes')) {
-							dev.attributes = devices[i].attributes;
-							if (devices[i].attributes.hasOwnProperty('roomHint')){
+						if (deviceJSON.hasOwnProperty('attributes')) {
+							if (deviceJSON.attributes.hasOwnProperty('roomHint')){
 								delete dev.attributes.roomHint
 								dev.roomHint = devices[i].attributes.roomHint
 							}
