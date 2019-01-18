@@ -857,10 +857,9 @@ app.post('/api/v1/action', defaultLimiter,
 								}
 							});
 						}
-						// Drop action.devices.traits.OnOff if traits includes action.devices.traits.ColorSetting
-						if (dev.traits.indexOf('action.devices.traits.ColorSetting') > -1 && dev.traits.indexOf('action.devices.traits.OnOff' > -1)){
-							dev.traits = dev.traits.filter(obj => obj != 'action.devices.traits.OnOff')
-						}
+						// if (dev.traits.indexOf('action.devices.traits.ColorSetting') > -1 && dev.traits.indexOf('action.devices.traits.OnOff' > -1)){
+						// 	dev.traits = dev.traits.filter(obj => obj != 'action.devices.traits.OnOff');
+						// }
 
 						dev.name = {
 							name : devices[i].friendlyName
