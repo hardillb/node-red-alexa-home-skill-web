@@ -946,15 +946,17 @@ app.post('/api/v1/action', defaultLimiter,
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
 							var data = devices.find(obj => obj.endpointId === element.id); 
-							//var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
+							var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
 
 							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
-							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
-							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
+							var hastemperatureMax = getSafe(() => deviceJSON.attributes.temperatureRange.temperatureMax);
+							var hastemperatureMin = getSafe(() => deviceJSON.attributes.temperatureRange.temperatureMin);
 
 							if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
+								var temperatureMin = data.attributes.temperatureRange.temperatureMin;
+								var temperatureMax = data.attributes.temperatureRange.temperatureMax;
 								logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
-								if (params.thermostatTemperatureSetpoint > hastemperatureMax || params.thermostatTemperatureSetpoint < hastemperatureMin){
+								if (params.thermostatTemperatureSetpoint > temperatureMax || params.thermostatTemperatureSetpoint < temperatureMin){
 									// Build valueOutOfRange error response
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
 									var errResponse = {
@@ -2602,11 +2604,11 @@ function setstate(username, endpointId, payload) {
 
 // Nested attribute/ element tester
 function getSafe(fn) {
-    try {
-		logger.log('debug', "[getSafe] Returned element:" + fn)
+	logger.log('debug', "[getSafe] Checking element exists:" + fn)
+	try {
 		return fn();
     } catch (e) {
-		logger.log('debug', "[getSafe] Element not found")
+		logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
 }
