@@ -940,17 +940,17 @@ app.post('/api/v1/action', defaultLimiter,
 				if (devices) {
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
 					logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
-					var devicesJSON = JSON.parse(JSON.stringify(devices));
-					logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
+					//var devicesJSON = JSON.parse(JSON.stringify(devices));
+					//logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
+						var validationStatus = true;
 
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
-							logger.log('debug', "[GHome Exec API] Attempting to matching command device: " + element.id + ", against devicesJSON");
-							
-							var data = devices.find(obj => obj.endpointId == element.id); // Not working
+							//logger.log('debug', "[GHome Exec API] Attempting to matching command device: " + element.id + ", against devicesJSON");
+							var data = devices.find(obj => obj.endpointId == element.id);
 							if (data == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
 							else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data))}
 
@@ -964,6 +964,7 @@ app.post('/api/v1/action', defaultLimiter,
 								logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
 								if (params.thermostatTemperatureSetpoint > temperatureMax || params.thermostatTemperatureSetpoint < temperatureMin){
 									// Build valueOutOfRange error response
+									validationStatus = false;
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
 									var errResponse = {
 										"requestId": req.body.requestId,
@@ -974,47 +975,50 @@ app.post('/api/v1/action', defaultLimiter,
 									// push deviceid with properties, i.e. {90: {"errorCode": valueOutOfRange}}
 									errResponse.payload.devices[element.id] = {"errorCode": "valueOutOfRange"}
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
+									res.status(200).json(response);
 								}
 							}
 
-							logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
-							// Set MQTT Topic
-							var topic = "command/" + req.user.username + "/" + element.id;
-							try{
-								// Define MQTT Message
-								var message = JSON.stringify({
+							if (validationStatus == true) {
+								logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
+								// Set MQTT Topic
+								var topic = "command/" + req.user.username + "/" + element.id;
+								try{
+									// Define MQTT Message
+									var message = JSON.stringify({
+										requestId: requestId,
+										id: element.id,
+										execution: arrCommands[i]
+									});
+									mqttClient.publish(topic,message); // Publish Command
+									logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+									logger.log('debug', "[GHome Exec API] MQTT message:" + message);
+
+								} catch (err) {
+									logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
+									logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
+								}
+
+								// Build success response and include in onGoingCommands
+								var response = {
 									requestId: requestId,
-									id: element.id,
-									execution: arrCommands[i]
-								});
-								mqttClient.publish(topic,message); // Publish Command
-								logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
-								logger.log('debug', "[GHome Exec API] MQTT message:" + message);
-
-							} catch (err) {
-								logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
-								logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
-							}
-
-							// Build success response and include in onGoingCommands
-							var response = {
-								requestId: requestId,
-								payload: {
-									commands: [{
-										ids: [element.id],
-										status: "SUCCESS",
-										state: params
-									}]
+									payload: {
+										commands: [{
+											ids: [element.id],
+											status: "SUCCESS",
+											state: params
+										}]
+									}
 								}
-							}
 
-							var command = {
-								user: req.user.username,
-								res: res,
-								response: response,
-								timestamp: Date.now()
-							};
-							onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+								var command = {
+									user: req.user.username,
+									res: res,
+									response: response,
+									timestamp: Date.now()
+								};
+								onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+							}
 						});
 					}
 					if (debug == "true") {console.timeEnd('ghome-exec')};
