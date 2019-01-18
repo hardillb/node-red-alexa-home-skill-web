@@ -97,6 +97,8 @@ $("#ThermostatController").change(function(e) {
 		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
 		$('#AUTO').prop('checked', true);
+		// Prevent ColorTemperature and Thermostat interfaces co-exist
+		$("#ColorTemperatureController").prop('checked', false);
 	}
 });
 //Enable Celsius and Farenheit options for Temperature Sesnor
@@ -137,6 +139,8 @@ $("#ColorTemperatureController").change(function(e) {
 		$('#minimumValue').removeAttr("disabled");
 		$("#maximumValue").prop('required',true);
 		$("#minimumValue").prop('required',true);
+		// Prevent ColorTemperature and Thermostat interfaces co-exist
+		$("#ThermostatController").prop('checked', false);
 	}
 });
 // Prevent Step Speaker and Speaker being enabled at the same time
@@ -507,20 +511,6 @@ function saveDevice() {
 			}
 			device.attributes.temperatureScale = scale;
 			device.attributes.thermostatModes = [];
-			// ThermostatMode validation
-			// if ($('#ON').prop('checked') && !$('#OFF').prop('checked') ) {
-			// 	$('#OFF').prop('checked', true)
-			// }
-			// if ($('#OFF').prop('checked') && !$('#ON').prop('checked') ) {
-			// 	$('#ON').prop('checked', true)
-			// }
-			// if ($('#HEAT').prop('checked') && !$('#COOL').prop('checked') ) {
-			// 	$('#COOL').prop('checked', true)
-			// }
-			// if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
-			// 	$('#HEAT').prop('checked', true)
-			// }
-			// ThermostatMode validation
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
 					device.attributes.thermostatModes.push(this.value);
@@ -605,19 +595,6 @@ function saveDevice() {
 			}
 			device.attributes.temperatureScale = scale;
 			device.attributes.thermostatModes = [];
-			// ThermostatMode validation
-			// if ($('#ON').prop('checked') && !$('#OFF').prop('checked') ) {
-			// 	$('#OFF').prop('checked', true)
-			// }
-			// if ($('#OFF').prop('checked') && !$('#ON').prop('checked') ) {
-			// 	$('#ON').prop('checked', true)
-			// }
-			// if ($('#HEAT').prop('checked') && !$('#COOL').prop('checked') ) {
-			// 	$('#COOL').prop('checked', true)
-			// }
-			// if ($('#COOL').prop('checked') && !$('#HEAT').prop('checked') ) {
-			// 	$('#HEAT').prop('checked', true)
-			// }
 			$('input[name=thermostatModes]').each(function(index){
 				if (this.checked) {
 					device.attributes.thermostatModes.push(this.value);
@@ -742,7 +719,6 @@ function edit(id) {
 	$('#description').val(device.description);
 	// Disable all Interfaces/ Capabilities
 	$('input[name=capabilities]').each(function(index){
-		//$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 		$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 	});
 	// Pre-select and enable specific capabilities
@@ -809,6 +785,7 @@ function edit(id) {
 		if (device.reportState == true) {$('#ReportState').prop('checked', true)};
 		if (device.reportState == false) {$('#ReportState').prop('checked', false)};
 	}
+	// Load device attribtes into modal
 	if (device.hasOwnProperty('attributes')){
 		// Google Home Room Hint
 		if (device.attributes.hasOwnProperty('roomHint')) {
@@ -830,7 +807,7 @@ function edit(id) {
 			}
 		}
 		// Thermostat or Temperature Sensor
-		else if (thermostat || temperature) {
+		if (thermostat || temperature) {
 			if (device.attributes.hasOwnProperty('temperatureScale')) {
 				$('#validRangeScaleOptions').show();
 				$('#Celsius').removeAttr("disabled");
