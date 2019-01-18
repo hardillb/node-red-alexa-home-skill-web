@@ -938,16 +938,34 @@ app.post('/api/v1/action', defaultLimiter,
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (devices) {
-					
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
-					
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
 
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
-							var data = devices.find(obj => obj.endpointId === element.id);
+							var data = devices.find(obj => obj.endpointId === element.id); 
+							var deviceJSON = JSON.parse(JSON.stringify(data)); // Use data for supported range comparison against requested
+
+							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
+							var hasRange = getSafe(() => deviceJSON.attributes.temperatureRange);
+							if (hasRange == true) {
+								if (params.thermostatTemperatureSetpoint > deviceJSON.attributes.temperatureRange.temperatureMax || params.thermostatTemperatureSetpoint < deviceJSON.attributes.temperatureRange.temperatureMin){
+									// Build valueOutOfRange error response
+									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
+									var errResponse = {
+										"requestId": req.body.requestId,
+										"payload": {
+											"devices": {} 
+										}
+									}
+									// push deviceid with properties, i.e. {90: {"errorCode": valueOutOfRange}}
+									errResponse.payload.devices[element.id] = {"errorCode": "valueOutOfRange"}
+									logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
+								}
+							}
+
 							logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
 							// Set MQTT Topic
 							var topic = "command/" + req.user.username + "/" + element.id;
@@ -2579,3 +2597,11 @@ function setstate(username, endpointId, payload) {
 	}
 }
 
+// Nested attribute/ element tester
+function getSafe(fn) {
+    try {
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
