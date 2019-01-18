@@ -20,7 +20,7 @@ var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
 //const { format, createLogger, transports } = require('winston');
-var logger = require('./config/winston');
+var logger = require('./config/logger');
 
 var enableAnalytics = true;
 var consoleLoglevel = "info"; // default console log level
