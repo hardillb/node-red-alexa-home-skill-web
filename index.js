@@ -953,6 +953,7 @@ app.post('/api/v1/action', defaultLimiter,
 							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
 
 							if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
+								logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
 								if (params.thermostatTemperatureSetpoint > hastemperatureMax || params.thermostatTemperatureSetpoint < hastemperatureMin){
 									// Build valueOutOfRange error response
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
