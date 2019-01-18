@@ -950,7 +950,7 @@ app.post('/api/v1/action', defaultLimiter,
 						arrCommandsDevices.forEach(function(element) {
 							logger.log('debug', "[GHome Exec API] Attempting to matching command device: " + element.id + ", against devicesJSON");
 							
-							var data = devicesJSON.find(obj => obj.endpointId === element.id); // Not working
+							var data = devices.find(obj => obj.endpointId == element.id); // Not working
 							if (data == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
 							else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data))}
 
