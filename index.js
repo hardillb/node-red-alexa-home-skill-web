@@ -864,9 +864,9 @@ app.post('/api/v1/action', defaultLimiter,
 						dev.attributes = devices[i].attributes;
 						// Populate attributes, remap roomHint to device root
 						if (deviceJSON.hasOwnProperty('attributes')) {
-							if (deviceJSON.attributes.hasOwnProperty('roomHint') && deviceJSON.attributes.roomHint != ""){
+							if (deviceJSON.attributes.hasOwnProperty('roomHint')){
 								delete dev.attributes.roomHint;
-								dev.roomHint = deviceJSON.attributes.roomHint;
+								if (deviceJSON.attributes.roomHint != ""){dev.roomHint = deviceJSON.attributes.roomHint};
 							}
 						}
 						// Add colorModel attribute
