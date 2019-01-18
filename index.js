@@ -939,6 +939,7 @@ app.post('/api/v1/action', defaultLimiter,
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (devices) {
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
+					logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
 					var devicesJSON = JSON.parse(JSON.stringify(devices));
 					logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
@@ -947,8 +948,12 @@ app.post('/api/v1/action', defaultLimiter,
 
 						// Match device to returned array in case of any required property/ validation
 						arrCommandsDevices.forEach(function(element) {
-							var data = devicesJSON.find(obj => obj.endpointId === element.id); 
-							logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data));
+							logger.log('debug', "[GHome Exec API] Attempting to matching command device: " + element.id + ", against devicesJSON");
+							
+							var data = devicesJSON.find(obj => obj.endpointId === element.id); // Not working
+							if (data == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
+							else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data))}
+
 							// Handle Thermostat valueOutOfRange ==> no response, yet, testing response object output
 							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
 							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
