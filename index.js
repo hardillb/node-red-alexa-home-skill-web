@@ -966,14 +966,22 @@ app.post('/api/v1/action', defaultLimiter,
 									// Build valueOutOfRange error response
 									validationStatus = false;
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
+									// var errResponse = {
+									// 	"requestId": req.body.requestId,
+									// 	"payload": {
+									// 		"devices": {} 
+									// 	}
+									// }
+									// push deviceid with properties, i.e. {90: {"errorCode": valueOutOfRange}}
+									//errResponse.payload.devices[element.id] = {"errorCode": "valueOutOfRange"}
+
+									// Global error response
 									var errResponse = {
 										"requestId": req.body.requestId,
 										"payload": {
-											"devices": {} 
+											"errorCode": "valueOutOfRange"
 										}
 									}
-									// push deviceid with properties, i.e. {90: {"errorCode": valueOutOfRange}}
-									errResponse.payload.devices[element.id] = {"errorCode": "valueOutOfRange"}
 									logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
 									res.status(200).json(response);
 								}
