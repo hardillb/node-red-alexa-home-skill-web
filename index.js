@@ -1029,7 +1029,6 @@ app.post('/api/v1/action', defaultLimiter,
 									logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
 									logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
 								}
-
 								// Build success response and include in onGoingCommands
 								var response = {
 									requestId: requestId,
@@ -1041,7 +1040,6 @@ app.post('/api/v1/action', defaultLimiter,
 										}]
 									}
 								}
-
 								var command = {
 									user: req.user.username,
 									res: res,
@@ -1108,12 +1106,6 @@ app.post('/api/v1/action', defaultLimiter,
 								if (trait == "action.devices.traits.Brightness"){
 									response.payload.devices[data.endpointId].brightness = data.state.brightness;
 								}
-
-								// if (data.capabilities.indexOf('ColorController') > -1 ){
-								// }
-								// if (data.capabilities.indexOf('ColorTemperatureController') > -1){
-								// }
-
 								if (trait == "action.devices.traits.ColorSetting") {
 									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
 										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
@@ -1121,9 +1113,9 @@ app.post('/api/v1/action', defaultLimiter,
 									if (data.capabilities.indexOf('ColorController') > -1 ){
 										response.payload.devices[data.endpointId].color = {
 											"spectrumHsv": {
-												"hue": parseFloat((data.state.colorHue).toFixed(1)),
-												"saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
-												"value": parseFloat((data.state.colorBrightness).toFixed(1))
+												"hue": data.state.colorHue,
+												"saturation": data.state.colorSaturation,
+												"value": data.state.colorBrightness
 											  }
 										}
 									}
@@ -1136,14 +1128,6 @@ app.post('/api/v1/action', defaultLimiter,
 											}
 										}
 									}
-									// response.payload.devices[data.endpointId].color = {
-									// 		"temperatureK":data.state.colorTemperature,
-									// 		"spectrumHsv": {
-									// 		  "hue": parseFloat((data.state.colorHue).toFixed(1)),
-									// 		  "saturation": parseFloat((data.state.colorSaturation).toFixed(1)),
-									// 		  "value": parseFloat((data.state.colorBrightness).toFixed(1))
-									// 		}
-									// 	}
 								}
 								if (trait == "action.devices.traits.OnOff") {
 									if (data.state.power.toLowerCase() == 'on') {
@@ -1161,9 +1145,6 @@ app.post('/api/v1/action', defaultLimiter,
 									if (data.state.hasOwnProperty('temperature')) {
 										response.payload.devices[data.endpointId].thermostatTemperatureAmbient = data.state.temperature;
 									}
-									//else {
-									//	response.payload.devices[data.endpointId].thermostatTemperatureAmbient = data.state.thermostatSetPoint;
-									//}
 								}
 							});
 						}
