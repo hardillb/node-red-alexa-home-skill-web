@@ -859,8 +859,8 @@ app.post('/api/v1/action', defaultLimiter,
 							}
 						dev.willReportState = devices[i].reportState;
 						dev.attributes = devices[i].attributes;
-						if (devices[i].attributes.hasOwnProperty('roomHint')){delete dev.attributes.roomHint}; // This is stored in attributes, but should be presented at device root level
-						if (JSON.parse(JSON.stringify(devices[i].attributes).hasOwnProperty('roomHint'))){dev.roomHint = devices[i].attributes.roomHint};
+						//if (devices[i].attributes.hasOwnProperty('roomHint')){delete dev.attributes.roomHint}; // This is stored in attributes, but should be presented at device root level
+						//if (JSON.parse(JSON.stringify(devices[i].attributes).hasOwnProperty('roomHint'))){dev.roomHint = devices[i].attributes.roomHint};
 
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
