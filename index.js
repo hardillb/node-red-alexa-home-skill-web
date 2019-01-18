@@ -832,7 +832,7 @@ app.post('/api/v1/action', defaultLimiter,
 			if (enableAnalytics) {visitor.event(params).send()};
 
 			if (debug == "true") {console.time('ghome-sync')};
-			var findUser = Account.findOne({username: req.user.username});
+			var findUser = Account.find({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
@@ -1010,7 +1010,7 @@ app.post('/api/v1/action', defaultLimiter,
 			if (enableAnalytics) {visitor.event(params).send()};
 
 			if (debug == "true") {console.time('ghome-query')};
-			var findUser = Account.findOne({username: req.user.username});
+			var findUser = Account.find({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
