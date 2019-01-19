@@ -683,8 +683,7 @@ app.post('/auth/exchange',function(req,res,next){
 }, oauthServer.token(), oauthServer.errorHandler());
 
 
-var ghomeController = require('./routes/ghome');
-app.use('/api/v1/action', ghomeController);
+require('./routes/ghome.js')(app, defaultLimiter, passport, mqttClient, logger);
 
 /* 
 /////////////////////// Start GHome
