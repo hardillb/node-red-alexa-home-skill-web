@@ -1,4 +1,5 @@
 var mqtt = require('mqtt');
+var logger = require('./logger'); // Moved to own module
 
 // MQTT Settings
 var mqtt_user = (process.env.MQTT_USER);
