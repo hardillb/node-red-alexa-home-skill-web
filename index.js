@@ -19,9 +19,7 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
-//const { format, createLogger, transports } = require('winston');
-var logger = require('./config/logger');
-
+var logger = require('./config/logger'); // Moved to own module
 var enableAnalytics = true;
 var consoleLoglevel = "info"; // default console log level
 var enableGoogleHomeSync = true;
@@ -30,31 +28,7 @@ var enableGoogleHomeSync = true;
 var debug = (process.env.ALEXA_DEBUG || false);
 if (debug == "true") {consoleLoglevel = "debug"};
 
-// const logger = createLogger({
-// 	transports: [
-// 	  // Console Transport
-// 	  new transports.Console({
-// 		level: consoleLoglevel,
-// 		format: format.combine(
-// 		  format.timestamp(),
-// 		  format.colorize(),
-// 		  format.simple()
-// 		),
-// 		handleExceptions: true
-// 	  })
-// 	  // Will add AWS CloudWatch capability here as well
-// 	]
-//   });
-
 logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
-
-// Create logger stream object for use with morgan
-// logger.stream = {
-// 	write: function(message, encoding) {
-// 	  // use the 'verbose' log level
-// 	  logger.verbose(message);
-// 	},
-//   };
 
 // Use GA account ID specified in container definition
 if (!(process.env.GOOGLE_ANALYTICS_TID)) {
@@ -2353,6 +2327,8 @@ app.post('/api/v1/command2',
 					};                
 				}
 
+				logger.log('debug', "[Command API] Command response:" + response);
+				
 				// Prepare MQTT topic/ message validation
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 				var validationStatus = true;
