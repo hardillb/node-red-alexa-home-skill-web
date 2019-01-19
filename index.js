@@ -1,5 +1,4 @@
 var url = require('url');
-//var mqtt = require('mqtt');
 var http = require('http');
 var https = require('https');
 var favicon = require('serve-favicon')
@@ -91,39 +90,8 @@ else {
 }
 var cookieSecret = 'ihytsrf334';
 
-// var mqttClient;
+// MQTT Client
 var mqttClient = require('./config/mqtt');
-// var mqttOptions = {
-// 	connectTimeout: 30 * 1000,
-// 	reconnectPeriod: 1000,
-// 	keepAlive: 10,
-// 	clean: true,
-// 	resubscribe: true,
-// 	clientId: 'webApp_' + Math.random().toString(16).substr(2, 8)
-// };
-
-// if (mqtt_user) {
-// 	mqttOptions.username = mqtt_user;
-// 	mqttOptions.password = mqtt_password;
-// }
-
-// logger.log('info', "[Core] Connecting to MQTT server: " + mqtt_url);
-// mqttClient = mqtt.connect(mqtt_url, mqttOptions);
-
-// mqttClient.on('error',function(err){
-// 	logger.log('error', "[Core] MQTT connect error");
-// });
-
-// mqttClient.on('reconnect', function(){
-// 	logger.log('warn', "[Core] MQTT reconnect event");
-// });
-
-// mqttClient.on('connect', function(){
-// 	logger.log('info', "[Core] MQTT connected, subscribing to 'response/#'")
-// 	mqttClient.subscribe('response/#');
-// 	logger.log('info', "[Core] MQTT connected, subscribing to 'state/#'")
-// 	mqttClient.subscribe('state/#');
-// });
 
 // Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){
@@ -160,7 +128,9 @@ Account.findOne({username: mqtt_user}, function(error, account){
 var app = express();
 
 // Redis client, required by express-limiter
-var client = require('redis').createClient({
+var client = require('./config/redis')
+
+/* var client = require('redis').createClient({
 	host: 'redis',
 	retry_strategy: function (options) {
         if (options.error && options.error.code === 'ECONNREFUSED') {
@@ -195,7 +165,7 @@ client.on('reconnecting', function() {
 
 client.on('error', function (err) {
     logger.log('error', "[Core] Unable to connect to Redis server");
-});
+}); */
 
 // Rate-limiter 
 const limiter = require('express-limiter')(app, client)
