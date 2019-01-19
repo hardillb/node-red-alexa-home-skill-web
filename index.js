@@ -2217,9 +2217,9 @@ app.post('/api/v1/command2',
 					if (name == "AdjustTargetTemperature") {
 						var newTemp, scale, newMode;
 						// Workout values for targetTemperature
-						var hasTemperature = getSafe(() => deviceJSON.state.temperature);
+						var hasthermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
 						var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
-						if (hasTemperature != undefined){newTemp = deviceJSON.state.temperature + req.body.directive.payload.targetSetpointDelta.value}
+						if (hasthermostatSetPoint != undefined){newTemp = deviceJSON.state.thermostatSetPoint + req.body.directive.payload.targetSetpointDelta.value}
 						else {newTemp = req.body.directive.payload.targetSetpointDelta.value}
 						if (hasTemperatureScale != undefined){scale = deviceJSON.attributes.temperatureScale}
 						else {scale = req.body.directive.payload.targetSetpointDelta.scale}
