@@ -89,7 +89,7 @@ if (process.env.VCAP_APPLICATION) {
 else {
 	var app_id = 'http://localhost:' + port;
 }
-var cookieSecret = 'ihytsrf334';
+var cookieSecret = (process.env.COOKIE_SECRET || 'ihytsrf334');
 
 // MQTT Client ==========================
 var mqttClient = require('./config/mqtt');
