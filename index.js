@@ -2375,10 +2375,12 @@ app.post('/api/v1/command2',
 					// Handle Temperature Out of Range
 					var hasTemperatureRange = getSafe(() => deviceJSON.attributes.temperatureRange);
 					if (hasTemperatureRange != undefined) {
-						logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
-						// Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
-						res.status(416).send();
-						validationStatus = false;
+						if (compare < deviceJSON.attributes.temperatureRange.temperatureMin || compare > deviceJSON.attributes.temperatureRange.temperatureMax) {
+							logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
+							// Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
+							res.status(416).send();
+							validationStatus = false;
+						}
 					}
 					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
 				}
