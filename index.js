@@ -1509,8 +1509,14 @@ mqttClient.on('message',function(topic,message){
 				}
 				// Alexa success response send to Lambda for full response construction
 				else {
-					logger.log('debug', "[Command API] Alexa MQTT command successful");
-					commandWaiting.res.status(200).send();
+					if (commandWaiting.hasOwnProperty('response')) {
+						logger.log('debug', "[Command API] Successful Alexa MQTT command, response: " + JSON.stringify(commandWaiting.response));
+						commandWaiting.res.status(200).json(commandWaiting.response)
+					}
+					else {
+						logger.log('debug', "[Command API] Alexa MQTT command successful");
+						commandWaiting.res.status(200).send()
+					}
 				}			
 			} else {
 				// Google Home failure response
@@ -1522,8 +1528,14 @@ mqttClient.on('message',function(topic,message){
 				}
 				// Alexa failure response send to Lambda for full response construction
 				else {
-					commandWaiting.res.status(503).send();
-					logger.log('warn', "[Command API] Failed MQTT Command API response");
+					if (commandWaiting.hasOwnProperty('response')) {
+						logger.log('warn', "[Command API] Failed Alexa MQTT Command API, response:" + + JSON.stringify(commandWaiting.response));
+						commandWaiting.res.status(503).json(commandWaiting.response)
+					}
+					else {
+						logger.log('warn', "[Command API] Failed Alexa MQTT Command API response");
+						commandWaiting.res.status(503).send()
+					}
 				}
 			}
 			delete onGoingCommands[payload.messageId];
@@ -2328,7 +2340,7 @@ app.post('/api/v1/command2',
 				}
 
 				logger.log('debug', "[Command API] Command response:" + response);
-				
+
 				// Prepare MQTT topic/ message validation
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
 				var validationStatus = true;
