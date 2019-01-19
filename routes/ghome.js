@@ -11,6 +11,8 @@ var LostPassword =  require('../models/lostPassword');
 
 module.exports = function(app, defaultLimiter, passport, mqttClient, logger){
 
+var debug = (process.env.ALEXA_DEBUG || false);
+
 // Need to import defaultLimiter, mqttClient, ongoingcommands +++++
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
