@@ -50,9 +50,9 @@ mongoose.connect(mongo_url, {
 });
 
 module.exports = {
-    Account: require('./models/account'),
-    oauthModels: require('./models/oauth'),
-    Devices: require('./models/devices'),
-    Topics: require('./models/topics'),
-    LostPassword: require('./models/lostPassword')
+    Account: require('../models/account'),
+    oauthModels: require('../models/oauth'),
+    Devices: require('../models/devices'),
+    Topics: require('../models/topics'),
+    LostPassword: require('../models/lostPassword')
 }
