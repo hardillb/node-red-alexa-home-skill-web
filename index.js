@@ -9,14 +9,14 @@ var express = require('express');
 const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
 ////////////////////////////////////////////////////
-// var db = require('./config/db');
-// var Account = db.Account;
-// var oauthModels = db.oauthModels;
-// var Devices = db.Devices;
-// var Topics = db.Topics;
-// var LostPassword = db.LostPassword;
+var db = require('./config/db');
+var Account = db.Account;
+var oauthModels = db.oauthModels;
+var Devices = db.Devices;
+var Topics = db.Topics;
+var LostPassword = db.LostPassword;
 ////////////////////////////////////////////////////
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -73,10 +73,10 @@ var port = (process.env.VCAP_APP_PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 
 // MongoDB Settings
-var mongo_user = (process.env.MONGO_USER);
-var mongo_password = (process.env.MONGO_PASSWORD);
-var mongo_host = (process.env.MONGO_HOST || "mongodb");
-var mongo_port = (process.env.MONGO_PORT || "27017");
+// var mongo_user = (process.env.MONGO_USER);
+// var mongo_password = (process.env.MONGO_PASSWORD);
+// var mongo_host = (process.env.MONGO_HOST || "mongodb");
+// var mongo_port = (process.env.MONGO_PORT || "27017");
 // MQTT Settings
 var mqtt_user = (process.env.MQTT_USER);
 var mqtt_password = (process.env.MQTT_PASSWORD);
@@ -127,7 +127,7 @@ mqttClient.on('connect', function(){
 	mqttClient.subscribe('state/#');
 });
 
-	// Connect to Mongo Instance
+/* 	// Connect to Mongo Instance
 	mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
 	logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 	mongoose.Promise = global.Promise;
@@ -173,7 +173,7 @@ mqttClient.on('connect', function(){
 	var oauthModels = require('./models/oauth');
 	var Devices = require('./models/devices');
 	var Topics = require('./models/topics');
-	var LostPassword = require('./models/lostPassword');
+	var LostPassword = require('./models/lostPassword'); */
 
 // Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){

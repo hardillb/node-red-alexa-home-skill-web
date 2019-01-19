@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var logger = require('logger'); // Moved to own module
+var logger = require('./logger'); // Moved to own module
 
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER);
