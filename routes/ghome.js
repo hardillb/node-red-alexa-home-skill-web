@@ -3,21 +3,23 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var logger = require('../config/logger');
+
 var ua = require('universal-analytics');
-
-if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = true;
-    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
-}
-
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json());
-
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var Topics = require('../models/topics');
 var LostPassword =  require('../models/lostPassword');
+
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
+
+// Need to import defaultLimiter, mqttClient, ongoingcommands +++++
+
+if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
+    enableAnalytics = true;
+    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
+}
 
 /////////////////////// Start GHome
 router.post('/', defaultLimiter,
