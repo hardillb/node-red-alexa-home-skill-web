@@ -3,9 +3,10 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var logger = require('../config/logger');
+var ua = require('universal-analytics');
 
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = false;
+    enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
 
