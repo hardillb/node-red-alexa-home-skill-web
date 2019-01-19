@@ -680,6 +680,11 @@ app.post('/auth/exchange',function(req,res,next){
 	});
 }, oauthServer.token(), oauthServer.errorHandler());
 
+
+var ghomeController = require('./routes/ghome');
+app.use('/api/v1/action', ghomeController);
+
+/* 
 /////////////////////// Start GHome
 app.post('/api/v1/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
@@ -1100,7 +1105,7 @@ function gHomeReplaceType(type) {
 	else {return "NA"}
 }
 /////////////////////// End GHome
-
+ */
 
 /////////////////////// Start Amazon
 
