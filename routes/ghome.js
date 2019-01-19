@@ -2,7 +2,7 @@
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
-var logger = require('./config/logger');
+var logger = require('../config/logger');
 
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = false;
