@@ -1920,7 +1920,7 @@ app.post('/api/v1/command',
 
 
 ///////////////////////////////////////////////////////////////////////////
-// Start Alexa Command API v2 (replaces Lambda functionality)
+// Start Alexa Command API v2 (replaces much of the Lambda functionality)
 ///////////////////////////////////////////////////////////////////////////
 app.post('/api/v1/command2',
 	passport.authenticate('bearer', { session: false }),
@@ -1941,6 +1941,7 @@ app.post('/api/v1/command2',
 				res.status(404).send();	
 			}
 			if (data) {
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Revised Command API Router, offloading from Lambda to avoid multiple requests/ data comparison
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				logger.log('debug', "[Command API] Received command: " + JSON.stringify(req.body));
@@ -2215,20 +2216,13 @@ app.post('/api/v1/command2',
 					// Workout new targetSetpoint
 					if (name == "AdjustTargetTemperature") {
 						var newTemp, scale, newMode;
-						// Use existing state data to build response
-						if (deviceJSON.reportState == true) {
-							// Workout values for targetTemperature
-							var hasTemperature = getSafe(() => deviceJSON.state.temperature);
-							var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
-							if (hasTemperature != undefined){newTemp = deviceJSON.state.temperature + req.body.directive.payload.targetSetpointDelta.value}
-							else {newTemp = req.body.directive.payload.targetSetpointDelta.value}
-							if (hasTemperatureScale != undefined){scale = deviceJSON.attributes.temperatureScale}
-							else {scale = req.body.directive.payload.targetSetpointDelta.scale}
-						}
-						else { // Device doesn't support state reporting, unlikely to have state data
-							newTemp = req.body.directive.payload.targetSetpointDelta.value;
-							scale = req.body.directive.payload.targetSetpointDelta.scale;
-						}
+						// Workout values for targetTemperature
+						var hasTemperature = getSafe(() => deviceJSON.state.temperature);
+						var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
+						if (hasTemperature != undefined){newTemp = deviceJSON.state.temperature + req.body.directive.payload.targetSetpointDelta.value}
+						else {newTemp = req.body.directive.payload.targetSetpointDelta.value}
+						if (hasTemperatureScale != undefined){scale = deviceJSON.attributes.temperatureScale}
+						else {scale = req.body.directive.payload.targetSetpointDelta.scale}
 					}
 					else if (name == "SetTargetTemperature") { // Use command-supplied fields
 						newTemp = req.body.directive.payload.targetSetpoint.value;
