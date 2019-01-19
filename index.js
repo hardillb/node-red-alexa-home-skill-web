@@ -8,14 +8,14 @@ var express = require('express');
 const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
-////////////////////////////////////////////////////
+// MongoDB =======================
 var db = require('./config/db');
 var Account = db.Account;
 var oauthModels = db.oauthModels;
 var Devices = db.Devices;
 var Topics = db.Topics;
 var LostPassword = db.LostPassword;
-////////////////////////////////////////////////////
+// ===============================
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var BasicStrategy = require('passport-http').BasicStrategy;
@@ -25,7 +25,9 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('./oauth');
 var countries = require('countries-api');
 var ua = require('universal-analytics');
-var logger = require('./config/logger'); // Moved to own module
+// Winston Logger ==========================
+var logger = require('./config/logger');
+// =========================================
 var enableAnalytics = true;
 var consoleLoglevel = "info"; // default console log level
 var enableGoogleHomeSync = true;
@@ -33,7 +35,6 @@ var enableGoogleHomeSync = true;
 // Configure Logging, with Exception Handler
 var debug = (process.env.ALEXA_DEBUG || false);
 if (debug == "true") {consoleLoglevel = "debug"};
-
 logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
 
 // Use GA account ID specified in container definition
@@ -90,8 +91,9 @@ else {
 }
 var cookieSecret = 'ihytsrf334';
 
-// MQTT Client
+// MQTT Client ==========================
 var mqttClient = require('./config/mqtt');
+// ======================================
 
 // Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){
@@ -127,45 +129,9 @@ Account.findOne({username: mqtt_user}, function(error, account){
 
 var app = express();
 
-// Redis client, required by express-limiter
+// Redis Client ==========================
 var client = require('./config/redis')
-
-/* var client = require('redis').createClient({
-	host: 'redis',
-	retry_strategy: function (options) {
-        if (options.error && options.error.code === 'ECONNREFUSED') {
-			return new Error('The server refused the connection');
-        }
-        if (options.total_retry_time > 1000 * 60 * 60) {
-			//logger.log('error', "[REDIS] Retry time exhausted");
-			return new Error('Retry time exhausted');
-        }
-        if (options.attempt > 100) {
-			// End reconnecting with built in error
-			logger.log('error', "[Core] Redis server connection retry limit exhausted");
-            return undefined;
-        }
-		// reconnect after
-		//logger.log('error', "[REDIS] Attempting reconnection after set interval");
-        return Math.min(options.attempt * 1000, 10000);
-   	}
-});
-
-client.on('connect', function() {
-    logger.log('info', "[Core] Connecting to Redis server...");
-});
-
-client.on('ready', function() {
-    logger.log('info', "[Core] Redis connection ready!");
-});
-
-client.on('reconnecting', function() {
-    logger.log('info', "[Core] Attempting to reconnect to Redis server");
-});
-
-client.on('error', function (err) {
-    logger.log('error', "[Core] Unable to connect to Redis server");
-}); */
+// =======================================
 
 // Rate-limiter 
 const limiter = require('express-limiter')(app, client)

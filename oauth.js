@@ -7,7 +7,7 @@ var server = oauth2orize.createServer();
 server.grant(oauth2orize.grant.code({
 	scopeSeparator: [ ' ', ',' ]
 }, function(application, redirectURI, user, ares, done) {
-	//console.log("grant user: ", user);
+	//logger.log("grant user: ", user);
 	OAuth.GrantCode.findOne({application: application, user: user},function(error,grant){
 		if (!error && grant) {
 			done(null,grant.code); // Existing grant in-place
@@ -35,22 +35,22 @@ server.exchange(oauth2orize.exchange.code({
 			var now = (new Date().getTime())
 			OAuth.AccessToken.findOne({application:application, user: grant.user, expires: {$gt: now}}, function(error,token){
 				if (token) {
-					console.log("debug", "Found valid AccessToken for user:" + grant.user);
+					logger.log("debug", "[OAuth Server] Found valid AccessToken for user:" + grant.user);
 					OAuth.RefreshToken.findOne({application:application, user: grant.user},function(error, refreshToken){
 						if (refreshToken){
-							console.log("debug", "Found valid RefreshToken for user:" + grant.user);
+							logger.log("debug", "[OAuth Server] Found valid RefreshToken for user:" + grant.user);
 							var expires = Math.round((token.expires - (new Date().getTime()))/1000);
 							done(null,token.token, refreshToken.token,{token_type: 'Bearer', expires_in: expires});
-							console.log("debug", "AccessToken sent expires_in: " + expires);
+							logger.log("debug", "[OAuth Server] AccessToken sent expires_in: " + expires);
 						} else {
 							// Shouldn't get here unless there is an error as there
 							// should be a refresh token if there is an access token
-							console.log("debug", "Error, could not find valid RefreshToken for user:" + grant.user);
+							logger.log("debug", "[OAuth Server] Error, could not find valid RefreshToken for user:" + grant.user);
 							done(error);
 						}
 					});
 				} else if (!error) {
-					console.log("debug", "Valid AccessToken not found for user:" + grant.user);
+					logger.log("debug", "[OAuth Server] Valid AccessToken not found for user:" + grant.user);
 					var token = new OAuth.AccessToken({
 						application: grant.application,
 						user: grant.user,
@@ -68,9 +68,8 @@ server.exchange(oauth2orize.exchange.code({
 									user: grant.user,
 									application: grant.application
 								});
-								console.log("debug", "Created RefreshToken for user:" + grant.user + ", expires_in:" + expires);
-								console.log(JSON.stringify(refreshToken));
-
+								logger.log("debug", "[OAuth Server] Created RefreshToken for user:" + grant.user + ", expires_in:" + expires);
+								logger.log("debug", "[OAuth Server] refreshToken:" + JSON.stringify(refreshToken));
 								refreshToken.save(function(error){
 									done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope});
 								});
@@ -108,25 +107,25 @@ server.exchange(oauth2orize.exchange.refreshToken({
 					newToken.save(function(error){
 						var expires = Math.round((newToken.expires - (new Date().getTime()))/1000);
 						if (!error) {
-							console.log("debug", "Created AccessToken for user:" + refresh.user  + ", expires_in:" + expires);
-							console.log(JSON.stringify(newToken));
-							console.log("debug", "Access Token saved")
+							logger.log("debug", "[OAuth Server] Created AccessToken for user:" + refresh.user  + ", expires_in:" + expires);
+							logger.log("debug", "[OAuth Server] newToken:" + JSON.stringify(newToken));
+							logger.log("debug", "[OAuth Server] Access Token saved")
 							done(null, newToken.token, refresh.token, {token_type: 'Bearer', expires_in: expires, scope: newToken.scope});
 						} else {
-							console.log("debug", "Error saving token")
+							logger.log("debug", "[OAuth Server] Error saving token")
 							done(error,false);
 						}
 					});
 				} else {
-					if (!grant) {console.log("debug", "Error, GrantCode not found")};
-					if (!grant.active) {console.log("debug", "Error, grant not active")};
-					if (grant.application != application.id){console.log("debug", "Error, grant.application: " + grant.application + " does not match application.id:" + application.id)};
+					if (!grant) {logger.log("debug", "[OAuth Server] Error, GrantCode not found")};
+					if (!grant.active) {logger.log("debug", "[OAuth Server] Error, grant not active")};
+					if (grant.application != application.id){logger.log("debug", "[OAuth Server] Error, grant.application: " + grant.application + " does not match application.id:" + application.id)};
 					done(error,null);
 				}
 			});
 		} else {
-			if (!refresh) {console.log("debug", "Error, refresh token not found for application:" + application.title)};
-			if (refresh.application != application.id){console.log("debug", "Error, refresh.application: " + refresh.application + " does not match application.id:" + application.id)};
+			if (!refresh) {logger.log("debug", "[OAuth Server] Error, refresh token not found for application:" + application.title)};
+			if (refresh.application != application.id){logger.log("debug", "[OAuth Server] Error, refresh.application: " + refresh.application + " does not match application.id:" + application.id)};
 			done(error, false);
 		}
 	});
