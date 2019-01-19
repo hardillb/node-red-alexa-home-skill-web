@@ -9,7 +9,6 @@ var express = require('express');
 const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
-//var mongoose = require('mongoose');
 ////////////////////////////////////////////////////
 var db = require('./config/db');
 var Account = db.Account;
@@ -92,87 +91,39 @@ else {
 }
 var cookieSecret = 'ihytsrf334';
 
-var mqttClient;
+// var mqttClient;
+var mqttClient = require('./config/mqtt');
+// var mqttOptions = {
+// 	connectTimeout: 30 * 1000,
+// 	reconnectPeriod: 1000,
+// 	keepAlive: 10,
+// 	clean: true,
+// 	resubscribe: true,
+// 	clientId: 'webApp_' + Math.random().toString(16).substr(2, 8)
+// };
 
-var mqttOptions = {
-	connectTimeout: 30 * 1000,
-	reconnectPeriod: 1000,
-	keepAlive: 10,
-	clean: true,
-	resubscribe: true,
-	clientId: 'webApp_' + Math.random().toString(16).substr(2, 8)
-};
+// if (mqtt_user) {
+// 	mqttOptions.username = mqtt_user;
+// 	mqttOptions.password = mqtt_password;
+// }
 
-if (mqtt_user) {
-	mqttOptions.username = mqtt_user;
-	mqttOptions.password = mqtt_password;
-}
+// logger.log('info', "[Core] Connecting to MQTT server: " + mqtt_url);
+// mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
-logger.log('info', "[Core] Connecting to MQTT server: " + mqtt_url);
-mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+// mqttClient.on('error',function(err){
+// 	logger.log('error', "[Core] MQTT connect error");
+// });
 
-mqttClient.on('error',function(err){
-	logger.log('error', "[Core] MQTT connect error");
-});
+// mqttClient.on('reconnect', function(){
+// 	logger.log('warn', "[Core] MQTT reconnect event");
+// });
 
-mqttClient.on('reconnect', function(){
-	logger.log('warn', "[Core] MQTT reconnect event");
-});
-
-mqttClient.on('connect', function(){
-	logger.log('info', "[Core] MQTT connected, subscribing to 'response/#'")
-	mqttClient.subscribe('response/#');
-	logger.log('info', "[Core] MQTT connected, subscribing to 'state/#'")
-	mqttClient.subscribe('state/#');
-});
-
-/* 	// Connect to Mongo Instance
-	mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
-	logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
-	mongoose.Promise = global.Promise;
-	var mongoose_connection = mongoose.connection;
-
-	mongoose_connection.on('connecting', function() {
-		logger.log('info', "[Core] Connecting to MongoDB...");
-	});
-
-	mongoose_connection.on('error', function(error) {
-		logger.log('error', "[Core] MongoDB connection: " + error);
-		//mongoose.disconnect();
-	});
-
-	mongoose_connection.on('connected', function() {
-		logger.log('info', "[Core] MongoDB connected!");
-	});
-	
-	mongoose_connection.once('open', function() {
-		logger.log('info', "[Core] MongoDB connection opened!");
-	});
-
-	mongoose_connection.on('reconnected', function () {
-		logger.log('info', "[Core] MongoDB reconnected!");
-	});
-
-	mongoose_connection.on('disconnected', function() {
-		logger.log('warn', "[Core] MongoDB disconnected!");
-	});
-
-	// Fixes in relation to: https://github.com/Automattic/mongoose/issues/6922#issue-354147871
-	mongoose.set('useCreateIndex', true);
-	mongoose.set('useFindAndModify', false);
-
-	mongoose.connect(mongo_url, {
-			useNewUrlParser: true,
-			autoReconnect: true,
-			reconnectTries: Number.MAX_VALUE,
-			reconnectInterval: 1000
-	});
-
-	var Account = require('./models/account');
-	var oauthModels = require('./models/oauth');
-	var Devices = require('./models/devices');
-	var Topics = require('./models/topics');
-	var LostPassword = require('./models/lostPassword'); */
+// mqttClient.on('connect', function(){
+// 	logger.log('info', "[Core] MQTT connected, subscribing to 'response/#'")
+// 	mqttClient.subscribe('response/#');
+// 	logger.log('info', "[Core] MQTT connected, subscribing to 'state/#'")
+// 	mqttClient.subscribe('state/#');
+// });
 
 // Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){
