@@ -10,11 +10,13 @@ const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 // MongoDB =======================
 var db = require('./config/db');
-var Account = db.Account;
-var oauthModels = db.oauthModels;
-var Devices = db.Devices;
-var Topics = db.Topics;
-var LostPassword = db.LostPassword;
+// ===============================
+// Schema =======================
+var Account = require('./models/account');
+var oauthModels = require('./models/oauth');
+var Devices = require('./models/devices');
+var Topics = require('./models/topics');
+var LostPassword = require('./models/lostPassword');
 // ===============================
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
