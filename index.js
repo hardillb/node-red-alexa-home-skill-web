@@ -1925,7 +1925,6 @@ app.post('/api/v1/command',
 app.post('/api/v1/command2',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
-
 		var params = {
 			ec: "Command",
 			ea: req.body.directive.header ? "Command API directive:" + req.body.directive.header.name + ", username: " + req.user.username + ", endpointId:" + req.body.directive.endpoint.endpointId : "Command API directive",
@@ -2009,18 +2008,18 @@ app.post('/api/v1/command2',
 				if (namespace == "Alexa.ChannelController") {
 					if (name == "ChangeChannel") { 
 						if (req.body.directive.payload.channel.hasOwnProperty('number')) {
-						var contextResult = {
-						"properties": [
-							{
-							"namespace": "Alexa.ChannelController",
-							"name": "channel",
-							"value": {
-								"number": req.body.directive.payload.channel.number
-							},
-							"timeOfSample": dt.toISOString(),
-							"uncertaintyInMilliseconds": 50
-							}
-						]}
+							var contextResult = {
+							"properties": [
+								{
+								"namespace": "Alexa.ChannelController",
+								"name": "channel",
+								"value": {
+									"number": req.body.directive.payload.channel.number
+								},
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 50
+								}
+							]}
 						}
 						else if (req.body.directive.payload.channel.hasOwnProperty('callSign')) {
 							var contextResult = {
