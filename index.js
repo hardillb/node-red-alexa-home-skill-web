@@ -1732,7 +1732,7 @@ app.post('/api/v1/setstate/:dev_id',
 ///////////////////////////////////////////////////////////////////////////
 // Alexa Command API
 ///////////////////////////////////////////////////////////////////////////
-app.post('/api/v1/command',
+/* app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		//console.log(req.user.username);
@@ -1814,7 +1814,7 @@ app.post('/api/v1/command',
 		});
 	}
 );
-
+ */
 
 ///////////////////////////////////////////////////////////////////////////
 // Start Alexa Command API v2 (replaces much of the Lambda functionality)
