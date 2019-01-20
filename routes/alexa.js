@@ -80,18 +80,18 @@ if (mqtt_user) {
 	mqttOptions.username = mqtt_user;
 	mqttOptions.password = mqtt_password;
 }
-logger.log('info', "[GHome API] Connecting to MQTT server: " + mqtt_url);
+logger.log('info', "[Alexa API] Connecting to MQTT server: " + mqtt_url);
 mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 mqttClient.on('error',function(err){
-	logger.log('error', "[GHome API] MQTT connect error");
+	logger.log('error', "[Alexa API] MQTT connect error");
 });
 mqttClient.on('reconnect', function(){
-	logger.log('warn', "[GHome API] MQTT reconnect event");
+	logger.log('warn', "[Alexa API] MQTT reconnect event");
 });
 mqttClient.on('connect', function(){
-	logger.log('info', "[GHome API] MQTT connected, subscribing to 'response/#'")
+	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	logger.log('info', "[GHome API] MQTT connected, subscribing to 'state/#'")
+	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'state/#'")
 	mqttClient.subscribe('state/#');
 });
 // Redis Client =============================
