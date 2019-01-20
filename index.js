@@ -1355,7 +1355,8 @@ function replaceCapability(capability, reportState, attributes) {
 	// ThermostatController - SinglePoint
 	if(capability == "ThermostatController")  {
 		var supportedModes;
-		if (attributes != null) {
+		var hasModes = getSafe(() => attributes.thermostatModes);
+		if (attributes != null && hasModes != undefined) {
 			supportedModes = attributes.thermostatModes;
 		}
 		else {
