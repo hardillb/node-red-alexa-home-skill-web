@@ -26,9 +26,6 @@ var countries = require('countries-api');
 // Winston Logger ============================
 var logger = require('./config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
-var consoleLoglevel = "info"; // default console log level
-if (debug == "true") {consoleLoglevel = "debug"};
-logger.log('info', "[App] Log Level set to: " + consoleLoglevel);
 // ===========================================
 // Passport Config, Local Auth only =======================
 passport.use(new LocalStrategy(Account.authenticate()));

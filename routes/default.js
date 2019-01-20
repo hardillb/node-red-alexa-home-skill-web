@@ -27,10 +27,7 @@ var countries = require('countries-api');
 // ===============================
 // Winston Logger ==========================
 var logger = require('../config/logger');
-var consoleLoglevel = "info"; // default console log level
 var debug = (process.env.ALEXA_DEBUG || false);
-if (debug == "true") {consoleLoglevel = "debug"};
-logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
 // =========================================
 // Google Analytics ==========================
 var ua = require('universal-analytics');
