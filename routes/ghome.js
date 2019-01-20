@@ -91,8 +91,8 @@ mqttClient.on('reconnect', function(){
 mqttClient.on('connect', function(){
 	logger.log('info', "[GHome API] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	logger.log('info', "[GHome API] MQTT connected, subscribing to 'state/#'")
-	mqttClient.subscribe('state/#');
+	// logger.log('info', "[GHome API] MQTT connected, subscribing to 'state/#'")
+	// mqttClient.subscribe('state/#');
 });
 //===========================================
 
