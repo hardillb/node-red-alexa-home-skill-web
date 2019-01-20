@@ -17,6 +17,12 @@ var Devices = require('./models/devices');
 var Topics = require('./models/topics');
 var LostPassword = require('./models/lostPassword');
 // ===============================
+// Auth Handler ==================
+var passport = require('passport');
+var BasicStrategy = require('passport-http').BasicStrategy;
+var LocalStrategy = require('passport-local').Strategy;
+var countries = require('countries-api');
+// ===============================
 // Winston Logger ============================
 var logger = require('./config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
