@@ -5,6 +5,8 @@ var express = require('express');
 const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 // MongoDB =======================
 var db = require('./config/db');
 // ===============================
