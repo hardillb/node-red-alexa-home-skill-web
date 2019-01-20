@@ -6,18 +6,18 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 // ======================================
 // Mailer ========================
-var sendemail = require('./sendemail');
+var sendemail = require('../sendemail');
 var mailer = new sendemail();
 // ===============================
 // Request =======================
 const request = require('request');
 // ===============================
 // Schema =======================
-var Account = require('./models/account');
-var oauthModels = require('./models/oauth');
-var Devices = require('./models/devices');
-var Topics = require('./models/topics');
-var LostPassword = require('./models/lostPassword');
+var Account = require('../models/account');
+var oauthModels = require('../models/oauth');
+var Devices = require('../models/devices');
+var Topics = require('../models/topics');
+var LostPassword = require('../models/lostPassword');
 // ===============================
 // Auth Handler ==================
 var passport = require('passport');
@@ -26,7 +26,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
 // ===============================
 // Winston Logger ==========================
-var logger = require('./config/logger');
+var logger = require('../config/logger');
 var consoleLoglevel = "info"; // default console log level
 var debug = (process.env.ALEXA_DEBUG || false);
 if (debug == "true") {consoleLoglevel = "debug"};
@@ -47,7 +47,7 @@ passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 // ========================================================
 // Redis Client =============================
-var client = require('./config/redis')
+var client = require('../config/redis')
 // ==========================================
 // Rate-limiter =============================
 const limiter = require('express-limiter')(router, client)

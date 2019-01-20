@@ -5,24 +5,24 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 // ===========================================
-// Schema ====================================
-var Account = require('./models/account');
-var oauthModels = require('./models/oauth');
-var Devices = require('./models/devices');
-var Topics = require('./models/topics');
-var LostPassword = require('./models/lostPassword');
-// ===========================================
+// Schema =======================
+var Account = require('../models/account');
+var oauthModels = require('../models/oauth');
+var Devices = require('../models/devices');
+var Topics = require('../models/topics');
+var LostPassword = require('../models/lostPassword');
+// ===============================
 // Auth Handler ==============================
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
 var PassportOAuthBearer = require('passport-http-bearer');
-var oauthServer = require('./oauth');
+var oauthServer = require('../oauth');
 var url = require('url');
 // ===========================================
 // Winston Logger ============================
-var logger = require('./config/logger');
+var logger = require('../config/logger');
 var consoleLoglevel = "info"; // default console log level
 var debug = (process.env.ALEXA_DEBUG || false);
 if (debug == "true") {consoleLoglevel = "debug"};
