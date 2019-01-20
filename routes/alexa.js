@@ -435,7 +435,7 @@ function replaceCapability(capability, reportState, attributes) {
 ///////////////////////////////////////////////////////////////////////////
 // Get State API
 ///////////////////////////////////////////////////////////////////////////
-app.get('/getstate/:dev_id', getStateLimiter,
+router.get('/getstate/:dev_id', getStateLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		var id = req.params.dev_id;
@@ -651,7 +651,7 @@ app.get('/getstate/:dev_id', getStateLimiter,
 ///////////////////////////////////////////////////////////////////////////
 // Set State API (Not in Use)
 ///////////////////////////////////////////////////////////////////////////
-app.post('/setstate/:dev_id',
+router.post('/setstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		// do nothing, disused for now, may use along side command API 
@@ -661,7 +661,7 @@ app.post('/setstate/:dev_id',
 ///////////////////////////////////////////////////////////////////////////
 // Start Alexa Command API v2 (replaces much of the Lambda functionality)
 ///////////////////////////////////////////////////////////////////////////
-app.post('/command2',
+router.post('/command2',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		var params = {
