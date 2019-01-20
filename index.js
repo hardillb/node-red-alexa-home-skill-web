@@ -91,7 +91,10 @@ if (process.env.VCAP_APPLICATION) {
 else {
 	var app_id = 'http://localhost:' + port;
 }
-var cookieSecret = 'ihytsrf334';
+
+var cookieSecret = (process.env.COOKIE_SECRET || 'ihytsrf334');
+if (cookieSecret == 'ihytsrf334') {logger.log("warn", "[Security] Using default Cookie Secret, please supply new secret using COOKIE_SECRET environment variable")}
+else {logger.log("info", "[Security] Using user-defined cookie secret")}
 
 // MQTT Client ==========================
 var mqttClient = require('./config/mqtt');
@@ -1138,8 +1141,10 @@ app.get('/api/v1/devices', defaultLimiter,
 					dev.reportState = data[i].reportState;
 					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
 					dev.capabilities = [];
+					// Grab device attributes for use in building discovery response
+					var devAttribues = (data[i].attributes || null);
 					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability, dev.reportState))
+						dev.capabilities.push(replaceCapability(capability, dev.reportState, devAttribues))
 					});
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
@@ -1155,7 +1160,7 @@ app.get('/api/v1/devices', defaultLimiter,
 );
 
 // Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
-function replaceCapability(capability, reportState) {
+function replaceCapability(capability, reportState, attributes) {
 	// BrightnessController
 	if(capability == "BrightnessController")  {
 		return {
@@ -1355,6 +1360,14 @@ function replaceCapability(capability, reportState) {
 	}
 	// ThermostatController - SinglePoint
 	if(capability == "ThermostatController")  {
+		var supportedModes;
+		var hasModes = getSafe(() => attributes.thermostatModes);
+		if (attributes != null && hasModes != undefined) {
+			supportedModes = attributes.thermostatModes;
+		}
+		else {
+			supportedModes = ["HEAT","COOL","AUTO"];
+		}
 		return {
 			"type": "AlexaInterface",
             "interface": "Alexa.ThermostatController",
@@ -1372,11 +1385,7 @@ function replaceCapability(capability, reportState) {
             },
             "configuration": {
               "supportsScheduling": true,
-              "supportedModes": [
-                "HEAT",
-                "COOL",
-                "AUTO"
-              ]
+              "supportedModes": supportedModes
 			}
 		};
 	}
@@ -1735,7 +1744,7 @@ app.post('/api/v1/setstate/:dev_id',
 ///////////////////////////////////////////////////////////////////////////
 // Alexa Command API
 ///////////////////////////////////////////////////////////////////////////
-app.post('/api/v1/command',
+/* app.post('/api/v1/command',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		//console.log(req.user.username);
@@ -1817,7 +1826,7 @@ app.post('/api/v1/command',
 		});
 	}
 );
-
+ */
 
 ///////////////////////////////////////////////////////////////////////////
 // Start Alexa Command API v2 (replaces much of the Lambda functionality)
@@ -3025,11 +3034,11 @@ function setstate(username, endpointId, payload) {
 
 // Nested attribute/ element tester
 function getSafe(fn) {
-	logger.log('debug', "[getSafe] Checking element exists:" + fn)
+	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
 	try {
 		return fn();
     } catch (e) {
-		logger.log('debug', "[getSafe] Element not found:" + fn)
+		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
 }
