@@ -455,7 +455,7 @@ router.get('/devices', defaultLimiter,
 		});
 });
 
-app.put('/devices', defaultLimiter,
+router.put('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var user = req.user.username;
