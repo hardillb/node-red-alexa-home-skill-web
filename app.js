@@ -30,6 +30,12 @@ var consoleLoglevel = "info"; // default console log level
 if (debug == "true") {consoleLoglevel = "debug"};
 logger.log('info', "[App] Log Level set to: " + consoleLoglevel);
 // ===========================================
+// Passport Config, Local Auth only =======================
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.use(new BasicStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+// ========================================================
 
 // MongoDB Settings, used for expression session handler DB connection
 var mongo_user = (process.env.MONGO_USER);
@@ -118,31 +124,6 @@ app.use(requireHTTPS);
 
 app.use('/',express.static('static')); // Static content router
 app.use('/octicons', express.static('node_modules/octicons/build'), express.static('node_modules/octicons/build/svg')); // Octicons router
-
-passport.use(new LocalStrategy(Account.authenticate()));
-passport.use(new BasicStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
-
-var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
-	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-		if (!error && token && !token.grant) {
-			logger.log('error', "[Core] Missing grant token:" + token);
-		}
-		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
-			logger.log('debug', "[Core] OAuth Token good, token:" + token);
-			done(null, token.user, { scope: token.scope });
-		} else if (!error) {
-			logger.log('error', "[Core] OAuth Token error, token:" + token);
-			done(null, false);
-		} else {
-			logger.log('error', "[Core] OAuth Token error:" + error);
-			done(error);
-		}
-	});
-});
-
-passport.use(accessTokenStrategy);
 
 const rtDefault = require('./routes/default'); 
 const rtAdmin = require('./routes/admin'); 
