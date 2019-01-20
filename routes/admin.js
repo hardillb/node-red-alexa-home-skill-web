@@ -61,7 +61,7 @@ const defaultLimiter = limiter({
 	  }
 });
 // ==========================================
-router.get('/admin/services', defaultLimiter,
+router.get('/services', defaultLimiter,
 	ensureAuthenticated, 
 	function(req,res){
 		if (req.user.username === mqtt_user) {
@@ -86,7 +86,7 @@ router.get('/admin/services', defaultLimiter,
 		}
 });
 
-router.get('/admin/users', defaultLimiter,
+router.get('/users', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
@@ -132,7 +132,7 @@ router.get('/admin/users', defaultLimiter,
 		}
 });
 
-router.get('/admin/user-devices', defaultLimiter,
+router.get('/user-devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
@@ -158,7 +158,7 @@ router.get('/admin/user-devices', defaultLimiter,
 		}
 });
 
-router.put('/admin/services', defaultLimiter,
+router.put('/services', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
     if (req.user.username == mqtt_user) {
@@ -173,7 +173,7 @@ function(req,res){
     }
 });
 
-router.post('/admin/service/:id', defaultLimiter,
+router.post('/service/:id', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
     var service = req.body;
@@ -194,7 +194,7 @@ function(req,res){
         });
 });
 
-router.delete('/admin/service/:id', defaultLimiter,
+router.delete('/service/:id', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
     oauthModels.Application.remove({_id:req.params.id},

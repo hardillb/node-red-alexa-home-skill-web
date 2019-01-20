@@ -59,7 +59,7 @@ passport.use(accessTokenStrategy);
 //===========================================
 
 // Authorization URI
-router.get('/auth/start',oauthServer.authorize(function(applicationID, redirectURI, done) {
+router.get('/start',oauthServer.authorize(function(applicationID, redirectURI, done) {
 	if (typeof applicationID == "string") {applicationID = parseInt(applicationID)};
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
 		if (application) {
@@ -105,7 +105,7 @@ router.get('/auth/start',oauthServer.authorize(function(applicationID, redirectU
 	});
 });
 
-router.post('/auth/finish',function(req,res,next) {
+router.post('/finish',function(req,res,next) {
 	//console.log("/auth/finish user: ", req.user);
 	//console.log(req.body);
 	//console.log(req.params);
@@ -137,7 +137,7 @@ router.post('/auth/finish',function(req,res,next) {
 }));
 
 // Access Token URI
-router.post('/auth/exchange',function(req,res,next){
+router.post('/exchange',function(req,res,next){
 	var appID = req.body['client_id'];
 	var appSecret = req.body['client_secret'];
 
