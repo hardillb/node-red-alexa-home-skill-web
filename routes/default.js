@@ -43,6 +43,9 @@ passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 // ========================================================
+// MQTT Settings  =========================================
+var mqtt_user = (process.env.MQTT_USER);
+// ========================================================
 // Redis Client =============================
 var client = require('../config/redis')
 // ==========================================
