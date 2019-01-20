@@ -8,7 +8,6 @@ var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 
 var mqttClient;
-
 var mqttOptions = {
 	connectTimeout: 30 * 1000,
 	reconnectPeriod: 1000,

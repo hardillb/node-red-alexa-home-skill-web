@@ -1,25 +1,132 @@
-// GHome API Controller
-var logger = require('../config/logger');
-
-var ua = require('universal-analytics');
-var Account = require('../models/account');
-var oauthModels = require('../models/oauth');
-var Devices = require('../models/devices');
-var Topics = require('../models/topics');
-var LostPassword =  require('../models/lostPassword');
-
-module.exports = function(app, defaultLimiter, passport, mqttClient, logger){
-
+// Express Router ============================
+var express = require('express');
+var router = express.Router();
+var bodyParser = require('body-parser');
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
+// ===========================================
+// Schema ====================================
+var Account = require('./models/account');
+var oauthModels = require('./models/oauth');
+var Devices = require('./models/devices');
+var Topics = require('./models/topics');
+var LostPassword = require('./models/lostPassword');
+// ===========================================
+// Auth Handler ==============================
+var passport = require('passport');
+var BasicStrategy = require('passport-http').BasicStrategy;
+var LocalStrategy = require('passport-local').Strategy;
+var countries = require('countries-api');
+var PassportOAuthBearer = require('passport-http-bearer');
+var oauthServer = require('./oauth');
+var url = require('url');
+// ===========================================
+// Winston Logger ============================
+var logger = require('./config/logger');
+var consoleLoglevel = "info"; // default console log level
 var debug = (process.env.ALEXA_DEBUG || false);
-
-// Need to import defaultLimiter, mqttClient, ongoingcommands +++++
+if (debug == "true") {consoleLoglevel = "debug"};
+logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
+// ===========================================
+// Google Analytics ==========================
+var ua = require('universal-analytics');
+var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
+//=============================================
+// Passport Config, Local *and* Oauth Support =
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.use(new BasicStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
+	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+		if (!error && token && !token.grant) {
+			logger.log('error', "[Core] Missing grant token:" + token);
+		}
+		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
+			logger.log('debug', "[Core] OAuth Token good, token:" + token);
+			done(null, token.user, { scope: token.scope });
+		} else if (!error) {
+			logger.log('error', "[Core] OAuth Token error, token:" + token);
+			done(null, false);
+		} else {
+			logger.log('error', "[Core] OAuth Token error:" + error);
+			done(error);
+		}
+	});
+});
+passport.use(accessTokenStrategy);
+//===========================================
+// MQTT =====================================
+var mqtt = require('mqtt');
+//===========================================
+// MQTT ENV variables========================
+var mqtt_user = (process.env.MQTT_USER);
+var mqtt_password = (process.env.MQTT_PASSWORD);
+var mqtt_port = (process.env.MQTT_PORT || "1883");
+var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
+//===========================================
+// MQTT Config ==============================
+var mqttClient;
+var mqttOptions = {
+	connectTimeout: 30 * 1000,
+	reconnectPeriod: 1000,
+	keepAlive: 10,
+	clean: true,
+	resubscribe: true,
+	clientId: 'gHomeAPI_' + Math.random().toString(16).substr(2, 8)
+};
+if (mqtt_user) {
+	mqttOptions.username = mqtt_user;
+	mqttOptions.password = mqtt_password;
+}
+logger.log('info', "[GHome API] Connecting to MQTT server: " + mqtt_url);
+mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+mqttClient.on('error',function(err){
+	logger.log('error', "[GHome API] MQTT connect error");
+});
+mqttClient.on('reconnect', function(){
+	logger.log('warn', "[GHome API] MQTT reconnect event");
+});
+mqttClient.on('connect', function(){
+	logger.log('info', "[GHome API] MQTT connected, subscribing to 'response/#'")
+	mqttClient.subscribe('response/#');
+	logger.log('info', "[GHome API] MQTT connected, subscribing to 'state/#'")
+	mqttClient.subscribe('state/#');
+});
+//===========================================
 
-/////////////////////// Start GHome
-app.post('/api/v1/action', defaultLimiter,
+// Redis Client =============================
+var client = require('./config/redis')
+// ==========================================
+// Rate-limiter =============================
+const limiter = require('express-limiter')(router, client)
+// Default Limiter, used on majority of routers ex. OAuth2-related and Command API
+const defaultLimiter = limiter({
+	lookup: function(req, res, opts, next) {
+		opts.lookup = 'connection.remoteAddress'
+		opts.total = 100
+		opts.expire = 1000 * 60 * 60
+		return next()
+  },
+	onRateLimited: function (req, res, next) {
+		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
+		var params = {
+			ec: "Express-limiter",
+			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
+			uip: req.ip
+		  }
+		if (enableAnalytics) {visitor.event(params).send()};
+		res.status(429).json('Rate limit exceeded');
+	  }
+});
+// ==========================================
+
+// GHome Action API =========================
+router.post('/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
@@ -439,4 +546,86 @@ function gHomeReplaceType(type) {
 }
 /////////////////////// End GHome
 
+///////////////////////////////////////////////////////////////////////////
+// MQTT Message Handlers
+///////////////////////////////////////////////////////////////////////////
+var onGoingCommands = {};
+
+// Event handler for received MQTT messages - note subscribe near top of script.
+mqttClient.on('message',function(topic,message){
+	var arrTopic = topic.split("/"); 
+	var username = arrTopic[1];
+	var endpointId = arrTopic[2];
+
+	if (topic.startsWith('response/')){
+		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
+		if (debug == "true") {console.time('mqtt-response')};
+		var payload = JSON.parse(message.toString());
+		//console.log("response payload", payload)
+		var commandWaiting = onGoingCommands[payload.messageId];
+		if (commandWaiting) {
+			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
+			if (payload.success) {
+				// Google Home success response
+				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
+					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+					commandWaiting.res.status(200).json(commandWaiting.response);
+				}		
+			} else {
+				// Google Home failure response
+				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
+					delete commandWaiting.response.state;
+					commandWaiting.response.status = "FAILED";
+					logger.log('warn', "[Command API] Failed Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+					commandWaiting.res.status(200).json(commandWaiting.response);
+				}
+			}
+			delete onGoingCommands[payload.messageId];
+			var params = {
+				ec: "Command",
+				ea: "Command API successfully processed MQTT command for username: " + username,
+				uid: username,
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
+		}
+		if (debug == "true") {console.timeEnd('mqtt-response')};
+	}
+	// Leave Alexa API MQTT state listener to pickup all other MQTT state messages
+});
+
+// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
+var timeout = setInterval(function(){
+	var now = Date.now();
+	var keys = Object.keys(onGoingCommands);
+	for (key in keys){
+		var waiting = onGoingCommands[keys[key]];
+		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
+		if (waiting) {
+			var diff = now - waiting.timestamp;
+			if (diff > 6000) {
+				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
+				waiting.res.status(504).send('{"error": "timeout"}');
+				delete onGoingCommands[keys[key]];
+				//measurement.send({
+				//	t:'event', 
+				//	ec:'command', 
+				//	ea: 'timeout',
+				//	uid: waiting.user
+				//});
+			}
+		}
+	}
+},500);
+
+// Nested attribute/ element tester
+function getSafe(fn) {
+	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
+	try {
+		return fn();
+    } catch (e) {
+		//logger.log('debug', "[getSafe] Element not found:" + fn)
+        return undefined;
+    }
 }
+
+module.exports = router;

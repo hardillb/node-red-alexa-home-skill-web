@@ -73,7 +73,7 @@
       service.domains = $('#domains').val().split(',');
       console.log(service);
       $.ajax({
-        url: '/services',
+        url: '/admin/services',
         type: 'PUT',
         data: JSON.stringify(service),
         contentType: "application/json",
@@ -94,7 +94,7 @@
       service.oauth_secret = $('#secret').val();
       service.domains = $('#domains').val().split(',');
       $.ajax({
-        url: '/service/' + servID,
+        url: '/admin/service/' + servID,
         type: 'POST',
         data: JSON.stringify(service),
         contentType: "application/json",
@@ -140,7 +140,7 @@
     var answer = confirm("Are you sure you want to delete this service?");
     if(answer) {
       $.ajax({
-        url:"/service/" + id,
+        url:"/admin/service/" + id,
         type: 'DELETE',
         success: function(data){
           document.location.reload();
