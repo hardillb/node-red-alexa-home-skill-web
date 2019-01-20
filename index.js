@@ -1135,8 +1135,10 @@ app.get('/api/v1/devices', defaultLimiter,
 					dev.reportState = data[i].reportState;
 					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
 					dev.capabilities = [];
+					// Grab device attributes for use in building discovery response
+					var devAttribues = (data[i].attributes || null);
 					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability, dev.reportState))
+						dev.capabilities.push(replaceCapability(capability, dev.reportState, devAttribues))
 					});
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
@@ -1152,7 +1154,7 @@ app.get('/api/v1/devices', defaultLimiter,
 );
 
 // Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
-function replaceCapability(capability, reportState) {
+function replaceCapability(capability, reportState, attributes) {
 	// BrightnessController
 	if(capability == "BrightnessController")  {
 		return {
@@ -1352,6 +1354,13 @@ function replaceCapability(capability, reportState) {
 	}
 	// ThermostatController - SinglePoint
 	if(capability == "ThermostatController")  {
+		var supportedModes;
+		if (attributes != null) {
+			supportedModes = attributes.thermostatModes;
+		}
+		else {
+			supportedModes = ["HEAT","COOL","AUTO"];
+		}
 		return {
 			"type": "AlexaInterface",
             "interface": "Alexa.ThermostatController",
@@ -1369,11 +1378,7 @@ function replaceCapability(capability, reportState) {
             },
             "configuration": {
               "supportsScheduling": true,
-              "supportedModes": [
-                "HEAT",
-                "COOL",
-                "AUTO"
-              ]
+              "supportedModes": supportedModes
 			}
 		};
 	}
