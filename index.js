@@ -3028,11 +3028,11 @@ function setstate(username, endpointId, payload) {
 
 // Nested attribute/ element tester
 function getSafe(fn) {
-	logger.log('debug', "[getSafe] Checking element exists:" + fn)
+	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
 	try {
 		return fn();
     } catch (e) {
-		logger.log('debug', "[getSafe] Element not found:" + fn)
+		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
 }
