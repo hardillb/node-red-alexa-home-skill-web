@@ -26,7 +26,7 @@ var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
 // Google Auth JSON Web Token ================
-const {auth} = require('google-auth-library');
+const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
 var keys;
