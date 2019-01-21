@@ -29,7 +29,7 @@ var debug = (process.env.ALEXA_DEBUG || false);
 const {auth} = require('google-auth-library');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
-const keys;
+var keys;
 if (!ghomeJWT) {
 	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
 }
