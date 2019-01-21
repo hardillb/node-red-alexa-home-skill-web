@@ -5,6 +5,9 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 // ===========================================
+// Request =======================
+const request = require('request');
+// ===============================
 // Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
