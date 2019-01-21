@@ -1271,6 +1271,9 @@ function setstate(username, endpointId, payload) {
 	logger.log('debug', "[State API] SetState payload:" + JSON.stringify(payload));
 	if (payload.hasOwnProperty('state')) {
 		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
+
+		// Add promises here that find Grant Code for Google Application to only call JWT state submission if count > 0
+
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
 			if (error) {
 				logger.log('warn', "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
@@ -1442,15 +1445,13 @@ function setstate(username, endpointId, payload) {
 				}
 				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
-
-				// Test Ghome Home Graoh API Request Token 
-				requestToken().catch(function(e) {
-					logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
-				});
-
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
 						logger.log('debug', "[State API] Error updating state for endpointId: " + endpointId);
+						// Test Ghome Home Graoh API Request Token 
+						requestToken().catch(function(e) {
+							logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
+						});
 					}
 					else {logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);}
 				});
@@ -1473,18 +1474,38 @@ function getSafe(fn) {
     }
 }
 // GHome HomeGraph Token Request
-async function requestToken() {
+async function requestToken(keys) {
 	if (reportState == true) {
-		logger.log('verbose', "[State API] GHome requesting Google HomeGraph token");
-		// load the JWT or UserRefreshClient from the keys
-		const client = auth.fromJSON(keys);
-		client.scopes = ['https://www.googleapis.com/auth/homegraph'];
-		const url = 'https://accounts.google.com/o/oauth2/token';
-		const res = await client.request({url});
-		logger.log('verbose', "[State API] GHome JWT response: " + res.data);
-
-		// Add token in return
-		// Add catch for error handling
+		var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+		}
+		// Use jsonwebtoken to sign token
+		// Sign token: https://cloud.google.com/endpoints/docs/openapi/service-account-authentication#using_jwt_signed_by_service_account
+		var privKey = keys.private_key;
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
+		// Need submit token using: application/x-www-form-urlencoded
+		// Use form: https://www.npmjs.com/package/request#forms
+		// Also include grant_type in form data : urn:ietf:params:oauth:grant-type:jwt-bearer
+		request.post({
+			url: 'https://accounts.google.com/o/oauth2/token',
+			form: {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+				}
+			},
+			function(err,res, body){
+				if (err) {
+					logger.log('warn', "[State API] Ghome JWT / OAuth token request failed");
+				} else {
+					var oauthToken = JSON.parse(body).access_token;
+					logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(oauthToken));
+				}
+			}
+		);
 	}
 }
 

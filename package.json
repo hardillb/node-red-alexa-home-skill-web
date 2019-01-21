@@ -24,7 +24,7 @@
     "express": "^4.16.3",
     "express-limiter": "^1.6.1",
     "express-session": "^1.15.6",
-    "google-auth-library": "3.0.1",
+    "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.2.15",
     "mongoose-sequence": "^4.0.1",
     "connect-mongo": "^2.0.1",
