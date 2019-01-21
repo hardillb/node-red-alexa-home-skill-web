@@ -1444,12 +1444,9 @@ function setstate(username, endpointId, payload) {
 				// Update state element with modified properties
 
 				// Test Ghome Home Graoh API Request Token 
-				try {
-					requestToken()
-				}
-				catch (e) {
+				requestToken().catch(function(e) {
 					logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
-				}
+				});
 
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
@@ -1481,7 +1478,7 @@ async function requestToken() {
 		logger.log('verbose', "[State API] GHome requesting Google HomeGraph token");
 		// load the JWT or UserRefreshClient from the keys
 		const client = auth.fromJSON(keys);
-		client.scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+		client.scopes = ['https://www.googleapis.com/auth/homegraph'];
 		const url = `https://www.googleapis.com/dns/v1/projects/${keys.project_id}`;
 		const res = await client.request({url});
 		logger.log('verbose', "[State API] GHome JWT response: " + res.data);
