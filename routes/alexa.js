@@ -1451,12 +1451,14 @@ function setstate(username, endpointId, payload) {
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
 						logger.log('debug', "[State API] Error updating state for endpointId: " + endpointId);
+					}
+					else {
+						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 						// Test Ghome Home Graoh API Request Token 
 						requestToken().catch(function(e) {
 							logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
 						});
 					}
-					else {logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);}
 				});
 			}
 		});
