@@ -95,7 +95,6 @@ mqttClient.on('connect', function(){
 	// mqttClient.subscribe('state/#');
 });
 //===========================================
-
 // Redis Client =============================
 var client = require('../config/redis')
 // ==========================================

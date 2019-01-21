@@ -25,6 +25,17 @@ var url = require('url');
 var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
+// Google Auth JSON Web Token ================
+const {auth} = require('google-auth-library');
+const ghomeJWT = process.env['ghomeJWT'];
+if (!ghomeJWT) {
+	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
+}
+else {
+	reportState = true;
+	const keys = JSON.parse(ghomeJWT);
+}
+// ===========================================
 // Google Analytics ==========================
 var ua = require('universal-analytics');
 var enableAnalytics = false;
@@ -1429,6 +1440,15 @@ function setstate(username, endpointId, payload) {
 				}
 				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
+
+				// Test Ghome Home Graoh API Request Token 
+				try {
+					requestToken()
+				}
+				catch (e) {
+					logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
+				}
+
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
 					if (err) {
 						logger.log('debug', "[State API] Error updating state for endpointId: " + endpointId);
@@ -1452,6 +1472,20 @@ function getSafe(fn) {
 		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
+}
+// GHome HomeGraph Token Request
+async function requestToken() {
+	if (reportState == true) {
+		logger.log('verbose', "[State API] GHome requesting Google HomeGraph token");
+		// load the JWT or UserRefreshClient from the keys
+		const client = auth.fromJSON(keys);
+		client.scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+		const url = `https://www.googleapis.com/dns/v1/projects/${keys.project_id}`;
+		const res = await client.request({url});
+		logger.log('verbose', "[State API] GHome JWT response: " + res.data);
+
+		// Add token in return
+	}
 }
 
 module.exports = router;
