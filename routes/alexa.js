@@ -27,7 +27,8 @@ var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
 // Google Auth JSON Web Token ================
 const {auth} = require('google-auth-library');
-const ghomeJWT = process.env['ghomeJWT'];
+const ghomeJWT = process.env['GHOMEJWT'];
+var reportState = false;
 if (!ghomeJWT) {
 	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
 }
@@ -1485,6 +1486,7 @@ async function requestToken() {
 		logger.log('verbose', "[State API] GHome JWT response: " + res.data);
 
 		// Add token in return
+		// Add catch for error handling
 	}
 }
 
