@@ -257,7 +257,7 @@ router.post('/action', defaultLimiter,
 
 			if (debug == "true") {console.time('ghome-exec')};
 			var findDevices = Devices.find({username: req.user.username});
-			Promise.all([findUser, findDevices]).then(([user, devices]) => {
+			Promise.all([findDevices]).then(([devices]) => {
 				if (devices) {
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
 					logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
