@@ -1479,7 +1479,7 @@ async function requestToken() {
 		// load the JWT or UserRefreshClient from the keys
 		const client = auth.fromJSON(keys);
 		client.scopes = ['https://www.googleapis.com/auth/homegraph'];
-		const url = `https://www.googleapis.com/dns/v1/projects/${keys.project_id}`;
+		const url = 'https://accounts.google.com/o/oauth2/token';
 		const res = await client.request({url});
 		logger.log('verbose', "[State API] GHome JWT response: " + res.data);
 
