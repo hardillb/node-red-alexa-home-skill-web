@@ -1455,9 +1455,9 @@ function setstate(username, endpointId, payload) {
 					else {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 						// Test Ghome Home Graoh API Request Token 
-						requestToken(keys).catch(function(e) {
-							logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
-						});
+						// requestToken(keys).catch(function(e) {
+						// 	logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
+						// });
 					}
 				});
 			}
