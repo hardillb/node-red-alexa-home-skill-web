@@ -423,64 +423,11 @@ router.post('/action', defaultLimiter,
 						var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
-							
 							try {
-								var devState = queryDeviceState(user, data);
+								var devState = queryDeviceState(data);
 								response.payload.devices[data.endpointId] = devState;
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
-
-/* 							// Create initial JSON object for device
-							response.payload.devices[data.endpointId] = {online: true};
-							// Add state response based upon device traits
-							data.capabilities.forEach(function(capability){
-								var trait = gHomeReplaceCapability(capability);
-
-								// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
-								if (trait == "action.devices.traits.Brightness"){
-									response.payload.devices[data.endpointId].brightness = data.state.brightness;
-								}
-								if (trait == "action.devices.traits.ColorSetting") {
-									if (!response.payload.devices[data.endpointId].hasOwnProperty('on')){
-										response.payload.devices[data.endpointId].on = data.state.power.toLowerCase();
-									}
-									if (data.capabilities.indexOf('ColorController') > -1 ){
-										response.payload.devices[data.endpointId].color = {
-											"spectrumHsv": {
-												"hue": data.state.colorHue,
-												"saturation": data.state.colorSaturation,
-												"value": data.state.colorBrightness
-											  }
-										}
-									}
-									if (data.capabilities.indexOf('ColorTemperatureController') > -1){
-										var hasColorElement = getSafe(() => response.payload.devices[data.endpointId].color);
-										if (hasColorElement != undefined) {response.payload.devices[data.endpointId].color.temperatureK = data.state.colorTemperature}
-										else {
-											response.payload.devices[data.endpointId].color = {
-												"temperatureK" : data.state.colorTemperature
-											}
-										}
-									}
-								}
-								if (trait == "action.devices.traits.OnOff") {
-									if (data.state.power.toLowerCase() == 'on') {
-										response.payload.devices[data.endpointId].on = true;
-									}
-									else {
-										response.payload.devices[data.endpointId].on = false;
-									}
-									
-								}
-								// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
-								if (trait == "action.devices.traits.TemperatureSetting") {
-									response.payload.devices[data.endpointId].thermostatMode = data.state.thermostatMode.toLowerCase();
-									response.payload.devices[data.endpointId].thermostatTemperatureSetpoint = data.state.thermostatSetPoint;
-									if (data.state.hasOwnProperty('temperature')) {
-										response.payload.devices[data.endpointId].thermostatTemperatureAmbient = data.state.temperature;
-									}
-								}
-							}); */
 						}
 						else {
 							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
@@ -542,6 +489,45 @@ router.post('/action', defaultLimiter,
 	}
 });
 
+// GHome Action API =========================
+router.post('/reportstate/:dev_id', defaultLimiter,
+	passport.authenticate(['bearer', 'basic'], { session: false }),
+	function(req,res,next){
+		var id = req.params.dev_id;
+		const promiseDevices = Devices.findOne({endpointId: id});
+		Promise.all([promiseDevices]).then(([device]) => {
+			if (device){
+				var token = requestToken(keys).catch(token = undefined); // Get Token via JWT
+				var stateUpdate = queryDeviceState(device); // Get State Update
+				var promiseUser = Account.find({username:device.username}); // Get User (need _id)
+				Promise.all([token, stateUpdate, promiseUser]).then(([token, state, user]) => {
+					if (token != undefined && user && state) {
+						// Build state update
+						var response = {
+							"agentUserId": user[0]._id,
+							"payload": {
+								"devices" : state
+							}
+						}
+						reportState(token, response).catch(function(error){
+							logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
+						});
+						// Send 200 response
+						res.status(200).send();
+					}
+				});
+			}
+			else {
+				logger.log('error', '[GHome Report State] Device not found, deviceId:' + id);
+				res.status(500).send();
+			}
+		}).catch(err => {
+			//res.status(500).json({error: err});
+			logger.log('error', '[GHome Report State] Error:' + err);
+			res.status(500).send();
+		});
+	});
+
 // Convert Alexa Device Capabilities to Google Home-compatible
 function gHomeReplaceCapability(capability) {
 	// Limit supported traits, add new ones here
@@ -589,7 +575,12 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					// Send state update here
+					// Send async state update
+					var token = requestToken(keys).catch(token = undefined);
+					reportState(token, commandWaiting.response).catch(function(error){
+						logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
+					});
+
 				}		
 			} else {
 				// Google Home failure response
@@ -649,8 +640,8 @@ function getSafe(fn) {
 }
 
 // Call this from QUERY intent or reportstate API endpoint
-function queryDeviceState(user, device) {
-	if (user && device) {
+function queryDeviceState(device) {
+	if (device) {
 		var dev = {};
 		// Create initial JSON object for device
 		dev.online = true;
@@ -702,18 +693,27 @@ function queryDeviceState(user, device) {
 					}
 				}
 			});
-
 			// Retrun device state
 			return dev;
-	}
-	else if (!user){
-		logger.log('warn', "[GHome Query API] queryDeviceState User not specified");
-		return {message: "User not found"};
 	}
 	else if (!device) {
 		logger.log('warn', "[GHome Query API] queryDeviceState Device not specified");
 		return {message: "Device not found"};
 	}
+}
+
+// Send State Update
+async function reportState(token, response) {
+	request({
+		url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
+			method: 'POST',
+			headers:{
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + token,
+				'X-GFE-SSL': 'yes'
+			},
+			json: response
+	});
 }
 
 // GHome HomeGraph Token Request
@@ -744,8 +744,8 @@ async function requestToken(keys) {
 				if (err) {
 					logger.log('warn', "[State API] Ghome JWT / OAuth token request failed");
 				} else {
-					var oauthToken = JSON.parse(body).access_token;
-					logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(oauthToken));
+					logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
+					return JSON.parse(body).access_token;
 				}
 			}
 		);
