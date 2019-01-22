@@ -495,6 +495,7 @@ router.post('/reportstate/:dev_id', defaultLimiter,
 	function(req,res,next){
 		if (debug == "true") {console.time('ghome-reportstate')};
 		var id = req.params.dev_id;
+		logger.log('verbose', '[GHome Report State] Recived report state trigger for deviceId:' + id);
 		const promiseDevices = Devices.findOne({endpointId: id});
 		const promiseGHomeService = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" })
 		Promise.all([promiseDevices, promiseGHomeService]).then(([device, ghomeservice]) => {
