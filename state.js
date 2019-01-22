@@ -331,10 +331,8 @@ function setstate(username, endpointId, payload) {
 async function triggerState(id) {
 	// Ghome
 	try {
-		request({
-			url: 'https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,
-				method: 'GET',
-				auth: {
+		request.post('https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,{
+			auth: {
 					user: mqtt_user,
 					pass: mqtt_password,
 					sendImmediately: false

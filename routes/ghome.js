@@ -490,7 +490,7 @@ router.post('/action', defaultLimiter,
 });
 
 // GHome Action API =========================
-router.get('/reportstate/:dev_id',
+router.post('/reportstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		if (debug == "true") {console.time('ghome-reportstate')};
