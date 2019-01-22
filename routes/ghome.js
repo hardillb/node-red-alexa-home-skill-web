@@ -424,9 +424,9 @@ router.post('/action', defaultLimiter,
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
 							
-							queryDeviceState(user, data);
+							try {queryDeviceState(user, data)}
+							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
 
-							
 							// Create initial JSON object for device
 							response.payload.devices[data.endpointId] = {online: true};
 							// Add state response based upon device traits
@@ -649,7 +649,7 @@ function getSafe(fn) {
 function queryDeviceState(user, device) {
 	if (user && device) {
 		var dev = {};
-		var deviceJSON = JSON.stringify(device);
+		var deviceJSON = device;
 		// Create initial JSON object for device
 		dev[deviceJSON.endpointId] = {online: true};
 		// Add state response based upon device traits
