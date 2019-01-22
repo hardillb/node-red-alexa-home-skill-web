@@ -417,14 +417,6 @@ router.post('/action', defaultLimiter,
 							"devices" : {}
 						}
 					}
-
-					var testResponse = {
-						"requestId": requestId,
-						"payload": {
-							"devices" : {}
-						}
-					}
-
 					for (var i=0; i< arrQueryDevices.length; i++) {
 						// Find device in array of user devices returned in promise
 						logger.log('debug', "[GHome Query API] Trying to match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
@@ -434,11 +426,11 @@ router.post('/action', defaultLimiter,
 							
 							try {
 								var devState = queryDeviceState(user, data);
-								testResponse.payload.devices[data.endpointId] = devState;
+								response.payload.devices[data.endpointId] = devState;
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
 
-							// Create initial JSON object for device
+/* 							// Create initial JSON object for device
 							response.payload.devices[data.endpointId] = {online: true};
 							// Add state response based upon device traits
 							data.capabilities.forEach(function(capability){
@@ -488,7 +480,7 @@ router.post('/action', defaultLimiter,
 										response.payload.devices[data.endpointId].thermostatTemperatureAmbient = data.state.temperature;
 									}
 								}
-							});
+							}); */
 						}
 						else {
 							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
@@ -496,9 +488,6 @@ router.post('/action', defaultLimiter,
 					}
 					// Send Response
 					logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
-					logger.log('debug', '*************************************************************');
-					logger.log('debug', "[GHome Query API] TEST QUERY state: " + JSON.stringify(testResponse));
-					logger.log('debug', '*************************************************************');
 					res.status(200).json(response);
 					if (debug == "true") {console.timeEnd('ghome-query')};
 				}
