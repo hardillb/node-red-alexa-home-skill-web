@@ -5,9 +5,6 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 // ===========================================
-// Request =======================
-const request = require('request');
-// ===============================
 // Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
@@ -27,19 +24,6 @@ var url = require('url');
 // Winston Logger ============================
 var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
-// Google Auth JSON Web Token ================
-const jwt = require('jsonwebtoken');
-const ghomeJWT = process.env['GHOMEJWT'];
-var reportState = false;
-var keys;
-if (!ghomeJWT) {
-	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
-}
-else {
-	reportState = true;
-	keys = JSON.parse(ghomeJWT);
-}
 // ===========================================
 // Google Analytics ==========================
 var ua = require('universal-analytics');
@@ -1477,41 +1461,6 @@ function getSafe(fn) {
 		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
-}
-// GHome HomeGraph Token Request
-async function requestToken(keys) {
-	if (reportState == true) {
-		var payload = {
-				"iss": keys.client_email,
-				"scope": "https://www.googleapis.com/auth/homegraph",
-				"aud": "https://accounts.google.com/o/oauth2/token",
-				"iat": new Date().getTime()/1000,
-				"exp": new Date().getTime()/1000 + 3600,
-		}
-		// Use jsonwebtoken to sign token
-		// Sign token: https://cloud.google.com/endpoints/docs/openapi/service-account-authentication#using_jwt_signed_by_service_account
-		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
-		// Need submit token using: application/x-www-form-urlencoded
-		// Use form: https://www.npmjs.com/package/request#forms
-		// Also include grant_type in form data : urn:ietf:params:oauth:grant-type:jwt-bearer
-		request.post({
-			url: 'https://accounts.google.com/o/oauth2/token',
-			form: {
-				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-				assertion: token
-				}
-			},
-			function(err,res, body){
-				if (err) {
-					logger.log('warn', "[State API] Ghome JWT / OAuth token request failed");
-				} else {
-					var oauthToken = JSON.parse(body).access_token;
-					logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(oauthToken));
-				}
-			}
-		);
-	}
 }
 
 module.exports = router;

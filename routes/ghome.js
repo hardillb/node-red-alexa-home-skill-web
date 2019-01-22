@@ -5,6 +5,9 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 // ===========================================
+// Request =======================
+const request = require('request');
+// ===============================
 // Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
@@ -24,6 +27,19 @@ var url = require('url');
 // Winston Logger ============================
 var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
+// ===========================================
+// Google Auth JSON Web Token ================
+const jwt = require('jsonwebtoken');
+const ghomeJWT = process.env['GHOMEJWT'];
+var reportState = false;
+var keys;
+if (!ghomeJWT) {
+	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
+}
+else {
+	reportState = true;
+	keys = JSON.parse(ghomeJWT);
+}
 // ===========================================
 // Google Analytics ==========================
 var ua = require('universal-analytics');
@@ -407,6 +423,10 @@ router.post('/action', defaultLimiter,
 						var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
+							
+							queryDeviceState(user, data);
+
+							
 							// Create initial JSON object for device
 							response.payload.devices[data.endpointId] = {online: true};
 							// Add state response based upon device traits
@@ -566,6 +586,7 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
+					// Send state update here
 				}		
 			} else {
 				// Google Home failure response
@@ -622,6 +643,118 @@ function getSafe(fn) {
 		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
+}
+
+// Call this form QUERY intent or reportstate API endpoint
+function queryDeviceState(user, device) {
+	if (user && device) {
+		var dev = {};
+		var deviceJSON = JSON.stringify(device);
+		// Create initial JSON object for device
+		dev[deviceJSON.endpointId] = {online: true};
+		// Add state response based upon device traits
+		deviceJSON.capabilities.forEach(function(capability){
+			var trait = gHomeReplaceCapability(capability);
+				// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
+				if (trait == "action.devices.traits.Brightness"){
+					dev[deviceJSON.endpointId].brightness = deviceJSON.state.brightness;
+				}
+				if (trait == "action.devices.traits.ColorSetting") {
+					if (!dev[deviceJSON.endpointId].hasOwnProperty('on')){
+						dev[deviceJSON.endpointId].on = deviceJSON.state.power.toLowerCase();
+					}
+					if (deviceJSON.capabilities.indexOf('ColorController') > -1 ){
+						dev[deviceJSON.endpointId].color = {
+							"spectrumHsv": {
+								"hue": deviceJSON.state.colorHue,
+								"saturation": deviceJSON.state.colorSaturation,
+								"value": deviceJSON.state.colorBrightness
+								}
+						}
+					}
+					if (deviceJSON.capabilities.indexOf('ColorTemperatureController') > -1){
+						var hasColorElement = getSafe(() => dev[deviceJSON.endpointId].color);
+						if (hasColorElement != undefined) {dev[deviceJSON.endpointId].color.temperatureK = deviceJSON.state.colorTemperature}
+						else {
+							dev[deviceJSON.endpointId].color = {
+								"temperatureK" : deviceJSON.state.colorTemperature
+							}
+						}
+					}
+				}
+				if (trait == "action.devices.traits.OnOff") {
+					if (deviceJSON.state.power.toLowerCase() == 'on') {
+						dev[deviceJSON.endpointId].on = true;
+					}
+					else {
+						dev[deviceJSON.endpointId].on = false;
+					}
+					
+				}
+				// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
+				if (trait == "action.devices.traits.TemperatureSetting") {
+					dev[deviceJSON.endpointId].thermostatMode = deviceJSON.state.thermostatMode.toLowerCase();
+					dev[deviceJSON.endpointId].thermostatTemperatureSetpoint = deviceJSON.state.thermostatSetPoint;
+					if (deviceJSON.state.hasOwnProperty('temperature')) {
+						dev[deviceJSON.endpointId].thermostatTemperatureAmbient = deviceJSON.state.temperature;
+					}
+				}
+			});
+
+			// Send Response
+			logger.log('debug', '*************************************************************');
+			logger.log('debug', "[GHome Query API] TEST QUERY state: " + JSON.stringify(dev));
+			logger.log('debug', '*************************************************************');
+			return dev;
+	}
+	else if (!user){
+		logger.log('warn', "[GHome Query API] User not found");
+		return {message: "User not found"};
+	}
+	else if (!device) {
+		logger.log('warn', "[GHome Query API] Device not found");
+		return {message: "Device not found"};
+	}
+	else if (!type) {
+		logger.log('warn', "[GHome Query API] State Query Type not specified");
+		return {message: "Device not found"};
+	}
+}
+
+// GHome HomeGraph Token Request
+async function requestToken(keys) {
+	if (reportState == true) {
+		var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+		}
+		// Use jsonwebtoken to sign token
+		// Sign token: https://cloud.google.com/endpoints/docs/openapi/service-account-authentication#using_jwt_signed_by_service_account
+		var privKey = keys.private_key;
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
+		// Need submit token using: application/x-www-form-urlencoded
+		// Use form: https://www.npmjs.com/package/request#forms
+		// Also include grant_type in form data : urn:ietf:params:oauth:grant-type:jwt-bearer
+		request.post({
+			url: 'https://accounts.google.com/o/oauth2/token',
+			form: {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+				}
+			},
+			function(err,res, body){
+				if (err) {
+					logger.log('warn', "[State API] Ghome JWT / OAuth token request failed");
+				} else {
+					var oauthToken = JSON.parse(body).access_token;
+					logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(oauthToken));
+				}
+			}
+		);
+	}
 }
 
 module.exports = router;
