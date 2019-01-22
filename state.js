@@ -333,7 +333,7 @@ async function triggerState(id) {
 	try {
 		request({
 			url: 'https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,
-				method: 'POST',
+				method: 'GET',
 				auth: {
 					user: mqtt_user,
 					pass: mqtt_password,
