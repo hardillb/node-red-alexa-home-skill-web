@@ -332,10 +332,10 @@ async function triggerState(id) {
 	// Ghome
 	try {
 		request.post('https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,{
-			auth: {
-					user: mqtt_user,
-					pass: mqtt_password,
-					sendImmediately: false
+			'auth': {
+					'user': mqtt_user,
+					'pass': mqtt_password,
+					'sendImmediately': false
 				}
 		});
 	}
