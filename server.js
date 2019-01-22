@@ -27,10 +27,6 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 // Warn on SYNC_API not being specified/ request SYNC will be disabled
 if (!(process.env.HOMEGRAPH_APIKEY)){
 	logger.log('warn',"[Core] No HOMEGRAPH_APIKEY environment variable supplied. New devices, removal or device changes will not show in users Google Home App without this");
-	enableGoogleHomeSync = false;
-}
-else {
-	var SYNC_API = "https://homegraph.googleapis.com/v1/devices:requestSync?key=" + process.env.HOMEGRAPH_APIKEY;
 }
 
 // NodeJS App Settings

@@ -493,28 +493,34 @@ router.post('/action', defaultLimiter,
 router.post('/reportstate/:dev_id', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
+		if (debug == "true") {console.time('ghome-reportstate')};
 		var id = req.params.dev_id;
 		const promiseDevices = Devices.findOne({endpointId: id});
-		Promise.all([promiseDevices]).then(([device]) => {
+		const promiseGHomeService = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" })
+		Promise.all([promiseDevices, promiseGHomeService]).then(([device, ghomeservice]) => {
 			if (device){
 				var token = requestToken(keys).catch(token = undefined); // Get Token via JWT
 				var stateUpdate = queryDeviceState(device); // Get State Update
 				var promiseUser = Account.find({username:device.username}); // Get User (need _id)
 				Promise.all([token, stateUpdate, promiseUser]).then(([token, state, user]) => {
-					if (token != undefined && user && state) {
-						// Build state update
-						var response = {
-							"agentUserId": user[0]._id,
-							"payload": {
-								"devices" : state
+					// Google Home Update
+					const promiseGrants = oauthModels.GrantCode.count({user: user._id, application: ghomeservice._id})
+					Promise.all([promiseGrants]).then(([countGHomeGrants]) => {
+						if (countGHomeGrants > 0 && token != undefined && user && state) {
+							// Build state update
+							var response = {
+								"agentUserId": user[0]._id,
+								"payload": {
+									"devices" : state
+								}
 							}
+							sendState(token, response).catch(function(error){
+								logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
+							});
+							// Send 200 response
+							res.status(200).send();
 						}
-						sendState(token, response).catch(function(error){
-							logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
-						});
-						// Send 200 response
-						res.status(200).send();
-					}
+					});
 				});
 			}
 			else {
@@ -526,6 +532,7 @@ router.post('/reportstate/:dev_id', defaultLimiter,
 			logger.log('error', '[GHome Report State] Error:' + err);
 			res.status(500).send();
 		});
+		if (debug == "true") {console.timeEnd('ghome-reportstate')};
 	});
 
 // Convert Alexa Device Capabilities to Google Home-compatible
@@ -550,6 +557,83 @@ function gHomeReplaceType(type) {
 	else {return "NA"}
 }
 /////////////////////// End GHome
+
+
+///////////////////////////////////////////////////////////////////////////
+// MQTT Message Handlers
+///////////////////////////////////////////////////////////////////////////
+var onGoingCommands = {};
+
+// Event handler for received MQTT messages - note subscribe near top of script.
+mqttClient.on('message',function(topic,message){
+	var arrTopic = topic.split("/"); 
+	var username = arrTopic[1];
+	var endpointId = arrTopic[2];
+
+	if (topic.startsWith('response/')){
+		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
+		if (debug == "true") {console.time('mqtt-response')};
+		var payload = JSON.parse(message.toString());
+		//console.log("response payload", payload)
+		var commandWaiting = onGoingCommands[payload.messageId];
+		if (commandWaiting) {
+			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
+			if (payload.success) {
+				// Google Home success response
+				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
+					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+					commandWaiting.res.status(200).json(commandWaiting.response);
+					// Send async state update
+					var token = requestToken(keys).catch(token = undefined);
+					sendState(token, commandWaiting.response).catch(function(error){
+						logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
+					});
+				}		
+			} else {
+				// Google Home failure response
+				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
+					delete commandWaiting.response.state;
+					commandWaiting.response.status = "FAILED";
+					logger.log('warn', "[Command API] Failed Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+					commandWaiting.res.status(200).json(commandWaiting.response);
+				}
+			}
+			delete onGoingCommands[payload.messageId];
+			var params = {
+				ec: "Command",
+				ea: "Command API successfully processed MQTT command for username: " + username,
+				uid: username,
+			  }
+			if (enableAnalytics) {visitor.event(params).send()};
+		}
+		if (debug == "true") {console.timeEnd('mqtt-response')};
+	}
+	// Leave Alexa API MQTT state listener to pickup all other MQTT state messages
+});
+
+// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
+var timeout = setInterval(function(){
+	var now = Date.now();
+	var keys = Object.keys(onGoingCommands);
+	for (key in keys){
+		var waiting = onGoingCommands[keys[key]];
+		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
+		if (waiting) {
+			var diff = now - waiting.timestamp;
+			if (diff > 6000) {
+				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
+				waiting.res.status(504).send('{"error": "timeout"}');
+				delete onGoingCommands[keys[key]];
+				//measurement.send({
+				//	t:'event', 
+				//	ec:'command', 
+				//	ea: 'timeout',
+				//	uid: waiting.user
+				//});
+			}
+		}
+	}
+},500);
 
 // Nested attribute/ element tester
 function getSafe(fn) {
@@ -674,81 +758,5 @@ async function requestToken(keys) {
 		);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////
-// MQTT Message Handlers
-///////////////////////////////////////////////////////////////////////////
-var onGoingCommands = {};
-
-// Event handler for received MQTT messages - note subscribe near top of script.
-mqttClient.on('message',function(topic,message){
-	var arrTopic = topic.split("/"); 
-	var username = arrTopic[1];
-	var endpointId = arrTopic[2];
-
-	if (topic.startsWith('response/')){
-		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
-		if (debug == "true") {console.time('mqtt-response')};
-		var payload = JSON.parse(message.toString());
-		//console.log("response payload", payload)
-		var commandWaiting = onGoingCommands[payload.messageId];
-		if (commandWaiting) {
-			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
-			if (payload.success) {
-				// Google Home success response
-				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
-					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
-					commandWaiting.res.status(200).json(commandWaiting.response);
-					// Send async state update
-					var token = requestToken(keys).catch(token = undefined);
-					sendState(token, commandWaiting.response).catch(function(error){
-						logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
-					});
-				}		
-			} else {
-				// Google Home failure response
-				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
-					delete commandWaiting.response.state;
-					commandWaiting.response.status = "FAILED";
-					logger.log('warn', "[Command API] Failed Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
-					commandWaiting.res.status(200).json(commandWaiting.response);
-				}
-			}
-			delete onGoingCommands[payload.messageId];
-			var params = {
-				ec: "Command",
-				ea: "Command API successfully processed MQTT command for username: " + username,
-				uid: username,
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
-		}
-		if (debug == "true") {console.timeEnd('mqtt-response')};
-	}
-	// Leave Alexa API MQTT state listener to pickup all other MQTT state messages
-});
-
-// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
-var timeout = setInterval(function(){
-	var now = Date.now();
-	var keys = Object.keys(onGoingCommands);
-	for (key in keys){
-		var waiting = onGoingCommands[keys[key]];
-		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
-		if (waiting) {
-			var diff = now - waiting.timestamp;
-			if (diff > 6000) {
-				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
-				waiting.res.status(504).send('{"error": "timeout"}');
-				delete onGoingCommands[keys[key]];
-				//measurement.send({
-				//	t:'event', 
-				//	ec:'command', 
-				//	ea: 'timeout',
-				//	uid: waiting.user
-				//});
-			}
-		}
-	}
-},500);
 
 module.exports = router;

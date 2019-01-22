@@ -133,6 +133,9 @@ app.use('/admin', rtAdmin); // Minor admin page changes
 app.use('/auth', rtAuth); // OAuth endpoints remain as-is
 app.use('/api/ghome', rtGhome); // Google Home API changes
 app.use('/api/v1', rtAlexa); // Alexa API continues as-is
+// Load State API ==========================
+var state = require('./state');
+// ====================================
 
 module.exports = app;
 

@@ -91,8 +91,8 @@ mqttClient.on('reconnect', function(){
 mqttClient.on('connect', function(){
 	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'state/#'")
-	mqttClient.subscribe('state/#');
+/* 	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'state/#'")
+	mqttClient.subscribe('state/#'); */
 });
 // Redis Client =============================
 var client = require('../config/redis')
@@ -1194,35 +1194,35 @@ mqttClient.on('message',function(topic,message){
 		}
 		if (debug == "true") {console.timeEnd('mqtt-response')};
 	}
-	else if (topic.startsWith('state/')){
-		logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
-		if (debug == "true") {console.time('mqtt-state')};
-		// Split topic/ get username and endpointId
-		var messageJSON = JSON.parse(message);
-		var payload = messageJSON.payload;
-		// Call setstate to update attribute in mongodb
-		setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
-		// Add message to onGoingCommands
-		var stateWaiting = onGoingCommands[payload.messageId];
-		if (stateWaiting) {
-			if (payload.success) {
-				logger.log('info', "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
-				stateWaiting.res.status(200).send();
-			} else {
-				logger.log('warn', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
-				stateWaiting.res.status(503).send();
+	/* 	else if (topic.startsWith('state/')){
+			logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
+			if (debug == "true") {console.time('mqtt-state')};
+			// Split topic/ get username and endpointId
+			var messageJSON = JSON.parse(message);
+			var payload = messageJSON.payload;
+			// Call setstate to update attribute in mongodb
+			setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
+			// Add message to onGoingCommands
+			var stateWaiting = onGoingCommands[payload.messageId];
+			if (stateWaiting) {
+				if (payload.success) {
+					logger.log('info', "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
+					stateWaiting.res.status(200).send();
+				} else {
+					logger.log('warn', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
+					stateWaiting.res.status(503).send();
+				}
 			}
-		}
-		// If successful remove messageId from onGoingCommands
-		delete onGoingCommands[payload.messageId];
-		var params = {
-			ec: "Set State",
-			ea: "State API successfully processed MQTT state for username: " + username + " device: " + endpointId,
-			uid: username,
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-		if (debug == "true") {console.timeEnd('mqtt-state')};
-	}
+			// If successful remove messageId from onGoingCommands
+			delete onGoingCommands[payload.messageId];
+			var params = {
+				ec: "Set State",
+				ea: "State API successfully processed MQTT state for username: " + username + " device: " + endpointId,
+				uid: username,
+			}
+			if (enableAnalytics) {visitor.event(params).send()};
+			if (debug == "true") {console.timeEnd('mqtt-state')};
+		} */
 	else {
 		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
 	}
@@ -1251,7 +1251,7 @@ var timeout = setInterval(function(){
 		}
 	}
 },500);
-
+/* 
 // Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
@@ -1451,7 +1451,7 @@ function setstate(username, endpointId, payload) {
 		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
 	}
 }
-
+ */
 // Nested attribute/ element tester
 function getSafe(fn) {
 	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
