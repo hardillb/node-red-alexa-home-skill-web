@@ -316,9 +316,7 @@ function setstate(username, endpointId, payload) {
 					else {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 						// Test Ghome Home Graoh API Request Token 
-						// triggerState(endpointId).catch(function(e) {
-						//  	logger.log('error', "[State API] Trigger State failed, error:" + e);
-						// });
+						triggerState(endpointId);
 					}
 				});
 			}
@@ -330,17 +328,22 @@ function setstate(username, endpointId, payload) {
 }
 
 // Send State Update
-async function triggerState (id) {
-    // Ghome
-	request({
-		url: 'https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,
-            method: 'POST',
-            auth: {
-                user: mqtt_user,
-                pass: mqtt_password,
-                sendImmediately: false
-              }
-	});
+async function triggerState(id) {
+	// Ghome
+	try {
+		request({
+			url: 'https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,
+				method: 'POST',
+				auth: {
+					user: mqtt_user,
+					pass: mqtt_password,
+					sendImmediately: false
+				}
+		});
+	}
+	catch (err) {
+		logger.log('error', "[State API] Trigger State failed, error:" + err);
+	}
 }
 
 // Nested attribute/ element tester
