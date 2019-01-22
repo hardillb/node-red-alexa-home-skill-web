@@ -417,6 +417,14 @@ router.post('/action', defaultLimiter,
 							"devices" : {}
 						}
 					}
+
+					var testResponse = {
+						"requestId": requestId,
+						"payload": {
+							"devices" : {}
+						}
+					}
+
 					for (var i=0; i< arrQueryDevices.length; i++) {
 						// Find device in array of user devices returned in promise
 						logger.log('debug', "[GHome Query API] Trying to match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
@@ -424,7 +432,10 @@ router.post('/action', defaultLimiter,
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
 							
-							try {queryDeviceState(user, data)}
+							try {
+								var devState = queryDeviceState(user, data);
+								testResponse.payload.devices.push(devState);
+							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
 
 							// Create initial JSON object for device
@@ -485,6 +496,9 @@ router.post('/action', defaultLimiter,
 					}
 					// Send Response
 					logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
+					logger.log('debug', '*************************************************************');
+					logger.log('debug', "[GHome Query API] TEST QUERY state: " + JSON.stringify(testResponse));
+					logger.log('debug', '*************************************************************');
 					res.status(200).json(response);
 					if (debug == "true") {console.timeEnd('ghome-query')};
 				}
@@ -649,54 +663,53 @@ function getSafe(fn) {
 function queryDeviceState(user, device) {
 	if (user && device) {
 		var dev = {};
-		var deviceJSON = device;
 		// Create initial JSON object for device
-		dev[deviceJSON.endpointId] = {online: true};
+		dev[device.endpointId] = {online: true};
 		// Add state response based upon device traits
-		deviceJSON.capabilities.forEach(function(capability){
+		device.capabilities.forEach(function(capability){
 			var trait = gHomeReplaceCapability(capability);
 				// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
 				if (trait == "action.devices.traits.Brightness"){
-					dev[deviceJSON.endpointId].brightness = deviceJSON.state.brightness;
+					dev[device.endpointId].brightness = device.state.brightness;
 				}
 				if (trait == "action.devices.traits.ColorSetting") {
-					if (!dev[deviceJSON.endpointId].hasOwnProperty('on')){
-						dev[deviceJSON.endpointId].on = deviceJSON.state.power.toLowerCase();
+					if (!dev[device.endpointId].hasOwnProperty('on')){
+						dev[device.endpointId].on = device.state.power.toLowerCase();
 					}
-					if (deviceJSON.capabilities.indexOf('ColorController') > -1 ){
-						dev[deviceJSON.endpointId].color = {
+					if (device.capabilities.indexOf('ColorController') > -1 ){
+						dev[device.endpointId].color = {
 							"spectrumHsv": {
-								"hue": deviceJSON.state.colorHue,
-								"saturation": deviceJSON.state.colorSaturation,
-								"value": deviceJSON.state.colorBrightness
+								"hue": device.state.colorHue,
+								"saturation": device.state.colorSaturation,
+								"value": device.state.colorBrightness
 								}
 						}
 					}
-					if (deviceJSON.capabilities.indexOf('ColorTemperatureController') > -1){
-						var hasColorElement = getSafe(() => dev[deviceJSON.endpointId].color);
-						if (hasColorElement != undefined) {dev[deviceJSON.endpointId].color.temperatureK = deviceJSON.state.colorTemperature}
+					if (device.capabilities.indexOf('ColorTemperatureController') > -1){
+						var hasColorElement = getSafe(() => dev[device.endpointId].color);
+						if (hasColorElement != undefined) {dev[device.endpointId].color.temperatureK = device.state.colorTemperature}
 						else {
-							dev[deviceJSON.endpointId].color = {
-								"temperatureK" : deviceJSON.state.colorTemperature
+							dev[device.endpointId].color = {
+								"temperatureK" : device.state.colorTemperature
 							}
 						}
 					}
 				}
 				if (trait == "action.devices.traits.OnOff") {
-					if (deviceJSON.state.power.toLowerCase() == 'on') {
-						dev[deviceJSON.endpointId].on = true;
+					if (device.state.power.toLowerCase() == 'on') {
+						dev[device.endpointId].on = true;
 					}
 					else {
-						dev[deviceJSON.endpointId].on = false;
+						dev[device.endpointId].on = false;
 					}
 					
 				}
 				// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
 				if (trait == "action.devices.traits.TemperatureSetting") {
-					dev[deviceJSON.endpointId].thermostatMode = deviceJSON.state.thermostatMode.toLowerCase();
-					dev[deviceJSON.endpointId].thermostatTemperatureSetpoint = deviceJSON.state.thermostatSetPoint;
-					if (deviceJSON.state.hasOwnProperty('temperature')) {
-						dev[deviceJSON.endpointId].thermostatTemperatureAmbient = deviceJSON.state.temperature;
+					dev[device.endpointId].thermostatMode = device.state.thermostatMode.toLowerCase();
+					dev[device.endpointId].thermostatTemperatureSetpoint = device.state.thermostatSetPoint;
+					if (device.state.hasOwnProperty('temperature')) {
+						dev[device.endpointId].thermostatTemperatureAmbient = device.state.temperature;
 					}
 				}
 			});
