@@ -434,7 +434,7 @@ router.post('/action', defaultLimiter,
 							
 							try {
 								var devState = queryDeviceState(user, data);
-								testResponse.payload.devices.push(devState);
+								testResponse.payload.devices[data.endpointId] = devState;
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
 
@@ -664,20 +664,20 @@ function queryDeviceState(user, device) {
 	if (user && device) {
 		var dev = {};
 		// Create initial JSON object for device
-		dev[device.endpointId] = {online: true};
+		dev.online = true;
 		// Add state response based upon device traits
 		device.capabilities.forEach(function(capability){
 			var trait = gHomeReplaceCapability(capability);
 				// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
 				if (trait == "action.devices.traits.Brightness"){
-					dev[device.endpointId].brightness = device.state.brightness;
+					dev.brightness = device.state.brightness;
 				}
 				if (trait == "action.devices.traits.ColorSetting") {
-					if (!dev[device.endpointId].hasOwnProperty('on')){
-						dev[device.endpointId].on = device.state.power.toLowerCase();
+					if (!dev.hasOwnProperty('on')){
+						dev.on = device.state.power.toLowerCase();
 					}
 					if (device.capabilities.indexOf('ColorController') > -1 ){
-						dev[device.endpointId].color = {
+						dev.color = {
 							"spectrumHsv": {
 								"hue": device.state.colorHue,
 								"saturation": device.state.colorSaturation,
@@ -686,10 +686,10 @@ function queryDeviceState(user, device) {
 						}
 					}
 					if (device.capabilities.indexOf('ColorTemperatureController') > -1){
-						var hasColorElement = getSafe(() => dev[device.endpointId].color);
-						if (hasColorElement != undefined) {dev[device.endpointId].color.temperatureK = device.state.colorTemperature}
+						var hasColorElement = getSafe(() => dev.color);
+						if (hasColorElement != undefined) {dev.color.temperatureK = device.state.colorTemperature}
 						else {
-							dev[device.endpointId].color = {
+							dev.color = {
 								"temperatureK" : device.state.colorTemperature
 							}
 						}
@@ -697,19 +697,19 @@ function queryDeviceState(user, device) {
 				}
 				if (trait == "action.devices.traits.OnOff") {
 					if (device.state.power.toLowerCase() == 'on') {
-						dev[device.endpointId].on = true;
+						dev.on = true;
 					}
 					else {
-						dev[device.endpointId].on = false;
+						dev.on = false;
 					}
 					
 				}
 				// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
 				if (trait == "action.devices.traits.TemperatureSetting") {
-					dev[device.endpointId].thermostatMode = device.state.thermostatMode.toLowerCase();
-					dev[device.endpointId].thermostatTemperatureSetpoint = device.state.thermostatSetPoint;
+					dev.thermostatMode = device.state.thermostatMode.toLowerCase();
+					dev.thermostatTemperatureSetpoint = device.state.thermostatSetPoint;
 					if (device.state.hasOwnProperty('temperature')) {
-						dev[device.endpointId].thermostatTemperatureAmbient = device.state.temperature;
+						dev.thermostatTemperatureAmbient = device.state.temperature;
 					}
 				}
 			});
