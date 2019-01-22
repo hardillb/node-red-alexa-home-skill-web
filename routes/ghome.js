@@ -626,7 +626,7 @@ function queryDeviceState(device) {
 }
 
 // Send State Update
-function sendState(token, response) {
+async function sendState(token, response) {
 	request({
 		url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
 			method: 'POST',
@@ -636,13 +636,6 @@ function sendState(token, response) {
 				'X-GFE-SSL': 'yes'
 			},
 			json: response
-	}, function(error, response, body){
-		if (error) {
-			logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
-		}
-		else {
-			logger.log('verbose', '[GHome Report State] Sent state report, state:' + response);
-		}
 	});
 }
 
@@ -708,7 +701,9 @@ mqttClient.on('message',function(topic,message){
 					commandWaiting.res.status(200).json(commandWaiting.response);
 					// Send async state update
 					var token = requestToken(keys).catch(token = undefined);
-					sendState(token, commandWaiting.response);
+					sendState(token, commandWaiting.response).catch(function(error){
+						logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
+					});
 				}		
 			} else {
 				// Google Home failure response
