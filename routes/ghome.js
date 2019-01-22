@@ -648,7 +648,7 @@ function getSafe(fn) {
     }
 }
 
-// Call this form QUERY intent or reportstate API endpoint
+// Call this from QUERY intent or reportstate API endpoint
 function queryDeviceState(user, device) {
 	if (user && device) {
 		var dev = {};
@@ -703,22 +703,15 @@ function queryDeviceState(user, device) {
 				}
 			});
 
-			// Send Response
-			logger.log('debug', '*************************************************************');
-			logger.log('debug', "[GHome Query API] TEST QUERY state: " + JSON.stringify(dev));
-			logger.log('debug', '*************************************************************');
+			// Retrun device state
 			return dev;
 	}
 	else if (!user){
-		logger.log('warn', "[GHome Query API] User not found");
+		logger.log('warn', "[GHome Query API] queryDeviceState User not specified");
 		return {message: "User not found"};
 	}
 	else if (!device) {
-		logger.log('warn', "[GHome Query API] Device not found");
-		return {message: "Device not found"};
-	}
-	else if (!type) {
-		logger.log('warn', "[GHome Query API] State Query Type not specified");
+		logger.log('warn', "[GHome Query API] queryDeviceState Device not specified");
 		return {message: "Device not found"};
 	}
 }
