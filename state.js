@@ -315,7 +315,7 @@ function setstate(username, endpointId, payload) {
 					}
 					else {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
-						// Test Ghome Home Graoh API Request Token 
+						// Test Ghome Home Graph API Request Token 
 						triggerState(endpointId);
 					}
 				});
@@ -337,6 +337,9 @@ async function triggerState(id) {
 					'pass': mqtt_password,
 					'sendImmediately': false
 				}
+		}, function (error, response, body){
+			if (error) {logger.log('error', "[State API] Request failed, error:" + error);
+		}
 		});
 	}
 	catch (err) {
