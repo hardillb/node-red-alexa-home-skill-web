@@ -316,7 +316,7 @@ function setstate(username, endpointId, payload) {
 					else {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 						// Test Ghome Home Graph API Request Token 
-						triggerState(endpointId);
+						//triggerState(endpointId);
 					}
 				});
 			}
