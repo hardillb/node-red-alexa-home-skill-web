@@ -626,7 +626,7 @@ function queryDeviceState(device) {
 }
 
 // Send State Update
-async function reportState(token, response) {
+function reportState(token, response) {
 	request({
 		url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
 			method: 'POST',
