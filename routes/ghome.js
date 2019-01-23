@@ -426,7 +426,7 @@ router.post('/action', defaultLimiter,
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
 							try {
-								var devState = await queryDeviceState(data);
+								var devState = queryDeviceState(data);
 								response.payload.devices[data.endpointId] = devState;
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
@@ -587,7 +587,7 @@ mqttClient.on('message',function(topic,message){
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 					// Send async state update
-					var token = await requestToken(keys).catch(token = undefined);
+					var token = requestToken(keys).catch(token = undefined);
 					sendState(token, commandWaiting.response).catch(function(error){
 						logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
 					});
