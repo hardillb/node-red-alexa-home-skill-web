@@ -137,7 +137,10 @@ const defaultLimiter = limiter({
 });
 // ==========================================
 // GHome Functions =========================
-const {queryDeviceState, requestToken, isGhomeUser, sendState} = require('../functions/func-ghome')
+const gHomeFunc = require('../functions/func-ghome');
+const requestToken = gHomeFunc.requestToken;
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
 // ==========================================
 // GHome Action API =========================
 router.post('/action', defaultLimiter,
