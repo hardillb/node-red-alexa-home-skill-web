@@ -560,7 +560,9 @@ mqttClient.on('message',function(topic,message){
 								"requestId" : commandWaiting.requestId,
 								"agentUserId": commandWaiting.userId,
 								"payload": {
-									"devices" : {}
+									"devices" : {
+										"states": {}
+									}
 								}
 							}
 							stateReport.payload.devices[device.endpointId] = devState;
