@@ -1196,7 +1196,7 @@ mqttClient.on('message',function(topic,message){
 						
 						// Generate GHome state JSON object and send to HomeGraph API
 						if (reportState == true) {
-							var gHomeUser = isGhomeUser(); // Check user is GHome account-linked
+							var gHomeUser = isGhomeUser(username); // Check user is GHome account-linked
 							if (gHomeUser == true) {
 								var pDevice = Devices.findOne({username: username, endpointId: endpointId});
 								Promise.all([pDevice]).then(([device]) => {
