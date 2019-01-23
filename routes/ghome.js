@@ -556,8 +556,10 @@ mqttClient.on('message',function(topic,message){
 					}
 					// Send state update
 					if (token != undefined) {
+						logger.log('verbose', '[GHome Report State] Calling Send State');
 						sendState(token, commandWaiting.response);
 					}
+					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
 				}		
 			} else {
 				// Google Home failure response
