@@ -144,6 +144,11 @@ const requestToken = gHomeFunc.requestToken;
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 // ==========================================
+// Refresh Google oAuth Token used for State Reporting
+var refreshToken = setInterval(function(){
+	token = requestToken(keys);
+},354000);
+// ==========================================
 // GHome Action API =========================
 router.post('/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
@@ -544,25 +549,11 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					// Check for existing token
-					if (timeMillis == undefined){
-						timeMillis = new Date().getTime()/1000;
-						logger.log('verbose', '[GHome Report State] Requesting new OAuth token for Report State');
-						var pToken = requestToken(keys);
+					if (token != undefined) {
+						logger.log('verbose', '[GHome Report State] Calling Send State');
+						sendState(token, commandWaiting.response);
 					}
-					else if (timeMillis + 3590 <=  new Date().getTime()/1000) { // Allow a few seconds for initial request, hence 3590, not 3600
-						logger.log('verbose', '[GHome Report State] Using existing OAuth token for Report State');
-						var pToken = requestToken(keys);
-					}
-					Promise.all([pToken]).then(([oauthToken]) => {
-						token = oauthToken;
-						if (token != undefined) {
-							logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
-							logger.log('verbose', '[GHome Report State] Calling Send State');
-							sendState(token, commandWaiting.response);
-						}
-						else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
-					});
+					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
 				}		
 			} else {
 				// Google Home failure response
