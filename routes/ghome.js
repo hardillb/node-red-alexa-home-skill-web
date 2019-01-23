@@ -565,7 +565,7 @@ mqttClient.on('message',function(topic,message){
 									}
 								}
 							}
-							stateReport.payload.devices[device.endpointId] = devState;
+							stateReport.payload.devices.states[device.endpointId] = devState;
 						}
 						catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
 						if (gToken != undefined) {
