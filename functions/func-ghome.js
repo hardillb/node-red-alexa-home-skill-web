@@ -171,5 +171,15 @@ module.exports.sendState = async function sendState(token, response) {
                 'X-GFE-SSL': 'yes'
             },
             json: response
-    });
+    }, function(err,res, body){
+		if (err) {
+			logger.log('warn', "[State API] State report to HomeGraph failed");
+		}
+		else {
+			if (res.statusCode == 200) {
+				logger.log('verbose', "[State API] State report to HomeGraph failed");
+			}
+			else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
+		}
+	});
 }
