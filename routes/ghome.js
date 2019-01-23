@@ -381,6 +381,7 @@ router.post('/action', defaultLimiter,
 								var command = {
 									user: req.user.username,
 									userId: req.user._id,
+									requestId: requestId,
 									res: res,
 									response: response,
 									source: "Google",
@@ -556,6 +557,7 @@ mqttClient.on('message',function(topic,message){
 						try {
 							var devState = queryDeviceState(device);
 							var stateReport = {
+								"requestId" : commandWaiting.requestId,
 								"agentUserId": commandWaiting.userId,
 								"payload": {
 									"devices" : {}
@@ -619,11 +621,9 @@ var timeout = setInterval(function(){
 
 // Nested attribute/ element tester
 function getSafe(fn) {
-	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
 	try {
 		return fn();
     } catch (e) {
-		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
 }
@@ -638,9 +638,8 @@ function requestToken(keys) {
 				"iat": new Date().getTime()/1000,
 				"exp": new Date().getTime()/1000 + 3600,
 		}
-		// Use jsonwebtoken to sign token
 		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
 		request.post({
 			url: 'https://accounts.google.com/o/oauth2/token',
 			form: {
