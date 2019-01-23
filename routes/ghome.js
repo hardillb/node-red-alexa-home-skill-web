@@ -554,11 +554,9 @@ mqttClient.on('message',function(topic,message){
 						logger.log('verbose', '[GHome Report State] Using existing OAuth token for Report State');
 						token = requestToken(keys);
 					}
-					// Send async state update
+					// Send state update
 					if (token != undefined) {
-						sendState(token, commandWaiting.response).catch(function(error){
-							logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
-						});
+						sendState(token, commandWaiting.response);
 					}
 				}		
 			} else {
