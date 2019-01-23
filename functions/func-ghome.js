@@ -101,7 +101,7 @@ function gHomeReplaceCapability(capability) {
 }
 
 // GHome HomeGraph Token Request
-module.exports.requestToken = async function requestToken(keys) {
+module.exports.requestToken = function requestToken(keys) {
 	logger.log('verbose', "[State API] Ghome JWT requesting OAuth token");
 	if (reportState == true) {
 		var payload = {
