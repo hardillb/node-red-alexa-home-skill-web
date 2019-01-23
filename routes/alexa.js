@@ -1216,6 +1216,7 @@ mqttClient.on('message',function(topic,message){
 									logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
 								});
 							}
+							else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + gHomeUser)}
 						}
 					}
 					else {
