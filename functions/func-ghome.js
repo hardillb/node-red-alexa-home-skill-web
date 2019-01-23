@@ -24,7 +24,7 @@ else {
 // ===========================================
 
 // Call this from QUERY intent or reportstate API endpoint
-module.exports.queryDeviceState = async function queryDeviceState(device) {
+module.exports.queryDeviceState = function queryDeviceState(device) {
 	if (device) {
 		var dev = {};
 		// Create initial JSON object for device
