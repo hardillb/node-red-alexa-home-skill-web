@@ -148,10 +148,6 @@ requestToken(keys);
 var refreshToken = setInterval(function(){
 	gToken = requestToken(keys);
 },3540000);
-// Temporary logger to track value of gToken
-var logTokenValue = setInterval(function(){
-	logger.log('verbose', "[GHome Sync API] gToken value:" + JSON.stringify(gToken));
-}, 6000)
 // ==========================================
 // GHome Action API =========================
 router.post('/action', defaultLimiter,
@@ -627,12 +623,8 @@ function requestToken(keys) {
 				"exp": new Date().getTime()/1000 + 3600,
 		}
 		// Use jsonwebtoken to sign token
-		// Sign token: https://cloud.google.com/endpoints/docs/openapi/service-account-authentication#using_jwt_signed_by_service_account
 		var privKey = keys.private_key;
 		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
-		// Need submit token using: application/x-www-form-urlencoded
-		// Use form: https://www.npmjs.com/package/request#forms
-		// Also include grant_type in form data : urn:ietf:params:oauth:grant-type:jwt-bearer
 		request.post({
 			url: 'https://accounts.google.com/o/oauth2/token',
 			form: {
@@ -642,12 +634,10 @@ function requestToken(keys) {
 			},
 			function(err,res, body){
 				if (err) {
-					return undefined;
 					gToken = undefined;
 				} else {
 					logger.log('verbose', "[State API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
 					gToken =JSON.parse(body).access_token;
-					//return JSON.parse(body).access_token;
 				}
 			}
 		);

@@ -100,43 +100,6 @@ function gHomeReplaceCapability(capability) {
 	else {return "Not Supported"}
 }
 
-// GHome HomeGraph Token Request
-module.exports.requestToken = function requestToken(keys) {
-	logger.log('verbose', "[State API] Ghome JWT requesting OAuth token");
-	if (reportState == true) {
-		var payload = {
-				"iss": keys.client_email,
-				"scope": "https://www.googleapis.com/auth/homegraph",
-				"aud": "https://accounts.google.com/o/oauth2/token",
-				"iat": new Date().getTime()/1000,
-				"exp": new Date().getTime()/1000 + 3600,
-		}
-		// Use jsonwebtoken to sign token
-		// Sign token: https://cloud.google.com/endpoints/docs/openapi/service-account-authentication#using_jwt_signed_by_service_account
-		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
-		// Need submit token using: application/x-www-form-urlencoded
-		// Use form: https://www.npmjs.com/package/request#forms
-		// Also include grant_type in form data : urn:ietf:params:oauth:grant-type:jwt-bearer
-		request.post({
-			url: 'https://accounts.google.com/o/oauth2/token',
-			form: {
-				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-				assertion: token
-				}
-			},
-			function(err,res, body){
-				if (err) {
-					return undefined;
-				} else {
-					logger.log('verbose', "[State API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
-					return JSON.parse(body).access_token;
-				}
-			}
-		);
-	}
-}
-
 // Check user is actually enabled / account-linked for Google Home
 module.exports.isGhomeUser = function isGhomeUser(username) {
     // Need device, user and whether user has grantcodes for GHome
@@ -161,6 +124,7 @@ module.exports.isGhomeUser = function isGhomeUser(username) {
 
 // Send State Update
 module.exports.sendState = function sendState(token, response) {
+	logger.log('verbose', "[State API] Sending HomeGraph State report:" + response);
     request.post({
         url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
             headers:{
@@ -175,7 +139,7 @@ module.exports.sendState = function sendState(token, response) {
 		}
 		else {
 			if (res.statusCode == 200) {
-				logger.log('verbose', "[State API] State report to HomeGraph failed");
+				logger.log('verbose', "[State API] State report to HomeGraph successful!");
 			}
 			else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
 		}
