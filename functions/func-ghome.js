@@ -102,7 +102,7 @@ function gHomeReplaceCapability(capability) {
 
 // GHome HomeGraph Token Request
 module.exports.requestToken = function requestToken(keys) {
-	logger.log('verbose', "[State API] Ghome JWT requesting OAuth token");
+	//logger.log('verbose', "[State API] Ghome JWT requesting OAuth token");
 	if (reportState == true) {
 		var payload = {
 				"iss": keys.client_email,
