@@ -136,7 +136,9 @@ const defaultLimiter = limiter({
 	  }
 });
 // ==========================================
-
+// GHome Functions =========================
+const {queryDeviceState, requestToken, isGhomeUser, sendState} = require('../functions/func-ghome')
+// ==========================================
 // GHome Action API =========================
 router.post('/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
@@ -424,7 +426,7 @@ router.post('/action', defaultLimiter,
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
 							try {
-								var devState = queryDeviceState(data);
+								var devState = await queryDeviceState(data);
 								response.payload.devices[data.endpointId] = devState;
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
@@ -489,7 +491,7 @@ router.post('/action', defaultLimiter,
 	}
 });
 
-// GHome Action API =========================
+/* // GHome Action API =========================
 router.post('/reportstate/:dev_id',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
@@ -534,7 +536,7 @@ router.post('/reportstate/:dev_id',
 			res.status(500).send();
 		});
 		if (debug == "true") {console.timeEnd('ghome-reportstate')};
-	});
+	}); */
 
 // Convert Alexa Device Capabilities to Google Home-compatible
 function gHomeReplaceCapability(capability) {
@@ -585,7 +587,7 @@ mqttClient.on('message',function(topic,message){
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 					// Send async state update
-					var token = requestToken(keys).catch(token = undefined);
+					var token = await requestToken(keys).catch(token = undefined);
 					sendState(token, commandWaiting.response).catch(function(error){
 						logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
 					});
@@ -646,7 +648,7 @@ function getSafe(fn) {
         return undefined;
     }
 }
-
+/* 
 // Call this from QUERY intent or reportstate API endpoint
 function queryDeviceState(device) {
 	if (device) {
@@ -758,6 +760,6 @@ async function requestToken(keys) {
 			}
 		);
 	}
-}
+} */
 
 module.exports = router;
