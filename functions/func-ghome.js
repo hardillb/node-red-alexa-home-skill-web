@@ -1,3 +1,6 @@
+// Request =======================
+const request = require('request');
+// ===============================
 // Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
