@@ -380,6 +380,7 @@ router.post('/action', defaultLimiter,
 								}
 								var command = {
 									user: req.user.username,
+									userId: req.user._id,
 									res: res,
 									response: response,
 									source: "Google",
@@ -555,7 +556,7 @@ mqttClient.on('message',function(topic,message){
 						try {
 							var devState = queryDeviceState(device);
 							var stateReport = {
-								"agentUserId": req.user._id,
+								"agentUserId": commandWaiting.userId,
 								"payload": {
 									"devices" : {}
 								}
