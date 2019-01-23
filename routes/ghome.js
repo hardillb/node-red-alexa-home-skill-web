@@ -548,19 +548,21 @@ mqttClient.on('message',function(topic,message){
 					if (timeMillis == undefined){
 						timeMillis = new Date().getTime()/1000;
 						logger.log('verbose', '[GHome Report State] Requesting new OAuth token for Report State');
-						token = requestToken(keys);
+						var pToken = requestToken(keys);
 					}
 					else if (timeMillis + 3590 <=  new Date().getTime()/1000) { // Allow a few seconds for initial request, hence 3590, not 3600
 						logger.log('verbose', '[GHome Report State] Using existing OAuth token for Report State');
-						token = requestToken(keys);
+						var pToken = requestToken(keys);
 					}
-					// Send state update
-					if (token != undefined) {
-						logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
-						logger.log('verbose', '[GHome Report State] Calling Send State');
-						sendState(token, commandWaiting.response);
-					}
-					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
+					Promise.all([pToken]).then(([oauthToken]) => {
+						token = oauthToken;
+						if (token != undefined) {
+							logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
+							logger.log('verbose', '[GHome Report State] Calling Send State');
+							sendState(token, commandWaiting.response);
+						}
+						else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
+					});
 				}		
 			} else {
 				// Google Home failure response
