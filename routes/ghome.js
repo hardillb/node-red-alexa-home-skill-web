@@ -139,12 +139,12 @@ const defaultLimiter = limiter({
 // ==========================================
 // GHome Functions =========================
 const gHomeFunc = require('../functions/func-ghome');
-const requestToken = gHomeFunc.requestToken;
+//const requestToken = gHomeFunc.requestToken;
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
-gToken = requestToken(keys);
+requestToken(keys);
 var refreshToken = setInterval(function(){
 	gToken = requestToken(keys);
 },3540000);
@@ -614,6 +614,44 @@ function getSafe(fn) {
 		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
+}
+
+function requestToken(keys) {
+	logger.log('verbose', "[State API] Ghome JWT requesting OAuth token");
+	if (reportState == true) {
+		var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+		}
+		// Use jsonwebtoken to sign token
+		// Sign token: https://cloud.google.com/endpoints/docs/openapi/service-account-authentication#using_jwt_signed_by_service_account
+		var privKey = keys.private_key;
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
+		// Need submit token using: application/x-www-form-urlencoded
+		// Use form: https://www.npmjs.com/package/request#forms
+		// Also include grant_type in form data : urn:ietf:params:oauth:grant-type:jwt-bearer
+		request.post({
+			url: 'https://accounts.google.com/o/oauth2/token',
+			form: {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+				}
+			},
+			function(err,res, body){
+				if (err) {
+					return undefined;
+					gToken = undefined;
+				} else {
+					logger.log('verbose', "[State API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
+					gToken =JSON.parse(body).access_token;
+					//return JSON.parse(body).access_token;
+				}
+			}
+		);
+	}
 }
 
 module.exports = router;
