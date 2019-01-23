@@ -29,8 +29,7 @@ var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
 // Google Auth JSON Web Token ================
-var timeMillis = undefined; // Store Token Life
-var gToken; // Store Report State OAuth Token
+var gToken = null; // Store Report State OAuth Token
 const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
@@ -550,11 +549,11 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					if (gToken) {
-						logger.log('verbose', '[GHome Report State] Calling Send State');
+					if (gToken != null) {
+						logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
 						sendState(gToken, commandWaiting.response);
 					}
-					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
+					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 				}		
 			} else {
 				// Google Home failure response
