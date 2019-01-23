@@ -29,7 +29,7 @@ var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
 // Google Auth JSON Web Token ================
-var gToken = null; // Store Report State OAuth Token
+var gToken = undefined; // Store Report State OAuth Token
 const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
@@ -147,7 +147,11 @@ const queryDeviceState = gHomeFunc.queryDeviceState;
 gToken = requestToken(keys);
 var refreshToken = setInterval(function(){
 	gToken = requestToken(keys);
-},354000);
+},3540000);
+// Temporary logger to track value of gToken
+var logTokenValue = setInterval(function(){
+	logger.log('verbose', "[GHome Sync API] gToken value:" + JSON.stringify(gToken));
+}, 6000)
 // ==========================================
 // GHome Action API =========================
 router.post('/action', defaultLimiter,
@@ -549,7 +553,7 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					if (gToken != null) {
+					if (gToken != undefined) {
 						logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
 						sendState(gToken, commandWaiting.response);
 					}
