@@ -1123,6 +1123,7 @@ router.post('/command2',
 					}
 					var command = {
 						user: req.user.username,
+						userId: req.user._id,
 						res: res,
 						response: response,
 						source: "Alexa",
