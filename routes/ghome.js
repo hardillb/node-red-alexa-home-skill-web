@@ -145,6 +145,7 @@ const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
+token = requestToken(keys);
 var refreshToken = setInterval(function(){
 	token = requestToken(keys);
 },354000);
