@@ -549,11 +549,26 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					if (gToken != undefined) {
-						logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
-						sendState(gToken, commandWaiting.response);
-					}
-					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
+
+					var pDevice = Devices.findOne({username: req.user.username});
+					Promise.all([pDevice]).then(([device]) => {
+						try {
+							var devState = queryDeviceState(device);
+							var stateReport = {
+								"agentUserId": req.user._id,
+								"payload": {
+									"devices" : {}
+								}
+							}
+							stateReport.payload.devices[data.endpointId] = devState;
+						}
+						catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
+						if (gToken != undefined) {
+							logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
+							sendState(gToken, stateReport);
+						}
+						else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
+					});
 				}		
 			} else {
 				// Google Home failure response
