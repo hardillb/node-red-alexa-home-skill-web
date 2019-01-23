@@ -134,7 +134,7 @@ module.exports.requestToken = async function requestToken(keys) {
 }
 
 // Check user is actually enabled / account-linked for Google Home
-module.exports.isGhomeUser = async function isGhomeUser(username) {
+module.exports.isGhomeUser = function isGhomeUser(username) {
     // Need device, user and whether user has grantcodes for GHome
     const pGHomeOauthApplication = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" });
     const pUsers = Account.find({username: username });
