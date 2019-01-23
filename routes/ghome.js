@@ -144,10 +144,22 @@ const queryDeviceState = gHomeFunc.queryDeviceState;
 // const isGhomeUser = gHomeFunc.isGhomeUser;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
-requestToken(keys);
+/* requestToken(keys);
 var refreshToken = setInterval(function(){
 	gToken = requestToken(keys);
+},3540000); */
+
+// Revised gToken variable assignment
+requestToken2(keys, function(returnValue) {
+	gToken = returnValue;
+});
+
+var refreshToken = setInterval(function(){
+	requestToken2(keys, function(returnValue) {
+		gToken = returnValue;
+	});
 },3540000);
+
 // ==========================================
 // GHome Action API =========================
 router.post('/action', defaultLimiter,
@@ -657,6 +669,37 @@ function requestToken(keys) {
 				} else {
 					logger.log('verbose', "[GHome API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
 					gToken =JSON.parse(body).access_token;
+				}
+			}
+		);
+	}
+}
+
+
+function requestToken2(keys, callback) {
+	if (reportState == true) {
+		var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+		}
+		var privKey = keys.private_key;
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
+		request.post({
+			url: 'https://accounts.google.com/o/oauth2/token',
+			form: {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+				}
+			},
+			function(err,res, body){
+				if (err) {
+					callback(undefined);
+				} else {
+					logger.log('verbose', "[GHome API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
+					callback(JSON.parse(body).access_token);
 				}
 			}
 		);
