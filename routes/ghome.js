@@ -30,7 +30,7 @@ var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
 // Google Auth JSON Web Token ================
 var timeMillis = undefined; // Store Token Life
-var token; // Store Report State OAuth Token
+var gToken; // Store Report State OAuth Token
 const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
