@@ -169,7 +169,7 @@ const getStateLimiter = limiter({
 const gHomeFunc = require('../functions/func-ghome');
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
-const isGhomeUser = gHomeFunc.isGhomeUser;
+//const isGhomeUser = gHomeFunc.isGhomeUser;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
 requestToken(keys);
@@ -1315,6 +1315,27 @@ function requestToken(keys) {
 			}
 		);
 	}
+}
+
+function isGhomeUser(username) {
+    // Need device, user and whether user has grantcodes for GHome
+    const pGHomeOauthApplication = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" });
+    const pUsers = Account.find({username: username });
+    Promise.all([pGHomeOauthApplication,pUsers]).then(([gHomeService, users]) => {
+        if (gHomeService && users){
+            const pCountGrantCode = oauthModels.GrantCode.countDocuments({user: users[0]._id, application: gHomeService._id});
+            Promise.all([pCountGrantCode]).then(([countGrants]) => {
+                if (countGrants && countGrants > 0) {
+                    logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
+                    return true;
+                }
+                else {
+                    logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
+                    return false;
+                }
+            });
+        }
+	});
 }
 
 module.exports = router;

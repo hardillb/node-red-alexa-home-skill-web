@@ -119,7 +119,7 @@ module.exports.isGhomeUser = function isGhomeUser(username) {
                 }
             });
         }
-});
+	});
 }
 
 // Send State Update
