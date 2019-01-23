@@ -29,6 +29,8 @@ var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
 // Google Auth JSON Web Token ================
+var timeMillis = undefined; // Store Token Life
+var token; // Store Report State OAuth Token
 const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
@@ -542,8 +544,17 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
+					// Check for existing token
+					if (timeMillis == undefined){
+						timeMillis = new Date().getTime()/1000;
+						logger.log('verbose', '[GHome Report State] Requesting new OAuth token for Report State');
+						token = requestToken(keys);
+					}
+					else if (timeMillis + 3590 <=  new Date().getTime()/1000) { // Allow a few seconds for initial request, hence 3590, not 3600
+						logger.log('verbose', '[GHome Report State] Using existing OAuth token for Report State');
+						token = requestToken(keys);
+					}
 					// Send async state update
-					var token = requestToken(keys);
 					if (token != undefined) {
 						sendState(token, commandWaiting.response).catch(function(error){
 							logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
