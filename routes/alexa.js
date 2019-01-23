@@ -169,7 +169,7 @@ const getStateLimiter = limiter({
 const gHomeFunc = require('../functions/func-ghome');
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
-//const isGhomeUser = gHomeFunc.isGhomeUser;
+const isGhomeUser = gHomeFunc.isGhomeUser;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
 requestToken(keys);
@@ -1194,7 +1194,7 @@ mqttClient.on('message',function(topic,message){
 						logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response)
 						
-						// Generate GHome state JSON object and send to HomeGraph API
+					/* 	// Generate GHome state JSON object and send to HomeGraph API
 						if (reportState == true) {
 							var gHomeUser = isGhomeUser(username); // Check user is GHome account-linked
 							if (gHomeUser == true) {
@@ -1216,8 +1216,9 @@ mqttClient.on('message',function(topic,message){
 									logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
 								});
 							}
-							else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + gHomeUser)}
-						}
+							else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + )}
+						} */
+
 					}
 					else {
 						logger.log('debug', "[Alexa API] Alexa MQTT command successful");
@@ -1285,7 +1286,6 @@ function getSafe(fn) {
     }
 }
 
-
 function requestToken(keys) {
 	logger.log('verbose', "[Alexa API] Ghome JWT requesting OAuth token");
 	if (reportState == true) {
@@ -1315,27 +1315,6 @@ function requestToken(keys) {
 			}
 		);
 	}
-}
-
-function isGhomeUser(username) {
-    // Need device, user and whether user has grantcodes for GHome
-    const pGHomeOauthApplication = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" });
-    const pUsers = Account.find({username: username });
-    Promise.all([pGHomeOauthApplication,pUsers]).then(([gHomeService, users]) => {
-        if (gHomeService && users){
-            const pCountGrantCode = oauthModels.GrantCode.countDocuments({user: users[0]._id, application: gHomeService._id});
-            Promise.all([pCountGrantCode]).then(([countGrants]) => {
-                if (countGrants && countGrants > 0) {
-                    logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
-                    return true;
-                }
-                else {
-                    logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
-                    return false;
-                }
-            });
-        }
-	});
 }
 
 module.exports = router;
