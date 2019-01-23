@@ -152,11 +152,13 @@ var refreshToken = setInterval(function(){
 // Revised gToken variable assignment
 requestToken2(keys, function(returnValue) {
 	gToken = returnValue;
+	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
 });
 
 var refreshToken = setInterval(function(){
 	requestToken2(keys, function(returnValue) {
 		gToken = returnValue;
+		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
 	});
 },3540000);
 
@@ -644,7 +646,7 @@ function getSafe(fn) {
     }
 }
 
-function requestToken(keys) {
+/* function requestToken(keys) {
 	logger.log('verbose', "[GHome API] Ghome JWT requesting OAuth token");
 	if (reportState == true) {
 		var payload = {
@@ -673,7 +675,7 @@ function requestToken(keys) {
 			}
 		);
 	}
-}
+} */
 
 
 function requestToken2(keys, callback) {
@@ -698,7 +700,6 @@ function requestToken2(keys, callback) {
 				if (err) {
 					callback(undefined);
 				} else {
-					logger.log('verbose', "[GHome API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
 					callback(JSON.parse(body).access_token);
 				}
 			}
