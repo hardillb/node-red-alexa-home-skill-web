@@ -139,9 +139,9 @@ const defaultLimiter = limiter({
 // ==========================================
 // GHome Functions =========================
 const gHomeFunc = require('../functions/func-ghome');
-//const requestToken = gHomeFunc.requestToken;
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
+// const isGhomeUser = gHomeFunc.isGhomeUser;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
 requestToken(keys);
@@ -551,29 +551,31 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-
-					var pDevice = Devices.findOne({username: username});
-					Promise.all([pDevice]).then(([device]) => {
-						try {
-							var devState = queryDeviceState(device);
-							var stateReport = {
-								"requestId" : commandWaiting.requestId,
-								"agentUserId": commandWaiting.userId,
-								"payload": {
-									"devices" : {
-										"states": {}
+					// Generate state JSON object and send to HomeGraph API
+					if (reportState == true) {
+						var pDevice = Devices.findOne({username: username, endpointId: endpointId});
+						Promise.all([pDevice]).then(([device]) => {
+							try {
+								var devState = queryDeviceState(device);
+								var stateReport = {
+									"requestId" : commandWaiting.requestId,
+									"agentUserId": commandWaiting.userId,
+									"payload": {
+										"devices" : {
+											"states": {}
+										}
 									}
 								}
+								stateReport.payload.devices.states[device.endpointId] = devState;
 							}
-							stateReport.payload.devices.states[device.endpointId] = devState;
-						}
-						catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
-						if (gToken != undefined) {
-							logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
-							sendState(gToken, stateReport);
-						}
-						else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
-					});
+							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
+							if (gToken != undefined) {
+								logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
+								sendState(gToken, stateReport);
+							}
+							else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
+						});
+					}
 				}		
 			} else {
 				// Google Home failure response
@@ -631,7 +633,7 @@ function getSafe(fn) {
 }
 
 function requestToken(keys) {
-	logger.log('verbose', "[State API] Ghome JWT requesting OAuth token");
+	logger.log('verbose', "[GHome API] Ghome JWT requesting OAuth token");
 	if (reportState == true) {
 		var payload = {
 				"iss": keys.client_email,
@@ -653,7 +655,7 @@ function requestToken(keys) {
 				if (err) {
 					gToken = undefined;
 				} else {
-					logger.log('verbose', "[State API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
+					logger.log('verbose', "[GHome API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
 					gToken =JSON.parse(body).access_token;
 				}
 			}

@@ -25,6 +25,20 @@ var url = require('url');
 var logger = require('../config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
+// Google Auth JSON Web Token ================
+var gToken = undefined; // Store Report State OAuth Token
+const jwt = require('jsonwebtoken');
+const ghomeJWT = process.env['GHOMEJWT'];
+var reportState = false;
+var keys;
+if (!ghomeJWT) {
+	logger.log('warn', "[Alexa API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
+}
+else {
+	reportState = true;
+	keys = JSON.parse(ghomeJWT);
+}
+// ===========================================
 // Google Analytics ==========================
 var ua = require('universal-analytics');
 var enableAnalytics = false;
@@ -91,8 +105,6 @@ mqttClient.on('reconnect', function(){
 mqttClient.on('connect', function(){
 	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-/* 	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'state/#'")
-	mqttClient.subscribe('state/#'); */
 });
 // Redis Client =============================
 var client = require('../config/redis')
@@ -149,6 +161,18 @@ const getStateLimiter = limiter({
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
   });
+// ==========================================
+// GHome Functions =========================
+const gHomeFunc = require('../functions/func-ghome');
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const isGhomeUser = gHomeFunc.isGhomeUser;
+// ==========================================
+// Refresh Google oAuth Token used for State Reporting
+requestToken(keys);
+var refreshToken = setInterval(function(){
+	gToken = requestToken(keys);
+},3540000);
 // ==========================================
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1153,7 +1177,7 @@ mqttClient.on('message',function(topic,message){
 	var endpointId = arrTopic[2];
 
 	if (topic.startsWith('response/')){
-		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
+		logger.log('info', "[Alexa API] Acknowledged MQTT response message for topic: " + topic);
 		if (debug == "true") {console.time('mqtt-response')};
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
@@ -1164,11 +1188,35 @@ mqttClient.on('message',function(topic,message){
 				// Alexa success response send to Lambda for full response construction
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Alexa") {
 					if (commandWaiting.hasOwnProperty('response')) {
-						logger.log('debug', "[Command API] Successful Alexa MQTT command, response: " + JSON.stringify(commandWaiting.response));
+						logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response)
+						
+						// Generate GHome state JSON object and send to HomeGraph API
+						if (reportState == true) {
+							var gHomeUser = isGhomeUser(); // Check user is GHome account-linked
+							if (gHomeUser == true) {
+								var pDevice = Devices.findOne({username: username, endpointId: endpointId});
+								Promise.all([pDevice]).then(([device]) => {
+									try {
+										var devState = queryDeviceState(device);
+										var stateReport = {
+											"agentUserId": commandWaiting.userId,
+											"payload": {
+												"devices" : {
+													"states": {}
+												}
+											}
+										}
+										stateReport.payload.devices.states[device.endpointId] = devState;
+									}
+									catch (e) {logger.log('debug', "[Alexa API] queryDeviceState error: " + e)}
+									logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
+								});
+							}
+						}
 					}
 					else {
-						logger.log('debug', "[Command API] Alexa MQTT command successful");
+						logger.log('debug', "[Alexa API] Alexa MQTT command successful");
 						commandWaiting.res.status(200).send()
 					}
 				}			
@@ -1195,35 +1243,6 @@ mqttClient.on('message',function(topic,message){
 		}
 		if (debug == "true") {console.timeEnd('mqtt-response')};
 	}
-	/* 	else if (topic.startsWith('state/')){
-			logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
-			if (debug == "true") {console.time('mqtt-state')};
-			// Split topic/ get username and endpointId
-			var messageJSON = JSON.parse(message);
-			var payload = messageJSON.payload;
-			// Call setstate to update attribute in mongodb
-			setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
-			// Add message to onGoingCommands
-			var stateWaiting = onGoingCommands[payload.messageId];
-			if (stateWaiting) {
-				if (payload.success) {
-					logger.log('info', "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
-					stateWaiting.res.status(200).send();
-				} else {
-					logger.log('warn', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
-					stateWaiting.res.status(503).send();
-				}
-			}
-			// If successful remove messageId from onGoingCommands
-			delete onGoingCommands[payload.messageId];
-			var params = {
-				ec: "Set State",
-				ea: "State API successfully processed MQTT state for username: " + username + " device: " + endpointId,
-				uid: username,
-			}
-			if (enableAnalytics) {visitor.event(params).send()};
-			if (debug == "true") {console.timeEnd('mqtt-state')};
-		} */
 	else {
 		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
 	}
@@ -1252,216 +1271,46 @@ var timeout = setInterval(function(){
 		}
 	}
 },500);
-/* 
-// Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
-function setstate(username, endpointId, payload) {
-	// Check payload has state property
-	logger.log('debug', "[State API] SetState payload:" + JSON.stringify(payload));
-	if (payload.hasOwnProperty('state')) {
-		// Find existing device, we need to retain state elements, state is fluid/ will contain new elements so flattened input no good
 
-		// Add promises here that find Grant Code for Google Application to only call JWT state submission if count > 0
-
-		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
-			if (error) {
-				logger.log('warn', "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
-			}
-			if (dev) {
-				var dt = new Date().toISOString();
-				var deviceJSON = JSON.parse(JSON.stringify(dev));
-				dev.state = (dev.state || {});
-				dev.state.time = dt;
-				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
-				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
-				if (payload.state.hasOwnProperty('colorBrightness')) {dev.state.colorBrightness = payload.state.colorBrightness};
-				if (payload.state.hasOwnProperty('colorHue')) {dev.state.colorHue = payload.state.colorHue};
-				if (payload.state.hasOwnProperty('colorSaturation')) {dev.state.colorSaturation = payload.state.colorSaturation};
-				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
-				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
-				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
-				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
-				if (payload.state.hasOwnProperty('percentageDelta')) {
-					if (dev.state.hasOwnProperty('percentage')) {
-						var newPercentage = dev.state.percentage + payload.state.percentageDelta;
-						if (newPercentage > 100) {newPercentage = 100}
-						else if (newPercentage < 0) {newPercentage = 0}
-						dev.state.percentage = newPercentage;
-					}
-				};
-				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
-				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
-				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
-					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						var newMode;
-						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
-						// Get Supported Ranges and work-out new value for thermostatMode
-						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
-							var countModes = deviceJSON.attributes.thermostatModes.length;
-							var arrModes = deviceJSON.attributes.thermostatModes;
-							// If single mode is supported leave as-is
-							if (countModes == 1){
-								newMode = dev.state.thermostatMode;
-							}
-							else {
-								var auto = false;
-								var heat = false;
-								var cool = false;
-								var on = false;
-								var off = false;
-								if (arrModes.indexOf('AUTO') > -1){auto = true};
-								if (arrModes.indexOf('HEAT') > -1){heat = true};
-								if (arrModes.indexOf('COOL') > -1){cool = true};
-								if (arrModes.indexOf('ON') > -1){on = true};
-								if (arrModes.indexOf('OFF') > -1){off = true};
-								// Supported combos
-									// ON and OFF
-									// HEAT and COOL
-									// HEAT, COOl, AUTO
-									// HEAT, COOl, AUTO, ON, OFF
-								if (countModes == 2 && (on && off)) { // On and Off Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
-									else {newMode = "ON"}
-								}
-								else if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 5 && (on && off && on && off && auto)) { // All Modes Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else { // Fallback position
-									newMode = "HEAT";
-								}
-							}
-						}
-						// Check within supported range of device
-						if (deviceJSON.hasOwnProperty('attributes')) {
-							if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
-								if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
-									if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
-										dev.state.thermostatSetPoint = newTemp;
-										dev.state.thermostatMode = newMode;
-									}
-								}
-
-							}
-						}
-					}
-				}
-				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
-				if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
-					dev.state.thermostatMode = payload.state.thermostatMode;
-				};
-				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
-					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						var newMode;
-						var newTemp = payload.state.thermostatSetPoint;
-						// Get Supported Ranges and work-out new value for thermostatMode
-						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
-							var countModes = deviceJSON.attributes.thermostatModes.length;
-							var arrModes = deviceJSON.attributes.thermostatModes;
-							// If single mode is supported leave as-is
-							if (countModes == 1){
-								newMode = dev.state.thermostatMode;
-							}
-							else {
-								var auto = false;
-								var heat = false;
-								var cool = false;
-								var on = false;
-								var off = false;
-								if (arrModes.indexOf('AUTO') > -1){auto = true};
-								if (arrModes.indexOf('HEAT') > -1){heat = true};
-								if (arrModes.indexOf('COOL') > -1){cool = true};
-								if (arrModes.indexOf('ON') > -1){on = true};
-								if (arrModes.indexOf('OFF') > -1){off = true};
-								logger.log('debug', "[State API] thermostatSetPoint, modes: " + JSON.stringify(deviceJSON.attributes.thermostatModes) + ", countModes: " + countModes);
-								// Supported combos
-									// ON and OFF
-									// HEAT and COOL
-									// HEAT, COOl, AUTO
-									// HEAT, COOl, AUTO, ON, OFF
-								// Set dev.state.thermostatMode
-								if (countModes == 2 && (on && off)) { // On and Off Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
-									else {newMode = "ON"}
-								}
-								else if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 5 && (on && off && on && off && auto)) { // All Modes Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else { // Fallback position
-									newMode = "HEAT";
-								}
-								logger.log('debug', "[State API] thermostatSetPoint, newMode: " + newMode);
-								logger.log('debug', "[State API] thermostatSetPoint, newTemp: " + newTemp);
-							}
-						}
-						// Check within supported range of device
-						if (deviceJSON.hasOwnProperty('attributes')) {
-							if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
-								if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
-									if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
-										dev.state.thermostatSetPoint = newTemp;
-										dev.state.thermostatMode = newMode;
-									}
-								}
-
-							}
-						}
-					}
-				}
-				if (payload.state.hasOwnProperty('volume')) {dev.state.volume = payload.state.volume}
-				if (payload.state.hasOwnProperty('volumeDelta')) {
-					if (dev.state.hasOwnProperty('volume')) {
-						var newVolume = dev.state.volume + payload.state.volumeDelta;
-						dev.state.volume = newVolume;
-					}
-				}
-				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
-				// Update state element with modified properties
-				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
-					if (err) {
-						logger.log('debug', "[State API] Error updating state for endpointId: " + endpointId);
-					}
-					else {
-						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
-						// Test Ghome Home Graoh API Request Token 
-						// requestToken(keys).catch(function(e) {
-						// 	logger.log('error', "[State API] GHome JWT requestToken failed, error:" + e);
-						// });
-					}
-				});
-			}
-		});
-	}
-	else {
-		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
-	}
-}
- */
 // Nested attribute/ element tester
 function getSafe(fn) {
-	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
 	try {
 		return fn();
     } catch (e) {
-		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
+}
+
+
+function requestToken(keys) {
+	logger.log('verbose', "[Alexa API] Ghome JWT requesting OAuth token");
+	if (reportState == true) {
+		var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+		}
+		var privKey = keys.private_key;
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
+		request.post({
+			url: 'https://accounts.google.com/o/oauth2/token',
+			form: {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+				}
+			},
+			function(err,res, body){
+				if (err) {
+					gToken = undefined;
+				} else {
+					logger.log('verbose', "[Alexa API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
+					gToken =JSON.parse(body).access_token;
+				}
+			}
+		);
+	}
 }
 
 module.exports = router;
