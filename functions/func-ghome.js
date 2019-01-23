@@ -24,7 +24,7 @@ else {
 // ===========================================
 
 // Call this from QUERY intent or reportstate API endpoint
-async function queryDeviceState(device) {
+module.exports.queryDeviceState = async function queryDeviceState(device) {
 	if (device) {
 		var dev = {};
 		// Create initial JSON object for device
@@ -98,7 +98,7 @@ function gHomeReplaceCapability(capability) {
 }
 
 // GHome HomeGraph Token Request
-async function requestToken(keys) {
+module.exports.requestToken = async function requestToken(keys) {
 	if (reportState == true) {
 		var payload = {
 				"iss": keys.client_email,
@@ -134,7 +134,7 @@ async function requestToken(keys) {
 }
 
 // Check user is actually enabled / account-linked for Google Home
-async function isGhomeUser(username) {
+module.exports.isGhomeUser = async function isGhomeUser(username) {
     // Need device, user and whether user has grantcodes for GHome
     const pGHomeOauthApplication = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" });
     const pUsers = Account.find({username: username });
@@ -156,7 +156,7 @@ async function isGhomeUser(username) {
 }
 
 // Send State Update
-async function sendState(token, response) {
+module.exports.sendState = async function sendState(token, response) {
     request({
         url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
             method: 'POST',
@@ -168,5 +168,3 @@ async function sendState(token, response) {
             json: response
     });
 }
-
-module.exports = queryDeviceState, requestToken, isGhomeUser, sendState;
