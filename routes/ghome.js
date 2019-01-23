@@ -556,6 +556,7 @@ mqttClient.on('message',function(topic,message){
 					}
 					// Send state update
 					if (token != undefined) {
+						logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
 						logger.log('verbose', '[GHome Report State] Calling Send State');
 						sendState(token, commandWaiting.response);
 					}
