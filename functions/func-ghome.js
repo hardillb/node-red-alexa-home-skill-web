@@ -128,6 +128,7 @@ module.exports.requestToken = function requestToken(keys) {
 			function(err,res, body){
 				if (err) {
 					logger.log('warn', "[State API] Ghome JWT / OAuth token request failed");
+					return undefined;
 				} else {
 					logger.log('info', "[State API] Ghome JWT / OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
 					return JSON.parse(body).access_token;
