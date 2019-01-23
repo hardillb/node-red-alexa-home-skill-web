@@ -145,9 +145,9 @@ const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 // ==========================================
 // Refresh Google oAuth Token used for State Reporting
-token = requestToken(keys);
+gToken = requestToken(keys);
 var refreshToken = setInterval(function(){
-	token = requestToken(keys);
+	gToken = requestToken(keys);
 },354000);
 // ==========================================
 // GHome Action API =========================
@@ -550,9 +550,9 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					if (token != undefined) {
+					if (gToken) {
 						logger.log('verbose', '[GHome Report State] Calling Send State');
-						sendState(token, commandWaiting.response);
+						sendState(gToken, commandWaiting.response);
 					}
 					else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token!')}
 				}		
