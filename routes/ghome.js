@@ -590,17 +590,12 @@ mqttClient.on('message',function(topic,message){
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 					// Send async state update
-					var pToken = requestToken(keys).catch(pToken = undefined);
-					Promise.all([pToken]).then(([token]) => {
-						if (token != undefined) {
-							sendState(token, commandWaiting.response).catch(function(error){
-								logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
-							});
-						}
-						else {
-							logger.log('error', '[GHome Report State] No token!');
-						}
-					});
+					var token = requestToken(keys).catch(token = undefined);
+					if (token != undefined) {
+						sendState(token, commandWaiting.response).catch(function(error){
+							logger.log('error', '[GHome Report State] Failed to report state, error:' + error);
+						});
+					}
 				}		
 			} else {
 				// Google Home failure response
