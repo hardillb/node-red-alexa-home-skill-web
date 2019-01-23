@@ -550,7 +550,7 @@ mqttClient.on('message',function(topic,message){
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
 
-					var pDevice = Devices.findOne({username: req.user.username});
+					var pDevice = Devices.findOne({username: username});
 					Promise.all([pDevice]).then(([device]) => {
 						try {
 							var devState = queryDeviceState(device);
