@@ -463,7 +463,31 @@ router.post('/action', defaultLimiter,
 							}
 						}
 
+
 						const start = async () => {
+							await Promise.all(arrQueryDevices.map(async dev => {
+								logger.log('verbose', "[Array Async] Iterating through array, deviceId:" + dev.id);
+								var data = devices.find(obj => obj.endpointId == dev.id);
+								if (data) {
+									await queryDeviceState(data, function(state) {
+										if (response != undefined) {
+											response.payload.devices[data.endpointId] = state;
+										}
+									});
+								}
+								else {
+									logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
+								}
+							}))
+							// Send Response
+							logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
+							res.status(200).json(response);
+							if (debug == "true") {console.timeEnd('ghome-query')};
+						  }
+						  start()
+
+
+/* 						const start = async () => {
 							asyncForEach(arrQueryDevices, async (dev) => {
 								logger.log('verbose', "[Array Async] Iterating through array, deviceId:" + dev.id);
 								var data = devices.find(obj => obj.endpointId == dev.id);
@@ -484,7 +508,7 @@ router.post('/action', defaultLimiter,
 							res.status(200).json(response);
 							if (debug == "true") {console.timeEnd('ghome-query')};
 						}
-						start()
+						start() */
 
 /* 					for (var i=0; i< arrQueryDevices.length; i++) {
 						// Find device in array of user devices returned in promise
