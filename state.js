@@ -55,6 +55,28 @@ mqttClient.on('connect', function(){
 	logger.log('info', "[State API] MQTT connected, subscribing to 'state/#'")
 	mqttClient.subscribe('state/#');
 });
+// GHome Functions =========================
+const gHomeFunc = require('../functions/func-ghome');
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const isGhomeUser = gHomeFunc.isGhomeUser;
+const requestToken2 = gHomeFunc.requestToken2;
+// const gHomeSync = gHomeFunc.gHomeSync;
+// ==========================================
+// Revised gToken variable assignment
+requestToken2(keys, function(returnValue) {
+	gToken = returnValue;
+	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
+});
+
+// Refresh Google oAuth Token used for State Reporting
+var refreshToken = setInterval(function(){
+	requestToken2(keys, function(returnValue) {
+		gToken = returnValue;
+		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
+	});
+},3540000);
+// ==========================================
 
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Message Handlers
@@ -315,8 +337,43 @@ function setstate(username, endpointId, payload) {
 					}
 					else {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
-						// Test Ghome Home Graph API Request Token 
-						//triggerState(endpointId);
+
+						// Generate GHome state JSON object and send to HomeGraph API
+							if (reportState == true) {
+							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
+								if (returnValue == true) {
+									var pDevice = Devices.findOne({username: username, endpointId: endpointId});
+									Promise.all([pDevice]).then(([device]) => {
+										try {
+											queryDeviceState(device, function(response) {
+												if (response != undefined) {
+													var stateReport = {
+														"agentUserId": commandWaiting.userId,
+														"payload": {
+															"devices" : {
+																"states": {}
+															}
+														}
+													}
+													stateReport.payload.devices.states[device.endpointId] = response;
+													logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
+
+													if (gToken != undefined) {
+														logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
+														sendState(gToken, stateReport);
+													}
+													else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
+												}
+											});											
+										}
+										catch (e) {logger.log('debug', "[Alexa API] queryDeviceState error: " + e)}
+									});
+								}
+								else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + returnValue)}
+							});
+						}
+
+
 					}
 				});
 			}
@@ -324,26 +381,6 @@ function setstate(username, endpointId, payload) {
 	}
 	else {
 		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
-	}
-}
-
-// Send State Update
-async function triggerState(id) {
-	// Ghome
-	try {
-		request.post('https://' + process.env.WEB_HOSTNAME + '/api/ghome/reportstate/' + id,{
-			'auth': {
-					'user': mqtt_user,
-					'pass': mqtt_password,
-					'sendImmediately': false
-				}
-		}, function (error, response, body){
-			if (error) {logger.log('error', "[State API] Request failed, error:" + error);
-		}
-		});
-	}
-	catch (err) {
-		logger.log('error', "[State API] Trigger State failed, error:" + err);
 	}
 }
 

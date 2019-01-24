@@ -186,6 +186,7 @@ var refreshToken = setInterval(function(){
 		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
 	});
 },3540000);
+// ==========================================
 
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
