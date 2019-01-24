@@ -141,13 +141,9 @@ const defaultLimiter = limiter({
 const gHomeFunc = require('../functions/func-ghome');
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
+const requestToken2 = gHomeFunc.requestToken2;
 // const isGhomeUser = gHomeFunc.isGhomeUser;
 // ==========================================
-// Refresh Google oAuth Token used for State Reporting
-/* requestToken(keys);
-var refreshToken = setInterval(function(){
-	gToken = requestToken(keys);
-},3540000); */
 
 // Revised gToken variable assignment
 requestToken2(keys, function(returnValue) {
@@ -155,6 +151,7 @@ requestToken2(keys, function(returnValue) {
 	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
 });
 
+// Refresh Google oAuth Token used for State Reporting
 var refreshToken = setInterval(function(){
 	requestToken2(keys, function(returnValue) {
 		gToken = returnValue;
@@ -452,8 +449,11 @@ router.post('/action', defaultLimiter,
 						if (data) {
 							logger.log('verbose', "[GHome Query API] Matched requested device: " + arrQueryDevices[i].id + " with user-owned endpointId: " + data.endpointId);	
 							try {
-								var devState = queryDeviceState(data);
-								response.payload.devices[data.endpointId] = devState;
+								queryDeviceState(device, function(response) {
+									if (response != undefined) {
+										response.payload.devices[data.endpointId] = reponse;
+									}
+								});
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
 						}
@@ -570,24 +570,28 @@ mqttClient.on('message',function(topic,message){
 						var pDevice = Devices.findOne({username: username, endpointId: endpointId});
 						Promise.all([pDevice]).then(([device]) => {
 							try {
-								var devState = queryDeviceState(device);
-								var stateReport = {
-									"requestId" : commandWaiting.requestId,
-									"agentUserId": commandWaiting.userId,
-									"payload": {
-										"devices" : {
-											"states": {}
+								queryDeviceState(device, function(response) {
+									if (response != undefined) {
+										var stateReport = {
+											"requestId" : commandWaiting.requestId,
+											"agentUserId": commandWaiting.userId,
+											"payload": {
+												"devices" : {
+													"states": {}
+												}
+											}
 										}
+										stateReport.payload.devices.states[device.endpointId] = response;
+
+										if (gToken != undefined) {
+											logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
+											sendState(gToken, stateReport);
+										}
+										else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 									}
-								}
-								stateReport.payload.devices.states[device.endpointId] = devState;
+								});							
 							}
 							catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
-							if (gToken != undefined) {
-								logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
-								sendState(gToken, stateReport);
-							}
-							else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 						});
 					}
 				}		
@@ -678,33 +682,6 @@ function getSafe(fn) {
 } */
 
 
-function requestToken2(keys, callback) {
-	if (reportState == true) {
-		var payload = {
-				"iss": keys.client_email,
-				"scope": "https://www.googleapis.com/auth/homegraph",
-				"aud": "https://accounts.google.com/o/oauth2/token",
-				"iat": new Date().getTime()/1000,
-				"exp": new Date().getTime()/1000 + 3600,
-		}
-		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
-		request.post({
-			url: 'https://accounts.google.com/o/oauth2/token',
-			form: {
-				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-				assertion: token
-				}
-			},
-			function(err,res, body){
-				if (err) {
-					callback(undefined);
-				} else {
-					callback(JSON.parse(body).access_token);
-				}
-			}
-		);
-	}
-}
+
 
 module.exports = router;

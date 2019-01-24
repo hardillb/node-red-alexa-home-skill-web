@@ -27,7 +27,7 @@ else {
 // ===========================================
 
 // Call this from QUERY intent or reportstate API endpoint
-module.exports.queryDeviceState = function queryDeviceState(device) {
+module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 	if (device) {
 		var dev = {};
 		// Create initial JSON object for device
@@ -81,11 +81,11 @@ module.exports.queryDeviceState = function queryDeviceState(device) {
 				}
 			});
 			// Retrun device state
-			return dev;
+			callback(dev);
 	}
 	else if (!device) {
 		logger.log('warn', "[GHome Query API] queryDeviceState Device not specified");
-		return {message: "Device not found"};
+		callback(undefined);
 	}
 }
 
@@ -101,7 +101,7 @@ function gHomeReplaceCapability(capability) {
 }
 
 // Check user is actually enabled / account-linked for Google Home
-module.exports.isGhomeUser = function isGhomeUser(username) {
+module.exports.isGhomeUser = function isGhomeUser(username, callback) {
     // Need device, user and whether user has grantcodes for GHome
     const pGHomeOauthApplication = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" });
     const pUsers = Account.find({username: username });
@@ -111,11 +111,11 @@ module.exports.isGhomeUser = function isGhomeUser(username) {
             Promise.all([pCountGrantCode]).then(([countGrants]) => {
                 if (countGrants && countGrants > 0) {
                     logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
-                    return true;
+                    callback(true);
                 }
                 else {
                     logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
-                    return false;
+                    callback(false);
                 }
             });
         }
@@ -144,4 +144,33 @@ module.exports.sendState = function sendState(token, response) {
 			else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
 		}
 	});
+}
+
+module.exports.sendState = function requestToken2(keys, callback) {
+	if (reportState == true) {
+		var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+		}
+		var privKey = keys.private_key;
+		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
+		request.post({
+			url: 'https://accounts.google.com/o/oauth2/token',
+			form: {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+				}
+			},
+			function(err,res, body){
+				if (err) {
+					callback(undefined);
+				} else {
+					callback(JSON.parse(body).access_token);
+				}
+			}
+		);
+	}
 }

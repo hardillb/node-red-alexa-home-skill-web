@@ -1194,31 +1194,34 @@ mqttClient.on('message',function(topic,message){
 						logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response)
 						
-					/* 	// Generate GHome state JSON object and send to HomeGraph API
+					 	// Generate GHome state JSON object and send to HomeGraph API
 						if (reportState == true) {
-							var gHomeUser = isGhomeUser(username); // Check user is GHome account-linked
-							if (gHomeUser == true) {
-								var pDevice = Devices.findOne({username: username, endpointId: endpointId});
-								Promise.all([pDevice]).then(([device]) => {
-									try {
-										var devState = queryDeviceState(device);
-										var stateReport = {
-											"agentUserId": commandWaiting.userId,
-											"payload": {
-												"devices" : {
-													"states": {}
+							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
+								if (returnValue == true) {
+									var pDevice = Devices.findOne({username: username, endpointId: endpointId});
+									Promise.all([pDevice]).then(([device]) => {
+										try {
+											queryDeviceState(device, function(response) {
+												if (response != undefined) {
+													var stateReport = {
+														"agentUserId": commandWaiting.userId,
+														"payload": {
+															"devices" : {
+																"states": {}
+															}
+														}
+													}
+													stateReport.payload.devices.states[device.endpointId] = response;
+													logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
 												}
-											}
+											});											
 										}
-										stateReport.payload.devices.states[device.endpointId] = devState;
-									}
-									catch (e) {logger.log('debug', "[Alexa API] queryDeviceState error: " + e)}
-									logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
-								});
-							}
-							else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + )}
-						} */
-
+										catch (e) {logger.log('debug', "[Alexa API] queryDeviceState error: " + e)}
+									});
+								}
+								else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + returnValue)}
+							});
+						}
 					}
 					else {
 						logger.log('debug', "[Alexa API] Alexa MQTT command successful");
