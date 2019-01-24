@@ -462,7 +462,7 @@ router.post('/action', defaultLimiter,
 								"devices" : {}
 							}
 						}
-						asyncForEach(arrQueryDevices, async (dev) => {
+						await asyncForEach(arrQueryDevices, async (dev) => {
 							logger.log('verbose', "[Array Async] Iterating through array, deviceId:" + dev.id);
 							var data = devices.find(obj => obj.endpointId == dev.id);
 							if (data) {
