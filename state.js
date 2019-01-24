@@ -356,13 +356,14 @@ function setstate(username, endpointId, payload) {
 							if (reportState == true) {
 							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
 								if (returnValue == true) {
+									var pUser = Account.findOne({username: username});
 									var pDevice = Devices.findOne({username: username, endpointId: endpointId});
-									Promise.all([pDevice]).then(([device]) => {
+									Promise.all([pUser, pDevice]).then(([device, user]) => {
 										try {
 											queryDeviceState(device, function(response) {
 												if (response != undefined) {
 													var stateReport = {
-														"agentUserId": commandWaiting.userId,
+														"agentUserId": user._id,
 														"payload": {
 															"devices" : {
 																"states": {}
