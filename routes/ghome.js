@@ -455,7 +455,6 @@ router.post('/action', defaultLimiter,
 						}
 						const start = async () => {
 							await Promise.all(arrQueryDevices.map(async dev => {
-								logger.log('verbose', "[Array Async] Iterating through array, deviceId:" + dev.id);
 								var data = devices.find(obj => obj.endpointId == dev.id);
 								if (data) {
 									await queryDeviceState(data, function(state) {
