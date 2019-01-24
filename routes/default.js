@@ -101,6 +101,15 @@ else {
 	var SYNC_API = "https://homegraph.googleapis.com/v1/devices:requestSync?key=" + process.env.HOMEGRAPH_APIKEY;
 }
 // ==========================================
+// GHome Functions =========================
+const gHomeFunc = require('../functions/func-ghome');
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const isGhomeUser = gHomeFunc.isGhomeUser;
+const requestToken2 = gHomeFunc.requestToken2;
+const gHomeSync = gHomeFunc.gHomeSync;
+// ==========================================
+
 router.get('/', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -649,45 +658,6 @@ router.post('/api/v1/devices', defaultLimiter,
 		}
 	}
 );
-
-// GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync 
-function gHomeSync(userid){
-	oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" },function(err, data){
-		if (data) {
-			var userAccount = Account.findOne({_id:userid});
-			var arrGrantCodes = oauthModels.GrantCode.find({user: userid, application: data._id});
-			Promise.all([userAccount, arrGrantCodes]).then(([user, grants]) => {
-				if (user && grants.length > 0) {
-					request(
-						{
-							headers: {
-								"User-Agent": "request",
-								"Referer": "https://" + process.env.WEB_HOSTNAME
-							  },
-							url: SYNC_API,
-							method: "POST",
-							json: {
-								agentUserId: user._id
-							}
-						},
-						function(err, resp, body) {
-							if (!err) {
-								logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username + ", userid" + user._id);
-							} else {
-								logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username + ", error: " + err);
-							}
-						}
-					);
-				}
-				else if ( grants.length = 0) {
-					logger.log('debug', "[GHome Sync Devices] Not sending Sync Request for user:" + user.username + ", user has not linked Google Account with bridge account");
-				}
-			}).catch(err => {
-				logger.log('error', "[GHome Sync Devices] Error:" + err);
-			});
-		}
-	});
-}
 
 function ensureAuthenticated(req,res,next) {
     if (req.isAuthenticated()) {

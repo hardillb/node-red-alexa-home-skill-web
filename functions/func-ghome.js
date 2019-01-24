@@ -102,23 +102,18 @@ function gHomeReplaceCapability(capability) {
 
 // Check user is actually enabled / account-linked for Google Home
 module.exports.isGhomeUser = function isGhomeUser(username, callback) {
-    // Need device, user and whether user has grantcodes for GHome
-    const pGHomeOauthApplication = oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" });
     const pUsers = Account.find({username: username });
-    Promise.all([pGHomeOauthApplication,pUsers]).then(([gHomeService, users]) => {
-        if (gHomeService && users){
-            const pCountGrantCode = oauthModels.GrantCode.countDocuments({user: users[0]._id, application: gHomeService._id});
-            Promise.all([pCountGrantCode]).then(([countGrants]) => {
-                if (countGrants && countGrants > 0) {
-                    logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
-                    callback(true);
-                }
-                else {
-                    logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
-                    callback(false);
-                }
-            });
-        }
+	Promise.all([pUsers]).then(([users]) => {
+        if (users){
+			if (users[0].activeServices && users[0].activeServices.indexOf('Google') != -1) {
+				logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
+				callback(true);
+			}
+			else {
+				logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
+				callback(false);
+			}
+		}
 	});
 }
 
@@ -173,4 +168,38 @@ module.exports.requestToken2 = function requestToken2(keys, callback) {
 			}
 		);
 	}
+}
+
+// GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync 
+module.export.gHomeSync = function gHomeSync(userid){
+    const pUsers = Account.findOne({_id:userid});
+	Promise.all([pUsers]).then(([user]) => {
+        if (user){
+			if (user.activeServices && user.activeServices.indexOf('Google') != -1) {
+				request(
+					{
+						headers: {
+							"User-Agent": "request",
+							"Referer": "https://" + process.env.WEB_HOSTNAME
+						  },
+						url: SYNC_API,
+						method: "POST",
+						json: {
+							agentUserId: user._id
+						}
+					},
+					function(err, resp, body) {
+						if (!err) {
+							logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username + ", userid" + user._id);
+						} else {
+							logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username + ", error: " + err);
+						}
+					}
+				);
+			}
+			else {
+				logger.log('debug', "[GHome Sync Devices] Not sending Sync Request for user:" + user.username + ", user has not linked Google Account with bridge account");
+			}
+		}
+	});
 }

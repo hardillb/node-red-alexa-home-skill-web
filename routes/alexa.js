@@ -171,6 +171,7 @@ const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
 const requestToken2 = gHomeFunc.requestToken2;
+// const gHomeSync = gHomeFunc.gHomeSync;
 // ==========================================
 // Revised gToken variable assignment
 requestToken2(keys, function(returnValue) {

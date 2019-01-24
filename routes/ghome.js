@@ -143,6 +143,7 @@ const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 const requestToken2 = gHomeFunc.requestToken2;
 // const isGhomeUser = gHomeFunc.isGhomeUser;
+// const gHomeSync = gHomeFunc.gHomeSync;
 // ==========================================
 // Services Functions =========================
 const servicesFunc = require('../functions/func-services');
@@ -172,15 +173,9 @@ router.post('/action', defaultLimiter,
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
 
-	if (req.user.activeServices && req.user.activeServices.indexOf('Google') == -1) {
-		logger.log('verbose', 'activeServices element does not contain:' + 'Google');
-		updateUserServices(req.user.username, "Google"); // Async add service to user.activeServices
-	}
-	else if (!req.user.activeServices) {
-		logger.log('verbose', 'No activeServices element');
-		updateUserServices(req.user.username, "Google"); // Create element user.activeServices and add service
-	}
-
+	var serviceName = "Google"; // As user has authenticated, assume activeService
+	if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
+	
 	switch (intent) {
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
@@ -473,8 +468,8 @@ router.post('/action', defaultLimiter,
 							logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 							res.status(200).json(response);
 							if (debug == "true") {console.timeEnd('ghome-query')};
-						  }
-						  start()
+						}
+						start()
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Query API] User not found");
@@ -659,11 +654,5 @@ function getSafe(fn) {
         return undefined;
     }
 }
-
-async function asyncForEach(array, callback) {
-	for (let index = 0; index < array.length; index++) {
-	  await callback(array[index], index, array);
-	}
-  }
 
 module.exports = router;
