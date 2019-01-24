@@ -441,13 +441,6 @@ router.post('/action', defaultLimiter,
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
 				if (user && devices) {
 					var arrQueryDevices = req.body.inputs[0].payload.devices;
-					var response = {
-						"requestId": requestId,
-						"payload": {
-							"devices" : {}
-						}
-					}
-
 						// Create JSON object
 							// var response = {
 							// 	"requestId": requestId,
@@ -463,13 +456,18 @@ router.post('/action', defaultLimiter,
 						// When iterated through arrayu and populated response array ion JSON object
 						// Send response as call back
 
-
+						var response = {
+							"requestId": requestId,
+							"payload": {
+								"devices" : {}
+							}
+						}
 						asyncForEach(arrQueryDevices, async (dev) => {
 							var data = devices.find(obj => obj.endpointId == dev.id);
 							if (data) {
-								await queryDeviceState(data, function(response) {
+								await queryDeviceState(data, function(state) {
 									if (response != undefined) {
-										response.payload.devices[data.endpointId] = reponse;
+										response.payload.devices[data.endpointId] = state;
 									}
 								});
 							}
