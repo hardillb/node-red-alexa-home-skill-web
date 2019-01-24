@@ -171,7 +171,7 @@ module.exports.requestToken2 = function requestToken2(keys, callback) {
 }
 
 // GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync 
-module.export.gHomeSync = function gHomeSync(userid){
+module.exports.gHomeSync = function gHomeSync(userid){
     const pUsers = Account.findOne({_id:userid});
 	Promise.all([pUsers]).then(([user]) => {
         if (user){
