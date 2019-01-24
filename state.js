@@ -12,6 +12,20 @@ var LostPassword = require('./models/lostPassword');
 var logger = require('./config/logger');
 var debug = (process.env.ALEXA_DEBUG || false);
 // ===========================================
+// Google Auth JSON Web Token ================
+var gToken = undefined; // Store Report State OAuth Token
+const jwt = require('jsonwebtoken');
+const ghomeJWT = process.env['GHOMEJWT'];
+var reportState = false;
+var keys;
+if (!ghomeJWT) {
+	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
+}
+else {
+	reportState = true;
+	keys = JSON.parse(ghomeJWT);
+}
+// ===========================================
 // Google Analytics ==========================
 var ua = require('universal-analytics');
 var enableAnalytics = false;
