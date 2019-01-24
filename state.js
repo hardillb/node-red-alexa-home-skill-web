@@ -353,7 +353,7 @@ function setstate(username, endpointId, payload) {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 
 						// Generate GHome state JSON object and send to HomeGraph API
-							if (reportState == true) {
+/* 							if (reportState == true) {
 							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
 								if (returnValue == true) {
 									var pUser = Account.findOne({username: username});
@@ -386,9 +386,7 @@ function setstate(username, endpointId, payload) {
 								}
 								else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + returnValue)}
 							});
-						}
-
-
+						} */
 					}
 				});
 			}
