@@ -246,8 +246,8 @@ router.get('/newuser', defaultLimiter, function(req,res){
 router.post('/newuser', restrictiveLimiter, function(req,res){
     var body = JSON.parse(JSON.stringify(req.body));
     if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
-        const country = countries.findByCountryCode(req.body.country.toUpperCase());
-        Promise.all([country]).then(([userCountry]) => {
+        const pCountry = countries.findByCountryCode(req.body.country.toUpperCase());
+        Promise.all([pCountry]).then(([userCountry]) => {
             if (country.statusCode == 200) {
                 var region = userCountry.data[0].region;
                 Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
@@ -429,8 +429,8 @@ router.get('/my-account', defaultLimiter,
         }
         if (enableAnalytics) {visitor.pageview(view).send()};
 
-        const user = Account.findOne({username: req.user.username});
-        Promise.all([user]).then(([userAccount]) => {
+        const pUser = Account.findOne({username: req.user.username});
+        Promise.all([pUser]).then(([userAccount]) => {
             //logger.log('info', "userAccount: " + userAccount);
             res.render('pages/account',{user: userAccount, acc: true});
         }).catch(err => {
@@ -453,9 +453,9 @@ router.get('/devices', defaultLimiter,
 		}
 		if (enableAnalytics) {visitor.pageview(view).send()};
 		var user = req.user.username;
-		const userDevices = Devices.find({username:user});
-		const countDevices = Devices.countDocuments({username:user});
-		const countGrants = Account.aggregate([
+		const pUserDevices = Devices.find({username:user});
+		const pCountDevices = Devices.countDocuments({username:user});
+		const pCountGrants = Account.aggregate([
 			{ "$match": {
 				"username" : user
 			}},
@@ -475,7 +475,7 @@ router.get('/devices', defaultLimiter,
 			}}
 		]);
 
-		Promise.all([userDevices, countDevices, countGrants]).then(([devices, countDevs, countUserGrants]) => {
+		Promise.all([pUserDevices, pCountDevices, pCountGrants]).then(([devices, countDevs, countUserGrants]) => {
 			//logger.log('info', "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
 			//logger.log('info', "countUserGrants: " + JSON.stringify(countUserGrants));
 			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, devs: true});
@@ -515,8 +515,8 @@ router.post('/account/:user_id', defaultLimiter,
 	function(req,res){
 		var user = req.body;
 		if (req.user.username === mqtt_user || req.user.username == user.username) { // Check is admin user, or user themselves
-			const country = countries.findByCountryCode(user.country.toUpperCase());
-			Promise.all([country]).then(([userCountry]) => {
+			const pCountry = countries.findByCountryCode(user.country.toUpperCase());
+			Promise.all([pCountry]).then(([userCountry]) => {
 				if (country.statusCode == 200) {
 					var region = userCountry.data[0].region;
 					Account.findOne({_id: req.params.user_id},
@@ -558,18 +558,18 @@ router.delete('/account/:user_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var userId = req.params.user_id;
-		const user = Account.findOne({_id: userId});
-		Promise.all([user]).then(([userAccount]) => {
+		const pUser = Account.findOne({_id: userId});
+		Promise.all([pUser]).then(([userAccount]) => {
 			//logger.log('info', "userAccount: " + userAccount);
 			//res.render('pages/account',{user: userAccount, acc: true});
 			if (userAccount.username == req.user.username || req.user.username === mqtt_user) {
-				const deleteAccount = Account.deleteOne({_id: userId});
-				const deleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
-				const deleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
-				const deleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
-				const deleteDevices = Devices.deleteMany({username: userAccount.username});
-				const deleteTopics = Topics.deleteOne({_id:userAccount.topics});
-				Promise.all([deleteAccount, deleteGrantCodes, deleteAccessTokens, deleteRefreshTokens, deleteDevices, deleteTopics]).then(result => {
+				const pDeleteAccount = Account.deleteOne({_id: userId});
+				const pDeleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
+				const pDeleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
+				const pDeleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
+				const pDeleteDevices = Devices.deleteMany({username: userAccount.username});
+				const pDeleteTopics = Topics.deleteOne({_id:userAccount.topics});
+				Promise.all([pDeleteAccount, pDeleteGrantCodes, pDeleteAccessTokens, pDeleteRefreshTokens, pDeleteDevices, pDeleteTopics]).then(result => {
 					//logger.log('info', result);
 					res.status(202).json({message: 'deleted'});
 					if (req.user.username === mqtt_user) {

@@ -174,9 +174,9 @@ router.post('/action', defaultLimiter,
 			if (enableAnalytics) {visitor.event(params).send()};
 
 			if (debug == "true") {console.time('ghome-sync')};
-			var findUser = Account.find({username: req.user.username});
-			var findDevices = Devices.find({username: req.user.username});
-			Promise.all([findUser, findDevices]).then(([user, devices]) => {
+			var pFindUser = Account.find({username: req.user.username});
+			var pFindDevices = Devices.find({username: req.user.username});
+			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
 				if (user && devices) {
 					logger.log('debug', "[GHome Sync API] User: " + JSON.stringify(user[0]));
 					logger.log('debug', "[GHome Sync API] Devices: " + JSON.stringify(devices));
@@ -286,8 +286,8 @@ router.post('/action', defaultLimiter,
 			if (enableAnalytics) {visitor.event(params).send()};
 
 			if (debug == "true") {console.time('ghome-exec')};
-			var findDevices = Devices.find({username: req.user.username});
-			Promise.all([findDevices]).then(([devices]) => {
+			var pFindDevices = Devices.find({username: req.user.username});
+			Promise.all([pFindDevices]).then(([devices]) => {
 				if (devices) {
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
 					logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
@@ -423,9 +423,9 @@ router.post('/action', defaultLimiter,
 			if (enableAnalytics) {visitor.event(params).send()};
 
 			if (debug == "true") {console.time('ghome-query')};
-			var findUser = Account.find({username: req.user.username});
-			var findDevices = Devices.find({username: req.user.username});
-			Promise.all([findUser, findDevices]).then(([user, devices]) => {
+			var pFindUser = Account.find({username: req.user.username});
+			var pFindDevices = Devices.find({username: req.user.username});
+			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
 				if (user && devices) {
 					var arrQueryDevices = req.body.inputs[0].payload.devices;
 						var response = {
@@ -491,10 +491,10 @@ router.post('/action', defaultLimiter,
 				if (data) {
 					// Remove OAuth tokens for **Google Home** only
 					logger.log('debug', "[GHome Disconnect API] Disconnect request for userId:" + userId + ", application:" + data.title);
-					var grantCodes = oauthModels.GrantCode.deleteMany({user: userId, application: data._id});
-					var accessTokens = oauthModels.AccessToken.deleteMany({user: userId, application: data._id});
-					var refreshTokens = oauthModels.RefreshToken.deleteMany({user: userId, application: data._id});
-					Promise.all([grantCodes, accessTokens, refreshTokens]).then(result => {
+					var pGrantCodes = oauthModels.GrantCode.deleteMany({user: userId, application: data._id});
+					var pAccessTokens = oauthModels.AccessToken.deleteMany({user: userId, application: data._id});
+					var pRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId, application: data._id});
+					Promise.all([pGrantCodes, pAccessTokens, pRefreshTokens]).then(result => {
 						logger.log('info', "[GHome Disconnect API] Deleted GrantCodes, RefreshToken and AccessTokens for user account: " + userId)
 						res.status(200).send();
 						removeUserServices(req.user, "Google")

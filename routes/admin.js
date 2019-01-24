@@ -74,8 +74,8 @@ router.get('/services', defaultLimiter,
 			}
 			if (enableAnalytics) {visitor.pageview(view).send()};
 		
-			const applications = oauthModels.Application.find({});
-			Promise.all([applications]).then(([apps]) => {
+			const pApplications = oauthModels.Application.find({});
+			Promise.all([pApplications]).then(([apps]) => {
 					res.render('pages/services',{user:req.user, services: apps});
 				}).catch(err => {
 					res.status(500).json({error: err});
@@ -101,8 +101,8 @@ router.get('/users', defaultLimiter,
 				ua: req.headers['user-agent']
 			}
 			if (enableAnalytics) {visitor.pageview(view).send()};
-			const countUsers = Account.countDocuments({});
-			const usersAndCountDevices = Account.aggregate([
+			const pCountUsers = Account.countDocuments({});
+			const pUsersAndCountDevices = Account.aggregate([
 				{ "$lookup": {
 					"from": "devices",
 					"let": { "username": "$username" },
@@ -118,10 +118,7 @@ router.get('/users', defaultLimiter,
 					"countDevices": { "$sum": "$deviceCount.count" }
 				  }}
 			 ]);
-			Promise.all([countUsers, usersAndCountDevices]).then(([totalCount, usersAndDevs]) => {
-				//logger.log('info', "users: " + users)
-				//logger.log('info', "totalCount: " + totalCount)
-				//logger.log('info', "usersAndDevs: " + JSON.stringify(usersAndDevs));
+			Promise.all([pCountUsers, pUsersAndCountDevices]).then(([totalCount, usersAndDevs]) => {
 				res.render('pages/users',{user:req.user, users: usersAndDevs, usercount: totalCount});
 			}).catch(err => {
 				res.status(500).json({error: err});
@@ -148,9 +145,9 @@ router.get('/user-devices', defaultLimiter,
 			}
 			if (enableAnalytics) {visitor.pageview(view).send()};
 
-			const userDevices = Devices.find({});
-			const countDevices = Devices.countDocuments({});
-			Promise.all([userDevices, countDevices]).then(([devices, count]) => {
+			const pUserDevices = Devices.find({});
+			const pCountDevices = Devices.countDocuments({});
+			Promise.all([pUserDevices, pCountDevices]).then(([devices, count]) => {
 				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
 			}).catch(err => {
 				res.status(500).json({error: err});
