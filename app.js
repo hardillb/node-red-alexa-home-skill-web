@@ -119,15 +119,14 @@ app.use(requireHTTPS);
 app.use('/',express.static('static')); // Static content router
 app.use('/octicons', express.static('node_modules/octicons/build'), express.static('node_modules/octicons/build/svg')); // Octicons router
 
+///////////////////////////////////////////////////////////////////////////
+// Load Routes
+///////////////////////////////////////////////////////////////////////////
 const rtDefault = require('./routes/default'); 
 const rtAdmin = require('./routes/admin'); 
 const rtAuth = require('./routes/auth'); 
 const rtGhome = require('./routes/ghome'); 
 const rtAlexa = require('./routes/alexa'); 
-
-///////////////////////////////////////////////////////////////////////////
-// Load Routes
-///////////////////////////////////////////////////////////////////////////
 app.use('/', rtDefault);
 app.use('/admin', rtAdmin); // Admin Interface
 app.use('/auth', rtAuth); // OAuth endpoints

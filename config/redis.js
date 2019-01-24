@@ -25,19 +25,15 @@ var client = require('redis').createClient({
         return Math.min(options.attempt * 1000, 10000);
    	}
 });
-
 client.on('connect', function() {
     logger.log('info', "[Core] Connecting to Redis server...");
 });
-
 client.on('ready', function() {
     logger.log('info', "[Core] Redis connection ready!");
 });
-
 client.on('reconnecting', function() {
     logger.log('info', "[Core] Attempting to reconnect to Redis server");
 });
-
 client.on('error', function (err) {
     logger.log('error', "[Core] Unable to connect to Redis server");
 });
