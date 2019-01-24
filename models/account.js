@@ -13,7 +13,8 @@ var Account = new Schema({
     topics: { type: Number},
     created: { type: Date, default: function(){
         return new Date();
-    }}
+    }},
+    activeServices: []
 });
 
 var options = {

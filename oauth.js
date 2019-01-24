@@ -21,7 +21,7 @@ server.grant(oauth2orize.grant.code({
 				done(error, error ? null : grant.code);
 			});
 		} else {
-			done(error,null); // Grant rrror
+			done(error,null); // Grant error
 		}
 	});
 
@@ -108,8 +108,8 @@ server.exchange(oauth2orize.exchange.refreshToken({
 						var expires = Math.round((newToken.expires - (new Date().getTime()))/1000);
 						if (!error) {
 							logger.log("debug", "[OAuth Server] Created AccessToken for user:" + refresh.user  + ", expires_in:" + expires);
-							logger.log("debug", "[OAuth Server] newToken:" + JSON.stringify(newToken));
-							logger.log("debug", "[OAuth Server] Access Token saved")
+							logger.log("debug", "[OAuth Server] AccessToken:" + JSON.stringify(newToken));
+							logger.log("debug", "[OAuth Server] AccessToken saved")
 							done(null, newToken.token, refresh.token, {token_type: 'Bearer', expires_in: expires, scope: newToken.scope});
 						} else {
 							logger.log("debug", "[OAuth Server] Error saving token")

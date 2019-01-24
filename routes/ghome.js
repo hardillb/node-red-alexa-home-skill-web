@@ -144,6 +144,10 @@ const queryDeviceState = gHomeFunc.queryDeviceState;
 const requestToken2 = gHomeFunc.requestToken2;
 // const isGhomeUser = gHomeFunc.isGhomeUser;
 // ==========================================
+// Services Functions =========================
+const servicesFunc = require('../functions/func-services');
+const updateUserServices = servicesFunc.updateUserServices;
+// ==========================================
 
 // Revised gToken variable assignment
 requestToken2(keys, function(returnValue) {
@@ -167,6 +171,13 @@ router.post('/action', defaultLimiter,
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
+
+	if (req.user.hasOwnProperty('activeServices') && req.user.activeServices.indexOf('Google') == -1) {
+		updateUserServices(req.user.username, "Google"); // Async add service to user.activeServices
+	}
+	else if (!req.user.hasOwnProperty('activeServices')) {
+		updateUserServices(req.user.username, "Google"); // Create element user.activeServices and add service
+	}
 
 	switch (intent) {
 		///////////////////////////////////////////////////////////////////////////
