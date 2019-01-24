@@ -211,3 +211,11 @@ function gHomeReplaceCapability(capability) {
 	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
 	else {return "Not Supported"}
 }
+// Nested attribute/ element tester
+function getSafe(fn) {
+	try {
+		return fn();
+    } catch (e) {
+        return undefined;
+    }
+}
