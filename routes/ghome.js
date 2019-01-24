@@ -448,7 +448,22 @@ router.post('/action', defaultLimiter,
 						}
 					}
 
-					const start = async () => {
+						// Create JSON object
+							// var response = {
+							// 	"requestId": requestId,
+							// 	"payload": {
+							// 		"devices" : {}
+							// 	}
+							// }
+						
+						// For each device in arrQueryDevices
+							// Build a state response
+							// Call function to add to response
+
+						// When iterated through arrayu and populated response array ion JSON object
+						// Send response as call back
+
+
 						asyncForEach(arrQueryDevices, async (dev) => {
 							var data = devices.find(obj => obj.endpointId == dev.id);
 							if (data) {
@@ -467,8 +482,6 @@ router.post('/action', defaultLimiter,
 						logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 						res.status(200).json(response);
 						if (debug == "true") {console.timeEnd('ghome-query')};
-					}
-					start()
 
 /* 					for (var i=0; i< arrQueryDevices.length; i++) {
 						// Find device in array of user devices returned in promise
@@ -674,38 +687,6 @@ function getSafe(fn) {
         return undefined;
     }
 }
-
-/* function requestToken(keys) {
-	logger.log('verbose', "[GHome API] Ghome JWT requesting OAuth token");
-	if (reportState == true) {
-		var payload = {
-				"iss": keys.client_email,
-				"scope": "https://www.googleapis.com/auth/homegraph",
-				"aud": "https://accounts.google.com/o/oauth2/token",
-				"iat": new Date().getTime()/1000,
-				"exp": new Date().getTime()/1000 + 3600,
-		}
-		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
-		request.post({
-			url: 'https://accounts.google.com/o/oauth2/token',
-			form: {
-				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-				assertion: token
-				}
-			},
-			function(err,res, body){
-				if (err) {
-					gToken = undefined;
-				} else {
-					logger.log('verbose', "[GHome API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
-					gToken =JSON.parse(body).access_token;
-				}
-			}
-		);
-	}
-} */
-
 
 async function asyncForEach(array, callback) {
 	for (let index = 0; index < array.length; index++) {
