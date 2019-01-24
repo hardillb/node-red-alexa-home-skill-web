@@ -170,13 +170,21 @@ const gHomeFunc = require('../functions/func-ghome');
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
+const requestToken2 = gHomeFunc.requestToken2;
 // ==========================================
+// Revised gToken variable assignment
+requestToken2(keys, function(returnValue) {
+	gToken = returnValue;
+	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
+});
+
 // Refresh Google oAuth Token used for State Reporting
-requestToken(keys);
 var refreshToken = setInterval(function(){
-	gToken = requestToken(keys);
+	requestToken2(keys, function(returnValue) {
+		gToken = returnValue;
+		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
+	});
 },3540000);
-// ==========================================
 
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
@@ -1293,37 +1301,6 @@ function getSafe(fn) {
     } catch (e) {
         return undefined;
     }
-}
-
-function requestToken(keys) {
-	logger.log('verbose', "[Alexa API] Ghome JWT requesting OAuth token");
-	if (reportState == true) {
-		var payload = {
-				"iss": keys.client_email,
-				"scope": "https://www.googleapis.com/auth/homegraph",
-				"aud": "https://accounts.google.com/o/oauth2/token",
-				"iat": new Date().getTime()/1000,
-				"exp": new Date().getTime()/1000 + 3600,
-		}
-		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
-		request.post({
-			url: 'https://accounts.google.com/o/oauth2/token',
-			form: {
-				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-				assertion: token
-				}
-			},
-			function(err,res, body){
-				if (err) {
-					gToken = undefined;
-				} else {
-					logger.log('verbose', "[Alexa API] Ghome JWT returned OAuth token:" + JSON.stringify(JSON.parse(body).access_token));
-					gToken =JSON.parse(body).access_token;
-				}
-			}
-		);
-	}
 }
 
 module.exports = router;
