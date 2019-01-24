@@ -173,6 +173,11 @@ const isGhomeUser = gHomeFunc.isGhomeUser;
 const requestToken2 = gHomeFunc.requestToken2;
 // const gHomeSync = gHomeFunc.gHomeSync;
 // ==========================================
+// Services Functions =========================
+const servicesFunc = require('../functions/func-services');
+const updateUserServices = servicesFunc.updateUserServices;
+const removeUserServices = servicesFunc.removeUserServices;
+// ==========================================
 // Revised gToken variable assignment
 requestToken2(keys, function(returnValue) {
 	gToken = returnValue;
