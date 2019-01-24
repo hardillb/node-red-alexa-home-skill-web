@@ -148,6 +148,7 @@ const requestToken2 = gHomeFunc.requestToken2;
 // Services Functions =========================
 const servicesFunc = require('../functions/func-services');
 const updateUserServices = servicesFunc.updateUserServices;
+const removeUserServices = servicesFunc.removeUserServices;
 // ==========================================
 
 // Revised gToken variable assignment
@@ -512,6 +513,7 @@ router.post('/action', defaultLimiter,
 					Promise.all([grantCodes, accessTokens, refreshTokens]).then(result => {
 						logger.log('info', "[GHome Disconnect API] Deleted GrantCodes, RefreshToken and AccessTokens for user account: " + userId)
 						res.status(200).send();
+						removeUserServices(req.user, "Google")
 					}).catch(err => {
 					 	logger.log('warn', "[GHome Disconnect API] Failed to delete GrantCodes, RefreshToken and AccessTokens for user account: " + userId);
 					 	res.status(500).json({error: err});

@@ -482,6 +482,9 @@ router.get('/getstate/:dev_id', getStateLimiter,
 		  }
 		if (enableAnalytics) {visitor.event(params).send()};
 
+		var serviceName = "Amazon"; // As user has authenticated, assume activeService
+		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
+
 		// Identify device, we know who user is from request
 		logger.log('debug', "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
 
@@ -705,6 +708,9 @@ router.post('/command2',
 			dp: "/api/v1/command"
 		  }
 		if (enableAnalytics) {visitor.event(params).send()};
+
+		var serviceName = "Amazon"; // As user has authenticated, assume activeService
+		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (err) {
