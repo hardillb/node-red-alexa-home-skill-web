@@ -1,36 +1,43 @@
-// Express Router ============================
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-// ===========================================
-// Request =======================
-const request = require('request');
-// ===============================
-// Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
-var Topics = require('../models/topics');
-var LostPassword = require('../models/lostPassword');
-// ===============================
-// Auth Handler ==============================
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
-var countries = require('countries-api');
 var PassportOAuthBearer = require('passport-http-bearer');
-var oauthServer = require('../oauth');
-var url = require('url');
-// ===========================================
-// Winston Logger ============================
 var logger = require('../config/logger');
+var ua = require('universal-analytics');
+var mqtt = require('mqtt');
+var client = require('../config/redis')
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
+const gHomeFunc = require('../functions/func-ghome');
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const isGhomeUser = gHomeFunc.isGhomeUser;
+const requestToken2 = gHomeFunc.requestToken2;
+const servicesFunc = require('../functions/func-services');
+const updateUserServices = servicesFunc.updateUserServices;
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
+// MQTT ENV variables========================
+var mqtt_user = (process.env.MQTT_USER);
+var mqtt_password = (process.env.MQTT_PASSWORD);
+var mqtt_port = (process.env.MQTT_PORT || "1883");
+var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Google Auth JSON Web Token ================
 var gToken = undefined; // Store Report State OAuth Token
-const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
 var keys;
@@ -41,16 +48,15 @@ else {
 	reportState = true;
 	keys = JSON.parse(ghomeJWT);
 }
-// ===========================================
 // Google Analytics ==========================
-var ua = require('universal-analytics');
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-//===========================================
-// Passport Config, Local *and* Oauth Support =
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
@@ -73,17 +79,9 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	});
 });
 passport.use(accessTokenStrategy);
-//===========================================
-// MQTT =====================================
-var mqtt = require('mqtt');
-//===========================================
-// MQTT ENV variables========================
-var mqtt_user = (process.env.MQTT_USER);
-var mqtt_password = (process.env.MQTT_PASSWORD);
-var mqtt_port = (process.env.MQTT_PORT || "1883");
-var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-//===========================================
-// MQTT Config ==============================
+///////////////////////////////////////////////////////////////////////////
+// MQTT Client Configuration
+///////////////////////////////////////////////////////////////////////////
 var mqttClient;
 var mqttOptions = {
 	connectTimeout: 30 * 1000,
@@ -109,10 +107,9 @@ mqttClient.on('connect', function(){
 	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
 });
-// Redis Client =============================
-var client = require('../config/redis')
-// ==========================================
-// Rate-limiter =============================
+///////////////////////////////////////////////////////////////////////////
+// Rate-limiter 
+///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
 const defaultLimiter = limiter({
@@ -164,35 +161,22 @@ const getStateLimiter = limiter({
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
   });
-// ==========================================
-// GHome Functions =========================
-const gHomeFunc = require('../functions/func-ghome');
-const sendState =  gHomeFunc.sendState;
-const queryDeviceState = gHomeFunc.queryDeviceState;
-const isGhomeUser = gHomeFunc.isGhomeUser;
-const requestToken2 = gHomeFunc.requestToken2;
-// const gHomeSync = gHomeFunc.gHomeSync;
-// ==========================================
-// Services Functions =========================
-const servicesFunc = require('../functions/func-services');
-const updateUserServices = servicesFunc.updateUserServices;
-const removeUserServices = servicesFunc.removeUserServices;
-// ==========================================
-// Revised gToken variable assignment
+///////////////////////////////////////////////////////////////////////////
+// Homegraph API Token Request/ Refresh
+///////////////////////////////////////////////////////////////////////////
 requestToken2(keys, function(returnValue) {
 	gToken = returnValue;
-	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
+	logger.log('info', "[Alexa API] Obtained Google HomeGraph OAuth token");
+	logger.log('debug', "[Alexa API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 });
-
 // Refresh Google oAuth Token used for State Reporting
 var refreshToken = setInterval(function(){
 	requestToken2(keys, function(returnValue) {
 		gToken = returnValue;
-		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
+		logger.log('info', "[Alexa API] Refreshed Google HomeGraph OAuth token");
+		logger.log('debug', "[Alexa API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 	});
 },3540000);
-// ==========================================
-
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
 ///////////////////////////////////////////////////////////////////////////
@@ -238,239 +222,6 @@ router.get('/devices', defaultLimiter,
 		});
 	}
 );
-
-// Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
-function replaceCapability(capability, reportState, attributes) {
-	// BrightnessController
-	if(capability == "BrightnessController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.BrightnessController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "brightness"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-	// ChannelController
-	if(capability == "ChannelController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.ChannelController",
-			"version": "3",
-			};
-	}
-	// ColorController
-	if(capability == "ColorController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.ColorController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "color"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-	// ColorTemperatureController
-	if(capability == "ColorTemperatureController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.ColorTemperatureController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "colorTemperatureInKelvin"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-	// InputController, pre-defined 4x HDMI inputs and phono
-	if(capability == "InputController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.InputController",
-			"version": "3",
-			"inputs": [{
-				"name": "HDMI1"
-			  },
-			  {
-				"name": "HDMI2"
-			  },
-			  {
-				"name": "HDMI3"
-			  },
-			  {
-				"name": "HDMI4"
-			  },
-			  {
-				"name": "phono"
-			  },
-			  {
-				"name": "audio1"
-			  },
-			  {
-				"name": "audio2"
-			  },
-			  {
-				"name": "chromecast"
-			  }
-			]};
-	}
-	// LockController
-	if(capability == "LockController")  {
-		return {
-				"type": "AlexaInterface",
-				"interface": "Alexa.LockController",
-				"version": "3",
-				"properties": {
-					"supported": [{
-						"name": "lockState"
-					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
-				}
-			};
-	}
-	// PercentageController
-	if(capability == "PercentageController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.PercentageController",
-			"version": "3",
-			"properties": {
-				"supported": [{
-					"name": "percentage"
-				}],
-				"proactivelyReported": false,
-				"retrievable": reportState
-			}
-		};
-	}
-	// PlaybackController
-	if(capability == "PlaybackController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.PlaybackController",
-			"version": "3",
-			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
-			};
-	}
-	// PowerController
-	if(capability == "PowerController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.PowerController",
-			"version": "3",
-			"properties": {
-				"supported": [{
-					"name": "powerState"
-				}],
-				"proactivelyReported": false,
-				"retrievable": reportState
-				}
-			};
-	}
-	// Speaker
-	if(capability == "Speaker") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.Speaker",
-			"version": "3",
-			"properties":{
-				"supported":[{
-						"name":"volume"
-					},
-					{
-						"name":"muted"
-					}
-				]}
-			};
-	}
-	// SceneController 
-	if(capability == "SceneController") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.SceneController",
-			"version" : "3",
-			"supportsDeactivation" : false
-			};
-	}
-	// StepSpeaker
-	if(capability == "StepSpeaker") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.StepSpeaker",
-			"version": "3",
-			"properties":{
-				"supported":[{
-					  "name":"volume"
-				   },
-				   {
-					  "name":"muted"
-				   }
-				]}
-			};
-	}
-	// TemperatureSensor 
-	if(capability == "TemperatureSensor") {
-		return {
-			"type": "AlexaInterface",
-			"interface": "Alexa.TemperatureSensor",
-			"version" : "3",
-			"properties": {
-                "supported": [
-                  {
-                    "name": "temperature"
-                  }
-                ],
-                "proactivelyReported": false,
-                "retrievable": true
-              }
-			};
-	}
-	// ThermostatController - SinglePoint
-	if(capability == "ThermostatController")  {
-		var supportedModes;
-		var hasModes = getSafe(() => attributes.thermostatModes);
-		if (attributes != null && hasModes != undefined) {
-			supportedModes = attributes.thermostatModes;
-		}
-		else {
-			supportedModes = ["HEAT","COOL","AUTO"];
-		}
-		return {
-			"type": "AlexaInterface",
-            "interface": "Alexa.ThermostatController",
-            "version": "3",
-            "properties": {
-              "supported": [{
-                  "name": "targetSetpoint"
-                },
-                {
-                  "name": "thermostatMode"
-                }
-              ],
-			  "proactivelyReported": false,
-			  "retrievable": reportState
-            },
-            "configuration": {
-              "supportsScheduling": true,
-              "supportedModes": supportedModes
-			}
-		};
-	}
-};
-
 ///////////////////////////////////////////////////////////////////////////
 // Get State API
 ///////////////////////////////////////////////////////////////////////////
@@ -1282,8 +1033,9 @@ mqttClient.on('message',function(topic,message){
 		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
 	}
 });
-
-// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
+///////////////////////////////////////////////////////////////////////////
+// Timer
+///////////////////////////////////////////////////////////////////////////
 var timeout = setInterval(function(){
 	var now = Date.now();
 	var keys = Object.keys(onGoingCommands);
@@ -1306,7 +1058,9 @@ var timeout = setInterval(function(){
 		}
 	}
 },500);
-
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
 // Nested attribute/ element tester
 function getSafe(fn) {
 	try {
@@ -1315,6 +1069,237 @@ function getSafe(fn) {
         return undefined;
     }
 }
+// Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
+function replaceCapability(capability, reportState, attributes) {
+	// BrightnessController
+	if(capability == "BrightnessController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.BrightnessController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "brightness"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+	// ChannelController
+	if(capability == "ChannelController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.ChannelController",
+			"version": "3",
+			};
+	}
+	// ColorController
+	if(capability == "ColorController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "color"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+	// ColorTemperatureController
+	if(capability == "ColorTemperatureController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorTemperatureController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "colorTemperatureInKelvin"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+	// InputController, pre-defined 4x HDMI inputs and phono
+	if(capability == "InputController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.InputController",
+			"version": "3",
+			"inputs": [{
+				"name": "HDMI1"
+			  },
+			  {
+				"name": "HDMI2"
+			  },
+			  {
+				"name": "HDMI3"
+			  },
+			  {
+				"name": "HDMI4"
+			  },
+			  {
+				"name": "phono"
+			  },
+			  {
+				"name": "audio1"
+			  },
+			  {
+				"name": "audio2"
+			  },
+			  {
+				"name": "chromecast"
+			  }
+			]};
+	}
+	// LockController
+	if(capability == "LockController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.LockController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "lockState"
+					}],
+					"proactivelyReported": false,
+					"retrievable": reportState
+				}
+			};
+	}
+	// PercentageController
+	if(capability == "PercentageController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PercentageController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "percentage"
+				}],
+				"proactivelyReported": false,
+				"retrievable": reportState
+			}
+		};
+	}
+	// PlaybackController
+	if(capability == "PlaybackController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PlaybackController",
+			"version": "3",
+			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
+			};
+	}
+	// PowerController
+	if(capability == "PowerController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PowerController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "powerState"
+				}],
+				"proactivelyReported": false,
+				"retrievable": reportState
+				}
+			};
+	}
+	// Speaker
+	if(capability == "Speaker") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.Speaker",
+			"version": "3",
+			"properties":{
+				"supported":[{
+						"name":"volume"
+					},
+					{
+						"name":"muted"
+					}
+				]}
+			};
+	}
+	// SceneController 
+	if(capability == "SceneController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.SceneController",
+			"version" : "3",
+			"supportsDeactivation" : false
+			};
+	}
+	// StepSpeaker
+	if(capability == "StepSpeaker") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.StepSpeaker",
+			"version": "3",
+			"properties":{
+				"supported":[{
+					  "name":"volume"
+				   },
+				   {
+					  "name":"muted"
+				   }
+				]}
+			};
+	}
+	// TemperatureSensor 
+	if(capability == "TemperatureSensor") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.TemperatureSensor",
+			"version" : "3",
+			"properties": {
+                "supported": [
+                  {
+                    "name": "temperature"
+                  }
+                ],
+                "proactivelyReported": false,
+                "retrievable": true
+              }
+			};
+	}
+	// ThermostatController - SinglePoint
+	if(capability == "ThermostatController")  {
+		var supportedModes;
+		var hasModes = getSafe(() => attributes.thermostatModes);
+		if (attributes != null && hasModes != undefined) {
+			supportedModes = attributes.thermostatModes;
+		}
+		else {
+			supportedModes = ["HEAT","COOL","AUTO"];
+		}
+		return {
+			"type": "AlexaInterface",
+            "interface": "Alexa.ThermostatController",
+            "version": "3",
+            "properties": {
+              "supported": [{
+                  "name": "targetSetpoint"
+                },
+                {
+                  "name": "thermostatMode"
+                }
+              ],
+			  "proactivelyReported": false,
+			  "retrievable": reportState
+            },
+            "configuration": {
+              "supportsScheduling": true,
+              "supportedModes": supportedModes
+			}
+		};
+	}
+};
 
 module.exports = router;
 

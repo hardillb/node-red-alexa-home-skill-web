@@ -1,55 +1,61 @@
-// Express Router =======================
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-// ======================================
-// Mailer ========================
 var sendemail = require('../sendemail');
 var mailer = new sendemail();
-// ===============================
-// Request =======================
-const request = require('request');
-// ===============================
-// Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var Topics = require('../models/topics');
 var LostPassword = require('../models/lostPassword');
-// ===============================
-// Auth Handler ==================
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
-// ===============================
-// Winston Logger ==========================
 var logger = require('../config/logger');
-var debug = (process.env.ALEXA_DEBUG || false);
-// =========================================
-// Google Analytics ==========================
 var ua = require('universal-analytics');
+var client = require('../config/redis')
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
+const gHomeFunc = require('../functions/func-ghome');
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const isGhomeUser = gHomeFunc.isGhomeUser;
+const requestToken2 = gHomeFunc.requestToken2;
+const gHomeSync = gHomeFunc.gHomeSync;
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
+var debug = (process.env.ALEXA_DEBUG || false);
+var mqtt_user = (process.env.MQTT_USER);
+// Google Analytics ==========================
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-//===========================================
-// Passport Config, Local Auth only =======================
+// Google Home Sync =========================
+var enableGoogleHomeSync = true;
+// Warn on SYNC_API not being specified/ request SYNC will be disabled
+if (!(process.env.HOMEGRAPH_APIKEY)){
+	enableGoogleHomeSync = false;
+}
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
-// ========================================================
-// MQTT Settings  =========================================
-var mqtt_user = (process.env.MQTT_USER);
-// ========================================================
-// Redis Client =============================
-var client = require('../config/redis')
-// ==========================================
-// Rate-limiter =============================
+///////////////////////////////////////////////////////////////////////////
+// Rate-limiter
+///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
 const defaultLimiter = limiter({
@@ -89,23 +95,9 @@ const restrictiveLimiter = limiter({
 		res.status(429).json('Rate limit exceeded');
 	}
 });
-// ==========================================
-// Google Home Sync =========================
-var enableGoogleHomeSync = true;
-// Warn on SYNC_API not being specified/ request SYNC will be disabled
-if (!(process.env.HOMEGRAPH_APIKEY)){
-	enableGoogleHomeSync = false;
-}
-// ==========================================
-// GHome Functions =========================
-const gHomeFunc = require('../functions/func-ghome');
-const sendState =  gHomeFunc.sendState;
-const queryDeviceState = gHomeFunc.queryDeviceState;
-const isGhomeUser = gHomeFunc.isGhomeUser;
-const requestToken2 = gHomeFunc.requestToken2;
-const gHomeSync = gHomeFunc.gHomeSync;
-// ==========================================
-
+///////////////////////////////////////////////////////////////////////////
+// Home
+///////////////////////////////////////////////////////////////////////////
 router.get('/', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -118,7 +110,9 @@ router.get('/', defaultLimiter, function(req,res){
 
 	res.render('pages/index', {user: req.user, home: true});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Docs
+///////////////////////////////////////////////////////////////////////////
 router.get('/docs', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -131,7 +125,9 @@ router.get('/docs', defaultLimiter, function(req,res){
 
 	res.render('pages/docs', {user: req.user, docs: true});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// About
+///////////////////////////////////////////////////////////////////////////
 router.get('/about', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -144,7 +140,9 @@ router.get('/about', defaultLimiter, function(req,res){
 
 	res.render('pages/about', {user: req.user, about: true});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Privacy
+///////////////////////////////////////////////////////////////////////////
 router.get('/privacy', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -157,7 +155,9 @@ router.get('/privacy', defaultLimiter, function(req,res){
 
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// TOS
+///////////////////////////////////////////////////////////////////////////
 router.get('/tos', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -170,7 +170,9 @@ router.get('/tos', defaultLimiter, function(req,res){
 
 	res.render('pages/tos', {user: req.user, tos: true});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Login (Get)
+///////////////////////////////////////////////////////////////////////////
 router.get('/login', defaultLimiter, function(req,res){
 	var view = {
 		dp: req.path, 
@@ -183,7 +185,9 @@ router.get('/login', defaultLimiter, function(req,res){
 
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Logout
+///////////////////////////////////////////////////////////////////////////
 router.get('/logout', defaultLimiter, function(req,res){
 	req.logout();
 	if (req.query.next) {
@@ -195,7 +199,9 @@ router.get('/logout', defaultLimiter, function(req,res){
 	
 });
 
-//app.post('/login',passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/2faCheck', failureFlash: true }));
+///////////////////////////////////////////////////////////////////////////
+// Login (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/login', restrictiveLimiter,
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
@@ -219,8 +225,9 @@ router.post('/login', restrictiveLimiter,
 			}
 		}
     });
-    
-
+///////////////////////////////////////////////////////////////////////////
+// Register/ Newuser (Get)
+///////////////////////////////////////////////////////////////////////////
 router.get('/newuser', defaultLimiter, function(req,res){
     var view = {
         dp: req.path, 
@@ -233,7 +240,9 @@ router.get('/newuser', defaultLimiter, function(req,res){
 
     res.render('pages/register',{user: req.user, newuser: true});
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// Register/ Newuser (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/newuser', restrictiveLimiter, function(req,res){
     var body = JSON.parse(JSON.stringify(req.body));
     if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
@@ -290,7 +299,9 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
         res.status(500).send("Missing required attributes, please check registration form!");
     }
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// changePassword/:key (Get)
+///////////////////////////////////////////////////////////////////////////
 router.get('/changePassword/:key', defaultLimiter, function(req, res, next){
     var uuid = req.params.key;
     LostPassword.findOne({uuid: uuid}).populate('user').exec(function(error, lostPassword){
@@ -310,7 +321,9 @@ router.get('/changePassword/:key', defaultLimiter, function(req, res, next){
         }
     });
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// changePassword (Get)
+///////////////////////////////////////////////////////////////////////////
 router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
     var view = {
         dp: req.path, 
@@ -324,7 +337,9 @@ router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req,
     
     res.render('pages/changePassword', {user: req.user});
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// changePassword (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/changePassword', restrictiveLimiter, ensureAuthenticated, function(req, res, next){
     Account.findOne({username: req.user.username}, function (err, user){
         if (!err && user) {
@@ -358,7 +373,9 @@ router.post('/changePassword', restrictiveLimiter, ensureAuthenticated, function
         }
     });
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// lostPassword (Get)
+///////////////////////////////////////////////////////////////////////////
 router.get('/lostPassword', defaultLimiter, function(req, res, next){
     var view = {
         dp: req.path, 
@@ -371,7 +388,9 @@ router.get('/lostPassword', defaultLimiter, function(req, res, next){
 
     res.render('pages/lostPassword', { user: req.user});
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// lostPassword (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/lostPassword', restrictiveLimiter, function(req, res, next){
     var email = req.body.email;
     Account.findOne({email: email}, function(error, user){
@@ -394,7 +413,9 @@ router.post('/lostPassword', restrictiveLimiter, function(req, res, next){
         }
     });
 });
-    
+///////////////////////////////////////////////////////////////////////////
+// My-Account
+///////////////////////////////////////////////////////////////////////////
 router.get('/my-account', defaultLimiter,
     ensureAuthenticated,
     function(req,res){
@@ -416,7 +437,9 @@ router.get('/my-account', defaultLimiter,
             res.status(500).json({error: err});
         });
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Devices (Get)
+///////////////////////////////////////////////////////////////////////////
 router.get('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -460,7 +483,9 @@ router.get('/devices', defaultLimiter,
 			res.status(500).json({error: err});
 		});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Devices (Put)
+///////////////////////////////////////////////////////////////////////////
 router.put('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -482,7 +507,9 @@ router.put('/devices', defaultLimiter,
 		});
 
 });
-
+///////////////////////////////////////////////////////////////////////////
+// account/:user_id (Put)
+///////////////////////////////////////////////////////////////////////////
 router.post('/account/:user_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -524,7 +551,9 @@ router.post('/account/:user_id', defaultLimiter,
 			logger.log('warn', "[Update User] Attempt to modify user account blocked");
 		}
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Account (Delete)
+///////////////////////////////////////////////////////////////////////////
 router.delete('/account/:user_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -562,7 +591,9 @@ router.delete('/account/:user_id', defaultLimiter,
 			res.status(500).send();
 		});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Device (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/device/:dev_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -591,7 +622,9 @@ router.post('/device/:dev_id', defaultLimiter,
 				});
 		}
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Device (Delete)
+///////////////////////////////////////////////////////////////////////////
 router.delete('/device/:dev_id', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -628,7 +661,9 @@ router.delete('/device/:dev_id', defaultLimiter,
 				});
 		}
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Devices API (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/api/v1/devices', defaultLimiter,
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
@@ -654,7 +689,9 @@ router.post('/api/v1/devices', defaultLimiter,
 		}
 	}
 );
-
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
 function ensureAuthenticated(req,res,next) {
     if (req.isAuthenticated()) {
         return next();

@@ -1,19 +1,15 @@
-// Request =======================
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 const request = require('request');
-// ===============================
-// Schema =======================
 var Account = require('../models/account');
-var oauthModels = require('../models/oauth');
-var Devices = require('../models/devices');
-var Topics = require('../models/topics');
-var LostPassword = require('../models/lostPassword');
-// ===============================
-// Winston Logger ============================
 var logger = require('../config/logger');
-var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
-// Google Auth JSON Web Token ================
 const jwt = require('jsonwebtoken');
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
+var debug = (process.env.ALEXA_DEBUG || false);
+// Google JWT OAuth =========================
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
 var keys;
@@ -24,10 +20,8 @@ else {
 	reportState = true;
 	keys = JSON.parse(ghomeJWT);
 }
-// ===========================================
 // Google Home Sync =========================
 var enableGoogleHomeSync = true;
-// Warn on SYNC_API not being specified/ request SYNC will be disabled
 if (!(process.env.HOMEGRAPH_APIKEY)){
 	logger.log('warn',"[Core] No HOMEGRAPH_APIKEY environment variable supplied. New devices, removal or device changes will not show in users Google Home App without this");
 	enableGoogleHomeSync = false;
@@ -35,8 +29,9 @@ if (!(process.env.HOMEGRAPH_APIKEY)){
 else {
 	var SYNC_API = "https://homegraph.googleapis.com/v1/devices:requestSync?key=" + process.env.HOMEGRAPH_APIKEY;
 }
-// ==========================================
-
+///////////////////////////////////////////////////////////////////////////
+// Exports
+///////////////////////////////////////////////////////////////////////////
 // Call this from QUERY intent or reportstate API endpoint
 module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 	if (device) {
@@ -99,18 +94,6 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 		callback(undefined);
 	}
 }
-
-// Convert Alexa Device Capabilities to Google Home-compatible
-function gHomeReplaceCapability(capability) {
-	// Limit supported traits, add new ones here
-	if(capability == "PowerController") {return "action.devices.traits.OnOff"}
-	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
-	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
-	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
-	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
-	else {return "Not Supported"}
-}
-
 // Check user is actually enabled / account-linked for Google Home
 module.exports.isGhomeUser = function isGhomeUser(username, callback) {
     const pUsers = Account.find({username: username });
@@ -127,31 +110,32 @@ module.exports.isGhomeUser = function isGhomeUser(username, callback) {
 		}
 	});
 }
-
 // Send State Update
 module.exports.sendState = function sendState(token, response) {
-	logger.log('verbose', "[State API] Sending HomeGraph State report:" + JSON.stringify(response));
-    request.post({
-        url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
-            headers:{
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-                'X-GFE-SSL': 'yes'
-            },
-            json: response
-    }, function(err,res, body){
-		if (err) {
-			logger.log('warn', "[State API] State report to HomeGraph failed");
-		}
-		else {
-			if (res.statusCode == 200) {
-				logger.log('verbose', "[State API] State report to HomeGraph successful!");
+	if (reportState == true && token != undefined) {
+		logger.log('verbose', "[State API] Sending HomeGraph State report:" + JSON.stringify(response));
+		request.post({
+			url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
+				headers:{
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
+					'X-GFE-SSL': 'yes'
+				},
+				json: response
+		}, function(err,res, body){
+			if (err) {
+				logger.log('warn', "[State API] State report to HomeGraph failed");
 			}
-			else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
-		}
-	});
+			else {
+				if (res.statusCode == 200) {
+					logger.log('verbose', "[State API] State report to HomeGraph successful!");
+				}
+				else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
+			}
+		});
+	}
 }
-
+// Get OAuth HomeGraph token
 module.exports.requestToken2 = function requestToken2(keys, callback) {
 	if (reportState == true) {
 		var payload = {
@@ -179,8 +163,8 @@ module.exports.requestToken2 = function requestToken2(keys, callback) {
 			}
 		);
 	}
+	else {callback(undefined)}
 }
-
 // GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync 
 module.exports.gHomeSync = function gHomeSync(userid){
     const pUsers = Account.findOne({_id:userid});
@@ -213,4 +197,17 @@ module.exports.gHomeSync = function gHomeSync(userid){
 			}
 		}
 	});
+}
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
+// Convert Alexa Device Capabilities to Google Home-compatible
+function gHomeReplaceCapability(capability) {
+	// Limit supported traits, add new ones here
+	if(capability == "PowerController") {return "action.devices.traits.OnOff"}
+	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
+	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
+	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
+	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
+	else {return "Not Supported"}
 }

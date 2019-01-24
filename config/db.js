@@ -1,15 +1,21 @@
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var mongoose = require('mongoose');
 var logger = require('./logger'); // Moved to own module
-
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
 // MongoDB Settings
 var mongo_user = (process.env.MONGO_USER);
 var mongo_password = (process.env.MONGO_PASSWORD);
 var mongo_host = (process.env.MONGO_HOST || "mongodb");
 var mongo_port = (process.env.MONGO_PORT || "27017");
-
-// Connect to Mongo Instance
 mongo_url = "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/users";
 logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
+///////////////////////////////////////////////////////////////////////////
+// Connect to Mongo Instance
+///////////////////////////////////////////////////////////////////////////
 mongoose.Promise = global.Promise;
 var mongoose_connection = mongoose.connection;
 

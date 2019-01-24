@@ -1,39 +1,46 @@
-// Express Router ============================
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-// ===========================================
-// Request =======================
-const request = require('request');
-// ===============================
-// Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
-var Topics = require('../models/topics');
-var LostPassword = require('../models/lostPassword');
-// ===============================
-// Auth Handler ==============================
+var ua = require('universal-analytics');
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
-var countries = require('countries-api');
 var PassportOAuthBearer = require('passport-http-bearer');
-var oauthServer = require('../oauth');
-var url = require('url');
-// ===========================================
-// Winston Logger ============================
+var mqtt = require('mqtt');
 var logger = require('../config/logger');
+const gHomeFunc = require('../functions/func-ghome');
+const servicesFunc = require('../functions/func-services');
+var client = require('../config/redis')
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const requestToken2 = gHomeFunc.requestToken2;
+const updateUserServices = servicesFunc.updateUserServices;
+const removeUserServices = servicesFunc.removeUserServices;
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
+// MQTT ENV variables========================
+var mqtt_user = (process.env.MQTT_USER);
+var mqtt_password = (process.env.MQTT_PASSWORD);
+var mqtt_port = (process.env.MQTT_PORT || "1883");
+var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Google Auth JSON Web Token ================
-var gToken = undefined; // Store Report State OAuth Token
-const jwt = require('jsonwebtoken');
-const ghomeJWT = process.env['GHOMEJWT'];
-var reportState = false;
-var keys;
+const ghomeJWT = process.env['GHOMEJWT']; // Google Auth JSON Web Token
+var gToken = undefined; // Store "Report State" OAuth Token
+var reportState = false; // Default config for Google Home Report State
+var keys; // Store Google JWT, used for "Report State"
 if (!ghomeJWT) {
 	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
 }
@@ -41,16 +48,15 @@ else {
 	reportState = true;
 	keys = JSON.parse(ghomeJWT);
 }
-// ===========================================
 // Google Analytics ==========================
-var ua = require('universal-analytics');
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-//=============================================
-// Passport Config, Local *and* Oauth Support =
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
@@ -73,17 +79,9 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	});
 });
 passport.use(accessTokenStrategy);
-//===========================================
-// MQTT =====================================
-var mqtt = require('mqtt');
-//===========================================
-// MQTT ENV variables========================
-var mqtt_user = (process.env.MQTT_USER);
-var mqtt_password = (process.env.MQTT_PASSWORD);
-var mqtt_port = (process.env.MQTT_PORT || "1883");
-var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-//===========================================
-// MQTT Config ==============================
+///////////////////////////////////////////////////////////////////////////
+// MQTT Client Configuration
+///////////////////////////////////////////////////////////////////////////
 var mqttClient;
 var mqttOptions = {
 	connectTimeout: 30 * 1000,
@@ -108,14 +106,10 @@ mqttClient.on('reconnect', function(){
 mqttClient.on('connect', function(){
 	logger.log('info', "[GHome API] MQTT connected, subscribing to 'response/#'")
 	mqttClient.subscribe('response/#');
-	// logger.log('info', "[GHome API] MQTT connected, subscribing to 'state/#'")
-	// mqttClient.subscribe('state/#');
 });
-//===========================================
-// Redis Client =============================
-var client = require('../config/redis')
-// ==========================================
-// Rate-limiter =============================
+///////////////////////////////////////////////////////////////////////////
+// Rate-limiter 
+///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
 const defaultLimiter = limiter({
@@ -136,48 +130,37 @@ const defaultLimiter = limiter({
 		res.status(429).json('Rate limit exceeded');
 	  }
 });
-// ==========================================
-// GHome Functions =========================
-const gHomeFunc = require('../functions/func-ghome');
-const sendState =  gHomeFunc.sendState;
-const queryDeviceState = gHomeFunc.queryDeviceState;
-const requestToken2 = gHomeFunc.requestToken2;
-// const isGhomeUser = gHomeFunc.isGhomeUser;
-// const gHomeSync = gHomeFunc.gHomeSync;
-// ==========================================
-// Services Functions =========================
-const servicesFunc = require('../functions/func-services');
-const updateUserServices = servicesFunc.updateUserServices;
-const removeUserServices = servicesFunc.removeUserServices;
-// ==========================================
-
-// Revised gToken variable assignment
+///////////////////////////////////////////////////////////////////////////
+// Homegraph API Token Request/ Refresh
+///////////////////////////////////////////////////////////////////////////
 requestToken2(keys, function(returnValue) {
 	gToken = returnValue;
-	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
+	logger.log('info', "[GHome API] Obtained Google HomeGraph OAuth token");
+	logger.log('debug', "[GHome API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 });
-
 // Refresh Google oAuth Token used for State Reporting
 var refreshToken = setInterval(function(){
 	requestToken2(keys, function(returnValue) {
 		gToken = returnValue;
-		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
+		logger.log('info', "[GHome API] Refreshed Google HomeGraph OAuth token");
+		logger.log('debug', "[GHome API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 	});
 },3540000);
-
-// ==========================================
-// GHome Action API =========================
+///////////////////////////////////////////////////////////////////////////
+// Main GHome Action API
+///////////////////////////////////////////////////////////////////////////
 router.post('/action', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
-
 	var serviceName = "Google"; // As user has authenticated, assume activeService
 	if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
 	
 	switch (intent) {
+		///////////////////////////////////////////////////////////////////////////
+		// SYNC
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
 			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
@@ -238,7 +221,6 @@ router.post('/action', defaultLimiter,
 							dev.attributes.colorTemperatureRange.temperatureMinK = parseInt(dev.attributes.colorTemperatureRange.temperatureMinK);
 							dev.attributes.colorTemperatureRange.temperatureMaxK = parseInt(dev.attributes.colorTemperatureRange.temperatureMaxK);
 						}
-
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							//dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
@@ -259,7 +241,6 @@ router.post('/action', defaultLimiter,
 							devs.push(dev);
 						}
 					}
-
 					// Build Response
 					var response = {
 						"requestId": requestId,
@@ -290,6 +271,8 @@ router.post('/action', defaultLimiter,
 			});
 			break;
 
+		///////////////////////////////////////////////////////////////////////////
+		// EXECUTE
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' : 
 			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
@@ -423,9 +406,9 @@ router.post('/action', defaultLimiter,
 				res.status(500).json({message: "An error occurred."});
 				if (debug == "true") {console.timeEnd('ghome-exec')};
 			});
-
 			break;
-
+		///////////////////////////////////////////////////////////////////////////
+		// QUERY
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.QUERY' :
 			logger.log('verbose', "[GHome Query API] Running device state query for user:" + req.user.username);
@@ -489,7 +472,8 @@ router.post('/action', defaultLimiter,
 				if (debug == "true") {console.timeEnd('ghome-query')};
 			});
 			break;
-
+		///////////////////////////////////////////////////////////////////////////
+		// DISCONNECT
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.DISCONNECT' : 
 			// Find service definition with Google URLs
@@ -523,42 +507,15 @@ router.post('/action', defaultLimiter,
 			break; 
 	}
 });
-
-// Convert Alexa Device Capabilities to Google Home-compatible
-function gHomeReplaceCapability(capability) {
-	// Limit supported traits, add new ones here
-	if(capability == "PowerController") {return "action.devices.traits.OnOff"}
-	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
-	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
-	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
-	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
-	else {return "Not Supported"}
-}
-
-// Convert Alexa Device Types to Google Home-compatible
-function gHomeReplaceType(type) {
-	// Limit supported device types, add new ones here
-	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
-	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
-	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
-	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
-	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
-	else {return "NA"}
-}
-/////////////////////// End GHome
-
-
 ///////////////////////////////////////////////////////////////////////////
-// MQTT Message Handlers
+// MQTT Message Event Handlers
 ///////////////////////////////////////////////////////////////////////////
 var onGoingCommands = {};
-
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	var arrTopic = topic.split("/"); 
 	var username = arrTopic[1];
 	var endpointId = arrTopic[2];
-
 	if (topic.startsWith('response/')){
 		logger.log('info', "[Command API] Acknowledged MQTT response message for topic: " + topic);
 		if (debug == "true") {console.time('mqtt-response')};
@@ -589,7 +546,6 @@ mqttClient.on('message',function(topic,message){
 											}
 										}
 										stateReport.payload.devices.states[device.endpointId] = response;
-
 										if (gToken != undefined) {
 											logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
 											sendState(gToken, stateReport);
@@ -623,8 +579,9 @@ mqttClient.on('message',function(topic,message){
 	}
 	// Leave Alexa API MQTT state listener to pickup all other MQTT state messages
 });
-
-// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
+///////////////////////////////////////////////////////////////////////////
+// Timer
+///////////////////////////////////////////////////////////////////////////
 var timeout = setInterval(function(){
 	var now = Date.now();
 	var keys = Object.keys(onGoingCommands);
@@ -647,7 +604,29 @@ var timeout = setInterval(function(){
 		}
 	}
 },500);
-
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
+// Convert Alexa Device Capabilities to Google Home-compatible
+function gHomeReplaceCapability(capability) {
+	// Limit supported traits, add new ones here
+	if(capability == "PowerController") {return "action.devices.traits.OnOff"}
+	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
+	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
+	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
+	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
+	else {return "Not Supported"}
+}
+// Convert Alexa Device Types to Google Home-compatible
+function gHomeReplaceType(type) {
+	// Limit supported device types, add new ones here
+	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
+	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
+	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
+	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
+	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
+	else {return "NA"}
+}
 // Nested attribute/ element tester
 function getSafe(fn) {
 	try {

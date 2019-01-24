@@ -1,39 +1,33 @@
-// Express Router ============================
-var express = require('express');
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-// ===========================================
-// Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
-var Devices = require('../models/devices');
-var Topics = require('../models/topics');
-var LostPassword = require('../models/lostPassword');
-// ===============================
-// Auth Handler ==============================
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
-var countries = require('countries-api');
 var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('../oauth');
 var url = require('url');
-// ===========================================
-// Winston Logger ============================
 var logger = require('../config/logger');
-var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
-// Google Analytics ==========================
 var ua = require('universal-analytics');
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
+var debug = (process.env.ALEXA_DEBUG || false);
+// Google Analytics ==========================
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-//===========================================
-// Passport Config, Local *and* Oauth Support =
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
@@ -56,9 +50,9 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	});
 });
 passport.use(accessTokenStrategy);
-//===========================================
-
+///////////////////////////////////////////////////////////////////////////
 // Authorization URI
+///////////////////////////////////////////////////////////////////////////
 router.get('/start',oauthServer.authorize(function(applicationID, redirectURI, done) {
 	if (typeof applicationID == "string") {applicationID = parseInt(applicationID)};
 	oauthModels.Application.findOne({ oauth_id: applicationID }, function(error, application) {
@@ -84,7 +78,6 @@ router.get('/start',oauthServer.authorize(function(applicationID, redirectURI, d
 			done(error);
 		}
 	});
-	
 // Oauth Scopes
 }),function(req,res){
 	var scopeMap = {
@@ -104,11 +97,10 @@ router.get('/start',oauthServer.authorize(function(applicationID, redirectURI, d
 		map: scopeMap
 	});
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Finish
+///////////////////////////////////////////////////////////////////////////
 router.post('/finish',function(req,res,next) {
-	//console.log("/auth/finish user: ", req.user);
-	//console.log(req.body);
-	//console.log(req.params);
 	if (req.user) {
 		logger.log("debug", "[OAuth2] User already logged in:" + req.user.username);
 		next();
@@ -135,8 +127,9 @@ router.post('/finish',function(req,res,next) {
 	//console.log("decision user: ", req);
 	done(null, { scope: req.oauth2.req.scope });
 }));
-
+///////////////////////////////////////////////////////////////////////////
 // Access Token URI
+///////////////////////////////////////////////////////////////////////////
 router.post('/exchange',function(req,res,next){
 	var appID = req.body['client_id'];
 	var appSecret = req.body['client_secret'];

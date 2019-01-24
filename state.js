@@ -1,20 +1,33 @@
-// Request =======================
-const request = require('request');
-// ===============================
-// Schema =======================
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var Account = require('./models/account');
 var oauthModels = require('./models/oauth');
 var Devices = require('./models/devices');
 var Topics = require('./models/topics');
 var LostPassword = require('./models/lostPassword');
-// ===============================
-// Winston Logger ============================
+var ua = require('universal-analytics');
+var mqtt = require('mqtt');
 var logger = require('./config/logger');
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
+const gHomeFunc = require('./functions/func-ghome');
+const sendState =  gHomeFunc.sendState;
+const queryDeviceState = gHomeFunc.queryDeviceState;
+const isGhomeUser = gHomeFunc.isGhomeUser;
+const requestToken2 = gHomeFunc.requestToken2;
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
+// MQTT ENV variables========================
+var mqtt_user = (process.env.MQTT_USER);
+var mqtt_password = (process.env.MQTT_PASSWORD);
+var mqtt_port = (process.env.MQTT_PORT || "1883");
+var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Google Auth JSON Web Token ================
 var gToken = undefined; // Store Report State OAuth Token
-const jwt = require('jsonwebtoken');
 const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
 var keys;
@@ -25,25 +38,15 @@ else {
 	reportState = true;
 	keys = JSON.parse(ghomeJWT);
 }
-// ===========================================
 // Google Analytics ==========================
-var ua = require('universal-analytics');
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-//===========================================
-// MQTT =====================================
-var mqtt = require('mqtt');
-//===========================================
-// MQTT ENV variables========================
-var mqtt_user = (process.env.MQTT_USER);
-var mqtt_password = (process.env.MQTT_PASSWORD);
-var mqtt_port = (process.env.MQTT_PORT || "1883");
-var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-//===========================================
-// MQTT Config ==============================
+///////////////////////////////////////////////////////////////////////////
+// MQTT Client Configuration
+///////////////////////////////////////////////////////////////////////////
 var mqttClient;
 var mqttOptions = {
 	connectTimeout: 30 * 1000,
@@ -69,34 +72,26 @@ mqttClient.on('connect', function(){
 	logger.log('info', "[State API] MQTT connected, subscribing to 'state/#'")
 	mqttClient.subscribe('state/#');
 });
-// GHome Functions =========================
-const gHomeFunc = require('./functions/func-ghome');
-const sendState =  gHomeFunc.sendState;
-const queryDeviceState = gHomeFunc.queryDeviceState;
-const isGhomeUser = gHomeFunc.isGhomeUser;
-const requestToken2 = gHomeFunc.requestToken2;
-// const gHomeSync = gHomeFunc.gHomeSync;
-// ==========================================
-// Revised gToken variable assignment
+
+///////////////////////////////////////////////////////////////////////////
+// Homegraph API Token Request/ Refresh
+///////////////////////////////////////////////////////////////////////////
 requestToken2(keys, function(returnValue) {
 	gToken = returnValue;
-	logger.log('verbose', "[GHome API] Ghome JWT callback returned OAuth token:" + JSON.stringify(gToken));
+	logger.log('info', "[State API] Obtained Google HomeGraph OAuth token");
+	logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 });
-
 // Refresh Google oAuth Token used for State Reporting
 var refreshToken = setInterval(function(){
 	requestToken2(keys, function(returnValue) {
-		gToken = returnValue;
-		logger.log('verbose', "[GHome API] Ghome JWT callback refreshed OAuth token:" + JSON.stringify(gToken));
+		logger.log('info', "[State API] Refreshed Google HomeGraph OAuth token");
+		logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 	});
 },3540000);
-// ==========================================
-
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Message Handlers
 ///////////////////////////////////////////////////////////////////////////
 var onGoingCommands = {};
-
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	var arrTopic = topic.split("/"); 
@@ -143,8 +138,9 @@ mqttClient.on('message',function(topic,message){
 		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
 	}
 });
-
-// Interval funciton, runs every 500ms once defined via setInterval: https://www.w3schools.com/js/js_timing.asp
+///////////////////////////////////////////////////////////////////////////
+// Timer
+///////////////////////////////////////////////////////////////////////////
 var timeout = setInterval(function(){
 	var now = Date.now();
 	var keys = Object.keys(onGoingCommands);
@@ -167,7 +163,9 @@ var timeout = setInterval(function(){
 		}
 	}
 },500);
-
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
 // Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
 function setstate(username, endpointId, payload) {
 	// Check payload has state property
@@ -396,7 +394,6 @@ function setstate(username, endpointId, payload) {
 		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
 	}
 }
-
 // Nested attribute/ element tester
 function getSafe(fn) {
 	//logger.log('debug', "[getSafe] Checking element exists:" + fn)

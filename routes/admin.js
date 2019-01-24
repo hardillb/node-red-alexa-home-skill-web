@@ -1,48 +1,42 @@
-// Express Router =======================
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-// ======================================
-// Schema =======================
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
-var Topics = require('../models/topics');
-var LostPassword = require('../models/lostPassword');
-// ===============================
-// Auth Handler ==================
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
-// ===============================
-// Winston Logger ==========================
 var logger = require('../config/logger');
-var debug = (process.env.ALEXA_DEBUG || false);
-// =========================================
-// Google Analytics ==========================
 var ua = require('universal-analytics');
+var client = require('../config/redis')
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
+var debug = (process.env.ALEXA_DEBUG || false);
+// MQTT Settings  =========================================
+var mqtt_user = (process.env.MQTT_USER);
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     enableAnalytics = true;
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
-//===========================================
-// Passport Config, Local Auth only =======================
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
-// ========================================================
-// MQTT Settings  =========================================
-var mqtt_user = (process.env.MQTT_USER);
-// ========================================================
-// Redis Client =============================
-var client = require('../config/redis')
-// ==========================================
-// Rate-limiter =============================
+///////////////////////////////////////////////////////////////////////////
+// Rate-limiter 
+///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
 const defaultLimiter = limiter({
@@ -63,7 +57,9 @@ const defaultLimiter = limiter({
 		res.status(429).json('Rate limit exceeded');
 	  }
 });
-// ==========================================
+///////////////////////////////////////////////////////////////////////////
+// Services
+///////////////////////////////////////////////////////////////////////////
 router.get('/services', defaultLimiter,
 	ensureAuthenticated, 
 	function(req,res){
@@ -88,7 +84,9 @@ router.get('/services', defaultLimiter,
 			res.status(401).send();
 		}
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Users
+///////////////////////////////////////////////////////////////////////////
 router.get('/users', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -103,7 +101,6 @@ router.get('/users', defaultLimiter,
 				ua: req.headers['user-agent']
 			}
 			if (enableAnalytics) {visitor.pageview(view).send()};
-
 			const countUsers = Account.countDocuments({});
 			const usersAndCountDevices = Account.aggregate([
 				{ "$lookup": {
@@ -134,7 +131,9 @@ router.get('/users', defaultLimiter,
 			res.status(401).send();
 		}
 });
-
+///////////////////////////////////////////////////////////////////////////
+// User Devices
+///////////////////////////////////////////////////////////////////////////
 router.get('/user-devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
@@ -160,7 +159,9 @@ router.get('/user-devices', defaultLimiter,
 			res.status(401).send();
 		}
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Services (Put)
+///////////////////////////////////////////////////////////////////////////
 router.put('/services', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
@@ -175,7 +176,9 @@ function(req,res){
         res.status(401).send();
     }
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Service (Post)
+///////////////////////////////////////////////////////////////////////////
 router.post('/service/:id', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
@@ -196,7 +199,9 @@ function(req,res){
                 }
         });
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Service (Delete)
+///////////////////////////////////////////////////////////////////////////
 router.delete('/service/:id', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
@@ -209,7 +214,9 @@ function(req,res){
             }
         });
 });
-
+///////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////
 function ensureAuthenticated(req,res,next) {
 	//console.log("ensureAuthenticated - %j", req.isAuthenticated());
 	//console.log("ensureAuthenticated - %j", req.user);

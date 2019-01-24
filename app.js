@@ -1,3 +1,6 @@
+///////////////////////////////////////////////////////////////////////////
+// Depends
+///////////////////////////////////////////////////////////////////////////
 var favicon = require('serve-favicon')
 var flash = require('connect-flash');
 var morgan = require('morgan');
@@ -7,33 +10,21 @@ const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
-// MongoDB =======================
+///////////////////////////////////////////////////////////////////////////
+// MongoDB
+///////////////////////////////////////////////////////////////////////////
 var db = require('./config/db');
-// ===============================
 // Schema =======================
 var Account = require('./models/account');
-var oauthModels = require('./models/oauth');
-var Devices = require('./models/devices');
 var Topics = require('./models/topics');
-var LostPassword = require('./models/lostPassword');
-// ===============================
-// Auth Handler ==================
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
-var countries = require('countries-api');
-// ===============================
-// Winston Logger ============================
 var logger = require('./config/logger');
+///////////////////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
-// ===========================================
-// Passport Config, Local Auth only =======================
-passport.use(new LocalStrategy(Account.authenticate()));
-passport.use(new BasicStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
-// ========================================================
-
 // MongoDB Settings, used for expression session handler DB connection
 var mongo_user = (process.env.MONGO_USER);
 var mongo_password = (process.env.MONGO_PASSWORD);
@@ -44,11 +35,20 @@ var mqtt_user = (process.env.MQTT_USER);
 var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-
+// Cookie Secret
 var cookieSecret = (process.env.COOKIE_SECRET || 'ihytsrf334');
 if (cookieSecret == 'ihytsrf334') {logger.log("warn", "[App] Using default Cookie Secret, please supply new secret using COOKIE_SECRET environment variable")}
 else {logger.log("info", "[App] Using user-defined cookie secret")}
-
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.use(new BasicStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+///////////////////////////////////////////////////////////////////////////
+// Main
+///////////////////////////////////////////////////////////////////////////
 // Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){
 	if (!error && !account) {
@@ -82,14 +82,12 @@ Account.findOne({username: mqtt_user}, function(error, account){
 });
 
 var app = express();
-
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
 app.use(favicon('static/favicon.ico'));
 app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
 app.use(cookieParser(cookieSecret));
 app.use(flash());
-
 // Session handler
 app.use(session({
 	store: new mongoStore({
@@ -99,7 +97,6 @@ app.use(session({
 	saveUninitialized: true,
 	secret: 'ihytsrf334'
 }));
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
@@ -128,14 +125,16 @@ const rtAuth = require('./routes/auth');
 const rtGhome = require('./routes/ghome'); 
 const rtAlexa = require('./routes/alexa'); 
 
+///////////////////////////////////////////////////////////////////////////
+// Load Routes
+///////////////////////////////////////////////////////////////////////////
 app.use('/', rtDefault);
-app.use('/admin', rtAdmin); // Minor admin page changes
-app.use('/auth', rtAuth); // OAuth endpoints remain as-is
-app.use('/api/ghome', rtGhome); // Google Home API changes
-app.use('/api/v1', rtAlexa); // Alexa API continues as-is
-// Load State API ==========================
-var state = require('./state');
-// ====================================
+app.use('/admin', rtAdmin); // Admin Interface
+app.use('/auth', rtAuth); // OAuth endpoints
+app.use('/api/ghome', rtGhome); // Google Home API
+app.use('/api/v1', rtAlexa); // Alexa API
+
+var state = require('./state'); // Load State API
 
 module.exports = app;
 
