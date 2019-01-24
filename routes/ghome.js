@@ -172,11 +172,11 @@ router.post('/action', defaultLimiter,
 	var intent = req.body.inputs[0].intent;
 	var requestId = req.body.requestId;
 
-	if (req.user.hasOwnProperty('activeServices') && req.user.activeServices.indexOf('Google') == -1) {
+	if (req.user.activeServices && req.user.activeServices.indexOf('Google') == -1) {
 		logger.log('verbose', 'activeServices element does not contain:' + 'Google');
 		updateUserServices(req.user.username, "Google"); // Async add service to user.activeServices
 	}
-	else if (!req.user.hasOwnProperty('activeServices')) {
+	else if (!req.user.activeServices) {
 		logger.log('verbose', 'No activeServices element');
 		updateUserServices(req.user.username, "Google"); // Create element user.activeServices and add service
 	}
