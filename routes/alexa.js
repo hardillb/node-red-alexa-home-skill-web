@@ -1213,6 +1213,12 @@ mqttClient.on('message',function(topic,message){
 													}
 													stateReport.payload.devices.states[device.endpointId] = response;
 													logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
+
+													if (gToken != undefined) {
+														logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
+														sendState(gToken, stateReport);
+													}
+													else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 												}
 											});											
 										}
