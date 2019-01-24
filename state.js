@@ -56,7 +56,7 @@ mqttClient.on('connect', function(){
 	mqttClient.subscribe('state/#');
 });
 // GHome Functions =========================
-const gHomeFunc = require('../functions/func-ghome');
+const gHomeFunc = require('./functions/func-ghome');
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
