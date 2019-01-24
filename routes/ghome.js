@@ -448,22 +448,19 @@ router.post('/action', defaultLimiter,
 						}
 					}
 
-					for (let i = 0; i < arrQueryDevices.length; i++) {
-						fetchData(arrQueryDevices[i]).then(function () {
-							logger.log('debug', "[GHome Query API] Trying to match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
-							var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
-							if (data) {
-								queryDeviceState(data, function(response) {
-									if (response != undefined) {
-										response.payload.devices[data.endpointId] = reponse;
-									}
-								});
-							}
-							else {
-								logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
-							}
-						});
-					}
+					asyncForEach(arrQueryDevices, async (dev) => {
+						var data = devices.find(obj => obj.endpointId == dev.id);
+						if (data) {
+							await queryDeviceState(data, function(response) {
+								if (response != undefined) {
+									response.payload.devices[data.endpointId] = reponse;
+								}
+							});
+						}
+						else {
+							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
+						}
+					})
 
 /* 					for (var i=0; i< arrQueryDevices.length; i++) {
 						// Find device in array of user devices returned in promise
@@ -707,6 +704,10 @@ function getSafe(fn) {
 } */
 
 
-
+async function asyncForEach(array, callback) {
+	for (let index = 0; index < array.length; index++) {
+	  await callback(array[index], index, array);
+	}
+  }
 
 module.exports = router;
