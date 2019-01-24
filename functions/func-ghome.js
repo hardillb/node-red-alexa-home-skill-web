@@ -146,7 +146,7 @@ module.exports.sendState = function sendState(token, response) {
 	});
 }
 
-module.exports.sendState = function requestToken2(keys, callback) {
+module.exports.requestToken2 = function requestToken2(keys, callback) {
 	if (reportState == true) {
 		var payload = {
 				"iss": keys.client_email,
