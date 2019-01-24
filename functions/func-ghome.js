@@ -117,11 +117,11 @@ module.exports.isGhomeUser = function isGhomeUser(username, callback) {
 	Promise.all([pUsers]).then(([users]) => {
         if (users){
 			if (users[0].activeServices && users[0].activeServices.indexOf('Google') != -1) {
-				logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
+				//logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
 				callback(true);
 			}
 			else {
-				logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
+				//logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
 				callback(false);
 			}
 		}
