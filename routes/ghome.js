@@ -431,6 +431,11 @@ router.post('/action', defaultLimiter,
 			if (enableAnalytics) {visitor.event(params).send()};
 
 			if (debug == "true") {console.time('ghome-query')};
+
+
+
+
+
 			var findUser = Account.find({username: req.user.username});
 			var findDevices = Devices.find({username: req.user.username});
 			Promise.all([findUser, findDevices]).then(([user, devices]) => {
@@ -442,7 +447,25 @@ router.post('/action', defaultLimiter,
 							"devices" : {}
 						}
 					}
-					for (var i=0; i< arrQueryDevices.length; i++) {
+
+					for (let i = 0; i < arrQueryDevices.length; i++) {
+						fetchData(arrQueryDevices[i]).then(function () {
+							logger.log('debug', "[GHome Query API] Trying to match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
+							var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
+							if (data) {
+								queryDeviceState(data, function(response) {
+									if (response != undefined) {
+										response.payload.devices[data.endpointId] = reponse;
+									}
+								});
+							}
+							else {
+								logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
+							}
+						});
+					}
+
+/* 					for (var i=0; i< arrQueryDevices.length; i++) {
 						// Find device in array of user devices returned in promise
 						logger.log('debug', "[GHome Query API] Trying to match requested device: " + arrQueryDevices[i].id + " with user-owned endpointId");	
 						var data = devices.find(obj => obj.endpointId == arrQueryDevices[i].id);
@@ -460,7 +483,9 @@ router.post('/action', defaultLimiter,
 						else {
 							logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
 						}
-					}
+					} */
+					// callback response
+
 					// Send Response
 					logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 					res.status(200).json(response);
