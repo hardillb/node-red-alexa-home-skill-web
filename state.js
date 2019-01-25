@@ -81,6 +81,7 @@ requestToken2(keys, function(returnValue) {
 // Refresh Google oAuth Token used for State Reporting
 var refreshToken = setInterval(function(){
 	requestToken2(keys, function(returnValue) {
+		gToken = returnValue;
 		logger.log('info', "[State API] Refreshed Google HomeGraph OAuth token");
 		logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 	});
