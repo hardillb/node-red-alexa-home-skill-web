@@ -249,7 +249,6 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
 		logger.log('verbose', "[New User] Looking up region for country: " + req.body.country.toUpperCase());
         const pCountry = countries.findByCountryCode(req.body.country.toUpperCase());
         Promise.all([pCountry]).then(([userCountry]) => {
-            //if (country.statusCode == 200) {
 			if (userCountry.statusCode == 200) {
                 var region = userCountry.data[0].region;
                 Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
@@ -347,8 +346,8 @@ router.post('/changePassword', restrictiveLimiter, ensureAuthenticated, function
         if (!err && user) {
 			logger.log('debug', "[Change Password] Old hash:: " + user.mqttPass);
             user.setPassword(req.body.password, function(e,u){
-                // var s = Buffer.from(account.salt, 'hex').toString('base64');
-                // var h = Buffer.from(account.hash, 'hex').toString(('base64'));
+                var s = Buffer.from(user.salt, 'hex').toString('base64');
+                var h = Buffer.from(user.hash, 'hex').toString(('base64'));
                 var mqttPass = "PBKDF2$sha256$901$" + user.salt + "$" + user.hash;
                 u.mqttPass = mqttPass;
                 u.save(function(error){
