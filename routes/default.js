@@ -344,9 +344,9 @@ router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req,
 router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
     Account.findOne({username: req.user.username}, function (err, user){
         if (!err && user) {
-			logger.log('debug', "[Change Password] req.body: " + JSON.stringify(req.body));
-			logger.log('debug', "[Change Password] Setting password to: " + req.body.password);
-			logger.log('debug', "[Change Password] Old hash: " + user.mqttPass);
+			//logger.log('debug', "[Change Password] req.body: " + JSON.stringify(req.body));
+			//logger.log('debug', "[Change Password] Setting password to: " + req.body.password);
+			//logger.log('debug', "[Change Password] Old hash: " + user.mqttPass);
             user.setPassword(req.body.password, function(e,u){
                 //var s = Buffer.from(user.salt, 'hex').toString('base64');
                 //var h = Buffer.from(user.hash, 'hex').toString(('base64'));
@@ -354,7 +354,6 @@ router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req
                 u.mqttPass = mqttPass;
                 u.save(function(error){
                     if (!error) {
-                        //console.log("Chagned %s's password", u.username);
                         var params = {
                             ec: "Security",
                             ea: "Changed password for username:" + u.username,
