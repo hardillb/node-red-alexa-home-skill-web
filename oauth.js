@@ -124,8 +124,8 @@ server.exchange(oauth2orize.exchange.refreshToken({
 				}
 			});
 		} else {
-			if (!refresh) {logger.log("debug", "[OAuth Server] Error, refresh token not found for application:" + application.title)};
-			if (refresh.application != application.id){logger.log("debug", "[OAuth Server] Error, refresh.application: " + refresh.application + " does not match application.id:" + application.id)};
+			if (!refresh && application != null) {logger.log("debug", "[OAuth Server] Error, refresh token not found for application:" + application.title)};
+			if (application != null && refresh.application != application.id){logger.log("debug", "[OAuth Server] Error, refresh.application: " + refresh.application + " does not match application.id:" + application.id)};
 			done(error, false);
 		}
 	});
