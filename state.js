@@ -366,6 +366,10 @@ function setstate(username, endpointId, payload) {
 															}
 														}
 													}
+
+													var count = Object.keys(response).length;
+													logger.log('debug', "[State API] queryDeviceState response property count: " + count);
+
 													stateReport.payload.devices.states[device.endpointId] = response;
 													logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
 
