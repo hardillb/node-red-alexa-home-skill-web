@@ -200,9 +200,9 @@ router.get('/logout', defaultLimiter, function(req,res){
 });
 
 ///////////////////////////////////////////////////////////////////////////
-// Login (Post)
+// Login (Post) - restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/login', restrictiveLimiter,
+router.post('/login', defaultLimiter,
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
 		var params = {
@@ -241,9 +241,9 @@ router.get('/newuser', defaultLimiter, function(req,res){
     res.render('pages/register',{user: req.user, newuser: true});
 });
 ///////////////////////////////////////////////////////////////////////////
-// Register/ Newuser (Post)
+// Register/ Newuser (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/newuser', restrictiveLimiter, function(req,res){
+router.post('/newuser', defaultLimiter, function(req,res){
     var body = JSON.parse(JSON.stringify(req.body));
     if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
 		logger.log('verbose', "[New User] Looking up region for country: " + req.body.country.toUpperCase());
@@ -339,9 +339,9 @@ router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req,
     res.render('pages/changePassword', {user: req.user});
 });
 ///////////////////////////////////////////////////////////////////////////
-// changePassword (Post)
+// changePassword (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/changePassword', restrictiveLimiter, ensureAuthenticated, function(req, res, next){
+router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
     Account.findOne({username: req.user.username}, function (err, user){
         if (!err && user) {
 			logger.log('debug', "[Change Password] Old hash:: " + user.mqttPass);
@@ -393,9 +393,9 @@ router.get('/lostPassword', defaultLimiter, function(req, res, next){
     res.render('pages/lostPassword', { user: req.user});
 });
 ///////////////////////////////////////////////////////////////////////////
-// lostPassword (Post)
+// lostPassword (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/lostPassword', restrictiveLimiter, function(req, res, next){
+router.post('/lostPassword', defaultLimiter, function(req, res, next){
     var email = req.body.email;
     Account.findOne({email: email}, function(error, user){
         if (!error){
