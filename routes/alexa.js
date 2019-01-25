@@ -966,7 +966,7 @@ mqttClient.on('message',function(topic,message){
 						logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response)
 						
-					 	// Generate GHome state JSON object and send to HomeGraph API
+					/* // Generate GHome state JSON object and send to HomeGraph API
 						if (reportState == true) {
 							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
 								if (returnValue == true) {
@@ -999,7 +999,7 @@ mqttClient.on('message',function(topic,message){
 								}
 								else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + returnValue)}
 							});
-						}
+						} */
 					}
 					else {
 						logger.log('debug', "[Alexa API] Alexa MQTT command successful");

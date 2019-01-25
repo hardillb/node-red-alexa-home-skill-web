@@ -351,7 +351,7 @@ function setstate(username, endpointId, payload) {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 
 						// Generate GHome state JSON object and send to HomeGraph API
-/* 							if (reportState == true) {
+ 							if (reportState == true) {
 							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
 								if (returnValue == true) {
 									var pUser = Account.findOne({username: username});
@@ -369,22 +369,22 @@ function setstate(username, endpointId, payload) {
 														}
 													}
 													stateReport.payload.devices.states[device.endpointId] = response;
-													logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
+													logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
 
 													if (gToken != undefined) {
-														logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
+														logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
 														sendState(gToken, stateReport);
 													}
-													else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
+													else {logger.log('verbose', '[State API] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 												}
 											});											
 										}
-										catch (e) {logger.log('debug', "[Alexa API] queryDeviceState error: " + e)}
+										catch (e) {logger.log('debug', "[State API] queryDeviceState error: " + e)}
 									});
 								}
-								else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + returnValue)}
+								else {logger.log('debug', "[State API] NOT generating state report, gHomeUser value:" + returnValue)}
 							});
-						} */
+						}
 					}
 				});
 			}
