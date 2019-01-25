@@ -249,7 +249,8 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
 		logger.log('verbose', "[New User] Looking up region for country: " + req.body.country.toUpperCase());
         const pCountry = countries.findByCountryCode(req.body.country.toUpperCase());
         Promise.all([pCountry]).then(([userCountry]) => {
-            if (country.statusCode == 200) {
+            //if (country.statusCode == 200) {
+			if (userCountry.statusCode == 200) {
                 var region = userCountry.data[0].region;
                 Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
                     if (err) {
