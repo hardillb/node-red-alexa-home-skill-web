@@ -356,7 +356,7 @@ function setstate(username, endpointId, payload) {
 								if (returnValue == true) {
 									var pUser = Account.findOne({username: username});
 									var pDevice = Devices.findOne({username: username, endpointId: endpointId});
-									Promise.all([pUser, pDevice]).then(([device, user]) => {
+									Promise.all([pUser, pDevice]).then(([user, device]) => {
 										try {
 											logger.log('debug', "[State API] GHome Report State using device:" + JSON.stringify(device));
 											queryDeviceState(device, function(response) {
