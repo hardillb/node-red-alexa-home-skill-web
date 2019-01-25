@@ -521,7 +521,7 @@ router.post('/account/:user_id', defaultLimiter,
 		if (req.user.username === mqtt_user || req.user.username == user.username) { // Check is admin user, or user themselves
 			const pCountry = countries.findByCountryCode(user.country.toUpperCase());
 			Promise.all([pCountry]).then(([userCountry]) => {
-				if (country.statusCode == 200) {
+				if (userCountry.statusCode == 200) {
 					var region = userCountry.data[0].region;
 					Account.findOne({_id: req.params.user_id},
 						function(err, data){
