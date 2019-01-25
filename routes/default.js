@@ -362,7 +362,7 @@ router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req
                             }
 						if (enableAnalytics) {visitor.event(params).send()};
 						logger.log('verbose', "[Change Password] Changed password for: " + u.username);
-						logger.log('debug', "[Change Password] New hash: " + mqttPass);
+						//logger.log('debug', "[Change Password] New hash: " + mqttPass);
                         res.status(200).send();
                     } else {
                         logger.log('warn', "[Change Password] Unable to change password for: " + u.username);
