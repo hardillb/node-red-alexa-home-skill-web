@@ -2,10 +2,7 @@
 // Depends
 ///////////////////////////////////////////////////////////////////////////
 var Account = require('./models/account');
-var oauthModels = require('./models/oauth');
 var Devices = require('./models/devices');
-var Topics = require('./models/topics');
-var LostPassword = require('./models/lostPassword');
 var ua = require('universal-analytics');
 var mqtt = require('mqtt');
 var logger = require('./config/logger');

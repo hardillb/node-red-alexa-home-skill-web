@@ -20,11 +20,6 @@ var client = require('../config/redis')
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-const gHomeFunc = require('../functions/func-ghome');
-const sendState =  gHomeFunc.sendState;
-const queryDeviceState = gHomeFunc.queryDeviceState;
-const isGhomeUser = gHomeFunc.isGhomeUser;
-const requestToken2 = gHomeFunc.requestToken2;
 const servicesFunc = require('../functions/func-services');
 const updateUserServices = servicesFunc.updateUserServices;
 ///////////////////////////////////////////////////////////////////////////
@@ -36,18 +31,6 @@ var mqtt_user = (process.env.MQTT_USER);
 var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-// Google Auth JSON Web Token ================
-var gToken = undefined; // Store Report State OAuth Token
-const ghomeJWT = process.env['GHOMEJWT'];
-var reportState = false;
-var keys;
-if (!ghomeJWT) {
-	logger.log('warn', "[Alexa API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
-}
-else {
-	reportState = true;
-	keys = JSON.parse(ghomeJWT);
-}
 // Google Analytics ==========================
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
@@ -161,22 +144,6 @@ const getStateLimiter = limiter({
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
   });
-///////////////////////////////////////////////////////////////////////////
-// Homegraph API Token Request/ Refresh
-///////////////////////////////////////////////////////////////////////////
-requestToken2(keys, function(returnValue) {
-	gToken = returnValue;
-	logger.log('info', "[Alexa API] Obtained Google HomeGraph OAuth token");
-	logger.log('debug', "[Alexa API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-});
-// Refresh Google oAuth Token used for State Reporting
-var refreshToken = setInterval(function(){
-	requestToken2(keys, function(returnValue) {
-		gToken = returnValue;
-		logger.log('info', "[Alexa API] Refreshed Google HomeGraph OAuth token");
-		logger.log('debug', "[Alexa API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-	});
-},3540000);
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
 ///////////////////////////////////////////////////////////////////////////
@@ -965,41 +932,6 @@ mqttClient.on('message',function(topic,message){
 					if (commandWaiting.hasOwnProperty('response')) {
 						logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response)
-						
-					/* // Generate GHome state JSON object and send to HomeGraph API
-						if (reportState == true) {
-							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
-								if (returnValue == true) {
-									var pDevice = Devices.findOne({username: username, endpointId: endpointId});
-									Promise.all([pDevice]).then(([device]) => {
-										try {
-											queryDeviceState(device, function(response) {
-												if (response != undefined) {
-													var stateReport = {
-														"agentUserId": commandWaiting.userId,
-														"payload": {
-															"devices" : {
-																"states": {}
-															}
-														}
-													}
-													stateReport.payload.devices.states[device.endpointId] = response;
-													logger.log('debug', "[Alexa API] Generated GHome state report: " + JSON.stringify(stateReport));
-
-													if (gToken != undefined) {
-														logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
-														sendState(gToken, stateReport);
-													}
-													else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
-												}
-											});											
-										}
-										catch (e) {logger.log('debug', "[Alexa API] queryDeviceState error: " + e)}
-									});
-								}
-								else {logger.log('debug', "[Alexa API] NOT generating state report, gHomeUser value:" + returnValue)}
-							});
-						} */
 					}
 					else {
 						logger.log('debug', "[Alexa API] Alexa MQTT command successful");

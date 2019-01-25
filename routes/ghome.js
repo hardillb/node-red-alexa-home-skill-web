@@ -22,9 +22,7 @@ var client = require('../config/redis')
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
-const requestToken2 = gHomeFunc.requestToken2;
 const updateUserServices = servicesFunc.updateUserServices;
 const removeUserServices = servicesFunc.removeUserServices;
 ///////////////////////////////////////////////////////////////////////////
@@ -36,18 +34,6 @@ var mqtt_user = (process.env.MQTT_USER);
 var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-// Google Auth JSON Web Token ================
-const ghomeJWT = process.env['GHOMEJWT']; // Google Auth JSON Web Token
-var gToken = undefined; // Store "Report State" OAuth Token
-var reportState = false; // Default config for Google Home Report State
-var keys; // Store Google JWT, used for "Report State"
-if (!ghomeJWT) {
-	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
-}
-else {
-	reportState = true;
-	keys = JSON.parse(ghomeJWT);
-}
 // Google Analytics ==========================
 var enableAnalytics = false;
 if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
@@ -130,22 +116,6 @@ const defaultLimiter = limiter({
 		res.status(429).json('Rate limit exceeded');
 	  }
 });
-///////////////////////////////////////////////////////////////////////////
-// Homegraph API Token Request/ Refresh
-///////////////////////////////////////////////////////////////////////////
-requestToken2(keys, function(returnValue) {
-	gToken = returnValue;
-	logger.log('info', "[GHome API] Obtained Google HomeGraph OAuth token");
-	logger.log('debug', "[GHome API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-});
-// Refresh Google oAuth Token used for State Reporting
-var refreshToken = setInterval(function(){
-	requestToken2(keys, function(returnValue) {
-		gToken = returnValue;
-		logger.log('info', "[GHome API] Refreshed Google HomeGraph OAuth token");
-		logger.log('debug', "[GHome API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-	});
-},3540000);
 ///////////////////////////////////////////////////////////////////////////
 // Main GHome Action API
 ///////////////////////////////////////////////////////////////////////////
@@ -529,34 +499,6 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Google") {
 					logger.log('debug', "[Command API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
 					commandWaiting.res.status(200).json(commandWaiting.response);
-					/* 	// Generate state JSON object and send to HomeGraph API
-						if (reportState == true) {
-							var pDevice = Devices.findOne({username: username, endpointId: endpointId});
-							Promise.all([pDevice]).then(([device]) => {
-								try {
-									queryDeviceState(device, function(response) {
-										if (response != undefined) {
-											var stateReport = {
-												"requestId" : commandWaiting.requestId,
-												"agentUserId": commandWaiting.userId,
-												"payload": {
-													"devices" : {
-														"states": {}
-													}
-												}
-											}
-											stateReport.payload.devices.states[device.endpointId] = response;
-											if (gToken != undefined) {
-												logger.log('verbose', '[GHome Report State] Calling Send State with gToken:' + JSON.stringify(gToken));
-												sendState(gToken, stateReport);
-											}
-											else {logger.log('verbose', '[GHome Report State] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
-										}
-									});							
-								}
-								catch (e) {logger.log('debug', "[GHome Query API] queryDeviceState error: " + e)}
-							});
-					} */
 				}		
 			} else {
 				// Google Home failure response
