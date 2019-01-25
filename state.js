@@ -366,18 +366,17 @@ function setstate(username, endpointId, payload) {
 															}
 														}
 													}
+													var countProps = Object.keys(response).length; // Drop anything that simply has online: true property
+													if (countProps >= 2) {
+														stateReport.payload.devices.states[device.endpointId] = response;
+														logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
 
-													var count = Object.keys(response).length;
-													logger.log('debug', "[State API] queryDeviceState response property count: " + count);
-
-													stateReport.payload.devices.states[device.endpointId] = response;
-													logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
-
-													if (gToken != undefined) {
-														logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
-														sendState(gToken, stateReport);
+														if (gToken != undefined) {
+															logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
+															sendState(gToken, stateReport);
+														}
+														else {logger.log('verbose', '[State API] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 													}
-													else {logger.log('verbose', '[State API] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 												}
 											});											
 										}
