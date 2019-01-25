@@ -383,7 +383,7 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] queryDeviceState error: " + e)}
 									});
 								}
-								else {logger.log('debug', "[State API] NOT generating state report, gHomeUser value:" + returnValue)}
+								//else {logger.log('debug', "[State API] NOT generating state report, gHomeUser value:" + returnValue)}
 							});
 						}
 					}
