@@ -344,8 +344,9 @@ router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req,
 router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
     Account.findOne({username: req.user.username}, function (err, user){
         if (!err && user) {
+			logger.log('debug', "[Change Password] req.body: " + req.body);
 			logger.log('debug', "[Change Password] Setting password to: " + req.body.password);
-			logger.log('debug', "[Change Password] Old hash:: " + user.mqttPass);
+			logger.log('debug', "[Change Password] Old hash: " + user.mqttPass);
             user.setPassword(req.body.password, function(e,u){
                 //var s = Buffer.from(user.salt, 'hex').toString('base64');
                 //var h = Buffer.from(user.hash, 'hex').toString(('base64'));
@@ -362,7 +363,7 @@ router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req
                             }
 						if (enableAnalytics) {visitor.event(params).send()};
 						logger.log('verbose', "[Change Password] Changed password for: " + u.username);
-						logger.log('debug', "[Change Password] New hash:: " + mqttPass);
+						logger.log('debug', "[Change Password] New hash: " + mqttPass);
                         res.status(200).send();
                     } else {
                         logger.log('warn', "[Change Password] Unable to change password for: " + u.username);
