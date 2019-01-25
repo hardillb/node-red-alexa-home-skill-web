@@ -246,6 +246,7 @@ router.get('/newuser', defaultLimiter, function(req,res){
 router.post('/newuser', restrictiveLimiter, function(req,res){
     var body = JSON.parse(JSON.stringify(req.body));
     if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
+		logger.log('verbose', "[New User] Looking up region for country: " + req.body.country.toUpperCase());
         const pCountry = countries.findByCountryCode(req.body.country.toUpperCase());
         Promise.all([pCountry]).then(([userCountry]) => {
             if (country.statusCode == 200) {
@@ -290,7 +291,7 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
                 });
             }
         }).catch(err => {
-            logger.log('warn', "[New User] User region lookup failed.");
+            logger.log('warn', "[New User] User region lookup failed, error:" + err);
             res.status(500).send("Account creation failed, please check country is correctly specified!");
         });
     }
