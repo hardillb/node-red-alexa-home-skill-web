@@ -467,7 +467,7 @@ router.post('/action', defaultLimiter,
 					Promise.all([pGrantCodes, pAccessTokens, pRefreshTokens]).then(result => {
 						logger.log('info', "[GHome Disconnect API] Deleted GrantCodes, RefreshToken and AccessTokens for user account: " + userId)
 						res.status(200).send();
-						removeUserServices(req.user, "Google")
+						removeUserServices(req.user.username, "Google")
 					}).catch(err => {
 					 	logger.log('warn', "[GHome Disconnect API] Failed to delete GrantCodes, RefreshToken and AccessTokens for user account: " + userId);
 					 	res.status(500).json({error: err});
