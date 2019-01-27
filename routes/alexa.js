@@ -173,13 +173,13 @@ router.get('/devices', defaultLimiter,
 					dev.friendlyName = data[i].friendlyName;
 					dev.description = data[i].description;
 					dev.endpointId = "" + data[i].endpointId;
-					dev.reportState = data[i].reportState;
+					//dev.reportState = data[i].reportState;
 					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
 					dev.capabilities = [];
 					// Grab device attributes for use in building discovery response
 					var devAttribues = (data[i].attributes || null);
 					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability, dev.reportState, devAttribues))
+						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttribues))
 					});
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
