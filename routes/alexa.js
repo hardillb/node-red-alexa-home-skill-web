@@ -24,6 +24,9 @@ const servicesFunc = require('../functions/func-services');
 const alexaFunc = require('../functions/func-alexa');
 const updateUserServices = servicesFunc.updateUserServices;
 const queryDeviceState = alexaFunc.queryDeviceState;
+const queryDeviceState = alexaFunc.queryDeviceState;
+const saveGrant = alexaFunc.saveGrant;
+const requestAccessToken = alexaFunc.requestAccessToken;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
@@ -734,183 +737,57 @@ router.post('/command2',
 	}
 );
 ///////////////////////////////////////////////////////////////////////////
-// Alexa Authorization Handler (Not in Use)
+// Alexa Authorization Handler (Under Development)
 ///////////////////////////////////////////////////////////////////////////
 router.post('/authorization', getStateLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-		
-	/*	Process flow:
-
-		0. If client_id and client_secret ENV vars exit
-		1. Capture grant.code from inbound Lambda POST, example:
-
 		if (req.body.directive.payload.grant.type == "OAuth2.AuthorizationCode") {
-			AlexaAuthGrantCode.GrantCode.findOne({user: req.user},function(error,grant){
-				if (!grant) {
-					var grantcode = req.body.payload.grant.code;
-					
-					// Store the GrantCode
-					var grant = new AlexaAuthGrantCode.GrantCode({
-						user: user
+			var messageId = req.body.directve.header.messageId;
+			var grantcode = req.body.directve.payload.grant.code;
+			// Pre-build success and failure responses
+			var success = {
+				event: {
+				header: {
+					messageId: messageId,
+					namespace: "Alexa.Authorization",
+					name: "AcceptGrant.Response",
+					payloadVersion: "3"
+				},
+				payload: {}
+				}
+			};
+			var failure = {
+				event: {
+				header: {
+					messageId: messageId,
+					namespace: "Alexa.Authorization",
+					name: "ErrorResponse",
+					payloadVersion: "3"
+				},
+				payload: {
+					type: "ACCEPT_GRANT_FAILED",
+					message: "Failed to handle the AcceptGrant directive"
+				}
+				}
+			};
+			// Save GrantCode and attempt to generate AccessToken
+			saveGrant(req.user, grantcode, function(grant) {
+				if (grant != undefined) {
+					requestAccessToken(req.user, function(accesstoken) {
+						if (accesstoken != undefined) {
+							res.status(200).json(success);
+						}
+						else {
+							res.status(200).json(failure);
+						}
 					});
-					grant.save(function(error) {
-						callback(error, error ? null : grantcode);
-					});
-
+				}
+				else {
+					res.status(200).json(failure);
 				}
 			});
-
-
-
-			// Use the Grant Code to request Refresh and Acces Token
-
 		}
-
-				{
-					"directive": {
-						"header": {
-						"namespace": "Alexa.Authorization",
-						"name": "AcceptGrant",
-						"messageId": "5f8a426e-01e4-4cc9-8b79-65f8bd0fd8a4",
-						"payloadVersion": "3"
-						},
-						"payload": {
-						"grant": {
-							"type": "OAuth2.AuthorizationCode",
-							"code": "VGhpcyBpcyBhbiBhdXRob3JpemF0aW9uIGNvZGUuIDotKQ=="
-						},
-						"grantee": {
-							"type": "BearerToken",
-							"token": "bearer-token-representing-user"
-						}
-						}
-					}
-				}
-
-		1a. Store grant code
-
-		2. Use grant.code, client_id and client_secret (latter two from skill itself) to request token:
-
-				POST /auth/o2/token HTTP/l.l
-				Host: api.amazon.com
-				Content-Type: application/x-www-form-urlencoded;charset=UTF-8
-				grant_type=authorization_code&code=SplxlOBezQQYbYS6WxSbIA&client_id=smarthome&client_secret=Y76SDl2F
-
-		3. Store the bearer token and refresh token in the response. ou need to make sure you can always associate the tokens with that customer, which is identified by the Grantee section of the AcceptGrant message. 
-
-				HTTP/l.l 200 OK
-				Content-Type: application/json;charset UTF-8
-				Cache-Control: no-store
-				Pragma: no-cache
-				{
-					"access_token":"Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR...",
-					"token_type":"bearer",
-					"expires_in":3600,
-					"refresh_token":"Atzr|IQEBLzAtAhRPpMJxdwVz2Nn6f2y-tpJX2DeX..."
-				}
-
-		3a. sendState 
-
-		// Function sendState, if auth data in order fire and forget but log code, if code is *** delete alexa auth data for user
-		// Check grant code, refresh code
-		// Check access token
-		// If valid send state
-		// Else request acces token
-				// Send state
-
-		Use the access_token value in the scope of messages to the Alexa event gateway. The endpoints are:
-			> North America: https://api.amazonalexa.com/v3/events
-			> Europe: https://api.eu.amazonalexa.com/v3/events
-			> Far East: https://api.fe.amazonalexa.com/v3/events
-
-		Authorization token specified as an HTTP Authorization header and a bearer token in the scope of the message:
-
-				POST api-amazonalexa.com
-				Authorization: Bearer Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR...
-				Content-Type: application/json
-				{
-					"context": {
-						"properties": [ {
-						"namespace": "Alexa.LockController",
-						"name": "lockState",
-						"value": "LOCKED",
-						"timeOfSample": "2017-02-03T16:20:50.52Z",
-						"uncertaintyInMilliseconds": 1000
-						} ]
-					},
-					"event": {
-						"header": {
-						"namespace": "Alexa",
-						"name": "Response",
-						"payloadVersion": "3",
-						"messageId": "5f8a426e-01e4-4cc9-8b79-65f8bd0fd8a4",
-						"correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
-						},
-						"endpoint": {
-						"scope": {
-							"type": "BearerToken",
-							"token": "Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR..."
-						},
-						"endpointId": "appliance-001"
-						},
-						"payload": {}
-					}
-				}
-		
-		if response is 403, as below remove all stored auth data
-		/// function remove authdata
-
-				HTTP/1.1 403 Forbidden
-				Date: Wed, 07 Mar 2018 20:25:31 GMT
-				Connection: close
-					{
-						"header": {
-							"namespace": "System",
-							"name": "Exception",
-							"messageId": "90c3fc62-4b2d-460c-9c8b-77251f1698a0"
-						},
-						"payload": {
-							"code": "SKILL_DISABLED_EXCEPTION",
-							"description": "Skill is disabled. 3P needs to specifically identify that the skill is disabled by the customer so they can stop sending events for that customer"
-						}
-					}
-
-
-
-		///// Function refresh user token, w/ callback
-		5. Refresh token / getting a new access token
-
-		Make a secure HTTP POST to https://api.amazon.com/auth/o2/token with the following parameters:
-		> grant_type - Must be refresh_token
-		> refresh_token	- as stored above
-		> Use client_id and client_secret in form data, as below
-
-				POST /auth/o2/token HTTP/l.l
-				Host: api.amazon.com
-				Content-Type: application/x-www-form-urlencoded;charset=UTF-8
-				grant_type=refresh_token
-				&refresh_token=Atzr|IQEBLzAtAhRPpMJxdwVz2Nn6f2y-tpJX2DeX...
-				&client_id=foodev
-				&client_secret=Y76SDl2F
-		
-		Response will be:
-
-				HTTP/l.l 200 OK
-				Content-Type: application/json;charset UTF-8
-				Cache-Control: no-store
-				Pragma: no-cache
-				{
-					"access_token":"Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR...",
-					"token_type":"bearer",
-					"expires_in":3600,
-					"refresh_token":"Atzr|IQEBLzAtAhRPpMJxdwVz2Nn6f2y-tpJX2DeX..."
-				}
-
-		Store access_token (and refresh token?)
-
-	*/
-
 	}
 );
 

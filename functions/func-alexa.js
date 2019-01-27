@@ -11,7 +11,7 @@ var AlexaAuth = require('../models/alexa-auth');
 var debug = (process.env.ALEXA_DEBUG || false);
 var enableAlexaAuthorization = false;
 if (process.env.ALEXA_CLIENTID != undefined && process.env.ALEXA_CLIENTSECRET != undefined) {
-    logger.log('warn', "[AlexaAuth API] ALEXA_CLIENTID and ALEXA_CLIENTSECRET environment variables undefined, state reporting disabled!")
+    logger.log('warn', "[AlexaAuth API] ALEXA_CLIENTID and ALEXA_CLIENTSECRET environment variables undefined, state reporting disabled!");
     var client_id = process.env.ALEXA_CLIENTID;
     var client_secret = process.env.ALEXA_CLIENTSECRET;
     enableAlexaAuthorization = true;
@@ -24,22 +24,28 @@ module.exports.saveGrant = function saveGrant(user, grantcode, callback){
     AlexaAuth.AlexaAuthGrantCode.findOne({user: user},function(error,grant){
         if (!grant && !error) {
             // Create and store the GrantCode
-            var grant = new AlexaAuth.AlexaAuthGrantCode({
+            var newGrant = new AlexaAuth.AlexaAuthGrantCode({
                 user: user,
                 code: grantcode
             });
-            grant.save(function(err) {
+            newGrant.save(function(err) {
                 if (!err) {
-                    callback(grant)
+                    logger.log('verbose', "[AlexaAuth API] Saved Alexa/Authorization GrantCode for user:" + user.username + ", grant:" + JSON.stringify(newGrant));
+                    callback(newGrant);
                 }
-                else {callback(err)}
+                else {
+                    logger.log('verbose', "[AlexaAuth API] Failed to save Alexa/Authorization GrantCode for user:" + user.username + ", error:" + err);
+                    callback(undefined);
+                }
             });
         }
         else if (grant) {
-            logger.log('verbose', "[AlexaAuth API] User already has Alexa/Authorization GrantCode")
+            logger.log('verbose', "[AlexaAuth API] User already has Alexa/Authorization GrantCode:" + grant);
+            callback(grant);
         }
         else if (error) {
-            logger.log('error', "[AlexaAuth API] Error trying to find Alexa/Authorization GrantCode. error:" + error)
+            logger.log('error', "[AlexaAuth API] Error trying to find Alexa/Authorization GrantCode. error:" + error);
+            callback(undefined);
         }
     });
 }
@@ -53,6 +59,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
             if (grant && !refreshtoken && !accesstoken) { // Request new access token using grant code
+                ogger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code only");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
@@ -64,14 +71,13 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                     },
                     function(err,res, body){
                         if (err) {
-                            //callback(undefined);
-                        } else {
-                            // Store the RefreshToken and AccessToken
+                            logger.log('error', "[Alexa Auth] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
+                            callback(undefined);
+                        } else { // Store the RefreshToken and AccessToken
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
                                 token: body.refresh_token,
                                 user: user
                             });
-
                             var expires = Math.round((body.expires_in - (new Date().getTime()))/1000);
                             var accessToken = new AlexaAuth.AlexaAuthAccessToken({
                                 token: body.access_token,
@@ -79,32 +85,39 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                                 grant: grant,
                                 expires: expires
                             });
-
-                            refreshToken.save(function(err) {
-                                if (!err) {
-                                    //callback(grant)
-                                }
-                                else {
-                                    //callback(err)
-                                }
+                            var pSaveRefreshToken = new Promise((resolve, reject) => {
+                                refreshToken.save(function(err) {
+                                    if (!err) {resolve(refreshToken)}
+                                    else {
+                                        logger.log('error', "[Alexa Auth] Failed to save refreshToken for:" + user.username);
+                                        reject(err)
+                                    }
+                                });
                             });
-
-                            // Store the AccessToken
-                            accessToken.save(function(err) {
-                                if (!err) {
-                                    //callback(grant)
-                                }
-                                else {
-                                    //callback(err)
-                                }
+                            var pSaveAccessToken = new Promise((resolve, reject) => {
+                                accessToken.save(function(err) {
+                                    if (!err) {resolve(accessToken)}
+                                    else {
+                                        logger.log('error', "[Alexa Auth] Failed to save accessToken for:" + user.username)
+                                        reject(err)
+                                    }
+                                });
                             });
-
+                            Promise.all([pSaveRefreshToken, pSaveAccessToken]).then(([refresh, access]) => {
+                                logger.log('verbose', "[Alexa Auth] Saved RefreshToken for user:" + user.username + ", token:" + JSON.stringify(refresh));
+                                logger.log('verbose', "[Alexa Auth] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
+                                callback(access);
+                            }).catch(err => {
+                                logger.log('error', "[Alexa Auth] requestAccessToken error:" + err);
+                                callback(undefined);
+                            });
                         }
                     }
                 );
             }
             // User had grant code and refresh token, no (valid) access token
             else if (grant && refreshtoken && !accesstoken) { // Request new access token using refresh token
+                logger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code and refresh token");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
@@ -116,7 +129,8 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                     },
                     function(err,res, body){
                         if (err) {
-                            //callback(undefined);
+                            logger.log('error', "[Alexa Auth] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
+                            callback(undefined);
                         } else {
                             // Store the AccessToken
                             var expires = Math.round((body.expires_in - (new Date().getTime()))/1000);
@@ -126,13 +140,21 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                                 grant: grant,
                                 expires: expires
                             });
-                            accessToken.save(function(err) {
-                                if (!err) {
-                                    //callback(grant)
-                                }
-                                else {
-                                    //callback(err)
-                                }
+                            var pSaveAccessToken = new Promise((resolve, reject) => {
+                                accessToken.save(function(err) {
+                                    if (!err) {resolve(accessToken)}
+                                    else {
+                                        logger.log('error', "[Alexa Auth] Failed to save accessToken for:" + user.username)
+                                        reject(err)
+                                    }
+                                });
+                            });
+                            Promise.all([pSaveAccessToken]).then(([access]) => {
+                                logger.log('verbose', "[Alexa Auth] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
+                                callback(access);
+                            }).catch(err => {
+                                logger.log('error', "[Alexa Auth] requestAccessToken error:" + err);
+                                callback(undefined);
                             });
                         }
                     }
@@ -140,15 +162,19 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
             }
             // User had grant code and refresh token, and valid access token
             else if (grant && refreshtoken && accesstoken) {
-                callback(accesstoken)
+                logger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code, refresh token and valid access token");
+                logger.log('verbose', "[Alexa Auth] Returned existing AccessToken for user:" + user.username + ", token:" + JSON.stringify(accesstoken));
+                callback(accesstoken);
             }
-            else {
-                // ??? Shouldn;t get here
+            else { // Shouldn't get here!
+                callback(undefined);
             }
         });
     }
+    else {
+        callback(undefined);
+    }
 }
-
 
 // Generate stateUpdate for use in sendState
 module.exports.queryDeviceState = function queryDeviceState(device, callback) {
@@ -338,6 +364,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 
 // Send Event
 module.exports.sendState = function sendState(token, stateUpdate) {
+    // Going to need endpointId, messageId (it if exists), correlationToken (it if exists), AccessToken
 
     /* 
     Use the access_token value in the scope of messages to the Alexa event gateway. The endpoints are:
@@ -378,6 +405,24 @@ Authorization token specified as an HTTP Authorization header and a bearer token
                 "payload": {}
             }
         }
+
+        if response is 403, as below remove all stored auth data
+		/// function remove authdata
+
+				HTTP/1.1 403 Forbidden
+				Date: Wed, 07 Mar 2018 20:25:31 GMT
+				Connection: close
+					{
+						"header": {
+							"namespace": "System",
+							"name": "Exception",
+							"messageId": "90c3fc62-4b2d-460c-9c8b-77251f1698a0"
+						},
+						"payload": {
+							"code": "SKILL_DISABLED_EXCEPTION",
+							"description": "Skill is disabled. 3P needs to specifically identify that the skill is disabled by the customer so they can stop sending events for that customer"
+						}
+					}
         */
 }
 
