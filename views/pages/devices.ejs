@@ -88,7 +88,7 @@ $("#ThermostatController").change(function(e) {
 		$('#HEAT').prop('checked', false);
 		$('#COOL').prop('checked', false);
 		$('#AUTO').prop('checked', false);
-		//$('#ON').prop('checked', false);
+		$('#ECO').prop('checked', false);
 		$('#OFF').prop('checked', false);
 	}
 	else {
@@ -216,22 +216,22 @@ $("#SceneController").change(function(e) {
 	}
 });
 // Ensure Thermostat Mode co-exist
-$("#HEAT").change(function(e) {
-	if ($(this).is(':checked')) {
-		$("#COOL").prop("checked", true);
-	}
-	else {
-		$("#COOL").prop("checked", false);
-	}
-});
-$("#COOL").change(function(e) {
-	if ($(this).is(':checked')) {
-		$("#HEAT").prop("checked", true);
-	}
-	else {
-		$("#HEAT").prop("checked", false);
-	}
-});
+// $("#HEAT").change(function(e) {
+// 	if ($(this).is(':checked')) {
+// 		$("#COOL").prop("checked", true);
+// 	}
+// 	else {
+// 		$("#COOL").prop("checked", false);
+// 	}
+// });
+// $("#COOL").change(function(e) {
+// 	if ($(this).is(':checked')) {
+// 		$("#HEAT").prop("checked", true);
+// 	}
+// 	else {
+// 		$("#HEAT").prop("checked", false);
+// 	}
+// });
 // $("#ON").change(function(e) {
 // 	if ($(this).is(':checked')) {
 // 		$("#OFF").prop("checked", true);
