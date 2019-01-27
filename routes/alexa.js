@@ -24,7 +24,6 @@ const servicesFunc = require('../functions/func-services');
 const alexaFunc = require('../functions/func-alexa');
 const updateUserServices = servicesFunc.updateUserServices;
 const queryDeviceState = alexaFunc.queryDeviceState;
-const queryDeviceState = alexaFunc.queryDeviceState;
 const saveGrant = alexaFunc.saveGrant;
 const requestAccessToken = alexaFunc.requestAccessToken;
 ///////////////////////////////////////////////////////////////////////////
