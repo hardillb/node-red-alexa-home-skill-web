@@ -570,31 +570,28 @@ router.post('/command2',
 							newMode = deviceJSON.state.thermostatMode;
 						}
 						else {
-							var auto, heat, cool, on, off = false;
-							if (arrModes.indexOf('AUTO') > -1){auto = true};
-							if (arrModes.indexOf('HEAT') > -1){heat = true};
-							if (arrModes.indexOf('COOL') > -1){cool = true};
-							if (arrModes.indexOf('ON') > -1){on = true};
-							if (arrModes.indexOf('OFF') > -1){off = true};
-							if (countModes == 2 && (on && off)) { // On and Off Supported
-								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "OFF"}
-								else {newMode = "ON"}
-							}
-							else if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
-								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
-								else {newMode = "HEAT"}
-							}
-							else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
-								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
-								else {newMode = "HEAT"}
-							}
-							else if (countModes == 5 && (on && off && on && off && auto)) { // All Modes Supported
-								if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
-								else {newMode = "HEAT"}
-							}
-							else { // Fallback position
-								newMode = "HEAT";
-							}
+							// var auto, heat, cool, on, off = false;
+							// if (arrModes.indexOf('AUTO') > -1){auto = true};
+							// if (arrModes.indexOf('HEAT') > -1){heat = true};
+							// if (arrModes.indexOf('COOL') > -1){cool = true};
+							// if (arrModes.indexOf('OFF') > -1){off = true};
+							newMode = deviceJSON.state.thermostatMode;
+
+							// if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
+							// 	if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
+							// 	else {newMode = "HEAT"}
+							// }
+							// else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
+							// 	if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
+							// 	else {newMode = "HEAT"}
+							// }
+							// else if (countModes == 4 && (on && off && off && auto)) { // All Modes Supported
+							// 	if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
+							// 	else {newMode = "HEAT"}
+							// }
+							// else { // Fallback position
+							// 	newMode = "HEAT";
+							// }
 						}
 					}
 					else {
