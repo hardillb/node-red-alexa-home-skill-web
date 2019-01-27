@@ -222,7 +222,7 @@ router.get('/getstate/:dev_id', getStateLimiter,
 			if (data) {
 				const start = async () => {
 					await queryDeviceState(data, function(state) {
-						if (response != undefined) {
+						if (state != undefined) {
 							logger.log('debug', "[State API] Callback returned: " + JSON.stringify(state));
 							res.status(200).json(state);
 						}
