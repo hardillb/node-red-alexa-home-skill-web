@@ -103,7 +103,6 @@ server.exchange(oauth2orize.exchange.refreshToken({
 						grant: grant,
 						scope: grant.scope
 					});
-
 					newToken.save(function(error){
 						var expires = Math.round((newToken.expires - (new Date().getTime()))/1000);
 						if (!error) {
@@ -125,7 +124,7 @@ server.exchange(oauth2orize.exchange.refreshToken({
 			});
 		} else {
 			if (!refresh && application != null) {logger.log("debug", "[OAuth Server] Error, refresh token not found for application:" + application.title)};
-			if (application != null && refresh.application != application.id){logger.log("debug", "[OAuth Server] Error, refresh.application: " + refresh.application + " does not match application.id:" + application.id)};
+			if (!refresh){logger.log("error", "[OAuth Server] Error, unable to find refresh token, application is null")};
 			done(error, false);
 		}
 	});
