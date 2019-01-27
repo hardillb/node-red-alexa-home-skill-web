@@ -154,6 +154,7 @@ router.post('/action', defaultLimiter,
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
 						var deviceJSON = JSON.parse(JSON.stringify(devices[i])); 
+						logger.log('debug','[GHome Sync API] Building device data for device:' + JSON.stringify(devices[i]))
 						var dev = {}
 						dev.id = "" + devices[i].endpointId;
 						dev.type = gHomeReplaceType(devices[i].displayCategories);
