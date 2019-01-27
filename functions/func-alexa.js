@@ -10,7 +10,7 @@ var AlexaAuth = require('../models/alexa-auth');
 ///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
 var enableAlexaAuthorization = false;
-if (process.env.ALEXA_CLIENTID != undefined && process.env.ALEXA_CLIENTSECRET != undefined) {
+if (!process.env.ALEXA_CLIENTID && !process.env.ALEXA_CLIENTSECRET) {
     logger.log('warn', "[AlexaAuth API] ALEXA_CLIENTID and ALEXA_CLIENTSECRET environment variables undefined, state reporting disabled!");
     var client_id = process.env.ALEXA_CLIENTID;
     var client_secret = process.env.ALEXA_CLIENTSECRET;
