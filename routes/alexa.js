@@ -1109,7 +1109,7 @@ function replaceCapability(capability, reportState, attributes) {
 			  "retrievable": reportState
             },
             "configuration": {
-              "supportsScheduling": true,
+              "supportsScheduling": false,
               "supportedModes": supportedModes
 			}
 		};
