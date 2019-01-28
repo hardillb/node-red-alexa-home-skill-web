@@ -985,7 +985,7 @@ function generateState(deviceState) {
 				case "TemperatureSensor":
 					if (deviceState.hasOwnProperty('temperature')) {
 						if (typeof deviceState.temperature == 'number') {
-							dummyState.power = deviceState.temperature;
+							dummyState.temperature = deviceState.temperature;
 						}
 					}
 					else {dummyState.temperature = 22}
