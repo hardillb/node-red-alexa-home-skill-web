@@ -744,28 +744,28 @@ router.post('/authorization', getStateLimiter,
 			var grantcode = req.body.directive.payload.grant.code;
 			// Pre-build success and failure responses
 			var success = {
-				event: {
-				header: {
-					messageId: messageId,
-					namespace: "Alexa.Authorization",
-					name: "AcceptGrant.Response",
-					payloadVersion: "3"
-				},
-				payload: {}
+					event: {
+					header: {
+						messageId: messageId,
+						namespace: "Alexa.Authorization",
+						name: "AcceptGrant.Response",
+						payloadVersion: "3"
+					},
+					payload: {}
 				}
 			};
 			var failure = {
 				event: {
-				header: {
-					messageId: messageId,
-					namespace: "Alexa.Authorization",
-					name: "ErrorResponse",
-					payloadVersion: "3"
-				},
-				payload: {
-					type: "ACCEPT_GRANT_FAILED",
-					message: "Failed to handle the AcceptGrant directive"
-				}
+					header: {
+						messageId: messageId,
+						namespace: "Alexa.Authorization",
+						name: "ErrorResponse",
+						payloadVersion: "3"
+					},
+					payload: {
+						type: "ACCEPT_GRANT_FAILED",
+						message: "Failed to handle the AcceptGrant directive"
+					}
 				}
 			};
 			// Save GrantCode and attempt to generate AccessToken
@@ -773,14 +773,17 @@ router.post('/authorization', getStateLimiter,
 				if (grant != undefined) {
 					requestAccessToken(req.user, function(accesstoken) {
 						if (accesstoken != undefined) {
+							logger.log('info', "[Alexa Authorization] Success, sending: " + JSON.stringify(success));
 							res.status(200).json(success);
 						}
 						else {
+							logger.log('error', "[Alexa Authorization] Failure, sending: " + JSON.stringify(failure));
 							res.status(200).json(failure);
 						}
 					});
 				}
 				else {
+					logger.log('error', "[Alexa Authorization] General failure, sending: " + JSON.stringify(failure));
 					res.status(200).json(failure);
 				}
 			});
