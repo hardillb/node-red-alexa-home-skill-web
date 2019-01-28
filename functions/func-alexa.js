@@ -23,8 +23,10 @@ else {
 ///////////////////////////////////////////////////////////////////////////
 // Store GrantCode
 module.exports.saveGrant = function saveGrant(user, grantcode, callback){
-    var pDeleteAlexaAuthGrant = AlexaAuth.AlexaAuthGrantCode.deleteOne({user: user});
-    Promise.all([pDeleteAlexaAuthGrant]).then(result => {
+    var pDeleteAlexaAuthGrant = AlexaAuth.AlexaAuthGrantCode.deleteMany({user: user});
+    var pDeleteAlexaAuthRefresh = AlexaAuth.AlexaAuthRefreshToken.deleteMany({user: user});
+    var pDeleteAlexaAuthAcess = AlexaAuth.AlexaAuthAccessToken.deleteMany({user: user});
+    Promise.all([pDeleteAlexaAuthGrant, pDeleteAlexaAuthRefresh, pDeleteAlexaAuthAcess]).then(result => {
         // Create and store the GrantCode
         var newGrant = new AlexaAuth.AlexaAuthGrantCode({
             user: user,
@@ -121,7 +123,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
                         grant_type : "refresh_token",
-                        refresh_token: refresh.token,
+                        refresh_token: refreshtoken.token,
                         client_id : client_id,
                         client_secret : client_secret 
                         }
