@@ -47,14 +47,14 @@ module.exports.saveGrant = function saveGrant(user, grantcode, callback){
 // Use stored GrantCode to request access token and refresh token
 module.exports.requestAccessToken = function requestAccessToken(user, callback) {
     if (enableAlexaAuthorization == true) {
-        var now = (new Date().getTime())
+        var now = (new Date().getTime());
         var pGrantCodes = AlexaAuth.AlexaAuthGrantCode.findOne({user: user});
         var pRefreshTokens = AlexaAuth.AlexaAuthRefreshToken.findOne({user: user});
         var pAccessTokens = AlexaAuth.AlexaAuthAccessTokens.findOne({user: user, expires: {$gt: now}});
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
             if (grant && !refreshtoken && !accesstoken) { // Request new access token using grant code
-                ogger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code only");
+                logger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code only");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
