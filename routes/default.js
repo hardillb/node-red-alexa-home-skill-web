@@ -622,6 +622,7 @@ router.post('/device/:dev_id', defaultLimiter,
 							res.status(201);
 							res.send(d);
 						});
+						logger.log('debug', "[Devices] Edited device: " + JSON.stringify(data));
 						if (enableGoogleHomeSync == true){gHomeSync(req.user._id)}; // Sync changes with Google Home Graph API
 					}
 				});
