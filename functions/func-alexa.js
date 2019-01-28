@@ -21,33 +21,28 @@ if (!process.env.ALEXA_CLIENTID && !process.env.ALEXA_CLIENTSECRET) {
 ///////////////////////////////////////////////////////////////////////////
 // Store GrantCode
 module.exports.saveGrant = function saveGrant(user, grantcode, callback){
-    AlexaAuth.AlexaAuthGrantCode.findOne({user: user},function(error,grant){
-        if (!grant && !error) {
-            // Create and store the GrantCode
-            var newGrant = new AlexaAuth.AlexaAuthGrantCode({
-                user: user,
-                code: grantcode
-            });
-            newGrant.save(function(err) {
-                if (!err) {
-                    logger.log('verbose', "[AlexaAuth API] Saved Alexa/Authorization GrantCode for user:" + user.username + ", grant:" + JSON.stringify(newGrant));
-                    callback(newGrant);
-                }
-                else {
-                    logger.log('verbose', "[AlexaAuth API] Failed to save Alexa/Authorization GrantCode for user:" + user.username + ", error:" + err);
-                    callback(undefined);
-                }
-            });
-        }
-        else if (grant) {
-            logger.log('verbose', "[AlexaAuth API] User already has Alexa/Authorization GrantCode:" + grant);
-            callback(grant);
-        }
-        else if (error) {
-            logger.log('error', "[AlexaAuth API] Error trying to find Alexa/Authorization GrantCode. error:" + error);
-            callback(undefined);
-        }
+    var pDeleteAlexaAuthGrant = AlexaAuth.AlexaAuthGrantCode.deleteOne({user: user});
+    Promise.all([pDeleteAlexaAuthGrant]).then(result => {
+        // Create and store the GrantCode
+        var newGrant = new AlexaAuth.AlexaAuthGrantCode({
+            user: user,
+            code: grantcode
+        });
+        newGrant.save(function(err) {
+            if (!err) {
+                logger.log('verbose', "[AlexaAuth API] Saved Alexa/Authorization GrantCode for user:" + user.username + ", grant:" + JSON.stringify(newGrant));
+                callback(newGrant);
+            }
+            else {
+                logger.log('verbose', "[AlexaAuth API] Failed to save Alexa/Authorization GrantCode for user:" + user.username + ", error:" + err);
+                callback(undefined);
+            }
+        });
+    }).catch(error => {
+        logger.log('error', "[AlexaAuth API] Error deleteing existing Alexa/Authorization GrantCodes, error:" + error);
+        callback(undefined);
     });
+
 }
 // Use stored GrantCode to request access token and refresh token
 module.exports.requestAccessToken = function requestAccessToken(user, callback) {
