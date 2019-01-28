@@ -740,8 +740,8 @@ router.post('/authorization', getStateLimiter,
 	function(req,res,next){
 		if (req.body.directive.payload.grant.type == "OAuth2.AuthorizationCode") {
 			logger.log('info', "[Alexa Authorization] Request body: " + JSON.stringify(req.body));
-			var messageId = req.body.directve.header.messageId;
-			var grantcode = req.body.directve.payload.grant.code;
+			var messageId = req.body.directive.header.messageId;
+			var grantcode = req.body.directive.payload.grant.code;
 			// Pre-build success and failure responses
 			var success = {
 				event: {
