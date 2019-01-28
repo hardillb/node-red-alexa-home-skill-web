@@ -71,6 +71,8 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                             logger.log('error', "[Alexa Auth] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
                             callback(undefined);
                         } else { // Store the RefreshToken and AccessToken
+                            logger.log('verbose', "[Alexa Auth] Refresh AND Access Token response:" + JSON.stringify(body));
+
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
                                 token: body.refresh_token,
                                 user: user
@@ -130,6 +132,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                             callback(undefined);
                         } else {
                             // Store the AccessToken
+                            logger.log('verbose', "[Alexa Auth] Access Token response:" + JSON.stringify(body));
                             var expires = Math.round((body.expires_in - (new Date().getTime()))/1000);
                             var accessToken = new AlexaAuth.AlexaAuthAccessToken({
                                 token: body.access_token,

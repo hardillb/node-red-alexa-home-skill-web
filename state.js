@@ -25,7 +25,7 @@ var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Google Auth JSON Web Token ================
 var gToken = undefined; // Store Report State OAuth Token
-const ghomeJWT = process.env['GHOMEJWT'];
+const ghomeJWT = process.env.GHOMEJWT;
 var reportState = false;
 var keys;
 if (!ghomeJWT) {
@@ -73,19 +73,21 @@ mqttClient.on('connect', function(){
 ///////////////////////////////////////////////////////////////////////////
 // Homegraph API Token Request/ Refresh
 ///////////////////////////////////////////////////////////////////////////
-requestToken2(keys, function(returnValue) {
-	gToken = returnValue;
-	logger.log('info', "[State API] Obtained Google HomeGraph OAuth token");
-	logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-});
-// Refresh Google oAuth Token used for State Reporting
-var refreshToken = setInterval(function(){
+if (reportState == true) {
 	requestToken2(keys, function(returnValue) {
 		gToken = returnValue;
-		logger.log('info', "[State API] Refreshed Google HomeGraph OAuth token");
+		logger.log('info', "[State API] Obtained Google HomeGraph OAuth token");
 		logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
 	});
-},3540000);
+	// Refresh Google oAuth Token used for State Reporting
+	var refreshToken = setInterval(function(){
+		requestToken2(keys, function(returnValue) {
+			gToken = returnValue;
+			logger.log('info', "[State API] Refreshed Google HomeGraph OAuth token");
+			logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
+		});
+	},3540000);
+}
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Message Handlers
 ///////////////////////////////////////////////////////////////////////////
