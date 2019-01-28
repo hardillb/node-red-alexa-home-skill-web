@@ -80,7 +80,10 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                                 token: jsonBody.refresh_token,
                                 user: user
                             });
-                            var expires = Math.round((jsonBody.expires_in - (new Date().getTime()))/1000);
+
+                            var today = new Date();
+                            var expires = today.getTime() + jsonBody.expires_in*1000;
+
                             var accessToken = new AlexaAuth.AlexaAuthAccessToken({
                                 token: jsonBody.access_token,
                                 user: user,
@@ -137,7 +140,10 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                             // Store the AccessToken
                             var jsonBody = JSON.parse(body);
                             logger.log('verbose', "[Alexa Auth] Access Token response:" + JSON.stringify(jsonBody));
-                            var expires = Math.round((jsonBody.expires_in - (new Date().getTime()))/1000);
+                            
+                            var today = new Date();
+                            var expires = today.getTime() + jsonBody.expires_in*1000;
+
                             var accessToken = new AlexaAuth.AlexaAuthAccessToken({
                                 token: jsonBody.access_token,
                                 user: user,
