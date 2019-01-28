@@ -12,6 +12,8 @@ var debug = (process.env.ALEXA_DEBUG || false);
 var enableAlexaAuthorization = false;
 if (!process.env.ALEXA_CLIENTID && !process.env.ALEXA_CLIENTSECRET) {
     logger.log('warn', "[AlexaAuth API] ALEXA_CLIENTID and ALEXA_CLIENTSECRET environment variables undefined, state reporting disabled!");
+}
+else {
     var client_id = process.env.ALEXA_CLIENTID;
     var client_secret = process.env.ALEXA_CLIENTSECRET;
     enableAlexaAuthorization = true;
@@ -167,6 +169,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
         });
     }
     else {
+        logger.log('warn', "[Alexa Auth] enableAlexaAuthorization is DISABLED");
         callback(undefined);
     }
 }
