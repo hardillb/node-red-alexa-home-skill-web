@@ -733,6 +733,24 @@ router.post('/command2',
 	}
 );
 ///////////////////////////////////////////////////////////////////////////
+// Temporary Auth Test
+///////////////////////////////////////////////////////////////////////////
+router.get('/authtest', getStateLimiter,
+	passport.authenticate(['bearer', 'basic'], { session: false }),
+	function(req,res,next){
+		requestAccessToken(req.user, function(accesstoken) {
+			if (accesstoken != undefined) {
+				logger.log('info', "[TEST] Success, sending: " + JSON.stringify(accesstoken));
+				res.status(200).json(accesstoken);
+			}
+			else {
+				logger.log('error', "[TEST] Failed");
+				res.status(200).send("failed");
+			}
+		});
+});
+
+///////////////////////////////////////////////////////////////////////////
 // Alexa Authorization Handler (Under Development)
 ///////////////////////////////////////////////////////////////////////////
 router.post('/authorization', getStateLimiter,
