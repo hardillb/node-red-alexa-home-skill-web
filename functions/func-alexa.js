@@ -52,7 +52,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
         var now = (new Date().getTime());
         var pGrantCodes = AlexaAuth.AlexaAuthGrantCode.findOne({user: user});
         var pRefreshTokens = AlexaAuth.AlexaAuthRefreshToken.findOne({user: user});
-        var pAccessTokens = AlexaAuth.AlexaAuthAccessTokens.findOne({user: user, expires: {$gt: now}});
+        var pAccessTokens = AlexaAuth.AlexaAuthAccessToken.findOne({user: user, expires: {$gt: now}});
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
             if (grant && !refreshtoken && !accesstoken) { // Request new access token using grant code
