@@ -25,7 +25,6 @@ const alexaFunc = require('../functions/func-alexa');
 const updateUserServices = servicesFunc.updateUserServices;
 const queryDeviceState = alexaFunc.queryDeviceState;
 const saveGrant = alexaFunc.saveGrant;
-const requestAccessToken = alexaFunc.requestAccessToken;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
