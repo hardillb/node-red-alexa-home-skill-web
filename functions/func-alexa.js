@@ -257,7 +257,8 @@ module.exports.sendState = function sendState(user, state) {
     requestAccessToken(user, function(accesstoken) {
         if (accesstoken != undefined) {
             logger.log('info', "[State API] Alexa Authorization access token: " + JSON.stringify(accesstoken));
-            state.event.endpoint.scope.token = accesstoken.token
+            state.event.endpoint.scope.token = accesstoken.token;
+            logger.log('verbose', "[State API] Sending Change Report to Alexa:" +  JSON.stringify(state));
             // Send state update
             request.post({
                 url: stateURI,
@@ -272,7 +273,7 @@ module.exports.sendState = function sendState(user, state) {
                 }
                 else {
                     if (res.statusCode == 200) {
-                        logger.log('verbose', "[State API] State report to HomeGraph successful!");
+                        logger.log('verbose', "[State API] Change report to Alexa successful!");
                     }
                     else if (res.statusCode == 403) {
                         // Skill has been unlinked from users account, clean-up user grants, refresh token and access tokens
