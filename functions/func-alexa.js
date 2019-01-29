@@ -2,7 +2,6 @@
 // Depends
 ///////////////////////////////////////////////////////////////////////////
 const request = require('request');
-const uuidv4 = require('uuid/v4');
 var Account = require('../models/account');
 var Devices = require('../models/devices');
 var logger = require('../config/logger');

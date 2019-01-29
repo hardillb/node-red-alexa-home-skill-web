@@ -5,6 +5,7 @@ var Account = require('./models/account');
 var Devices = require('./models/devices');
 var ua = require('universal-analytics');
 var mqtt = require('mqtt');
+const uuidv4 = require('uuid/v4');
 var logger = require('./config/logger');
 ///////////////////////////////////////////////////////////////////////////
 // Functions
