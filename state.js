@@ -219,48 +219,10 @@ function setstate(username, endpointId, payload) {
 						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
 						// Get Supported Ranges and work-out new value for thermostatMode
 						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
-							var countModes = deviceJSON.attributes.thermostatModes.length;
-							var arrModes = deviceJSON.attributes.thermostatModes;
-							// If single mode is supported leave as-is
-							if (countModes == 1){
 								newMode = dev.state.thermostatMode;
-							}
-							else {
-								var auto = false;
-								var heat = false;
-								var cool = false;
-								var on = false;
-								var off = false;
-								if (arrModes.indexOf('AUTO') > -1){auto = true};
-								if (arrModes.indexOf('HEAT') > -1){heat = true};
-								if (arrModes.indexOf('COOL') > -1){cool = true};
-								if (arrModes.indexOf('ON') > -1){on = true};
-								if (arrModes.indexOf('OFF') > -1){off = true};
-								// Supported combos
-									// ON and OFF
-									// HEAT and COOL
-									// HEAT, COOl, AUTO
-									// HEAT, COOl, AUTO, ON, OFF
-								if (countModes == 2 && (on && off)) { // On and Off Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
-									else {newMode = "ON"}
-								}
-								else if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 5 && (on && off && on && off && auto)) { // All Modes Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else { // Fallback position
-									newMode = "HEAT";
-								}
-							}
+						}
+						else {
+							newMode = "HEAT";
 						}
 						// Check within supported range of device
 						if (deviceJSON.hasOwnProperty('attributes')) {
@@ -286,52 +248,10 @@ function setstate(username, endpointId, payload) {
 						var newTemp = payload.state.thermostatSetPoint;
 						// Get Supported Ranges and work-out new value for thermostatMode
 						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
-							var countModes = deviceJSON.attributes.thermostatModes.length;
-							var arrModes = deviceJSON.attributes.thermostatModes;
-							// If single mode is supported leave as-is
-							if (countModes == 1){
-								newMode = dev.state.thermostatMode;
-							}
-							else {
-								var auto = false;
-								var heat = false;
-								var cool = false;
-								var on = false;
-								var off = false;
-								if (arrModes.indexOf('AUTO') > -1){auto = true};
-								if (arrModes.indexOf('HEAT') > -1){heat = true};
-								if (arrModes.indexOf('COOL') > -1){cool = true};
-								if (arrModes.indexOf('ON') > -1){on = true};
-								if (arrModes.indexOf('OFF') > -1){off = true};
-								logger.log('debug', "[State API] thermostatSetPoint, modes: " + JSON.stringify(deviceJSON.attributes.thermostatModes) + ", countModes: " + countModes);
-								// Supported combos
-									// ON and OFF
-									// HEAT and COOL
-									// HEAT, COOl, AUTO
-									// HEAT, COOl, AUTO, ON, OFF
-								// Set dev.state.thermostatMode
-								if (countModes == 2 && (on && off)) { // On and Off Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "OFF"}
-									else {newMode = "ON"}
-								}
-								else if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else if (countModes == 5 && (on && off && on && off && auto)) { // All Modes Supported
-									if (newTemp < dev.state.thermostatSetPoint ) {newMode = "COOL"}
-									else {newMode = "HEAT"}
-								}
-								else { // Fallback position
-									newMode = "HEAT";
-								}
-								logger.log('debug', "[State API] thermostatSetPoint, newMode: " + newMode);
-								logger.log('debug', "[State API] thermostatSetPoint, newTemp: " + newTemp);
-							}
+							newMode = deviceJSON.state.thermostatMode;
+						}
+						else {
+							newMode = "HEAT";
 						}
 						// Check within supported range of device
 						if (deviceJSON.hasOwnProperty('attributes')) {
