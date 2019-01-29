@@ -390,10 +390,12 @@ module.exports.sendState = function sendState(user, state) {
             stateURI = 'https://api.fe.amazonalexa.com/v3/events';
             break;
     }
+    
     // Request access token and send change report
     requestAccessToken(user, function(accesstoken) {
         if (accesstoken != undefined) {
             logger.log('info', "[State API] Alexa Authorization access token: " + JSON.stringify(accesstoken));
+            state.event.endpoint.scope.token = accesstoken.token
             // Send state update
             request.post({
                 url: stateURI,

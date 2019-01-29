@@ -428,7 +428,7 @@ function setstate(username, endpointId, payload) {
 															endpoint: {
 															scope: {
 																type: "BearerToken",
-																token: accesstoken.token
+																token: "placeholder"
 															},
 															endpointId: device.endpointId
 															},
