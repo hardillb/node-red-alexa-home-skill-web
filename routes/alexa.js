@@ -915,8 +915,8 @@ function replaceCapability(capability, reportState, attributes) {
 					"supported": [{
 						"name": "brightness"
 					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
+					"proactivelyReported": true,
+					"retrievable": false
 				}
 			};
 	}
@@ -938,8 +938,8 @@ function replaceCapability(capability, reportState, attributes) {
 					"supported": [{
 						"name": "color"
 					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
+					"proactivelyReported": true,
+					"retrievable": false
 				}
 			};
 	}
@@ -953,8 +953,8 @@ function replaceCapability(capability, reportState, attributes) {
 					"supported": [{
 						"name": "colorTemperatureInKelvin"
 					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
+					"proactivelyReported": true,
+					"retrievable": false
 				}
 			};
 	}
@@ -1000,8 +1000,8 @@ function replaceCapability(capability, reportState, attributes) {
 					"supported": [{
 						"name": "lockState"
 					}],
-					"proactivelyReported": false,
-					"retrievable": reportState
+					"proactivelyReported": true,
+					"retrievable": false
 				}
 			};
 	}
@@ -1015,8 +1015,8 @@ function replaceCapability(capability, reportState, attributes) {
 				"supported": [{
 					"name": "percentage"
 				}],
-				"proactivelyReported": false,
-				"retrievable": reportState
+				"proactivelyReported": true,
+				"retrievable": false
 			}
 		};
 	}
@@ -1039,8 +1039,8 @@ function replaceCapability(capability, reportState, attributes) {
 				"supported": [{
 					"name": "powerState"
 				}],
-				"proactivelyReported": false,
-				"retrievable": reportState
+				"proactivelyReported": true,
+				"retrievable": false
 				}
 			};
 	}
@@ -1097,7 +1097,7 @@ function replaceCapability(capability, reportState, attributes) {
                     "name": "temperature"
                   }
                 ],
-                "proactivelyReported": false,
+                "proactivelyReported": true,
                 "retrievable": true
               }
 			};
@@ -1124,8 +1124,8 @@ function replaceCapability(capability, reportState, attributes) {
                   "name": "thermostatMode"
                 }
               ],
-			  "proactivelyReported": false,
-			  "retrievable": reportState
+			  "proactivelyReported": true,
+			  "retrievable": false
             },
             "configuration": {
               "supportsScheduling": false,
