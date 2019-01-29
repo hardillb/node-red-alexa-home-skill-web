@@ -10,7 +10,7 @@ var logger = require('./config/logger');
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 const gHomeFunc = require('./functions/func-ghome');
-const alexaFunc = require('../functions/func-alexa');
+const alexaFunc = require('./functions/func-alexa');
 const gHomeSendState =  gHomeFunc.sendState;
 const gHomeQueryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
