@@ -401,7 +401,10 @@ function setstate(username, endpointId, payload) {
 										}
 										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
 									}
-									else {logger.log('debug', "[State API] User:" + username + ", is not a Google Home user")}
+									else {
+										if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not a Google Home user")};
+										if (gHomeReportState == false){logger.log('debug', "[State API] GHome state reporting DISABLED")};
+									}
 								});
 								///////////////////////////////////////////////////////////////////////////
 								// Alexa
@@ -445,7 +448,10 @@ function setstate(username, endpointId, payload) {
 										}
 										catch (e) {logger.log('debug', "[State API] alexaSendState error: " + e)}
 									}
-									else {logger.log('debug', "[State API] User:" + username + ", is not an Alexa user")}
+									else {
+										if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not an Alexa user")};
+										if (alexaReportState == false){logger.log('debug', "[State API] Alexa Report State DISABLED")};
+									}
 								});
 							});
 						}
