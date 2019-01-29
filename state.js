@@ -10,9 +10,13 @@ var logger = require('./config/logger');
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 const gHomeFunc = require('./functions/func-ghome');
-const sendState =  gHomeFunc.sendState;
-const queryDeviceState = gHomeFunc.queryDeviceState;
+const alexaFunc = require('../functions/func-alexa');
+const gHomeSendState =  gHomeFunc.sendState;
+const gHomeQueryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
+const alexaSendState =  alexaFunc.sendState;
+const alexaQueryDeviceState = alexaFunc.queryDeviceState;
+const isAlexaUser = alexaFunc.isAlexaUser;
 const requestToken2 = gHomeFunc.requestToken2;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
@@ -26,14 +30,22 @@ var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Google Auth JSON Web Token ================
 var gToken = undefined; // Store Report State OAuth Token
 const ghomeJWT = process.env.GHOMEJWT;
-var reportState = false;
+var gHomeReportState = false;
 var keys;
 if (!ghomeJWT) {
 	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
 }
 else {
-	reportState = true;
+	gHomeReportState = true;
 	keys = JSON.parse(ghomeJWT);
+}
+// Alexa State Reporting
+var alexaReportState = false;
+if (!process.env.ALEXA_CLIENTID && !process.env.ALEXA_CLIENTSECRET) {
+	logger.log('warn', "[AlexaAuth API] ALEXA_CLIENTID and ALEXA_CLIENTSECRET environment variables undefined, state reporting disabled!");
+}
+else {
+	alexaReportState = true;
 }
 // Google Analytics ==========================
 var enableAnalytics = false;
@@ -73,7 +85,7 @@ mqttClient.on('connect', function(){
 ///////////////////////////////////////////////////////////////////////////
 // Homegraph API Token Request/ Refresh
 ///////////////////////////////////////////////////////////////////////////
-if (reportState == true) {
+if (gHomeReportState == true) {
 	requestToken2(keys, function(returnValue) {
 		gToken = returnValue;
 		logger.log('info', "[State API] Obtained Google HomeGraph OAuth token");
@@ -351,15 +363,18 @@ function setstate(username, endpointId, payload) {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
 
 						// Generate GHome state JSON object and send to HomeGraph API
- 							if (reportState == true) {
-							isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
-								if (returnValue == true) {
-									var pUser = Account.findOne({username: username});
-									var pDevice = Devices.findOne({username: username, endpointId: endpointId});
-									Promise.all([pUser, pDevice]).then(([user, device]) => {
+						if (gHomeReportState == true || alexaReportState == true) {
+							var pUser = Account.findOne({username: username});
+							var pDevice = Devices.findOne({username: username, endpointId: endpointId});
+							Promise.all([pUser, pDevice]).then(([user, device]) => {
+								///////////////////////////////////////////////////////////////////////////
+								// Google Home State Update
+								///////////////////////////////////////////////////////////////////////////
+								isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
+									if (returnValue == true && gHomeReportState == true) {
 										try {
 											logger.log('debug', "[State API] GHome Report State using device:" + JSON.stringify(device));
-											queryDeviceState(device, function(response) {
+											gHomeQueryDeviceState(device, function(response) {
 												if (response != undefined) {
 													var stateReport = {
 														"agentUserId": user._id,
@@ -376,17 +391,59 @@ function setstate(username, endpointId, payload) {
 
 														if (gToken != undefined) {
 															logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
-															sendState(gToken, stateReport);
+															gHomeSendState(gToken, stateReport);
 														}
 														else {logger.log('verbose', '[State API] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
 													}
 												}
 											});											
 										}
-										catch (e) {logger.log('debug', "[State API] queryDeviceState error: " + e)}
-									});
-								}
-								//else {logger.log('debug', "[State API] NOT generating state report, gHomeUser value:" + returnValue)}
+										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
+									}
+								});
+								///////////////////////////////////////////////////////////////////////////
+								// Alexa State Update/ Change Report
+								///////////////////////////////////////////////////////////////////////////
+								isAlexaUser(username, function(returnValue) {
+									if (returnValue == true && alexaReportState == true) {
+										try {
+											logger.log('debug', "[State API] Alexa Change report using device:" + JSON.stringify(device));
+											alexaQueryDeviceState(device, function(state) {
+												if (state != undefined) {
+													var messageId = uuidv4(); // Generate messageId
+													var changeReport = {
+														event: {
+															header: {
+																namespace: "Alexa",
+																name: "ChangeReport",
+																payloadVersion: "3",
+																messageId: messageId
+															},
+															endpoint: {
+															scope: {
+																type: "BearerToken",
+																token: accesstoken.token
+															},
+															endpointId: device.endpointId
+															},
+															payload: {
+																change: {
+																	cause: {
+																	type: "APP_INTERACTION"
+																	},
+																	properties: state
+																}
+															}
+														}
+													}
+													logger.log('debug', "[State API] Generated Alexa Change Report: " + JSON.stringify(changeReport));
+													alexaSendState(user, changeReport);
+												}
+											});
+										}
+										catch (e) {logger.log('debug', "[State API] alexaSendState error: " + e)}
+									}
+								});
 							});
 						}
 					}

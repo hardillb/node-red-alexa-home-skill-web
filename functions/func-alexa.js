@@ -2,7 +2,9 @@
 // Depends
 ///////////////////////////////////////////////////////////////////////////
 const request = require('request');
+const uuidv4 = require('uuid/v4');
 var Account = require('../models/account');
+var Devices = require('../models/devices');
 var logger = require('../config/logger');
 var AlexaAuth = require('../models/alexa-auth');
 ///////////////////////////////////////////////////////////////////////////
@@ -375,86 +377,51 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 
 // Send Event
 // Going to need username, endpointId, messageId (it if exists), correlationToken
-module.exports.sendState = function sendState(username, endpointId, stateUpdate, callback) {
-    // Find user based on username
-
-    // Check user is AlexaEnabled
-    if (isAlexaUser(user) == true) {
-        // Get user region/ check against list to assign URL variable and validate
-        // The endpoints are:
-            // > North America: https://api.amazonalexa.com/v3/events
-            // > Europe: https://api.eu.amazonalexa.com/v3/events
-            // > Far East: https://api.fe.amazonalexa.com/v3/events
-
-        // build state response and validate
-
-
-        // request access token
-        requestAccessToken(user, function(accesstoken) {
-            if (accesstoken != undefined) {
-                logger.log('info', "[State API] Alexa Authorization access token: " + JSON.stringify(accesstoken));
-                // Send state update
-
-                // Authorization token specified as an HTTP Authorization header and a bearer token in the scope of the message:
-
-                // POST api-amazonalexa.com
-                // Authorization: Bearer Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR...
-                // Content-Type: application/json
-                // {
-                //     "context": {
-                //         "properties": [ {
-                //         "namespace": "Alexa.LockController",
-                //         "name": "lockState",
-                //         "value": "LOCKED",
-                //         "timeOfSample": "2017-02-03T16:20:50.52Z",
-                //         "uncertaintyInMilliseconds": 1000
-                //         } ]
-                //     },
-                //     "event": {
-                //         "header": {
-                //         "namespace": "Alexa",
-                //         "name": "Response",
-                //         "payloadVersion": "3",
-                //         "messageId": "5f8a426e-01e4-4cc9-8b79-65f8bd0fd8a4",
-                //         "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
-                //         },
-                //         "endpoint": {
-                //         "scope": {
-                //             "type": "BearerToken",
-                //             "token": "Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR..."
-                //         },
-                //         "endpointId": "appliance-001"
-                //         },
-                //         "payload": {}
-                //     }
-                // }
-
-            }
-            else {
-                logger.log('error', "[TEST] Failed, no access token");
-            }
-        });
+module.exports.sendState = function sendState(user, state) {
+    // Get user region/ check against list to assign URL variable and validate
+    var stateURI;
+    switch (user.region) {
+        case 'Europe': // Europe
+            stateURI = 'https://api.eu.amazonalexa.com/v3/events';
+            break;
+        case 'Americas': // North America
+            stateURI = 'https://api.amazonalexa.com/v3/events';
+            break
+        case 'Asia Pacific': // Far East
+            stateURI = 'https://api.fe.amazonalexa.com/v3/events';
+            break;
     }
-
-    /* 
-        if response is 403, as below remove all stored auth data
-		/// function remove authdata
-
-				HTTP/1.1 403 Forbidden
-				Date: Wed, 07 Mar 2018 20:25:31 GMT
-				Connection: close
-					{
-						"header": {
-							"namespace": "System",
-							"name": "Exception",
-							"messageId": "90c3fc62-4b2d-460c-9c8b-77251f1698a0"
-						},
-						"payload": {
-							"code": "SKILL_DISABLED_EXCEPTION",
-							"description": "Skill is disabled. 3P needs to specifically identify that the skill is disabled by the customer so they can stop sending events for that customer"
-						}
-					}
-        */
+    // Request access token and send change report
+    requestAccessToken(user, function(accesstoken) {
+        if (accesstoken != undefined) {
+            logger.log('info', "[State API] Alexa Authorization access token: " + JSON.stringify(accesstoken));
+            // Send state update
+            request.post({
+                url: stateURI,
+                    headers:{
+                        'Authorization': 'Bearer ' + accesstoken.token,
+                        'Content-Type': 'application/json'
+                    },
+                    json: state
+            }, function(err,res, body){
+                if (err) {
+                    logger.log('warn', "[State API] Change report to Alexa failed. error" + err);
+                }
+                else {
+                    if (res.statusCode == 200) {
+                        logger.log('verbose', "[State API] State report to HomeGraph successful!");
+                    }
+                    else if (res.statusCode == 403) {
+                        // Skill has been unlinked from users account, clean-up user grants, refresh token and access tokens
+                    }
+                    else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
+                }
+            });
+        }
+        else {
+            logger.log('error', "[State API] Alexa requestAccessToken returned undefined");
+        }
+    });
 }
 
 // Check user is actually enabled / account-linked for Alexa

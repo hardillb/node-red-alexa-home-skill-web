@@ -45,6 +45,7 @@
     "serve-favicon": "^2.5.0",
     "uid2": "0.0.3",
     "universal-analytics": "^0.4.20",
+    "uuid": "^3.3.2",
     "winston": "^3.1.0"
   },
   "devDependencies": {
