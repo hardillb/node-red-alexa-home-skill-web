@@ -916,7 +916,7 @@ function replaceCapability(capability, reportState, attributes) {
 						"name": "brightness"
 					}],
 					"proactivelyReported": true,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -939,7 +939,7 @@ function replaceCapability(capability, reportState, attributes) {
 						"name": "color"
 					}],
 					"proactivelyReported": true,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -954,7 +954,7 @@ function replaceCapability(capability, reportState, attributes) {
 						"name": "colorTemperatureInKelvin"
 					}],
 					"proactivelyReported": true,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -1001,7 +1001,7 @@ function replaceCapability(capability, reportState, attributes) {
 						"name": "lockState"
 					}],
 					"proactivelyReported": true,
-					"retrievable": false
+					"retrievable": reportState
 				}
 			};
 	}
@@ -1016,7 +1016,7 @@ function replaceCapability(capability, reportState, attributes) {
 					"name": "percentage"
 				}],
 				"proactivelyReported": true,
-				"retrievable": false
+				"retrievable": reportState
 			}
 		};
 	}
@@ -1040,7 +1040,7 @@ function replaceCapability(capability, reportState, attributes) {
 					"name": "powerState"
 				}],
 				"proactivelyReported": true,
-				"retrievable": false
+				"retrievable": reportState
 				}
 			};
 	}
@@ -1098,7 +1098,7 @@ function replaceCapability(capability, reportState, attributes) {
                   }
                 ],
                 "proactivelyReported": true,
-                "retrievable": false
+                "retrievable": reportState
               }
 			};
 	}
@@ -1125,7 +1125,7 @@ function replaceCapability(capability, reportState, attributes) {
                 }
               ],
 			  "proactivelyReported": true,
-			  "retrievable": false
+			  "retrievable": reportState
             },
             "configuration": {
               "supportsScheduling": false,
