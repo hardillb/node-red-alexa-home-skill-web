@@ -735,7 +735,7 @@ router.post('/command2',
 ///////////////////////////////////////////////////////////////////////////
 // Temporary Auth Test
 ///////////////////////////////////////////////////////////////////////////
-router.get('/authtest', getStateLimiter,
+/* router.get('/authtest', getStateLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		requestAccessToken(req.user, function(accesstoken) {
@@ -748,7 +748,7 @@ router.get('/authtest', getStateLimiter,
 				res.status(200).send("failed");
 			}
 		});
-});
+}); */
 
 ///////////////////////////////////////////////////////////////////////////
 // Alexa Authorization Handler (Under Development)
@@ -789,16 +789,17 @@ router.post('/authorization', getStateLimiter,
 			// Save GrantCode and attempt to generate AccessToken
 			saveGrant(req.user, grantcode, function(grant) {
 				if (grant != undefined) {
-					requestAccessToken(req.user, function(accesstoken) {
-						if (accesstoken != undefined) {
-							logger.log('info', "[Alexa Authorization] Success, sending: " + JSON.stringify(success));
-							res.status(200).json(success);
-						}
-						else {
-							logger.log('error', "[Alexa Authorization] Failure, sending: " + JSON.stringify(failure));
-							res.status(200).json(failure);
-						}
-					});
+					res.status(200).json(success);
+					// requestAccessToken(req.user, function(accesstoken) {
+					// 	if (accesstoken != undefined) {
+					// 		logger.log('info', "[Alexa Authorization] Success, sending: " + JSON.stringify(success));
+							//res.status(200).json(success);
+					// 	}
+					// 	else {
+					// 		logger.log('error', "[Alexa Authorization] Failure, sending: " + JSON.stringify(failure));
+					// 		res.status(200).json(failure);
+					// 	}
+					// });
 				}
 				else {
 					logger.log('error', "[Alexa Authorization] General failure, sending: " + JSON.stringify(failure));

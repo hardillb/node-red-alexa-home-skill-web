@@ -58,7 +58,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
             if (grant && !refreshtoken && !accesstoken) { // Request new access token using grant code
-                logger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code only");
+                logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code only");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
@@ -70,11 +70,11 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                     },
                     function(err,res, body){
                         if (err) {
-                            logger.log('error', "[Alexa Auth] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
+                            logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
                             callback(undefined);
                         } else { // Store the RefreshToken and AccessToken
                             var jsonBody = JSON.parse(body);
-                            logger.log('verbose', "[Alexa Auth] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
+                            logger.log('verbose', "[AlexaAuth API] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
 
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
                                 token: jsonBody.refresh_token,
@@ -94,7 +94,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                                 refreshToken.save(function(err) {
                                     if (!err) {resolve(refreshToken)}
                                     else {
-                                        logger.log('error', "[Alexa Auth] Failed to save refreshToken for:" + user.username);
+                                        logger.log('error', "[AlexaAuth API] Failed to save refreshToken for:" + user.username);
                                         reject(err)
                                     }
                                 });
@@ -103,17 +103,17 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                                 accessToken.save(function(err) {
                                     if (!err) {resolve(accessToken)}
                                     else {
-                                        logger.log('error', "[Alexa Auth] Failed to save accessToken for:" + user.username)
+                                        logger.log('error', "[AlexaAuth API] Failed to save accessToken for:" + user.username)
                                         reject(err)
                                     }
                                 });
                             });
                             Promise.all([pSaveRefreshToken, pSaveAccessToken]).then(([refresh, access]) => {
-                                logger.log('verbose', "[Alexa Auth] Saved RefreshToken for user:" + user.username + ", token:" + JSON.stringify(refresh));
-                                logger.log('verbose', "[Alexa Auth] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
+                                logger.log('verbose', "[AlexaAuth API] Saved RefreshToken for user:" + user.username + ", token:" + JSON.stringify(refresh));
+                                logger.log('verbose', "[AlexaAuth API] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
                                 callback(access);
                             }).catch(err => {
-                                logger.log('error', "[Alexa Auth] requestAccessToken error:" + err);
+                                logger.log('error', "[AlexaAuth API] requestAccessToken error:" + err);
                                 callback(undefined);
                             });
                         }
@@ -122,7 +122,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
             }
             // User had grant code and refresh token, no (valid) access token
             else if (grant && refreshtoken && !accesstoken) { // Request new access token using refresh token
-                logger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code and refresh token");
+                logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code and refresh token");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
@@ -134,13 +134,13 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                     },
                     function(err,res, body){
                         if (err) {
-                            logger.log('error', "[Alexa Auth] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
+                            logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user:" + user.username + ", error: " + err);
                             callback(undefined);
                         } else {
                             // Store the AccessToken
                             var jsonBody = JSON.parse(body);
-                            logger.log('verbose', "[Alexa Auth] Access Token response:" + JSON.stringify(jsonBody));
-                            
+                            logger.log('verbose', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
+
                             var today = new Date();
                             var expires = today.getTime() + jsonBody.expires_in*1000;
 
@@ -154,16 +154,16 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
                                 accessToken.save(function(err) {
                                     if (!err) {resolve(accessToken)}
                                     else {
-                                        logger.log('error', "[Alexa Auth] Failed to save accessToken for:" + user.username)
+                                        logger.log('error', "[AlexaAuth API] Failed to save accessToken for:" + user.username)
                                         reject(err)
                                     }
                                 });
                             });
                             Promise.all([pSaveAccessToken]).then(([access]) => {
-                                logger.log('verbose', "[Alexa Auth] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
+                                logger.log('verbose', "[AlexaAuth API] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
                                 callback(access);
                             }).catch(err => {
-                                logger.log('error', "[Alexa Auth] requestAccessToken error:" + err);
+                                logger.log('error', "[AlexaAuth API] requestAccessToken error:" + err);
                                 callback(undefined);
                             });
                         }
@@ -172,8 +172,8 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
             }
             // User had grant code and refresh token, and valid access token
             else if (grant && refreshtoken && accesstoken) {
-                logger.log('verbose', "[Alexa Auth] User:" + user.username + " has existing grant code, refresh token and valid access token");
-                logger.log('verbose', "[Alexa Auth] Returned existing AccessToken for user:" + user.username + ", token:" + JSON.stringify(accesstoken));
+                logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code, refresh token and valid access token");
+                logger.log('verbose', "[AlexaAuth API] Returned existing AccessToken for user:" + user.username + ", token:" + JSON.stringify(accesstoken));
                 callback(accesstoken);
             }
             else { // Shouldn't get here!
@@ -182,7 +182,7 @@ module.exports.requestAccessToken = function requestAccessToken(user, callback) 
         });
     }
     else {
-        logger.log('warn', "[Alexa Auth] enableAlexaAuthorization is DISABLED");
+        logger.log('warn', "[AlexaAuth API] enableAlexaAuthorization is DISABLED");
         callback(undefined);
     }
 }
@@ -374,49 +374,69 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 }
 
 // Send Event
-module.exports.sendState = function sendState(token, stateUpdate) {
-    // Going to need endpointId, messageId (it if exists), correlationToken (it if exists), AccessToken
+// Going to need username, endpointId, messageId (it if exists), correlationToken
+module.exports.sendState = function sendState(username, endpointId, stateUpdate, callback) {
+    // Find user based on username
+
+    // Check user is AlexaEnabled
+    if (isAlexaUser(user) == true) {
+        // Get user region/ check against list to assign URL variable and validate
+        // The endpoints are:
+            // > North America: https://api.amazonalexa.com/v3/events
+            // > Europe: https://api.eu.amazonalexa.com/v3/events
+            // > Far East: https://api.fe.amazonalexa.com/v3/events
+
+        // build state response and validate
+
+
+        // request access token
+        requestAccessToken(user, function(accesstoken) {
+            if (accesstoken != undefined) {
+                logger.log('info', "[State API] Alexa Authorization access token: " + JSON.stringify(accesstoken));
+                // Send state update
+
+                // Authorization token specified as an HTTP Authorization header and a bearer token in the scope of the message:
+
+                // POST api-amazonalexa.com
+                // Authorization: Bearer Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR...
+                // Content-Type: application/json
+                // {
+                //     "context": {
+                //         "properties": [ {
+                //         "namespace": "Alexa.LockController",
+                //         "name": "lockState",
+                //         "value": "LOCKED",
+                //         "timeOfSample": "2017-02-03T16:20:50.52Z",
+                //         "uncertaintyInMilliseconds": 1000
+                //         } ]
+                //     },
+                //     "event": {
+                //         "header": {
+                //         "namespace": "Alexa",
+                //         "name": "Response",
+                //         "payloadVersion": "3",
+                //         "messageId": "5f8a426e-01e4-4cc9-8b79-65f8bd0fd8a4",
+                //         "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+                //         },
+                //         "endpoint": {
+                //         "scope": {
+                //             "type": "BearerToken",
+                //             "token": "Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR..."
+                //         },
+                //         "endpointId": "appliance-001"
+                //         },
+                //         "payload": {}
+                //     }
+                // }
+
+            }
+            else {
+                logger.log('error', "[TEST] Failed, no access token");
+            }
+        });
+    }
 
     /* 
-    Use the access_token value in the scope of messages to the Alexa event gateway. The endpoints are:
-    > North America: https://api.amazonalexa.com/v3/events
-    > Europe: https://api.eu.amazonalexa.com/v3/events
-    > Far East: https://api.fe.amazonalexa.com/v3/events
-
-Authorization token specified as an HTTP Authorization header and a bearer token in the scope of the message:
-
-        POST api-amazonalexa.com
-        Authorization: Bearer Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR...
-        Content-Type: application/json
-        {
-            "context": {
-                "properties": [ {
-                "namespace": "Alexa.LockController",
-                "name": "lockState",
-                "value": "LOCKED",
-                "timeOfSample": "2017-02-03T16:20:50.52Z",
-                "uncertaintyInMilliseconds": 1000
-                } ]
-            },
-            "event": {
-                "header": {
-                "namespace": "Alexa",
-                "name": "Response",
-                "payloadVersion": "3",
-                "messageId": "5f8a426e-01e4-4cc9-8b79-65f8bd0fd8a4",
-                "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
-                },
-                "endpoint": {
-                "scope": {
-                    "type": "BearerToken",
-                    "token": "Atza|IQEBLjAsAhRmHjNgHpi0U-Dme37rR6CuUpSR..."
-                },
-                "endpointId": "appliance-001"
-                },
-                "payload": {}
-            }
-        }
-
         if response is 403, as below remove all stored auth data
 		/// function remove authdata
 

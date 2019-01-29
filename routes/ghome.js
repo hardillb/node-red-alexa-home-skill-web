@@ -174,7 +174,16 @@ router.post('/action', defaultLimiter,
 							name : devices[i].friendlyName
 							}
 						dev.willReportState = devices[i].reportState;
-						dev.attributes = devices[i].attributes;
+						
+						dev.attributes = (deviceJSON.attributes || {});
+						// if (getSafe(deviceJSON.attributes) != undefined) {
+						// 	dev.attributes = deviceJSON.attributes;
+						// }
+						// else {
+						// 	dev.attributes = {};
+						// }
+
+						
 						// Populate attributes, remap roomHint to device root
 						if (deviceJSON.hasOwnProperty('attributes')) {
 							if (deviceJSON.attributes.hasOwnProperty('roomHint')){
