@@ -272,8 +272,8 @@ module.exports.sendState = function sendState(user, state) {
                     logger.log('warn', "[State API] Change report to Alexa failed. error" + err);
                 }
                 else {
-                    if (res.statusCode == 200) {
-                        logger.log('verbose', "[State API] Change report to Alexa successful!");
+                    if (res.statusCode == 202) {
+                        logger.log('verbose', "[State API] Change report to Alexa SUCCESSFUL!");
                     }
                     else if (res.statusCode == 403) {
                         // Skill has been unlinked from users account, clean-up user grants, refresh token and access tokens
