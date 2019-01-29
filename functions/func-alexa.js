@@ -425,16 +425,11 @@ module.exports.sendState = function sendState(user, state) {
 }
 
 // Check user is actually enabled / account-linked for Alexa
-module.exports.isAlexaUser = function isAlexaUser(username, callback) {
-    const pUsers = Account.find({username: username });
-	Promise.all([pUsers]).then(([users]) => {
-        if (users){
-			if (users[0].activeServices && users[0].activeServices.indexOf('Alexa') != -1) {
-				callback(true);
-			}
-			else {
-				callback(false);
-			}
-		}
-	});
+module.exports.isAlexaUser = function isAlexaUser(user, callback) {
+    if (user.activeServices && user.activeServices.indexOf('Alexa') != -1) {
+        callback(true);
+    }
+    else {
+        callback(false);
+    }
 }

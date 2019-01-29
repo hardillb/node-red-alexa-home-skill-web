@@ -361,14 +361,15 @@ function setstate(username, endpointId, payload) {
 					}
 					else {
 						logger.log('debug', "[State API] Updated state for endpointId: " + endpointId);
-
-						// Generate GHome state JSON object and send to HomeGraph API
+						///////////////////////////////////////////////////////////////////////////
+						// ASync State Updates
+						///////////////////////////////////////////////////////////////////////////
 						if (gHomeReportState == true || alexaReportState == true) {
 							var pUser = Account.findOne({username: username});
 							var pDevice = Devices.findOne({username: username, endpointId: endpointId});
 							Promise.all([pUser, pDevice]).then(([user, device]) => {
 								///////////////////////////////////////////////////////////////////////////
-								// Google Home State Update
+								// Google Home
 								///////////////////////////////////////////////////////////////////////////
 								isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
 									if (returnValue == true && gHomeReportState == true) {
@@ -402,7 +403,7 @@ function setstate(username, endpointId, payload) {
 									}
 								});
 								///////////////////////////////////////////////////////////////////////////
-								// Alexa State Update/ Change Report
+								// Alexa
 								///////////////////////////////////////////////////////////////////////////
 								isAlexaUser(username, function(returnValue) {
 									if (returnValue == true && alexaReportState == true) {

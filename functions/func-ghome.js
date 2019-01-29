@@ -95,20 +95,15 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 	}
 }
 // Check user is actually enabled / account-linked for Google Home
-module.exports.isGhomeUser = function isGhomeUser(username, callback) {
-    const pUsers = Account.find({username: username });
-	Promise.all([pUsers]).then(([users]) => {
-        if (users){
-			if (users[0].activeServices && users[0].activeServices.indexOf('Google') != -1) {
-				//logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
-				callback(true);
-			}
-			else {
-				//logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
-				callback(false);
-			}
-		}
-	});
+module.exports.isGhomeUser = function isGhomeUser(user, callback) {
+	if (user.activeServices && user.activeServices.indexOf('Google') != -1) {
+		//logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
+		callback(true);
+	}
+	else {
+		//logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
+		callback(false);
+	}
 }
 // Send State Update
 module.exports.sendState = function sendState(token, response) {
