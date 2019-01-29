@@ -426,7 +426,7 @@ module.exports.sendState = function sendState(user, state) {
 
 // Check user is actually enabled / account-linked for Alexa
 module.exports.isAlexaUser = function isAlexaUser(user, callback) {
-    if (user.activeServices && user.activeServices.indexOf('Alexa') != -1) {
+    if (user.activeServices && user.activeServices.indexOf('Amazon') != -1) {
         callback(true);
     }
     else {
