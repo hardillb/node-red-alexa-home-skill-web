@@ -248,7 +248,7 @@ module.exports.sendState = function sendState(user, state) {
         case 'Americas': // North America
             stateURI = 'https://api.amazonalexa.com/v3/events';
             break
-        case 'Asia Pacific': // Far East
+        case 'Asia': // Far East
             stateURI = 'https://api.fe.amazonalexa.com/v3/events';
             break;
     }
@@ -283,7 +283,7 @@ module.exports.sendState = function sendState(user, state) {
             });
         }
         else {
-            logger.log('error', "[State API] Alexa requestAccessToken returned undefined");
+            logger.log('warn', "[State API] Alexa requestAccessToken returned undefined");
         }
     });
 }
