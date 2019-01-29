@@ -371,7 +371,7 @@ function setstate(username, endpointId, payload) {
 								///////////////////////////////////////////////////////////////////////////
 								// Google Home
 								///////////////////////////////////////////////////////////////////////////
-								isGhomeUser(username, function(returnValue) { // Check user is has linked account w/ Google
+								isGhomeUser(user, function(returnValue) { // Check user is has linked account w/ Google
 									if (returnValue == true && gHomeReportState == true) {
 										try {
 											logger.log('debug', "[State API] GHome Report State using device:" + JSON.stringify(device));
@@ -409,7 +409,7 @@ function setstate(username, endpointId, payload) {
 								///////////////////////////////////////////////////////////////////////////
 								// Alexa
 								///////////////////////////////////////////////////////////////////////////
-								isAlexaUser(username, function(returnValue) {
+								isAlexaUser(user, function(returnValue) {
 									if (returnValue == true && alexaReportState == true) {
 										try {
 											logger.log('debug', "[State API] Alexa Change report using device:" + JSON.stringify(device));
