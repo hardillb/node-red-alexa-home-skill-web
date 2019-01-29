@@ -442,7 +442,6 @@ function setstate(username, endpointId, payload) {
 															}
 														}
 													}
-													logger.log('debug', "[State API] Generated Alexa Change Report: " + JSON.stringify(changeReport));
 													alexaSendState(user, changeReport);
 												}
 											});
