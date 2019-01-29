@@ -1098,7 +1098,7 @@ function replaceCapability(capability, reportState, attributes) {
                   }
                 ],
                 "proactivelyReported": true,
-                "retrievable": true
+                "retrievable": false
               }
 			};
 	}
