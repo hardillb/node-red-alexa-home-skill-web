@@ -75,7 +75,7 @@ $("#form-device").submit(function(e) {
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
-		$('#validRangeScaleOptions').hide();
+		if ($('#TEMPERATURE_SENSOR').prop('checked') == false){$('#validRangeScaleOptions').hide()};
 		$('#thermostatModeOptions').hide();
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
@@ -90,6 +90,7 @@ $("#ThermostatController").change(function(e) {
 		$('#AUTO').prop('checked', false);
 		$('#ECO').prop('checked', false);
 		$('#OFF').prop('checked', false);
+		$('#ON').prop('checked', false);
 	}
 	else {
 		$('#ReportState').prop('checked', true);

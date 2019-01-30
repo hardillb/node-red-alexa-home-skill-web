@@ -1107,7 +1107,11 @@ function replaceCapability(capability, reportState, attributes) {
 		var supportedModes;
 		var hasModes = getSafe(() => attributes.thermostatModes);
 		if (attributes != null && hasModes != undefined) {
-			supportedModes = attributes.thermostatModes;
+			//supportedModes = attributes.thermostatModes;
+			supportedModes = attributes.thermostatModes.filter(function(value, index, arr){
+				// Google Home filter, remove modes that are not Alexa Compliant
+				return value != "ON";
+			});
 		}
 		else {
 			supportedModes = ["HEAT","COOL","AUTO"];
