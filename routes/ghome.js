@@ -178,6 +178,22 @@ router.post('/action', defaultLimiter,
 							try {
 								 logger.log('debug', '[GHome SYNC API] devices[' + i + '].attributes:' + JSON.stringify(devices[i].attributes));
 								 logger.log('debug', '[GHome SYNC API] deviceJSON.attributes:' + JSON.stringify(deviceJSON.attributes));
+								
+								 var test1 = 'attributes' in devices[i];
+								 var test2 = 'attributes' in deviceJSON;
+								 var test3 = getSafe(deviceJSON.attributes);
+								 var test4 = getSafe(devices[i].attributes);
+								 
+								 logger.log('debug', '[GHome SYNC API] test1:' + test1);
+								 logger.log('debug', '[GHome SYNC API] test2:' + test2);
+								 logger.log('debug', '[GHome SYNC API] test3:' + test3);
+								 logger.log('debug', '[GHome SYNC API] test4:' + test4);
+
+								 if (devices[i].indexOf('attributes') > -1){
+									logger.log('debug', '[GHome SYNC API] test5 TRUE');
+								 }
+								 else {logger.log('debug', '[GHome SYNC API] test5 FALSE')}
+
 							}
 							catch (e) {
 								logger.log('debug', '[GHome SYNC API] Attrib logging error:' + e);
