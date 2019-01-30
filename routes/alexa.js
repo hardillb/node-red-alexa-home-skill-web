@@ -269,14 +269,14 @@ router.post('/command2',
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (err) {
-				logger.log('warn', "[Command API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username);
+				logger.log('warn', "[Alexa API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username + ", command execution failed");
 				res.status(404).send();	
 			}
 			if (data) {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Revised Command API Router, offloading from Lambda to avoid multiple requests/ data comparison
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				logger.log('debug', "[Command API] Received command: " + JSON.stringify(req.body));
+				logger.log('debug', "[Alexa API] Received command: " + JSON.stringify(req.body));
 				// Convert "model" object class to JSON object
 				var deviceJSON = JSON.parse(JSON.stringify(data));
 				var endpointId = req.body.directive.endpoint.endpointId;
@@ -662,7 +662,7 @@ router.post('/command2',
 					};                
 				}
 
-				logger.log('debug', "[Command API] Command response:" + response);
+				//logger.log('debug', "[Alexa API] Command response:" + response);
 
 				// Prepare MQTT topic/ message validation
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
@@ -672,7 +672,7 @@ router.post('/command2',
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
-				logger.log('debug', "[Command API] Received command API request for user: " + req.user.username + " command: " + message);
+				logger.log('debug', "[Alexa API] Received command API request for user: " + req.user.username + " command: " + message);
 
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -683,13 +683,13 @@ router.post('/command2',
 					var hasColorTemperatureRange = getSafe(() => deviceJSON.attributes.colorTemperatureRange);
 					if (hasColorTemperatureRange != undefined) {
 						if (compare < deviceJSON.attributes.colorTemperatureRange.temperatureMinK || compare > deviceJSON.attributes.colorTemperatureRange.temperatureMaxK) {
-							logger.log('warn', "[Command API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
+							logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
 							// Send 417 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
 							res.status(417).send();
 							validationStatus = false;
 						}
 					}
-					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
+					else {logger.log('debug', "[Alexa API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
 				}
 
 				// Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
@@ -699,21 +699,21 @@ router.post('/command2',
 					var hasTemperatureRange = getSafe(() => deviceJSON.attributes.temperatureRange);
 					if (hasTemperatureRange != undefined) {
 						if (compare < deviceJSON.attributes.temperatureRange.temperatureMin || compare > deviceJSON.attributes.temperatureRange.temperatureMax) {
-							logger.log('warn', "[Command API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
+							logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
 							// Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
 							res.status(416).send();
 							validationStatus = false;
 						}
 					}
-					else {logger.log('debug', "[Command API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
+					else {logger.log('debug', "[Alexa API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
 				}
 				
 				if (validationStatus) {
 					try{
 						mqttClient.publish(topic,message);
-						logger.log('info', "[Command API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+						logger.log('info', "[Alexa API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 					} catch (err) {
-						logger.log('warn', "[Command API] Failed to publish MQTT command for user: " + req.user.username);
+						logger.log('warn', "[Alexa API] Failed to publish MQTT command for user: " + req.user.username);
 					}
 					var command = {
 						user: req.user.username,
@@ -844,11 +844,11 @@ mqttClient.on('message',function(topic,message){
 				// Alexa failure response send to Lambda for full response construction
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Alexa") {
 					if (commandWaiting.hasOwnProperty('response')) {
-						logger.log('warn', "[Command API] Failed Alexa MQTT Command API, response:" + + JSON.stringify(commandWaiting.response));
+						logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API, response:" + + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(503).json(commandWaiting.response)
 					}
 					else {
-						logger.log('warn', "[Command API] Failed Alexa MQTT Command API response");
+						logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API response");
 						commandWaiting.res.status(503).send()
 					}
 				}
