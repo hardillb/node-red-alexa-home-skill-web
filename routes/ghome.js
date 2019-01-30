@@ -175,6 +175,14 @@ router.post('/action', defaultLimiter,
 							}
 						dev.willReportState = devices[i].reportState;
 						
+							try {
+								 logger.log('debug', '[GHome SYNC API] devices[' + i + '].attributes:' + JSON.stringify(devices[i].attributes));
+								 logger.log('debug', '[GHome SYNC API] deviceJSON.attributes:' + JSON.stringify(deviceJSON.attributes));
+							}
+							catch (e) {
+								logger.log('debug', '[GHome SYNC API] Attrib logging error:' + e);
+							}
+
 						//dev.attributes = (deviceJSON.attributes || {});
 						var hasAttributes = getSafe(deviceJSON.attributes);
 						if (hasAttributes != undefined) {
