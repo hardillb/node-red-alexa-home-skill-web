@@ -175,12 +175,12 @@ router.post('/action', defaultLimiter,
 							}
 						dev.willReportState = devices[i].reportState;
 						
-							try {
+/* 							try {
 								 logger.log('debug', '[GHome SYNC API] devices[' + i + '].attributes:' + JSON.stringify(devices[i].attributes));
 								 logger.log('debug', '[GHome SYNC API] deviceJSON.attributes:' + JSON.stringify(deviceJSON.attributes));
 								
 								 var test1 = 'attributes' in devices[i];
-								 var test2 = 'attributes' in deviceJSON;
+								 var test2 = 'attributes' in deviceJSON; // Only one that works
 								 var test3 = getSafe(deviceJSON.attributes);
 								 var test4 = getSafe(devices[i].attributes);
 								 
@@ -197,11 +197,11 @@ router.post('/action', defaultLimiter,
 							}
 							catch (e) {
 								logger.log('debug', '[GHome SYNC API] Attrib logging error:' + e);
-							}
+							} */
 
 						//dev.attributes = (deviceJSON.attributes || {});
-						var hasAttributes = getSafe(deviceJSON.attributes);
-						if (hasAttributes != undefined) {
+						var hasAttributes = 'attributes' in deviceJSON;
+						if (hasAttributes == true) {
 							logger.log('debug', '[GHome SYNC API] Device HAS attributes');
 							dev.attributes = devices[i].attributes;
 							logger.log('debug', '[GHome SYNC API] Device attributes set to:' + JSON.stringify(dev.attributes));
