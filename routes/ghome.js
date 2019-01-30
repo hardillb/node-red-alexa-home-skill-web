@@ -177,9 +177,12 @@ router.post('/action', defaultLimiter,
 						
 						//dev.attributes = (deviceJSON.attributes || {});
 						if (getSafe(deviceJSON.attributes) != undefined) {
-						 	dev.attributes = deviceJSON.attributes;
+							logger.log('debug', '[GHome SYNC API] Device HAS attributes');
+							dev.attributes = devices[i].attributes;
+							logger.log('debug', '[GHome SYNC API] Device attributes set to:' + JSON.stringify(dev.attributes));
 						}
 						else {
+							logger.log('debug', '[GHome SYNC API] Device has NO attributes, empty JSON object created');
 							dev.attributes = {};
 						}
 
