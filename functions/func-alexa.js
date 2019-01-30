@@ -257,8 +257,7 @@ module.exports.sendState = function sendState(user, state) {
     requestAccessToken(user, function(accesstoken) {
         if (accesstoken != undefined) {
             state.event.endpoint.scope.token = accesstoken.token;
-            logger.log('verbose', "[State API] Sending Change Report to:" +  stateURI);
-            logger.log('verbose', "[State API] Sending Change Report to Alexa:" +  JSON.stringify(state));
+            logger.log('verbose', "[State API] Sending Alexa Change Report to: " + stateURI + ", state:" +  JSON.stringify(state));
             // Send state update
             request.post({
                 url: stateURI,
@@ -269,21 +268,18 @@ module.exports.sendState = function sendState(user, state) {
                     json: state
             }, function(err,res, body){
                 if (err) {
-                    logger.log('warn', "[State API] Change report to Alexa failed. error" + err);
+                    logger.log('warn', "[State API] Change report for user:" + user.username + ", to Alexa failed, error" + err);
                 }
                 else {
                     if (res.statusCode == 202) {
-                        logger.log('verbose', "[State API] Change report to Alexa SUCCESSFUL!");
+                        logger.log('verbose', "[State API] Change report for user:" + user.username + ", to Alexa successful!");
                     }
                     else if (res.statusCode == 403) {
                         // Skill has been unlinked from users account, clean-up user grants, refresh token and access tokens
                     }
-                    else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
+                    else {logger.log('warn', "[State API] Change report failed, reponse code:" + res.statusCode)}
                 }
             });
-        }
-        else {
-            logger.log('warn', "[State API] Alexa requestAccessToken returned undefined");
         }
     });
 }
@@ -309,7 +305,7 @@ function requestAccessToken(user, callback) {
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
             if (grant && !refreshtoken && !accesstoken) { // Request new access token using grant code
-                logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code only");
+                //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code only");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
@@ -325,7 +321,7 @@ function requestAccessToken(user, callback) {
                             callback(undefined);
                         } else { // Store the RefreshToken and AccessToken
                             var jsonBody = JSON.parse(body);
-                            logger.log('verbose', "[AlexaAuth API] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
+                           // logger.log('verbose', "[AlexaAuth API] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
 
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
                                 token: jsonBody.refresh_token,
@@ -360,8 +356,8 @@ function requestAccessToken(user, callback) {
                                 });
                             });
                             Promise.all([pSaveRefreshToken, pSaveAccessToken]).then(([refresh, access]) => {
-                                logger.log('verbose', "[AlexaAuth API] Saved RefreshToken for user:" + user.username + ", token:" + JSON.stringify(refresh));
-                                logger.log('verbose', "[AlexaAuth API] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
+                                logger.log('debug', "[AlexaAuth API] Saved RefreshToken for user:" + user.username + ", token:" + JSON.stringify(refresh));
+                                logger.log('debug', "[AlexaAuth API] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
                                 callback(access);
                             }).catch(err => {
                                 logger.log('error', "[AlexaAuth API] requestAccessToken error:" + err);
@@ -373,7 +369,7 @@ function requestAccessToken(user, callback) {
             }
             // User had grant code and refresh token, no (valid) access token
             else if (grant && refreshtoken && !accesstoken) { // Request new access token using refresh token
-                logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code and refresh token");
+                //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code and refresh token");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
                     form: {
@@ -390,7 +386,7 @@ function requestAccessToken(user, callback) {
                         } else {
                             // Store the AccessToken
                             var jsonBody = JSON.parse(body);
-                            logger.log('verbose', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
+                            //logger.log('verbose', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
 
                             var today = new Date();
                             var expires = today.getTime() + jsonBody.expires_in*1000;
@@ -411,7 +407,7 @@ function requestAccessToken(user, callback) {
                                 });
                             });
                             Promise.all([pSaveAccessToken]).then(([access]) => {
-                                logger.log('verbose', "[AlexaAuth API] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
+                                logger.log('debug', "[AlexaAuth API] Saved AccessToken for user:" + user.username + ", token:" + JSON.stringify(access));
                                 callback(access);
                             }).catch(err => {
                                 logger.log('error', "[AlexaAuth API] requestAccessToken error:" + err);
@@ -423,9 +419,13 @@ function requestAccessToken(user, callback) {
             }
             // User had grant code and refresh token, and valid access token
             else if (grant && refreshtoken && accesstoken) {
-                logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code, refresh token and valid access token");
-                logger.log('verbose', "[AlexaAuth API] Returned existing AccessToken for user:" + user.username + ", token:" + JSON.stringify(accesstoken));
+                //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code, refresh token and valid access token");
+                logger.log('debug', "[AlexaAuth API] Returned existing AccessToken for user:" + user.username + ", token:" + JSON.stringify(accesstoken));
                 callback(accesstoken);
+            }
+            else if (!grant) { // User needs to un-link/ re-link Amazon account, no grant code
+                logger.log('warn', "[AlexaAuth API] No Alexa Grant Code for user:" + user.username);
+                callback(undefined);
             }
             else { // Shouldn't get here!
                 callback(undefined);
