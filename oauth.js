@@ -108,10 +108,10 @@ server.exchange(oauth2orize.exchange.refreshToken({
 						if (!error) {
 							logger.log("debug", "[OAuth Server] Created AccessToken for user:" + refresh.user  + ", expires_in:" + expires);
 							logger.log("debug", "[OAuth Server] AccessToken:" + JSON.stringify(newToken));
-							logger.log("debug", "[OAuth Server] AccessToken saved")
+							logger.log("debug", "[OAuth Server] AccessToken saved");
 							done(null, newToken.token, refresh.token, {token_type: 'Bearer', expires_in: expires, scope: newToken.scope});
 						} else {
-							logger.log("debug", "[OAuth Server] Error saving token")
+							logger.log("debug", "[OAuth Server] Error saving token, error:" + error);
 							done(error,false);
 						}
 					});
@@ -119,12 +119,15 @@ server.exchange(oauth2orize.exchange.refreshToken({
 					if (!grant) {logger.log("debug", "[OAuth Server] Error, GrantCode not found")};
 					if (!grant.active) {logger.log("debug", "[OAuth Server] Error, grant not active")};
 					if (grant.application != application.id){logger.log("debug", "[OAuth Server] Error, grant.application: " + grant.application + " does not match application.id:" + application.id)};
+					if (error){logger.log("error", "[OAuth Server] Find GrantCode error:" + error)};
 					done(error,null);
 				}
 			});
 		} else {
-			if (!refresh && application != null) {logger.log("debug", "[OAuth Server] Error, refresh token not found for application:" + application.title)};
-			if (!refresh){logger.log("error", "[OAuth Server] Error, unable to find refresh token, application is null")};
+			if (!refresh && application != null) {logger.log("debug", "[OAuth Server] Error, refresh token not found for application:" + application.title)}
+			else if (!application){logger.log("error", "[OAuth Server] Error, unable to find refresh token, application is null")};
+
+			if (error){logger.log("error", "[OAuth Server] Find RefreshToken error:" + error)};
 			done(error, false);
 		}
 	});
