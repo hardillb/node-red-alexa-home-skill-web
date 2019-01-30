@@ -321,7 +321,7 @@ function requestAccessToken(user, callback) {
                             callback(undefined);
                         } else { // Store the RefreshToken and AccessToken
                             var jsonBody = JSON.parse(body);
-                           // logger.log('verbose', "[AlexaAuth API] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
+                            logger.log('debug', "[AlexaAuth API] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
 
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
                                 token: jsonBody.refresh_token,
@@ -386,7 +386,7 @@ function requestAccessToken(user, callback) {
                         } else {
                             // Store the AccessToken
                             var jsonBody = JSON.parse(body);
-                            //logger.log('verbose', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
+                            logger.log('debug', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
 
                             var today = new Date();
                             var expires = today.getTime() + jsonBody.expires_in*1000;
