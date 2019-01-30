@@ -176,7 +176,7 @@ router.post('/action', defaultLimiter,
 						dev.willReportState = devices[i].reportState;
 						
 						//dev.attributes = (deviceJSON.attributes || {});
-						var hasAttributes = getSafe(devices[i].attributes);
+						var hasAttributes = getSafe(deviceJSON.attributes);
 						if (hasAttributes != undefined) {
 							logger.log('debug', '[GHome SYNC API] Device HAS attributes');
 							dev.attributes = devices[i].attributes;
