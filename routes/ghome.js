@@ -203,9 +203,10 @@ router.post('/action', defaultLimiter,
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							// Is a HVAC unit, change device type accordingly
-							if (dev.attributes.thermostatModes.indexOf('COOL') > -1 && dev.type == 'action.devices.types.THERMOSTAT') {
-							 	dev.type = 'action.devices.types.AC_UNIT';
-							}
+							// if (dev.attributes.thermostatModes.indexOf('COOL') > -1 && dev.type == 'action.devices.types.THERMOSTAT') {
+							//  	dev.type = 'action.devices.types.AC_UNIT';
+							// }
+
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.join().toLowerCase(); // Make string, not array
 							dev.attributes.thermostatTemperatureUnit = dev.attributes.temperatureScale.substring(0, 1); // >> Need to make this upper F or C, so trim
 							delete dev.attributes.temperatureRange;
