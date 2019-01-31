@@ -251,20 +251,16 @@ $("#SceneController").change(function(e) {
 // Device type-specific validation/ element show and hide
 ///////////////////////////////////////////////////////////////////////////
 function checkType(type) {
-	// Clean-up modal elemts in-case they are no longer needed
-	if ($('#ThermostatController').prop('checked') == false){
-		$('#thermostatModeOptions').hide();
-	}
-	if ($("#TemperatureSensor").prop('checked') == false && $('#ThermostatController').prop('checked') == false && $('#ColorTemperatureController').prop('checked') == false){
-		$('#validRangeOptions').hide();
-		$('#validRangeScaleOptions').hide();
-		$('#Celsius').attr("disabled", "disabled"); 
-		$('#Farenheit').attr("disabled", "disabled");
-		$("#maximumValue").prop('required',false);
-		$("#minimumValue").prop('required',false);
-		$("#Celsius").prop('required',false);
-		$("#Farenheit").prop('required',false);
-	}
+	// Clean-up modal elements in-case they are no longer needed
+	$('#thermostatModeOptions').hide();
+	$('#validRangeOptions').hide();
+	$('#validRangeScaleOptions').hide();
+	$('#Celsius').attr("disabled", "disabled"); 
+	$('#Farenheit').attr("disabled", "disabled");
+	$("#maximumValue").prop('required',false);
+	$("#minimumValue").prop('required',false);
+	$("#Celsius").prop('required',false);
+	$("#Farenheit").prop('required',false);
 	$('#stateReporting').hide(); 
 
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#OTHER').prop('checked')) {
