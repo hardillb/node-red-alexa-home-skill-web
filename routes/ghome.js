@@ -202,7 +202,10 @@ router.post('/action', defaultLimiter,
 						}
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
-							//dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.map(function(x){return x.toLowerCase()});
+							// Is a HVAC unit, change device type accordingly
+							if (dev.attributes.availableThermostatModes.indexOf('COOL') > -1) {
+								dev.type = 'action.devices.types.AC_UNIT';
+							}
 							dev.attributes.availableThermostatModes = dev.attributes.thermostatModes.join().toLowerCase(); // Make string, not array
 							dev.attributes.thermostatTemperatureUnit = dev.attributes.temperatureScale.substring(0, 1); // >> Need to make this upper F or C, so trim
 							delete dev.attributes.temperatureRange;
@@ -561,7 +564,7 @@ var timeout = setInterval(function(){
 // Convert Alexa Device Capabilities to Google Home-compatible
 function gHomeReplaceCapability(capability) {
 	// Limit supported traits, add new ones here
-	if(capability == "PowerController") {return "action.devices.traits.OnOff"}
+	if (capability == "PowerController") {return "action.devices.traits.OnOff"}
 	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
