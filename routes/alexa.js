@@ -492,6 +492,41 @@ router.post('/command2',
 						}]
 					};
 				}
+				// Build RangeController Response Context
+				if (namespace == "Alexa.RangeController") {
+					if (name == "SetRangeValue") {
+						var contextResult = {
+							"properties": [
+								{
+								"namespace": "Alexa.RangeController",
+								"instance" : "Fan.Speed",
+								"name": "rangeValue",
+								"value":  req.body.directive.payload.rangeValue,
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 50
+								}
+							]}
+					}
+					else if (name == "AdjustRangeValue") {
+						var rangeValue;
+						var hasrangeValue = getSafe(() => deviceJSON.state.rangeValue);
+						if (hasrangeValue != undefined) {
+							if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta > 10) {rangeValue = 10}
+							else if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta < 1) {rangeValue = 1}
+							else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValue}
+							var contextResult = {
+								"properties": [{
+									"namespace": "Alexa.RangeController",
+									"instance" : "Fan.Speed",
+									"name": "rangeValue",
+									"value":  rangeValue,
+									"timeOfSample": dt.toISOString(),
+									"uncertaintyInMilliseconds": 50
+									}]
+								};
+							}
+					}
+				}
 				// Build Scene Controller Activation Started Event
 				if (namespace == "Alexa.SceneController") {
 					header.namespace = "Alexa.SceneController";
@@ -563,35 +598,7 @@ router.post('/command2',
 					// Workout new thermostatMode
 					var hasThermostatModes = getSafe(() => deviceJSON.attributes.thermostatModes);
 					if (hasThermostatModes != undefined){
-						var countModes = deviceJSON.attributes.thermostatModes.length;
-						var arrModes = deviceJSON.attributes.thermostatModes;
-						if (countModes == 1){ // If single mode is supported leave as-is
-							newMode = deviceJSON.state.thermostatMode;
-						}
-						else {
-							// var auto, heat, cool, on, off = false;
-							// if (arrModes.indexOf('AUTO') > -1){auto = true};
-							// if (arrModes.indexOf('HEAT') > -1){heat = true};
-							// if (arrModes.indexOf('COOL') > -1){cool = true};
-							// if (arrModes.indexOf('OFF') > -1){off = true};
-							newMode = deviceJSON.state.thermostatMode;
-
-							// if (countModes == 2 && (heat && cool)) { // Cool and Heat Supported
-							// 	if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
-							// 	else {newMode = "HEAT"}
-							// }
-							// else if (countModes == 3 && (heat && cool && auto)) { // Heat, Cool and Auto Supported
-							// 	if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
-							// 	else {newMode = "HEAT"}
-							// }
-							// else if (countModes == 4 && (on && off && off && auto)) { // All Modes Supported
-							// 	if (newTemp < deviceJSON.state.thermostatSetPoint ) {newMode = "COOL"}
-							// 	else {newMode = "HEAT"}
-							// }
-							// else { // Fallback position
-							// 	newMode = "HEAT";
-							// }
-						}
+						newMode = deviceJSON.state.thermostatMode;
 					}
 					else {
 						newMode = "HEAT";
@@ -1044,6 +1051,109 @@ function replaceCapability(capability, reportState, attributes) {
 				}
 			};
 	}
+	// RangeController
+	if(capability == "RangeController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.RangeController",
+			"version": "3",
+			"instance": "Fan.Speed",
+			"capabilityResources": {
+			  "friendlyNames": [
+				{
+				  "@type": "asset",
+				  "value": {
+					"assetId": "Alexa.Setting.FanSpeed"
+				  }
+				}
+			  ]
+			},
+			"properties": {
+			  "supported": [
+				{
+				  "name": "rangeValue"
+				}
+			  ],
+			  "proactivelyReported": reportState,
+			  "retrievable": reportState
+			},
+			"configuration": {
+			  "supportedRange": {
+				"minimumValue": 1,
+				"maximumValue": 10,
+				"precision": 1
+			  },
+			  "presets": [
+				{
+					"rangeValue": 1,
+					"presetResources": {
+					  "friendlyNames": [
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Low"
+						  }
+						},
+						{
+						  "@type": "text",
+						  "value": {
+							"text": "Slowest",
+							"locale": "en-US"
+						  }
+						}
+					  ]
+					}
+				  },
+				{
+					"rangeValue": 5,
+					"presetResources": {
+					  "friendlyNames": [
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Medium"
+						  }
+						},
+						{
+						  "@type": "text",
+						  "value": {
+							"text": "Medium",
+							"locale": "en-US"
+						  }
+						}
+					  ]
+					}
+				  },
+				  {
+					"rangeValue": 10,
+					"presetResources": {
+					  "friendlyNames": [
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Maximum"
+						  }
+						},
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.High"
+						  }
+						},
+						{
+						  "@type": "text",
+						  "value": {
+							"text": "Highest",
+							"locale": "en-US"
+						  }
+						}
+					  ]
+					}
+				  }
+			  ]	
+			}
+		 };
+	 }
 	// Speaker
 	if(capability == "Speaker") {
 		return {

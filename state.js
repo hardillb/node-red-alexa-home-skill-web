@@ -212,7 +212,14 @@ function setstate(username, endpointId, payload) {
 					}
 				};
 				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
-				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power}
+				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power};
+				if (payload.state.hasOwnProperty('rangeValue')) {dev.state.rangeValue = payload.state.rangeValue};
+				if (payload.state.hasOwnProperty('rangeValueDelta')) {
+					if (dev.state.hasOwnProperty('rangeValue')) {
+						var newRangeValue = dev.state.rangeValue + payload.state.rangeValueDelta;
+						dev.state.rangeValue = newRangeValue;
+					}
+				}
 				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
 					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 						var newMode;

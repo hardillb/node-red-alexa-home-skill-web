@@ -298,7 +298,7 @@ function checkType(type) {
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController" && $(this).attr("id") != "PercentageController"){
+			if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController" && $(this).attr("id") != "PercentageController" && $(this).attr("id") != "RangeController"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
@@ -905,6 +905,9 @@ function generateState(deviceState) {
 				case "PowerController":
 					dummyState.power = "OFF";
 					break;
+				case "RangeController":
+					dummyState.rangeValue = 5;
+					break;
 				case "Speaker":
 					dummyState.volume = 50;
 					break;
@@ -982,6 +985,14 @@ function generateState(deviceState) {
 						}
 					}
 					else {dummyState.power = "OFF"}
+					break;
+				case "RangeController":
+					if (deviceState.hasOwnProperty('rangeValue')) {
+						if (typeof deviceState.rangeValue == 'number') {
+							dummyState.rangeValue = deviceState.rangeValue;
+						}
+					}
+					else {dummyState.rangeValue = 5}
 					break;
 				case "Speaker":
 					if (deviceState.hasOwnProperty('volume')) {

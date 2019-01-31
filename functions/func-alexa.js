@@ -155,6 +155,19 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                         });
                                 }
                                 break;
+                            case "RangeController":
+                                // Return Power State
+                                if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time')) {
+                                    properties.push({
+                                                "namespace": "Alexa.RangeController",
+                                                "instance": "Fan.Speed",
+                                                "name": "rangeValue ",
+                                                "value": deviceJSON.state.rangeValue,
+                                                "timeOfSample": deviceJSON.state.time,
+                                                "uncertaintyInMilliseconds": 1000
+                                        });
+                                }
+                                break;
                             case "TemperatureSensor":
                                 // Return temperature
                                 if (deviceJSON.state.hasOwnProperty('temperature') && deviceJSON.state.hasOwnProperty('time')) {
