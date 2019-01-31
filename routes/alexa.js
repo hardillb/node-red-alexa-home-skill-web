@@ -178,7 +178,15 @@ router.get('/devices', defaultLimiter,
 					// Grab device attributes for use in building discovery response
 					var devAttribues = (data[i].attributes || null);
 					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttribues))
+						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttribues));
+						// Add specific RangeController interface
+						if (capability == 'RangeController'){
+							dev.capabilities.push(
+							{  "type": "AlexaInterface",
+								"interface": "Alexa",
+								"version": "3"
+							});
+						}
 					});
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
