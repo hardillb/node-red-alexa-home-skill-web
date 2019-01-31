@@ -75,12 +75,13 @@ $("#form-device").submit(function(e) {
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
-		if ($('#TEMPERATURE_SENSOR').prop('checked') == false){
+		if ($('#TemperatureSensor').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
 			$('#Celsius').attr("disabled", "disabled"); 
 			$('#Farenheit').attr("disabled", "disabled");
 			$("#Celsius").prop('required',false);
 			$("#Farenheit").prop('required',false);
+			//$('#THERMOSTAT').prop('checked', false);
 		};
 		$('#thermostatModeOptions').hide();
 		$('#maximumValue').attr("disabled", "disabled"); 
@@ -121,7 +122,7 @@ $("#ThermostatController").change(function(e) {
 //Enable Celsius and Farenheit options for Temperature Sesnor
 $("#TemperatureSensor").change(function(e) {
 	if ( $(this).is(':checked') == false) {
-		if ($('#THERMOSTAT').prop('checked') == false){
+		if ($('#ThermostatController').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
 			$("#Celsius").prop('required',false);
 			$("#Farenheit").prop('required',false);
