@@ -169,9 +169,10 @@ router.get('/devices', defaultLimiter,
 				var devs = [];
 				for (var i=0; i< data.length; i++) {
 					var dev = {};
+					dev.endpointId = "" + data[i].endpointId;
 					dev.friendlyName = data[i].friendlyName;
 					dev.description = data[i].description;
-					dev.endpointId = "" + data[i].endpointId;
+					dev.displayCategories = data[i].displayCategories;
 					//dev.reportState = data[i].reportState;
 					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
 					dev.capabilities = [];
@@ -188,8 +189,6 @@ router.get('/devices', defaultLimiter,
 							"version": "3"
 						});
 					}
-
-					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
 					dev.version = "0.0.3";
 					dev.manufacturerName = "Node-RED"
@@ -1070,11 +1069,19 @@ function replaceCapability(capability, reportState, attributes) {
 			"capabilityResources": {
 			  "friendlyNames": [
 				{
-				  "@type": "asset",
-				  "value": {
-					"assetId": "Alexa.Setting.FanSpeed"
-				  }
-				}
+                    "@type": "text",
+                    "value": {
+                      "text": "Fan Speed",
+                      "locale": "en-US"
+                    }
+				},
+				{
+                    "@type": "text",
+                    "value": {
+                      "text": "Position",
+                      "locale": "en-US"
+                    }
+                }
 			  ]
 			},
 			"properties": {
