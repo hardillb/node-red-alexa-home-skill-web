@@ -75,22 +75,24 @@ $("#form-device").submit(function(e) {
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
-		if ($('#TEMPERATURE_SENSOR').prop('checked') == false){$('#validRangeScaleOptions').hide()};
+		if ($('#TEMPERATURE_SENSOR').prop('checked') == false){
+			$('#validRangeScaleOptions').hide()
+			$('#Celsius').attr("disabled", "disabled"); 
+			$('#Farenheit').attr("disabled", "disabled");
+			$("#Celsius").prop('required',false);
+			$("#Farenheit").prop('required',false);
+		};
 		$('#thermostatModeOptions').hide();
 		$('#maximumValue').attr("disabled", "disabled"); 
 		$('#minimumValue').attr("disabled", "disabled");
-		$('#Celsius').attr("disabled", "disabled"); 
-		$('#Farenheit').attr("disabled", "disabled");
 		$("#maximumValue").prop('required',false);
 		$("#minimumValue").prop('required',false);
-		$("#Celsius").prop('required',false);
-		$("#Farenheit").prop('required',false);
-		$('#HEAT').prop('checked', false);
-		$('#COOL').prop('checked', false);
-		$('#AUTO').prop('checked', false);
-		$('#ECO').prop('checked', false);
-		$('#OFF').prop('checked', false);
-		$('#ON').prop('checked', false);
+		// $('#HEAT').prop('checked', false);
+		// $('#COOL').prop('checked', false);
+		// $('#AUTO').prop('checked', false);
+		// $('#ECO').prop('checked', false);
+		// $('#OFF').prop('checked', false);
+		// $('#ON').prop('checked', false);
 	}
 	else {
 		$('#ReportState').prop('checked', true);
@@ -106,7 +108,12 @@ $("#ThermostatController").change(function(e) {
 		$("#minimumValue").prop('required',true);
 		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
-		$('#AUTO').prop('checked', true);
+		if ($('#HEAT').prop('checked') == false && $('#COOL').prop('checked') == false 
+			&& $('#AUTO').prop('checked') == false && $('#ECO').prop('checked') == false 
+			&& $('#OFF').prop('checked') == false && $('#ON').prop('checked') == false){
+				// By default, enable AUTO
+				$('#AUTO').prop('checked', true);
+			}
 		// Prevent ColorTemperature and Thermostat interfaces co-exist
 		$("#ColorTemperatureController").prop('checked', false);
 	}
