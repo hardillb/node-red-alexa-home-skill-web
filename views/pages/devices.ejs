@@ -226,6 +226,17 @@ $("#LockController").change(function(e) {
 		});	
 	}
 });
+// Prevent Range and Percentage Controller co-exist
+$("#RangeController").change(function(e) {
+	if ($(this).is(':checked')) {
+		$('#PercentageController').prop('checked', false);
+	}
+});
+$("#PercentageController").change(function(e) {
+	if ($(this).is(':checked')) {
+		$('#RangeController').prop('checked', false);
+	}
+});
 // Prevent Scene Controller co-exist
 $("#SceneController").change(function(e) {
 	if ($(this).is(':checked')) {
