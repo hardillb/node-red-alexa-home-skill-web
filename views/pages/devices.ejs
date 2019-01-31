@@ -303,7 +303,8 @@ function checkType(type) {
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 			else {
-				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				if ($(this).attr("id") == "RangeController"){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
+				else {$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
