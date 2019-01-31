@@ -114,11 +114,15 @@ $("#ThermostatController").change(function(e) {
 //Enable Celsius and Farenheit options for Temperature Sesnor
 $("#TemperatureSensor").change(function(e) {
 	if ( $(this).is(':checked') == false) {
-		if ($('#THERMOSTAT').prop('checked') == false){$('#validRangeScaleOptions').hide()};
-		$("#Celsius").prop('required',false);
-		$("#Farenheit").prop('required',false);
-		$('#Celsius').attr("disabled", "disabled"); 
-		$('#Farenheit').attr("disabled", "disabled");
+		if ($('#THERMOSTAT').prop('checked') == false){
+			$('#validRangeScaleOptions').hide()
+			$("#Celsius").prop('required',false);
+			$("#Farenheit").prop('required',false);
+			$('#Celsius').attr("disabled", "disabled"); 
+			$('#Farenheit').attr("disabled", "disabled");
+			$('#Celsius').prop('checked', false);
+			$('#Farenheit').prop('checked', false);
+		};
 		if ($('#THERMOSTAT').prop('checked')){$('#TEMPERATURE_SENSOR').prop('checked', false)};
 	}
 	else {
@@ -127,9 +131,28 @@ $("#TemperatureSensor").change(function(e) {
 		$('#validRangeScaleOptions').show();
 		$('#Celsius').removeAttr("disabled");
 		$('#Farenheit').removeAttr("disabled");
-		$("#Celsius").prop('required',true);
 		$("#Farenheit").prop('required',true);
+		$('#Celsius').prop('checked', true);
 		if ($('#THERMOSTAT').prop('checked')){$('#TEMPERATURE_SENSOR').prop('checked', true)};
+	}
+});
+// Ensure only one Temp Scale Selected
+$("#Celsius").change(function(e) {
+	if ($(this).is(':checked') == true) {
+		$('#Farenheit').prop('checked', false);
+		$("#Farenheit").prop('required',false);
+	}
+	else if ($('#Farenheit').prop('checked') == false){
+		$("#Celsius").prop('required',true);
+	}
+});
+$("#Farenheit").change(function(e) {
+	if ($(this).is(':checked') == true) {
+		$('#Celsius').prop('checked', false);
+		$("#Celsius").prop('required',false);
+	}
+	else if ($('#Celsius').prop('checked') == false){
+		$("#Farenheit").prop('required',true);
 	}
 });
 //Enable/ disable minimumValue/ maximumValue elements
