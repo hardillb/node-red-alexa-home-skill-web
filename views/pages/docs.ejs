@@ -66,7 +66,7 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <img style="margin-right: auto; margin-left: auto; display: block" src="/images/alexa-nodes.png">
       <p>Once you've dragged a Alexa Home node on to the canvas, configuring it is relatively simple<p>
       <ul> 
-        <li>Click on the pencil at the end of the Accounts line to add a new account</li>
+        <li>Click on the pencil at the end of the Accounts line to add a new account<sup>1</sup></li>
         <li>
           <p>Enter your username and password</p>
           <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/user-password.png">
@@ -78,6 +78,9 @@ npm install node-red-contrib-alexa-home-skill</pre>
           <img style="margin-right: auto; margin-left: auto; display: block;" src="/images/pick-device.png">
         </li>
       </ul>
+      <sup>1</sup> You should only create the new config account node once, when adding new device nodes, use the
+      drop down list to select the existing config node. If you create more than one with the same username and 
+      password the service will not work properly.
       <p>To start with leave the Auto Acknoledge checked, this tells Alexa that the command has succeeded as soon
       as it is received by Node-RED. If you want to report failures then you can uncheck this option and user the
       Alexa Home Resp node to signal sucess or failure. Details about the Alexa Home Resp node are in the Building

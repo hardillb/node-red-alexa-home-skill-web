@@ -581,6 +581,7 @@ mqttClient.on('message',function(topic,message){
 		var waiting = onGoingCommands[payload.messageId];
 		if (waiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
+			logger.info("mqtt response (", waiting.user , ") - ", JSON.stringify(payload,null," "))
 			if (payload.success) {
 				waiting.res.status(200);
 				if (payload.extra) {
@@ -627,6 +628,7 @@ var timeout = setInterval(function(){
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
 				//console.log("timed out");
+				logger.info("timed out - ", waiting.user);
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				measurement.send({
