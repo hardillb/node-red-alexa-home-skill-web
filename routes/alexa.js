@@ -179,15 +179,16 @@ router.get('/devices', defaultLimiter,
 					var devAttribues = (data[i].attributes || null);
 					data[i].capabilities.forEach(function(capability){
 						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttribues));
-						// Add specific RangeController interface
-						if (capability == 'RangeController'){
-							dev.capabilities.push(
-							{  "type": "AlexaInterface",
-								"interface": "Alexa",
-								"version": "3"
-							});
-						}
 					});
+					// Add specific RangeController interface
+					if (data[i].capabilities.indexOf('RangeController') > -1){
+						dev.capabilities.push(
+						{  "type": "AlexaInterface",
+							"interface": "Alexa",
+							"version": "3"
+						});
+					}
+
 					dev.displayCategories = data[i].displayCategories;
 					dev.cookie = data[i].cookie;
 					dev.version = "0.0.3";
