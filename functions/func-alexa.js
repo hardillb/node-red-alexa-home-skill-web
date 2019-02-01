@@ -160,7 +160,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                 if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time')) {
                                     properties.push({
                                                 "namespace": "Alexa.RangeController",
-                                                "instance": "Fan.Speed",
+                                                "instance": "NodeRed.Fan.Speed",
                                                 "name": "rangeValue ",
                                                 "value": deviceJSON.state.rangeValue,
                                                 "timeOfSample": deviceJSON.state.time,

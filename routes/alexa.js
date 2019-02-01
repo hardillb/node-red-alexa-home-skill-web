@@ -507,7 +507,7 @@ router.post('/command2',
 							"properties": [
 								{
 								"namespace": "Alexa.RangeController",
-								"instance" : "Fan.Speed",
+								"instance" : "NodeRed.Fan.Speed",
 								"name": "rangeValue",
 								"value":  req.body.directive.payload.rangeValue,
 								"timeOfSample": dt.toISOString(),
@@ -525,7 +525,7 @@ router.post('/command2',
 							var contextResult = {
 								"properties": [{
 									"namespace": "Alexa.RangeController",
-									"instance" : "Fan.Speed",
+									"instance" : "NodeRed.Fan.Speed",
 									"name": "rangeValue",
 									"value":  rangeValue,
 									"timeOfSample": dt.toISOString(),
@@ -1065,7 +1065,7 @@ function replaceCapability(capability, reportState, attributes) {
 			"type": "AlexaInterface",
 			"interface": "Alexa.RangeController",
 			"version": "3",
-			"instance": "Fan.Speed",
+			"instance": "NodeRed.Fan.Speed",
 			"capabilityResources": {
 			  "friendlyNames": [
 				{
