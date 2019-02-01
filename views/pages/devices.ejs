@@ -464,7 +464,7 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$("#ThermostatController").prop('checked',false);
 		$("#ThermostatController").change();
-		//$("#TemperatureSensor").change();
+		$("#TemperatureSensor").change();
 	}
 	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
