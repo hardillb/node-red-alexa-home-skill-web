@@ -245,7 +245,7 @@ function setstate(username, endpointId, payload) {
 					}
 
 					if (newTemp != undefined){dev.state.thermostatSetPoint = newTemp};
-					if (newMode != undefined){dev.state.thermostatMode = newTemp};
+					if (newMode != undefined){dev.state.thermostatMode = newMode};
 					// Check within supported range of device
 					// if (deviceJSON.hasOwnProperty('attributes')) {
 					// 	if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
