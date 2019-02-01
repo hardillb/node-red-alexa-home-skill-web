@@ -75,7 +75,7 @@ $("#form-device").submit(function(e) {
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
-		if ($('#TemperatureSensor').prop('checked') == false){
+		if ($('#TemperatureSensor').prop('checked') == false && $('#TEMPERATURE_SENSOR').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
 			$('#Celsius').attr("disabled", "disabled"); 
 			$('#Farenheit').attr("disabled", "disabled");
