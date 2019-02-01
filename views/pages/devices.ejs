@@ -455,6 +455,11 @@ function checkType(type) {
 		});
 	}
 	// Handle combination of temperature sensor and thermostat
+	else if (type.id== "THERMOSTAT" && type.checked == false && !$('#OTHER').prop('checked')) {
+		$('#simpleOptions').show();
+		$("#ThermostatController").change();
+		//$("#TemperatureSensor").change();
+	}
 	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#ThermostatController").change();
