@@ -1110,13 +1110,12 @@ function replaceCapability(capability, reportState, attributes) {
 							"assetId": "Alexa.SettingValues.Low"
 						  }
 						},
-						{
-						  "@type": "text",
-						  "value": {
-							"text": "Slowest",
-							"locale": "en-US"
-						  }
-						}
+                        {
+                          "@type": "asset",
+                          "value": {
+                            "assetId": "Alexa.SettingValues.Minimum"
+                          }
+                        }
 					  ]
 					}
 				  },
@@ -1128,13 +1127,6 @@ function replaceCapability(capability, reportState, attributes) {
 						  "@type": "asset",
 						  "value": {
 							"assetId": "Alexa.SettingValues.Medium"
-						  }
-						},
-						{
-						  "@type": "text",
-						  "value": {
-							"text": "Medium",
-							"locale": "en-US"
 						  }
 						}
 					  ]
@@ -1154,13 +1146,6 @@ function replaceCapability(capability, reportState, attributes) {
 						  "@type": "asset",
 						  "value": {
 							"assetId": "Alexa.SettingValues.High"
-						  }
-						},
-						{
-						  "@type": "text",
-						  "value": {
-							"text": "Highest",
-							"locale": "en-US"
 						  }
 						}
 					  ]
