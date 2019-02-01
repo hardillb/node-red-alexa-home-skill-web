@@ -80,7 +80,7 @@ $("#ThermostatController").change(function(e) {
 		$('#minimumValue').attr("disabled", "disabled");
 		$("#maximumValue").prop('required',false);
 		$("#minimumValue").prop('required',false);
-
+		// Check if scale set, if so don't re-add validation requirement
 		if ($('#TemperatureSensor').prop('checked') == false && $('#TEMPERATURE_SENSOR').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
 			$('#Celsius').attr("disabled", "disabled"); 
@@ -146,8 +146,11 @@ $("#TemperatureSensor").change(function(e) {
 		$('#validRangeScaleOptions').show();
 		$('#Celsius').removeAttr("disabled");
 		$('#Farenheit').removeAttr("disabled");
-		$("#Farenheit").prop('required',true);
-		$('#Celsius').prop('checked', true);
+		// Check if scale set, if so don't re-add validation requirement
+		if ($("#Celsius").prop('checked') == false && $("#Farenheit").prop('checked') == false) {
+			$("#Celsius").prop('required',true);
+			$("#Farenheit").prop('required',true);
+		}
 		if ($('#THERMOSTAT').prop('checked')){$('#TEMPERATURE_SENSOR').prop('checked', true)};
 	}
 });
