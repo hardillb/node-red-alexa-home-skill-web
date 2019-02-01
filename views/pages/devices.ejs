@@ -105,8 +105,11 @@ $("#ThermostatController").change(function(e) {
 		$('#Farenheit').removeAttr("disabled");
 		$("#maximumValue").prop('required',true);
 		$("#minimumValue").prop('required',true);
-		$("#Celsius").prop('required',true);
-		$("#Farenheit").prop('required',true);
+		// Check if scale set, if so don't re-add validation requirement
+		if ($("#Celsius").prop('checked') == false && $("#Farenheit").prop('checked') == false) {
+			$("#Celsius").prop('required',true);
+			$("#Farenheit").prop('required',true);
+		}
 		if ($('#HEAT').prop('checked') == false && $('#COOL').prop('checked') == false 
 			&& $('#AUTO').prop('checked') == false && $('#ECO').prop('checked') == false 
 			&& $('#OFF').prop('checked') == false && $('#ON').prop('checked') == false){
