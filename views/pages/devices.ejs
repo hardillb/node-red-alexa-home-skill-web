@@ -462,16 +462,19 @@ function checkType(type) {
 	// Handle combination of temperature sensor and thermostat
 	else if (type.id== "THERMOSTAT" && type.checked == false && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
+		$("#ThermostatController").prop('checked',false);
 		$("#ThermostatController").change();
 		//$("#TemperatureSensor").change();
 	}
 	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
+		$("#TemperatureSensor").prop('checked',true);
 		$("#ThermostatController").change();
 		$("#TemperatureSensor").change();
 	}
 	else if  (type.id== "TEMPERATURE_SENSOR" && type.checked == false && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked'))  {
 		$('#simpleOptions').show();
+		$("#TemperatureSensor").prop('checked',false);
 		$("#ThermostatController").change();
 		$("#TemperatureSensor").change();
 	}
