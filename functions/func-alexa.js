@@ -317,7 +317,7 @@ function requestAccessToken(user, callback) {
         var pAccessTokens = AlexaAuth.AlexaAuthAccessToken.findOne({user: user, expires: {$gt: now}});
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
-            if (grant && !refreshtoken && !accesstoken) { // Request new access token using grant code
+            if (grant && !refreshtoken && !refreshtoken.token && !accesstoken && !accesstoken.token) { // Request new access token using grant code
                 //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code only");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',

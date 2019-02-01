@@ -243,7 +243,6 @@ function setstate(username, endpointId, payload) {
 					else if (!payload.state.hasOwnProperty('thermostatMode')) {
 						newMode = "HEAT";
 					}
-
 					if (newTemp != undefined){dev.state.thermostatSetPoint = newTemp};
 					if (newMode != undefined){dev.state.thermostatMode = newMode};
 					// Check within supported range of device
@@ -255,7 +254,6 @@ function setstate(username, endpointId, payload) {
 					// 				dev.state.thermostatMode = newMode;
 					// 			}
 					// 		}
-
 					// 	}
 					// }
 				}
@@ -267,7 +265,6 @@ function setstate(username, endpointId, payload) {
 						dev.state.volume = newVolume;
 					}
 				}
-
 				// if (payload.state.hasOwnProperty('targetSetpointDelta')) {
 				// 	if (dev.state.hasOwnProperty('thermostatSetPoint')) {
 				// 		var newMode;
@@ -288,12 +285,10 @@ function setstate(username, endpointId, payload) {
 				// 						dev.state.thermostatMode = newMode;
 				// 					}
 				// 				}
-
 				// 			}
 				// 		}
 				// 	}
 				// }
-				
 				// if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
 				// 	dev.state.thermostatMode = payload.state.thermostatMode;
 				// };
@@ -318,13 +313,10 @@ function setstate(username, endpointId, payload) {
 				// 						dev.state.thermostatMode = newMode;
 				// 					}
 				// 				}
-
 				// 			}
 				// 		}
 				// 	}
 				// }
-
-
 				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
