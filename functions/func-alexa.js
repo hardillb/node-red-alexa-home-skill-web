@@ -36,7 +36,13 @@ module.exports.saveGrant = function saveGrant(user, grantcode, callback){
         newGrant.save(function(err) {
             if (!err) {
                 logger.log('verbose', "[AlexaAuth API] Saved Alexa/Authorization GrantCode for user:" + user.username + ", grant:" + JSON.stringify(newGrant));
-                callback(newGrant);
+                // Request refresh and access token
+                requestAccessToken(user, function(accesstoken) {
+                    if (accesstoken != undefined) {
+                        callback(newGrant);
+                    }
+                    else {callback(undefined)}
+                });
             }
             else {
                 logger.log('verbose', "[AlexaAuth API] Failed to save Alexa/Authorization GrantCode for user:" + user.username + ", error:" + err);
@@ -339,7 +345,7 @@ function requestAccessToken(user, callback) {
                             callback(undefined);
                         } else { // Store the RefreshToken and AccessToken
                             var jsonBody = JSON.parse(body);
-                            logger.log('debug', "[AlexaAuth API] Refresh AND Access Token response:" + JSON.stringify(jsonBody));
+                            logger.log('debug', "[AlexaAuth API] Grant Code only response:" + JSON.stringify(jsonBody));
 
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
                                 token: jsonBody.refresh_token,
