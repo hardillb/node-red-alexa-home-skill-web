@@ -842,8 +842,8 @@ function edit(id) {
 				$('#validRangeScaleOptions').show();
 				$('#Celsius').removeAttr("disabled");
 				$('#Farenheit').removeAttr("disabled");
-				$("#Celsius").prop('required',true);
-				$("#Farenheit").prop('required',true);
+				//$("#Celsius").prop('required',true);
+				//$("#Farenheit").prop('required',true);
 				if (device.attributes.temperatureScale == 'CELSIUS') {$("#Celsius").prop('checked', true)}
 				if (device.attributes.temperatureScale == 'FARENHEIT') {$("#Farenheit").prop('checked', true)}
 			}
