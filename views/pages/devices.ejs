@@ -75,7 +75,7 @@ $("#form-device").submit(function(e) {
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
-		if ($('#TemperatureSensor').prop('checked') == false || $('#TEMPERATURE_SENSOR').prop('checked') == false){
+		if ($('#TemperatureSensor').prop('checked') == false && $('#TEMPERATURE_SENSOR').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
 			$('#Celsius').attr("disabled", "disabled"); 
 			$('#Farenheit').attr("disabled", "disabled");
@@ -443,12 +443,12 @@ function checkType(type) {
 			}
 		});
 		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController" && $(this).attr("id") != "PowerController" && $(this).attr("id") != "PercentageController" && $(this).attr("id") != "RangeController"){
+			if ($(this).attr("id") != "TemperatureSensor" && $(this).attr("id") != "ThermostatController" && $(this).attr("id") != "PowerController" && $(this).attr("id") != "PercentageController" && $(this).attr("id") != "RangeController"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
 			else {
-				if ($(this).attr("id") == "RangeController" || $(this).attr("id") == "PowerController" || $(this).attr("id") == "PercentageController" ){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
+				if ($(this).attr("id") == "TemperatureSensor" || $(this).attr("id") == "RangeController" || $(this).attr("id") == "PowerController" || $(this).attr("id") == "PercentageController" ){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
 				else {$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
@@ -457,13 +457,13 @@ function checkType(type) {
 	// Handle combination of temperature sensor and thermostat
 	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
-		$("#TemperatureSensor").change();
 		$("#ThermostatController").change();
+		$("#TemperatureSensor").change();
 	}
 	else if  (type.id== "TEMPERATURE_SENSOR" && type.checked == false && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked'))  {
 		$('#simpleOptions').show();
-		$("#TemperatureSensor").change();
 		$("#ThermostatController").change();
+		$("#TemperatureSensor").change();
 	}
 	//else if ($('#TV').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "TV" && type.checked && !$('#OTHER').prop('checked')) {
