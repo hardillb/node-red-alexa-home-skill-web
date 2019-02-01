@@ -1107,7 +1107,7 @@ function replaceCapability(capability, reportState, attributes) {
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.Value.Low"
+							"assetId": "Alexa.SettingValues.Low"
 						  }
 						},
 						{
@@ -1127,7 +1127,7 @@ function replaceCapability(capability, reportState, attributes) {
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.Value.Medium"
+							"assetId": "Alexa.SettingValues.Medium"
 						  }
 						},
 						{
@@ -1147,13 +1147,13 @@ function replaceCapability(capability, reportState, attributes) {
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.Value.Maximum"
+							"assetId": "Alexa.SettingValues.Maximum"
 						  }
 						},
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.Value.High"
+							"assetId": "Alexa.SettingValues.High"
 						  }
 						},
 						{
