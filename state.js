@@ -229,6 +229,7 @@ function setstate(username, endpointId, payload) {
 								newMode = dev.state.thermostatMode;
 						}
 						else {
+							logger.log('debug', "[State API] device.attributes has no thermostatModes: " + JSON.stringify(deviceJSON.attributes));
 							newMode = "HEAT";
 						}
 						// Check within supported range of device
@@ -258,6 +259,7 @@ function setstate(username, endpointId, payload) {
 							newMode = deviceJSON.state.thermostatMode;
 						}
 						else {
+							logger.log('debug', "[State API] device.attributes has no thermostatModes: " + JSON.stringify(deviceJSON.attributes));
 							newMode = "HEAT";
 						}
 						// Check within supported range of device
