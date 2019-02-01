@@ -317,12 +317,12 @@ function requestAccessToken(user, callback) {
         var pAccessTokens = AlexaAuth.AlexaAuthAccessToken.findOne({user: user, expires: {$gt: now}});
         Promise.all([pGrantCodes, pRefreshTokens, pAccessTokens]).then(([grant, refreshtoken, accesstoken]) => {
             // User had grant code only, no refresh token, no (valid) access token
-            var hasGrant = getSafe(() => grant.code);
+            var hasGrantCode = getSafe(() => grant.code);
             var hasRefreshToken = getSafe(() => refreshtoken.token);
             var hasAccessToken = getSafe(() => accesstoken.token);
 
             // if (grant && grant.code && !refreshtoken && !refreshtoken.token && !accesstoken && !accesstoken.token) { // Request new access token using grant code
-            if (hasGrant != undefined && hasRefreshToken == undefined && hasAccessToken == undefined) { // Request new access token using grant code
+            if (hasGrantCode != undefined && hasRefreshToken == undefined && hasAccessToken == undefined) { // Request new access token using grant code
                 //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code only");
                 request.post({
                     url: 'https://api.amazon.com/auth/o2/token',
@@ -386,7 +386,7 @@ function requestAccessToken(user, callback) {
                 );
             }
             // User had grant code and refresh token, no (valid) access token
-            else if (hasGrant != undefined && hasRefreshToken != undefined && hasAccessToken == undefined) {
+            else if (hasGrantCode != undefined && hasRefreshToken != undefined && hasAccessToken == undefined) {
             //else if (grant && refreshtoken && !accesstoken) { // Request new access token using refresh token
                 //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code and refresh token");
                 request.post({
@@ -437,13 +437,13 @@ function requestAccessToken(user, callback) {
                 );
             }
             // User had grant code and refresh token, and valid access token
-            else if (hasGrant != undefined && hasRefreshToken != undefined && hasAccessToken != undefined) {    
+            else if (hasGrantCode != undefined && hasRefreshToken != undefined && hasAccessToken != undefined) {    
             //else if (grant && refreshtoken && accesstoken) {
                 //logger.log('verbose', "[AlexaAuth API] User:" + user.username + " has existing grant code, refresh token and valid access token");
                 logger.log('debug', "[AlexaAuth API] Returned existing AccessToken for user:" + user.username + ", token:" + JSON.stringify(accesstoken));
                 callback(accesstoken);
             }
-            else if (!grant) { // User needs to un-link/ re-link Amazon account, no grant code
+            else if (hasGrantCode == undefined) { // User needs to un-link/ re-link Amazon account, no grant code
                 logger.log('warn', "[AlexaAuth API] No Alexa Grant Code for user:" + user.username);
                 callback(undefined);
             }
@@ -467,3 +467,4 @@ function getSafe(fn) {
 		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
+}
