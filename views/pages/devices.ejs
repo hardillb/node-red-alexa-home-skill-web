@@ -437,10 +437,6 @@ function checkType(type) {
 		// Trigger ThermostatController onchange
 		$("#ThermostatController").prop('checked',true);
 		$("#ThermostatController").change();
-		// if ($('#TEMPERATURE_SENSOR').prop('checked')) {
-		// 	$("#TemperatureSensor").prop('checked',true)
-		// }
-		// else {$("#TemperatureSensor").prop('checked',false)}
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
@@ -461,10 +457,27 @@ function checkType(type) {
 	}
 	// Handle combination of temperature sensor and thermostat
 	else if (type.id== "THERMOSTAT" && type.checked == false && !$('#OTHER').prop('checked')) {
-		$('#simpleOptions').show();
-		$("#ThermostatController").prop('checked',false);
-		$("#ThermostatController").change();
-		$("#TemperatureSensor").change();
+		if ($('#TEMPERATURE_SENSOR').prop('checked')){
+			$('#simpleOptions').show();
+			$("#ThermostatController").prop('checked',false);
+			$("#ThermostatController").change();
+			$("#TemperatureSensor").change();
+			$('input[name=capabilities]').each(function(index){
+				if ($(this).attr("id") != "TemperatureSensor" && $(this).attr("id") != "ThermostatController"){
+					$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+					$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+				}
+				else {
+					if ($(this).attr("id") == "TemperatureSensor"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
+					else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
+					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				}
+			});
+		}
+		else {
+			$("#ThermostatController").prop('checked',false);
+			$("#ThermostatController").change();
+		}
 	}
 	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && $('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
