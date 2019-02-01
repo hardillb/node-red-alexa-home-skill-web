@@ -437,8 +437,10 @@ function checkType(type) {
 		// Trigger ThermostatController onchange
 		$("#ThermostatController").prop('checked',true);
 		$("#ThermostatController").change();
-		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
-		else {$("#TemperatureSensor").prop('checked',false)}
+		// if ($('#TEMPERATURE_SENSOR').prop('checked')) {
+		// 	$("#TemperatureSensor").prop('checked',true)
+		// }
+		// else {$("#TemperatureSensor").prop('checked',false)}
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "THERMOSTAT") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
@@ -455,6 +457,7 @@ function checkType(type) {
 				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
 			}
 		});
+		if ($('#TEMPERATURE_SENSOR').prop('checked')){$("#TemperatureSensor").prop('checked',true)}
 	}
 	// Handle combination of temperature sensor and thermostat
 	else if (type.id== "THERMOSTAT" && type.checked == false && !$('#OTHER').prop('checked')) {
