@@ -220,62 +220,46 @@ function setstate(username, endpointId, payload) {
 						dev.state.rangeValue = newRangeValue;
 					}
 				}
-				if (payload.state.hasOwnProperty('targetSetpointDelta')) {
-					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						var newMode;
-						var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
-						// Get Supported Ranges and work-out new value for thermostatMode
-						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
-								newMode = dev.state.thermostatMode;
-						}
-						else {
-							logger.log('debug', "[State API] device.attributes has no thermostatModes: " + JSON.stringify(deviceJSON.attributes));
-							newMode = "HEAT";
-						}
-						// Check within supported range of device
-						if (deviceJSON.hasOwnProperty('attributes')) {
-							if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
-								if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
-									if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
-										dev.state.thermostatSetPoint = newTemp;
-										dev.state.thermostatMode = newMode;
-									}
-								}
 
-							}
-						}
+				// Handle targetSetpointDelta, thermostatSetPoint and thermostatMode state updates
+				if (payload.state.hasOwnProperty('targetSetpointDelta') || payload.state.hasOwnProperty('thermostatSetPoint') || payload.state.hasOwnProperty('thermostatMode')) {
+					var newTemp = undefined;
+					var newMode = undefined;
+					if (dev.state.hasOwnProperty('thermostatSetPoint') && payload.state.hasOwnProperty('targetSetpointDelta')) {
+						newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
 					}
+					else if (dev.state.hasOwnProperty('thermostatSetPoint') && payload.state.hasOwnProperty('thermostatSetPoint')) {
+						newTemp = payload.state.thermostatSetPoint;
+					}
+					// Use included thermostatMode if exists
+					if (payload.state.hasOwnProperty('thermostatMode')) {
+						newMode = payload.state.thermostatMode
+					}
+					// Use existing thermostatMode if possible
+					else if (!payload.state.hasOwnProperty('thermostatMode') && deviceJSON.attributes.hasOwnProperty('thermostatModes')){
+						newMode = dev.state.thermostatMode;
+					}
+					// Use fall-back thermostatMode if necessary
+					else if (!payload.state.hasOwnProperty('thermostatMode')) {
+						newMode = "HEAT";
+					}
+
+					if (newTemp != undefined){dev.state.thermostatSetPoint = newTemp};
+					if (newMode != undefined){dev.state.thermostatMode = newTemp};
+					// Check within supported range of device
+					// if (deviceJSON.hasOwnProperty('attributes')) {
+					// 	if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
+					// 		if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
+					// 			if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
+					// 				dev.state.thermostatSetPoint = newTemp;
+					// 				dev.state.thermostatMode = newMode;
+					// 			}
+					// 		}
+
+					// 	}
+					// }
 				}
 				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
-				if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
-					dev.state.thermostatMode = payload.state.thermostatMode;
-				};
-				if (payload.state.hasOwnProperty('thermostatSetPoint')) {
-					if (dev.state.hasOwnProperty('thermostatSetPoint')) {
-						var newMode;
-						var newTemp = payload.state.thermostatSetPoint;
-						// Get Supported Ranges and work-out new value for thermostatMode
-						if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
-							newMode = deviceJSON.state.thermostatMode;
-						}
-						else {
-							logger.log('debug', "[State API] device.attributes has no thermostatModes: " + JSON.stringify(deviceJSON.attributes));
-							newMode = "HEAT";
-						}
-						// Check within supported range of device
-						if (deviceJSON.hasOwnProperty('attributes')) {
-							if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
-								if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
-									if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
-										dev.state.thermostatSetPoint = newTemp;
-										dev.state.thermostatMode = newMode;
-									}
-								}
-
-							}
-						}
-					}
-				}
 				if (payload.state.hasOwnProperty('volume')) {dev.state.volume = payload.state.volume}
 				if (payload.state.hasOwnProperty('volumeDelta')) {
 					if (dev.state.hasOwnProperty('volume')) {
@@ -283,6 +267,64 @@ function setstate(username, endpointId, payload) {
 						dev.state.volume = newVolume;
 					}
 				}
+
+				// if (payload.state.hasOwnProperty('targetSetpointDelta')) {
+				// 	if (dev.state.hasOwnProperty('thermostatSetPoint')) {
+				// 		var newMode;
+				// 		var newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+				// 		// Get Supported Ranges and work-out new value for thermostatMode
+				// 		if (!payload.state.hasOwnProperty('thermostatMode') && deviceJSON.attributes.hasOwnProperty('thermostatModes')){
+				// 				newMode = dev.state.thermostatMode;
+				// 		}
+				// 		else if (!payload.state.hasOwnProperty('thermostatMode')) {
+				// 			newMode = "HEAT";
+				// 		}
+				// 		// Check within supported range of device
+				// 		if (deviceJSON.hasOwnProperty('attributes')) {
+				// 			if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
+				// 				if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
+				// 					if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
+				// 						dev.state.thermostatSetPoint = newTemp;
+				// 						dev.state.thermostatMode = newMode;
+				// 					}
+				// 				}
+
+				// 			}
+				// 		}
+				// 	}
+				// }
+				
+				// if (payload.state.hasOwnProperty('thermostatMode') && !payload.state.hasOwnProperty('thermostatSetPoint')) {
+				// 	dev.state.thermostatMode = payload.state.thermostatMode;
+				// };
+				// if (payload.state.hasOwnProperty('thermostatSetPoint')) {
+				// 	if (dev.state.hasOwnProperty('thermostatSetPoint')) {
+				// 		var newMode;
+				// 		var newTemp = payload.state.thermostatSetPoint;
+				// 		// Get Supported Ranges and work-out new value for thermostatMode
+				// 		if (deviceJSON.attributes.hasOwnProperty('thermostatModes')){
+				// 			newMode = deviceJSON.state.thermostatMode;
+				// 		}
+				// 		else {
+				// 			logger.log('debug', "[State API] device.attributes has no thermostatModes: " + JSON.stringify(deviceJSON.attributes));
+				// 			newMode = "HEAT";
+				// 		}
+				// 		// Check within supported range of device
+				// 		if (deviceJSON.hasOwnProperty('attributes')) {
+				// 			if (deviceJSON.attributes.hasOwnProperty('temperatureRange')) {
+				// 				if (deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMin') && deviceJSON.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
+				// 					if (!(newTemp < deviceJSON.attributes.temperatureRange.temperatureMin) || !(newTemp > deviceJSON.attributes.temperatureRange.temperatureMax)) {
+				// 						dev.state.thermostatSetPoint = newTemp;
+				// 						dev.state.thermostatMode = newMode;
+				// 					}
+				// 				}
+
+				// 			}
+				// 		}
+				// 	}
+				// }
+
+
 				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
 				Devices.updateOne({username:username, endpointId:endpointId}, { $set: { state: dev.state }}, function(err, data) {
