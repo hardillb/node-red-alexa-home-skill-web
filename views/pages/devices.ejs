@@ -114,7 +114,7 @@ $("#ThermostatController").change(function(e) {
 				$('#AUTO').prop('checked', true);
 			}
 		// Catch re-enable capability after disabling, to ensure device type correct
-		if ($('#OTHER').prop('checked', false)){
+		if ($('#OTHER').prop('checked') ==  false){
 			$('#THERMOSTAT').prop('checked', true);
 		}
 		// Prevent ColorTemperature and Thermostat interfaces co-exist
