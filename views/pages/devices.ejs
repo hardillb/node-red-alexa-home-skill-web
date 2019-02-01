@@ -75,6 +75,12 @@ $("#form-device").submit(function(e) {
 $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
+		$('#thermostatModeOptions').hide();
+		$('#maximumValue').attr("disabled", "disabled"); 
+		$('#minimumValue').attr("disabled", "disabled");
+		$("#maximumValue").prop('required',false);
+		$("#minimumValue").prop('required',false);
+
 		if ($('#TemperatureSensor').prop('checked') == false && $('#TEMPERATURE_SENSOR').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
 			$('#Celsius').attr("disabled", "disabled"); 
@@ -82,14 +88,10 @@ $("#ThermostatController").change(function(e) {
 			$("#Celsius").prop('required',false);
 			$("#Farenheit").prop('required',false);
 		}
-		else {
-			$('#THERMOSTAT').prop('checked', false);
-		}
-		$('#thermostatModeOptions').hide();
-		$('#maximumValue').attr("disabled", "disabled"); 
-		$('#minimumValue').attr("disabled", "disabled");
-		$("#maximumValue").prop('required',false);
-		$("#minimumValue").prop('required',false);
+		//else {
+		$('#THERMOSTAT').prop('checked', false);
+		//}
+
 	}
 	else {
 		$('#ReportState').prop('checked', true);
