@@ -267,16 +267,24 @@ $("#SceneController").change(function(e) {
 ///////////////////////////////////////////////////////////////////////////
 function checkType(type) {
 	// Clean-up modal elements in-case they are no longer needed
-	$('#thermostatModeOptions').hide();
-	$('#validRangeOptions').hide();
-	$('#validRangeScaleOptions').hide();
-	$('#Celsius').attr("disabled", "disabled"); 
-	$('#Farenheit').attr("disabled", "disabled");
-	$("#maximumValue").prop('required',false);
-	$("#minimumValue").prop('required',false);
-	$("#Celsius").prop('required',false);
-	$("#Farenheit").prop('required',false);
-	$('#stateReporting').hide(); 
+	var countSelectedTypes = 0;
+	$('input[name=appType]').each(function(index){
+		if ($('input[id^='+$(this).attr("id")+']').prop("checked") == true){
+			countSelectedTypes = countSelectedTypes + 1;
+		}
+	});
+	if (countSelectedTypes == 0) {
+		$('#thermostatModeOptions').hide();
+		$('#validRangeOptions').hide();
+		$('#validRangeScaleOptions').hide();
+		$('#Celsius').attr("disabled", "disabled"); 
+		$('#Farenheit').attr("disabled", "disabled");
+		$("#maximumValue").prop('required',false);
+		$("#minimumValue").prop('required',false);
+		$("#Celsius").prop('required',false);
+		$("#Farenheit").prop('required',false);
+		$('#stateReporting').hide(); 
+	}
 
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#OTHER').prop('checked')) {
 	if (type.id== "ACTIVITY_TRIGGER" && type.checked && !$('#OTHER').prop('checked')) {
