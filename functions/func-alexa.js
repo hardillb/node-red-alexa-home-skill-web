@@ -270,6 +270,9 @@ module.exports.sendState = function sendState(user, state) {
         case 'Asia': // Far East
             stateURI = 'https://api.fe.amazonalexa.com/v3/events';
             break;
+        case 'Oceania': // APAC
+            stateURI = 'https://api.fe.amazonalexa.com/v3/events';
+            break;
     }
     
     // Request access token and send change report
