@@ -25,21 +25,7 @@ const logger = createLogger({
 		  format.simple()
 		),
 		handleExceptions: true
-		}),
-		// AWS CloudWatch Transport
-		new WinstonCloudwatch({
-      logGroupName: logGroup,
-      logStreamName: function() {
-        // Spread log streams across dates as the server stays up
-        let date = new Date().toISOString().split('T')[0];
-        return 'express-server-' + date + '-' +
-          crypto.createHash('md5')
-          .update(startTime)
-          .digest('hex');
-      },
-      awsRegion: 'eu-west-1',
-      jsonMessage: true
-    })
+		})
 	]
   });
   // Create logger stream object for use with morgan
@@ -48,6 +34,22 @@ logger.stream = {
 	  // use the 'verbose' log level
 	  logger.verbose(message);
 	},
-  };
+	};
+		
+	// AWS CloudWatch Transport
+	logger.add(new WinstonCloudwatch({
+		level: consoleLoglevel,
+		logGroupName: logGroup,
+		logStreamName: function() {
+			// Spread log streams across dates as the server stays up
+			let date = new Date().toISOString().split('T')[0];
+			return 'express-server-' + date + '-' +
+				crypto.createHash('md5')
+				.update(startTime)
+				.digest('hex');
+		},
+		awsRegion: 'eu-west-1',
+		jsonMessage: true
+	}));
 
 module.exports = logger;
