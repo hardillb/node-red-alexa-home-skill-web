@@ -50,16 +50,16 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			logger.log('error', "[Core] Missing grant token:" + token);
+			logger.log('error', "[Core] Missing grant token: " + token);
 		}
 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
-			logger.log('debug', "[Core] OAuth Token good, token:" + token);
+			logger.log('debug', "[Core] OAuth Token good, token: " + token);
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
-			logger.log('error', "[Core] OAuth Token error, token:" + token);
+			logger.log('error', "[Core] OAuth Token error, token: " + token);
 			done(null, false);
 		} else {
-			logger.log('error', "[Core] OAuth Token error:" + error);
+			logger.log('error', "[Core] OAuth Token error: " + error);
 			done(error);
 		}
 	});
@@ -106,10 +106,10 @@ const defaultLimiter = limiter({
 		return next()
   },
 	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
+		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address: " + req.ip)
 		var params = {
 			ec: "Express-limiter",
-			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
+			ea: "Default: rate-limited path: " + req.path + ", IP address: " + req.ip,
 			uip: req.ip
 		  }
 		if (enableAnalytics) {visitor.event(params).send()};
@@ -125,8 +125,8 @@ const getStateLimiter = limiter({
 		  return next()
 	},
 	onRateLimited: function (req, res, next) {
-		if (req.hasOwnProperty('user')) {
-			logger.log('warn', "Rate limit exceeded for user:" + req.user.username)
+		if (req.user) {
+			logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for user: " + req.user.username)
 			var params = {
 				ec: "Express-limiter",
 				ea: "Rate limited: " + req.user.username,
@@ -136,10 +136,10 @@ const getStateLimiter = limiter({
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
 		else {
-			logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for IP address:" + req.ip)
+			logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for IP address: " + req.ip)
 			var params = {
 				ec: "Express-limiter",
-				ea: "GetState: rate-limited path: " + req.path + ", IP address:" + req.ip,
+				ea: "GetState: rate-limited path: " + req.path + ", IP address: " + req.ip,
 				uip: req.ip
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
@@ -165,7 +165,7 @@ router.get('/devices', defaultLimiter,
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
 			if (!error) {
-				logger.log('info', "[Discover API] Running device discovery for user:" + user);
+				logger.log('info', "[Discover API] Running device discovery for user: " + user);
 				var devs = [];
 				for (var i=0; i< data.length; i++) {
 					var dev = {};
@@ -221,11 +221,11 @@ router.get('/getstate/:dev_id', getStateLimiter,
 		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
 
 		// Identify device, we know who user is from request
-		logger.log('debug', "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
+		logger.log('debug', "[State API] Received GetState API request for user: " + req.user.username + " endpointId: " + id);
 
 		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
 			if (err) {
-				logger.log('warn',"[State API] No device found for username: " + req.user.username + " endpointId:" + id);
+				logger.log('warn',"[State API] No device found for username: " + req.user.username + " endpointId: " + id);
 				res.status(500).send();
 			}
 			if (data) {
@@ -265,7 +265,7 @@ router.post('/command2',
 	function(req,res,next){
 		var params = {
 			ec: "Command",
-			ea: req.body.directive.header ? "Command API directive:" + req.body.directive.header.name + ", username: " + req.user.username + ", endpointId:" + req.body.directive.endpoint.endpointId : "Command API directive",
+			ea: req.body.directive.header ? "Command API directive: " + req.body.directive.header.name + ", username: " + req.user.username + ", endpointId: " + req.body.directive.endpoint.endpointId : "Command API directive",
 			uid: req.user.username,
 			uip: req.ip,
 			dp: "/api/v1/command"
@@ -677,7 +677,7 @@ router.post('/command2',
 					};                
 				}
 
-				//logger.log('debug', "[Alexa API] Command response:" + response);
+				//logger.log('debug', "[Alexa API] Command response: " + response);
 
 				// Prepare MQTT topic/ message validation
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
@@ -859,7 +859,7 @@ mqttClient.on('message',function(topic,message){
 				// Alexa failure response send to Lambda for full response construction
 				if (commandWaiting.hasOwnProperty('source') && commandWaiting.source == "Alexa") {
 					if (commandWaiting.hasOwnProperty('response')) {
-						logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API, response:" + + JSON.stringify(commandWaiting.response));
+						logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API, response: " + + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(503).json(commandWaiting.response)
 					}
 					else {
