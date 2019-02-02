@@ -9,7 +9,7 @@ const crypto = require('crypto');
 // Variables
 ///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
-var awscredentials = '~/.aws/credentials'
+var awscredentials = '/root/.aws/credentials'
 var logGroup = (process.env.WEB_HOSTNAME || "node-red")
 var startTime = new Date().toISOString();
 if (debug == "true") {consoleLoglevel = "debug"};
