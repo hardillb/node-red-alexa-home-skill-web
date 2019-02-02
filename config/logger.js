@@ -41,7 +41,7 @@ logger.stream = {
 // Check for AWS credentials
 fs.access(awscredentials, fs.F_OK, (err) => {
 	if (err) {
-		logger.lof('warn', '[Logger] AWS credentials file does not exist at ~/.aws/credentials. Cludwatch logging disabled.');
+		logger.log('warn', '[Logger] AWS credentials file does not exist at ~/.aws/credentials. Cludwatch logging disabled.');
 		return
 	}
 	// Setup AWS CloudWatch Transport
