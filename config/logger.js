@@ -2,12 +2,14 @@
 // Depends
 ///////////////////////////////////////////////////////////////////////////
 const { format, createLogger, transports } = require('winston');
+const fs = require('fs');
 const WinstonCloudwatch = require('winston-cloudwatch');
 const crypto = require('crypto');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
+var awscredentials = '~/.aws/credentials'
 var logGroup = (process.env.WEB_HOSTNAME || "node-red")
 var startTime = new Date().toISOString();
 if (debug == "true") {consoleLoglevel = "debug"};
@@ -35,8 +37,14 @@ logger.stream = {
 	  logger.verbose(message);
 	},
 	};
-		
-	// AWS CloudWatch Transport
+	
+// Check for AWS credentials
+fs.access(awscredentials, fs.F_OK, (err) => {
+	if (err) {
+		logger.lof('warn', '[Logger] AWS credentials file does not exist at ~/.aws/credentials. Cludwatch logging disabled.');
+		return
+	}
+	// Setup AWS CloudWatch Transport
 	logger.add(new WinstonCloudwatch({
 		level: consoleLoglevel,
 		logGroupName: logGroup,
@@ -51,5 +59,6 @@ logger.stream = {
 		awsRegion: 'eu-west-1',
 		jsonMessage: true
 	}));
+})
 
 module.exports = logger;
