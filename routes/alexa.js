@@ -274,6 +274,8 @@ router.post('/command2',
 
 		var serviceName = "Amazon"; // As user has authenticated, assume activeService
 		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
+		
+		logger.log('debug', "[Alexa API] Received command for user: " + req.user.username + ", command: " + JSON.stringify(req.body));
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (err) {
@@ -284,7 +286,6 @@ router.post('/command2',
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Revised Command API Router, offloading from Lambda to avoid multiple requests/ data comparison
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				logger.log('debug', "[Alexa API] Received command: " + JSON.stringify(req.body));
 				// Convert "model" object class to JSON object
 				var deviceJSON = JSON.parse(JSON.stringify(data));
 				var endpointId = req.body.directive.endpoint.endpointId;

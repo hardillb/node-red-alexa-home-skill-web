@@ -46,7 +46,8 @@
     "uid2": "0.0.3",
     "universal-analytics": "^0.4.20",
     "uuid": "^3.3.2",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "winston-cloudwatch": "^2.0.5"
   },
   "devDependencies": {
     "passport-oauth2": "^1.4.0"
