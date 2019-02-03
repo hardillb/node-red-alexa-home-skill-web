@@ -46,7 +46,6 @@ fs.access(awscredentials, fs.F_OK, (err) => {
 	}
 	// Setup AWS CloudWatch Transport
 	logger.add(new WinstonCloudwatch({
-		level: consoleLoglevel,
 		logGroupName: logGroup,
 		logStreamName: function() {
 			// Spread log streams across dates as the server stays up
