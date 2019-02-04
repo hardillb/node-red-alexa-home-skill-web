@@ -303,31 +303,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#HVAC').prop('checked') && !$('#OTHER').prop('checked')) { // Flash ToolTip ref TempSensor
-	else if (type.id== "HVAC" && type.checked && !$('#OTHER').prop('checked')) { // Flash ToolTip ref TempSensor
-		$('#simpleOptions').show();
-		// Trigger ThermostatController onchange
-		$("#ThermostatController").prop('checked',true);
-		$("#ThermostatController").change();
-		if ($('#TEMPERATURE_SENSOR').prop('checked')) {$("#TemperatureSensor").prop('checked',true)}
-		else {$("#TemperatureSensor").prop('checked',false)}	
-		$('input[name=appType]').each(function(index){
-			if ($(this).attr("id") != "TEMPERATURE_SENSOR" && $(this).attr("id") != "HVAC") {
-				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-			}
-		});
-		$('input[name=capabilities]').each(function(index){
-			if ($(this).attr("id") != "TemperatureSensor"  && $(this).attr("id") != "ThermostatController" && $(this).attr("id") != "PowerController" && $(this).attr("id") != "PercentageController" && $(this).attr("id") != "RangeController"){
-				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
-			}
-			else {
-				if ($(this).attr("id") == "RangeController" || $(this).attr("id") == "PowerController" || $(this).attr("id") == "PercentageController" ){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
-				else {$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-			}
-		});
-	}
 	//else if ($('#LIGHT').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "LIGHT" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
