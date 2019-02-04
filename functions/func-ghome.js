@@ -85,6 +85,10 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 						dev.thermostatTemperatureAmbient = device.state.temperature;
 					}
 				}
+				if (trait = "action.devices.traits.Volume") {
+					dev.currentVolume = device.state.volume;
+					dev.isMuted = device.state.mute;
+				}
 			});
 			// Retrun device state
 			callback(dev);
@@ -199,11 +203,15 @@ module.exports.gHomeSync = function gHomeSync(userid){
 // Convert Alexa Device Capabilities to Google Home-compatible
 function gHomeReplaceCapability(capability) {
 	// Limit supported traits, add new ones here
-	if(capability == "PowerController") {return "action.devices.traits.OnOff"}
-	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
+	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
+	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
-	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
-	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
+	//else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
+	//else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
+	//else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
+	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
+	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
+	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
 	else {return "Not Supported"}
 }
 // Nested attribute/ element tester

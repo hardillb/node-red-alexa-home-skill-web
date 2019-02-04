@@ -202,6 +202,7 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
+				if (payload.state.hasOwnProperty('mute')) {dev.state.mute = payload.state.mute};
 				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
 				if (payload.state.hasOwnProperty('percentageDelta')) {
 					if (dev.state.hasOwnProperty('percentage')) {
@@ -219,8 +220,7 @@ function setstate(username, endpointId, payload) {
 						var newRangeValue = dev.state.rangeValue + payload.state.rangeValueDelta;
 						dev.state.rangeValue = newRangeValue;
 					}
-				}
-
+				};
 				// Handle targetSetpointDelta, thermostatSetPoint and thermostatMode state updates
 				if (payload.state.hasOwnProperty('targetSetpointDelta') || payload.state.hasOwnProperty('thermostatSetPoint') || payload.state.hasOwnProperty('thermostatMode')) {
 					var newTemp = undefined;
@@ -256,7 +256,7 @@ function setstate(username, endpointId, payload) {
 					// 		}
 					// 	}
 					// }
-				}
+				};
 				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
 				if (payload.state.hasOwnProperty('volume')) {dev.state.volume = payload.state.volume}
 				if (payload.state.hasOwnProperty('volumeDelta')) {

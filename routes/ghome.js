@@ -565,11 +565,15 @@ var timeout = setInterval(function(){
 // Convert Alexa Device Capabilities to Google Home-compatible
 function gHomeReplaceCapability(capability) {
 	// Limit supported traits, add new ones here
-	if (capability == "PowerController") {return "action.devices.traits.OnOff"}
-	else if(capability == "BrightnessController")  {return "action.devices.traits.Brightness"}
+	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
+	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
-	else if(capability == "SceneController") {return "action.devices.traits.Scene"}
-	else if(capability == "ThermostatController")  {return "action.devices.traits.TemperatureSetting"}
+	//else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
+	//else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
+	//else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
+	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
+	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
+	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
 	else {return "Not Supported"}
 }
 // Convert Alexa Device Types to Google Home-compatible
@@ -577,7 +581,10 @@ function gHomeReplaceType(type) {
 	// Limit supported device types, add new ones here
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
+	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}
+	//else if (type == "SMARTLOCK") {return "action.devices.types.LOCK"}
 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
+	//else if (type == "TV") {return "action.devices.types.TV"}
 	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
 	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
 	else {return "NA"}

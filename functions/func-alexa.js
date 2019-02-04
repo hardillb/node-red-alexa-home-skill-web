@@ -174,6 +174,26 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                         });
                                 }
                                 break;
+                            case "Speaker":
+                                if (deviceJSON.state.hasOwnProperty('volume') && deviceJSON.state.hasOwnProperty('time')) {
+                                    properties.push({
+                                                "namespace": "Alexa.Speaker",
+                                                "name": "volume ",
+                                                "value": deviceJSON.state.volume,
+                                                "timeOfSample": deviceJSON.state.time,
+                                                "uncertaintyInMilliseconds": 1000
+                                        });
+                                }
+                                if (deviceJSON.state.hasOwnProperty('mute') && deviceJSON.state.hasOwnProperty('time')) {
+                                    properties.push({
+                                                "namespace": "Alexa.Speaker",
+                                                "name": "muted ",
+                                                "value": deviceJSON.state.mute,
+                                                "timeOfSample": deviceJSON.state.time,
+                                                "uncertaintyInMilliseconds": 1000
+                                        });
+                                }
+                                break;
                             case "TemperatureSensor":
                                 // Return temperature
                                 if (deviceJSON.state.hasOwnProperty('temperature') && deviceJSON.state.hasOwnProperty('time')) {
