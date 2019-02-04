@@ -570,6 +570,7 @@ function gHomeReplaceCapability(capability) {
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
 	//else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
+	else if(capability == "InputController"){return "action.devices.traits.InputSelector"} 
 	else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
 	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
