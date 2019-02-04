@@ -61,7 +61,7 @@ const limiter = require('express-limiter')(router, client)
 const defaultLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		opts.lookup = 'connection.remoteAddress'
-		opts.total = 100
+		opts.total = 1000
 		opts.expire = 1000 * 60 * 60
 		return next()
   },
@@ -80,7 +80,7 @@ const defaultLimiter = limiter({
 const restrictiveLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		opts.lookup = 'connection.remoteAddress'
-		opts.total = 10
+		opts.total = 100
 		opts.expire = 1000 * 60 * 60
 		return next()
   },
@@ -202,7 +202,7 @@ router.get('/logout', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 // Login (Post) - restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/login', defaultLimiter,
+router.post('/login', restrictiveLimiter,
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
 		var params = {
@@ -243,7 +243,7 @@ router.get('/newuser', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 // Register/ Newuser (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/newuser', defaultLimiter, function(req,res){
+router.post('/newuser', restrictiveLimiter, function(req,res){
     var body = JSON.parse(JSON.stringify(req.body));
     if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
 		logger.log('verbose', "[New User] Looking up region for country: " + req.body.country.toUpperCase());
