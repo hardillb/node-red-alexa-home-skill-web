@@ -206,7 +206,7 @@ function gHomeReplaceCapability(capability) {
 	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
-	//else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
+	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
 	//else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
 	else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
