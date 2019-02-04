@@ -569,7 +569,7 @@ function gHomeReplaceCapability(capability) {
 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
-	//else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
+	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
 	else if(capability == "InputController"){return "action.devices.traits.InputSelector"} 
 	else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
@@ -583,7 +583,7 @@ function gHomeReplaceType(type) {
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}
-	//else if (type == "SMARTLOCK") {return "action.devices.types.LOCK"}
+	else if (type == "SMARTLOCK") {return "action.devices.types.LOCK"}
 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
 	else if (type == "TV") {return "action.devices.types.TV"}
 	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}

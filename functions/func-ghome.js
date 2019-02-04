@@ -68,6 +68,15 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 						}
 					}
 				}
+				if (trait == "action.devices.traits.LockUnlock") {
+					if (device.state.lock.toLowerCase() == 'LOCKED') {
+						dev.isLocked = true;
+					}
+					else {
+						dev.isLocked = false;
+					}
+					
+				}
 				if (trait == "action.devices.traits.OnOff") {
 					if (device.state.power.toLowerCase() == 'on') {
 						dev.on = true;
@@ -208,7 +217,7 @@ function gHomeReplaceCapability(capability) {
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
 	else if(capability == "InputController"){return "action.devices.traits.InputSelector"} 
-	//else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
+	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
 	else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
 	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
