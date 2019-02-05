@@ -238,9 +238,11 @@ $("#LockController").change(function(e) {
 $("#RequirePIN").change(function(e) {
 	if ($(this).is(':checked')) {
 		$("#pin").prop('required',true);
+		$("#pin").removeAttr("disabled"); 
 	}
 	else {
 		$("#pin").prop('required',false);
+		$("#pin").attr("disabled", "disabled");
 	}
 });
 // Prevent Range and Percentage Controller co-exist
@@ -338,8 +340,9 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
-		$('#ghomeSecurity').show(); 
+		$('#ghomeSecurity').show();
 		$("#LockController").prop('checked',true);
+		$("#RequirePIN").change();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTLOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "LockController"){
@@ -872,7 +875,11 @@ function edit(id) {
 		if (device.attributes.hasOwnProperty('require2FA') && device.attributes.require2FA == true) {
 			$("#ghomeSecurity").show();
 			$("#RequirePin").prop('checked', true);
-			if (device.attributes.hasOwnProperty('pin')){$("#pin").val(device.attributes.pin)};
+			$('#pin').removeAttr("disabled"); 
+			if (device.attributes.hasOwnProperty('pin')){
+				$("#pin").val(device.attributes.pin);
+				$('#pin').removeAttr("disabled");
+			};
 		}
 		// Color Controller
 		if (colorTemperature && device.attributes.hasOwnProperty('colorTemperatureRange')) {
