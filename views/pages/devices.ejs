@@ -590,7 +590,7 @@ function saveDevice() {
 			device.attributes.sceneReversible = false;
 		}
 		if ($('#LockController').prop('checked'))  {
-			if ($('#requirePIN').prop('checked') == true){
+			if ($('#RequirePIN').prop('checked') == true){
 				device.attributes.require2FA = true;
 				device.attributes.pin = $('#pin').val();
 				device.attributes.type2FA = "pin";
@@ -684,7 +684,7 @@ function saveDevice() {
 			device.attributes.sceneReversible = false;
 		}
 		if ($('#LockController').prop('checked'))  {
-			if ($('#requirePIN').prop('checked') == true){
+			if ($('#RequirePIN').prop('checked') == true){
 				device.attributes.require2FA = true;
 				device.attributes.pin = $('#pin').val();
 				device.attributes.type2FA = "pin";
