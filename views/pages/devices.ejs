@@ -874,7 +874,7 @@ function edit(id) {
 		// Google Home 2FA/ PIN
 		if (device.attributes.hasOwnProperty('require2FA') && device.attributes.require2FA == true) {
 			$("#ghomeSecurity").show();
-			$("#RequirePin").prop('checked', true);
+			$("#RequirePIN").prop('checked', true);
 			$('#pin').removeAttr("disabled"); 
 			if (device.attributes.hasOwnProperty('pin')){
 				$("#pin").val(device.attributes.pin);
