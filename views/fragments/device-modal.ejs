@@ -284,6 +284,23 @@
 							</fieldset>
 						</div>
 						<div class="col-sm">
+							<div class="form-group" id="ghomeSecurity">
+								<fieldset class="form-group">
+									<h5 class="modal-title">Google Home 2FA</h5>
+									<div class="form-check">
+										<input title="Require PIN" type="checkbox" class="form-check-input" id="RequirePIN">
+										<label class="form-check-label" for="RequirePIN">
+											<a data-toggle="tooltip" data-placement="right" title="Require second factor/ PIN for command execution">Require PIN <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
+									</div>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="inputGroup-sizing-default">Device PIN</span>
+										</div>		
+										<input id="pin" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" type="text" pattern="^[0-9]{4,6}$" disabled>
+									</div>
+								</fieldset>
+							</div>
 							<div class="form-group" id="stateReporting">
 								<fieldset class="form-group">
 									<h5 class="modal-title">State Reporting</h5>
@@ -296,6 +313,7 @@
 									</div>
 								</fieldset>
 							</div>
+
 						</div>
 					</div>
 					<div class="modal-footer">

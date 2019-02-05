@@ -46,5 +46,8 @@ module.exports = mongoose.model('Devices', Devices);
     //     availableToggles: Schema.Types.Mixed,
     //     availableFanSpeeds: Schema.Types.Mixed,
     //     sceneReversible: Boolean,
-    //     roomHint: String
+    //     roomHint: String,
+    //     require2FA: boolean,
+    //     type2FA: String,
+    //     pin: String
     // }

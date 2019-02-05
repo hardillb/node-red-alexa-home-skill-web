@@ -334,6 +334,52 @@ router.post('/action', defaultLimiter,
 									}
 								}
 							}
+							// Handle 2FA requirement
+							var hasRequire2FA = getSafe(() => data.attributes.require2FA);
+							if (hasRequire2FA == true) {
+								var hasChallengeType = getSafe(() => data.attributes.type2FA); // check device for 2FA challenge type
+								var hasChallengePin = getSafe(() => arrCommands[i].execution[0].challenge.pin); // check request itself for pin
+								// PIN Required, NO pin supplied
+								if (hasChallengeType == "pin" && hasChallengePin == undefined){
+									validationStatus = false;
+									logger.log('warn', "[GHome Exec API] pinNeeded but not supplied for command against endpointId:" + element.id);
+									var errResponse = {
+										requestId: req.body.requestId,
+										payload: {
+											commands: [{
+												ids: [element.id.toString()],
+												status: "ERROR",
+												errorCode: "challengeNeeded",
+												challengeNeeded : {
+													type: "pinNeeded"
+												}
+											}]
+										}
+									};
+									logger.log('debug', "[GHome Exec API] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
+									res.status(200).json(errResponse);
+								}
+								// PIN required, wrong PIN
+								else if (hasChallengeType == "pin" && hasChallengePin != data.attributes.pin){
+									validationStatus = false;
+									logger.log('warn', "[GHome Exec API] wrong pin supplied for command against endpointId:" + element.id);
+									var errResponse = {
+										requestId: req.body.requestId,
+										payload: {
+											commands: [{
+												ids: [element.id.toString()],
+												status: "ERROR",
+												errorCode: "challengeNeeded",
+												challengeNeeded : {
+													type: "challengeFailedPinNeeded"
+												}
+											}]
+										}
+									};
+									logger.log('debug', "[GHome Exec API] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
+									res.status(200).json(errResponse);
+								}
+							}
 							if (validationStatus == true) {
 								logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
 								// Set MQTT Topic

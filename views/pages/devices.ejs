@@ -234,6 +234,15 @@ $("#LockController").change(function(e) {
 		});	
 	}
 });
+// Ensure that if RequirePIN checked, PIN is entered/ required
+$("#RequirePIN").change(function(e) {
+	if ($(this).is(':checked')) {
+		$("#pin").prop('required',true);
+	}
+	else {
+		$("#pin").prop('required',false);
+	}
+});
 // Prevent Range and Percentage Controller co-exist
 $("#RangeController").change(function(e) {
 	if ($(this).is(':checked')) {
@@ -284,7 +293,8 @@ function checkType(type) {
 	$("#minimumValue").prop('required',false);
 	$("#Celsius").prop('required',false);
 	$("#Farenheit").prop('required',false);
-	$('#stateReporting').hide(); 
+	$('#stateReporting').hide();
+	$('#ghomeSecurity').hide();
 
 	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#OTHER').prop('checked')) {
 	if (type.id== "ACTIVITY_TRIGGER" && type.checked && !$('#OTHER').prop('checked')) {
@@ -328,6 +338,7 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
 		$('#stateReporting').show(); 
+		$('#ghomeSecurity').show(); 
 		$("#LockController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTLOCK") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -575,6 +586,16 @@ function saveDevice() {
 		if ($('#SceneController').prop('checked')) {
 			device.attributes.sceneReversible = false;
 		}
+		if ($('#LockController').prop('checked'))  {
+			if ($('#requirePIN').prop('checked') == true){
+				device.attributes.require2FA = true;
+				device.attributes.pin = $('#pin').val();
+				device.attributes.type2FA = "pin";
+			}
+			else {
+				device.attributes.require2FA = false;
+			}
+		}
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
 				device.capabilities.push(this.value);
@@ -659,6 +680,16 @@ function saveDevice() {
 		if ($('#SceneController').prop('checked')) {
 			device.attributes.sceneReversible = false;
 		}
+		if ($('#LockController').prop('checked'))  {
+			if ($('#requirePIN').prop('checked') == true){
+				device.attributes.require2FA = true;
+				device.attributes.pin = $('#pin').val();
+				device.attributes.type2FA = "pin";
+			}
+			else {
+				device.attributes.require2FA = false;
+			}
+		}
 		device.capabilities = [];
 		$('input[name=capabilities]').each(function(index){
 			if (this.checked) {
@@ -706,7 +737,8 @@ function addDevice() {
 
 function clearDevice() {
 	// Hide modal elements
-	$('#simpleOptions').hide(); 
+	$('#simpleOptions').hide();
+	$('#ghomeSecurity').hide();
 	$('#advancedCapabilities').hide(); 
 	$('#advancedOptions').hide(); 
 	$('#stateReporting').hide(); 
@@ -720,6 +752,7 @@ function clearDevice() {
 	$('#roomHint').val("");
 	$('#maximumValue').val(""); 
 	$('#minimumValue').val("");
+	$('#pin').val("");
 	// Reset checkboxes
 	$('input[name=appType]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false)
@@ -739,6 +772,7 @@ function clearDevice() {
 	$('#ECO').prop('checked', false);
 	$('#OFF').prop('checked', false);
 	$('#ON').prop('checked', false);
+	$('#RequirePIN').prop('checked', false);
 	// Remove read-only property for new devices
 	$('#friendlyName').prop('readonly', false);
 	// Remove "required" property
@@ -786,11 +820,6 @@ function edit(id) {
 		$('#ThermostatController').removeAttr("disabled");
 		$('#TemperatureSensor').removeAttr("disabled");
 	}
-	// else if ($('#HVAC').prop('checked')){
-	// 	$('#PercentageController').removeAttr("disabled");
-	// 	$('#ThermostatController').removeAttr("disabled");
-	// 	$('#TemperatureSensor').removeAttr("disabled");
-	// }
 	else if ($('#LIGHT').prop('checked')){
 		$('#BrightnessController').removeAttr("disabled");
 		$('#ColorController').removeAttr("disabled");
@@ -838,6 +867,12 @@ function edit(id) {
 		// Google Home Room Hint
 		if (device.attributes.hasOwnProperty('roomHint')) {
 			$("#roomHint").val(device.attributes.roomHint);
+		}
+		// Google Home 2FA/ PIN
+		if (device.attributes.hasOwnProperty('require2FA') && device.attributes.require2FA == true) {
+			$("#ghomeSecurity").show();
+			$("#RequirePin").prop('checked', true);
+			if (device.attributes.hasOwnProperty('pin')){$("#pin").val(device.attributes.pin)};
 		}
 		// Color Controller
 		if (colorTemperature && device.attributes.hasOwnProperty('colorTemperatureRange')) {
