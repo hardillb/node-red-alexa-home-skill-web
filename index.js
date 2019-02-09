@@ -19,6 +19,10 @@ var LocalStrategy = require('passport-local').Strategy;
 var SimpleNodeLogger = require('simple-node-logger');
 var PassportOAuthBearer = require('passport-http-bearer');
 
+
+var logDirectory = path.join(__dirname, 'log');
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+
 var loggingOptions = {
 	logDirectory: 'log',
 	fileNamePattern:'debug-<DATE>.log',
@@ -171,18 +175,15 @@ Account.findOne({username: mqtt_user}, function(error, account){
 
 var app_id = 'http://localhost:' + port;
 
-if (process.env.VCAP_APPLICATION) {
-	var application = JSON.parse(process.env.VCAP_APPLICATION);
+// if (process.env.VCAP_APPLICATION) {
+// 	var application = JSON.parse(process.env.VCAP_APPLICATION);
 
-	var app_uri = application['application_uris'][0];
+// 	var app_uri = application['application_uris'][0];
 
-	app_id = 'https://' + app_uri;
-}
+// 	app_id = 'https://' + app_uri;
+// }
 
 var cookieSecret = 'ihytsrf334';
-
-var logDirectory = path.join(__dirname, 'log');
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
 
 var accessLogStream = rfs('access.log', {
   interval: '1d', // rotate daily
