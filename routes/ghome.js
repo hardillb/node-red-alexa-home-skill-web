@@ -286,6 +286,9 @@ router.post('/action', defaultLimiter,
 							var data = devices.find(obj => obj.endpointId == element.id);
 							if (data == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
 							else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data))}
+							///////////////////////////////////////////////////////////////////////////
+							// Perform Command Validation
+							///////////////////////////////////////////////////////////////////////////
 							// Handle Thermostat valueOutOfRange
 							if (arrCommands[i].execution[0].command == "action.devices.commands.ThermostatTemperatureSetpoint") {
 								var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
@@ -380,6 +383,9 @@ router.post('/action', defaultLimiter,
 									res.status(200).json(errResponse);
 								}
 							}
+							///////////////////////////////////////////////////////////////////////////
+							// End Validation
+							///////////////////////////////////////////////////////////////////////////
 							if (validationStatus == true) {
 								logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
 								// Set MQTT Topic

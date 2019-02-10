@@ -5,3 +5,7 @@ test-aws.sh
 .aws/*
 node-red-208520-70f2b1da662d.json
 config/node-red-208520-70f2b1da662d.json
+views/fragments/de/privacy-policy.ejs
+views/fragments/de/terms-of-service.ejs
+views/fragments/es/privacy-policy.ejs
+views/fragments/es/terms-of-service.ejs
