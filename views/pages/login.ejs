@@ -8,7 +8,7 @@
     <% include ../fragments/privacy-modal.ejs %>
 
     <div id="login">
-      <form class="form-signin" method="POST" action="/login">
+      <form class="form-signin notranslate" method="POST" action="/login">
         <h1 class="h3 mb-3 font-weight-normal">Please Sign In</h1>
         <label for="username" class="sr-only">Username</label>
         <input type="text" id="username" name="username" class="form-control" autocomplete="username" placeholder="Username" required autofocus>
@@ -33,4 +33,13 @@
       $('#privacyModal').modal('show');
     });
   </script>
+  <!-- Translate Bar Start -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL}, 'google_translate_element');
+    }
+  </script>
+    
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <!-- Translate Bar End -->
 <% include ../fragments/footer.ejs %>
