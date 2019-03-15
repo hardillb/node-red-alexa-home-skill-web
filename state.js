@@ -196,10 +196,22 @@ function setstate(username, endpointId, payload) {
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
 				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
-				if (payload.state.hasOwnProperty('colorBrightness')) {dev.state.colorBrightness = payload.state.colorBrightness};
-				if (payload.state.hasOwnProperty('colorHue')) {dev.state.colorHue = payload.state.colorHue};
-				if (payload.state.hasOwnProperty('colorSaturation')) {dev.state.colorSaturation = payload.state.colorSaturation};
-				if (payload.state.hasOwnProperty('colorTemperature')) {dev.state.colorTemperature = payload.state.colorTemperature}
+
+				// Color
+				if (payload.state.hasOwnProperty('colorBrightness') && payload.state.hasOwnProperty('colorHue') && payload.state.hasOwnProperty('colorSaturation')) {
+					dev.state.colorBrightness = payload.state.colorBrightness;
+					dev.state.colorHue = payload.state.colorHue;
+					dev.state.colorSaturation = payload.state.colorSaturation;
+					delete dev.state.colorTemperature;
+				}
+				// ColorTemperature
+				if (payload.state.hasOwnProperty('colorTemperature')) {
+					dev.state.colorTemperature = payload.state.colorTemperature;
+					delete dev.state.colorBrightness;
+					delete dev.state.colorHue;
+					delete dev.state.colorSaturation;
+				}
+
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('mute')) {dev.state.mute = payload.state.mute};
