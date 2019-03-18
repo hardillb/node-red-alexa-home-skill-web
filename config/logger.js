@@ -3,7 +3,6 @@
 ///////////////////////////////////////////////////////////////////////////
 const { format, createLogger, transports } = require('winston');
 const fs = require('fs');
-const WinstonCloudwatch = require('winston-cloudwatch');
 const crypto = require('crypto');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
@@ -45,6 +44,7 @@ fs.access(awscredentials, fs.F_OK, (err) => {
 		return
 	}
 	// Setup AWS CloudWatch Transport
+	const WinstonCloudwatch = require('winston-cloudwatch');
 	logger.add(new WinstonCloudwatch({
 		logGroupName: logGroup,
 		logStreamName: function() {
