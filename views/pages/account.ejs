@@ -54,6 +54,18 @@
       </div>
     </div>
     <div class="form-group row">
+      <div class="col-sm-9 bg-light rounded">
+        Reset your Google and Amazon OAuth tokens using the button below (note you will have to re-link your account(s) to use this service again!).
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-7 text-right">
+        <button class="btn btn-danger btn-space" id="tokens" type="button" onclick="deleteOAuthTokens('<%= user._id %>')">Delete Tokens</button>
+      </div>
+    </div>
+    <div class="form-group row">
         <div class="col-sm-9 bg-light rounded">
           Decided you want to remove your account? Click the button below to delete your account and all associated data.
         </div>
@@ -119,6 +131,20 @@ function saveAccount() {
     else {
       prompt("You have not changed email address or country, nothing to save!")
     }
+  }
+}
+
+function deleteOAuthTokens(id) {
+  var answer = confirm("Are you sure you want to delete your OAuth tokens? You will have to re-link your Amazon/ Google accounts to re-use this service!");
+  if (answer) {
+    // Delete oauthTokens
+    $.ajax({
+				url:"/tokens/" + id,
+				type: 'DELETE',
+				success: function(data){
+					document.location.reload();
+				}
+    });
   }
 }
 

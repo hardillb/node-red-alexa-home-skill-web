@@ -597,6 +597,40 @@ router.delete('/account/:user_id', defaultLimiter,
 		});
 });
 ///////////////////////////////////////////////////////////////////////////
+// Tokens (Delete)
+///////////////////////////////////////////////////////////////////////////
+router.delete('/tokens/:user_id', defaultLimiter,
+ensureAuthenticated,
+function(req,res){
+	var userId = req.params.user_id;
+	const pUser = Account.findOne({_id: userId});
+	Promise.all([pUser]).then(([userAccount]) => {
+		if (userAccount.username == req.user.username || req.user.username === mqtt_user) {
+			const pDeleteGrantCodes = oauthModels.GrantCode.deleteMany({user: userId});
+			const pDeleteAccessTokens = oauthModels.AccessToken.deleteMany({user: userId});
+			const pDeleteRefreshTokens = oauthModels.RefreshToken.deleteMany({user: userId});
+			Promise.all([pDeleteAccount, pDeleteGrantCodes, pDeleteAccessTokens, pDeleteRefreshTokens, pDeleteDevices, pDeleteTopics]).then(result => {
+				res.status(202).json({message: 'deleted OAuth tokens'});
+				if (req.user.username === mqtt_user) {
+					logger.log('info', "[Delete Tokens] Superuser deleted OAuth tokens for account: " + userId)
+				}
+				else {
+					logger.log('info', "[Delete Tokens] Self-service OAuth token deletion for account: " + userId)
+				}
+			}).catch(err => {
+				logger.log('warn', "[Delete Tokens] Failed to delete OAuth tokens for account: " + userId);
+				res.status(500).json({error: err});
+			});
+		}
+		else {
+			logger.log('warn', "[Delete Tokens] Attempt to delete user OAuth tokens blocked");
+		}
+	}).catch(err => {
+		logger.log('warn', "[Delete Tokens] Failed to find user account: " + userId);
+		res.status(500).send();
+	});
+});
+///////////////////////////////////////////////////////////////////////////
 // Device (Post)
 ///////////////////////////////////////////////////////////////////////////
 router.post('/device/:dev_id', defaultLimiter,
