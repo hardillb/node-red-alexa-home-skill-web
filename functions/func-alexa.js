@@ -98,6 +98,18 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                             });
                                     }
                                 break;
+                            case "ContactSensor":
+                                // Return detectionState
+                                if (deviceJSON.state.hasOwnProperty('contact') && deviceJSON.state.hasOwnProperty('time')) {
+                                    properties.push({
+                                            "namespace": "Alexa.ContactSensor",
+                                            "name": "detectionState",
+                                            "value": deviceJSON.state.contact,
+                                            "timeOfSample": deviceJSON.state.time,
+                                            "uncertaintyInMilliseconds": 1000
+                                            });
+                                    }
+                                break;
                             case "ColorTemperatureController":
                                 // Return color temperature
                                 if (deviceJSON.state.hasOwnProperty('colorTemperature') && deviceJSON.state.hasOwnProperty('time')) {

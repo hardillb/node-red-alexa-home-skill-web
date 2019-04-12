@@ -45,6 +45,12 @@
 									<br />
 								</div>
 								<div class="form-check">
+									<input title="Contact Sensor" type="checkbox" class="form-check-input" id="CONTACT_SENSOR" name="appType" value="CONTACT_SENSOR" onclick='checkType(this)'>
+									<label class="form-check-label" for="CONTACT_SENSOR"> 
+											Contact Sensor  <img src="/images/alexa-24px.png"></img>
+									</label>
+								</div>
+								<div class="form-check">
 										<input title="Light" type="checkbox" class="form-check-input" id="LIGHT" name="appType" value="LIGHT" onclick='checkType(this)'>
 										<label class="form-check-label" for="LIGHT"> 
 												Light/ Bulb <img src="/images/alexa-24px.png"></img><img src="/images/google-24px.png"></img>
@@ -139,6 +145,12 @@
 												<a data-toggle="tooltip" data-placement="right" title="Set color temperature, increase, decrease, cooler, warmer">Color Temperature <img class="octicon octicon-question" src="octicons/question.svg"></img></a>  
 										</label>
 										<br />
+									</div>
+									<div class="form-check">
+										<input title="Contact Sensor" type="checkbox" class="form-check-input" name="capabilities" id="ContactSensor" value="ContactSensor">
+										<label class="form-check-label" for="ContactSensor">
+											<a data-toggle="tooltip" data-placement="right" title="Make sensor data retrievable">Contact Sensor <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
 									</div>
 									<div class="form-check">
 											<input title="Input Control" type="checkbox" class="form-check-input" name="capabilities" id="InputController" value="InputController">

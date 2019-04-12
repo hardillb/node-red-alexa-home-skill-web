@@ -395,6 +395,7 @@ router.post('/command2',
 						}]
 					};
 				}
+
 				// Build ColorTemperatureController Response Context
 				if (namespace == "Alexa.ColorTemperatureController") {
 					var strPayload = req.body.directive.payload.colorTemperatureInKelvin;
@@ -954,6 +955,21 @@ function replaceCapability(capability, reportState, attributes) {
 					"supported": [{
 						"name": "color"
 					}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// ContactSensor
+	if(capability == "ContactSensor")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ContactSensor",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "detectionState"
+					  }],
 					"proactivelyReported": reportState,
 					"retrievable": reportState
 				}

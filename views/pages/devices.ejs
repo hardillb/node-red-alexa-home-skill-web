@@ -297,8 +297,6 @@ function checkType(type) {
 	$("#Farenheit").prop('required',false);
 	$('#stateReporting').hide();
 	$('#ghomeSecurity').hide();
-
-	//if ($('#ACTIVITY_TRIGGER').prop('checked') && !$('#OTHER').prop('checked')) {
 	if (type.id== "ACTIVITY_TRIGGER" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#SceneController").prop('checked',true);
@@ -315,7 +313,23 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#LIGHT').prop('checked') && !$('#OTHER').prop('checked')) {
+	else if (type.id== "CONTACT_SENSOR" && type.checked && !$('#OTHER').prop('checked')) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$("#ContactSensor").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "CONTACT_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "ContactSensor"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
 	else if (type.id== "LIGHT" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
@@ -335,7 +349,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#SMARTLOCK').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "SMARTLOCK" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
@@ -355,7 +368,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#SMARTPLUG').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "SMARTPLUG" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
@@ -373,7 +385,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#SWITCH').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "SWITCH" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
@@ -391,7 +402,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#SPEAKER').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "SPEAKER" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#SpeakerController").prop('checked',true);
@@ -409,7 +419,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#TEMPERATURE_SENSOR').prop('checked') && !$('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "TEMPERATURE_SENSOR" && type.checked && !$('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$("#TemperatureSensor").prop('checked',true);
@@ -426,7 +435,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#THERMOSTAT').prop('checked') && !$('#OTHER').prop('checked')) { // Flash ToolTip ref TempSensor
 	else if (type.id== "THERMOSTAT" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		// Trigger ThermostatController onchange
@@ -486,7 +494,6 @@ function checkType(type) {
 		$("#ThermostatController").change();
 		$("#TemperatureSensor").change();
 	}
-	//else if ($('#TV').prop('checked') && !$('#OTHER').prop('checked')) {
 	else if (type.id== "TV" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
@@ -509,7 +516,6 @@ function checkType(type) {
 			}
 		});
 	}
-	//else if ($('#OTHER').prop('checked')) {
 	else if (type.id== "OTHER" && type.checked) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
@@ -971,6 +977,9 @@ function generateState(deviceState) {
 				case "ColorTemperatureController": // set to warm white
 					dummyState.colorTemperature = 2200;
 					break;
+				case "ContactSensor": // set to closed
+					dummyState.contact = "DETECTED";
+					break;				
 				case "LockController":
 					dummyState.lock = "UNLOCKED";
 					break;
@@ -1037,6 +1046,14 @@ function generateState(deviceState) {
 					}
 					else {dummyState.colorTemperature = 2200}
 					break;
+				case "ContactSensor":
+					if (deviceState.hasOwnProperty('contact')) {
+						if (typeof deviceState.contact == 'string' && (deviceState.contact == 'DETECTED' || deviceState.contact == 'NOT_DETECTED')) {
+							dummyState.contact = deviceState.contact;
+						}
+					}
+					else {dummyState.contact = "DETECTED"}
+					break;				
 				case "LockController":
 					if (deviceState.hasOwnProperty('lock')) {
 						if (typeof deviceState.lock == 'string' && (deviceState.lock == 'UNLOCKED' || deviceState.lock == 'LOCKED')) {

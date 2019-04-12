@@ -36,6 +36,7 @@ module.exports = mongoose.model('Devices', Devices);
     //         temperatureMinK: Number,
     //         temperatureMaxK: Number
     //     },
+    //     contact: String,
     //     temperatureRange: {
     //         temperatureMin: Number,
     //         temperatureMax: Number,    

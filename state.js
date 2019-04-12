@@ -211,7 +211,7 @@ function setstate(username, endpointId, payload) {
 					delete dev.state.colorHue;
 					delete dev.state.colorSaturation;
 				}
-
+				if (payload.state.hasOwnProperty('contact')) {dev.state.contact = payload.state.contact};
 				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
 				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
 				if (payload.state.hasOwnProperty('mute')) {dev.state.mute = payload.state.mute};
