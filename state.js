@@ -194,43 +194,76 @@ function setstate(username, endpointId, payload) {
 				var deviceJSON = JSON.parse(JSON.stringify(dev));
 				dev.state = (dev.state || {});
 				dev.state.time = dt;
-				if (payload.state.hasOwnProperty('brightness')) {dev.state.brightness = payload.state.brightness};
-				if (payload.state.hasOwnProperty('channel')) {dev.state.input = payload.state.channel};
-
-				// Color
-				if (payload.state.hasOwnProperty('colorBrightness') && payload.state.hasOwnProperty('colorHue') && payload.state.hasOwnProperty('colorSaturation')) {
-					dev.state.colorBrightness = payload.state.colorBrightness;
-					dev.state.colorHue = payload.state.colorHue;
-					dev.state.colorSaturation = payload.state.colorSaturation;
-					delete dev.state.colorTemperature;
-				}
-				// ColorTemperature
-				if (payload.state.hasOwnProperty('colorTemperature')) {
-					dev.state.colorTemperature = payload.state.colorTemperature;
-					delete dev.state.colorBrightness;
-					delete dev.state.colorHue;
-					delete dev.state.colorSaturation;
-				}
-				if (payload.state.hasOwnProperty('contact')) {dev.state.contact = payload.state.contact};
-				if (payload.state.hasOwnProperty('input')) {dev.state.input = payload.state.input};
-				if (payload.state.hasOwnProperty('lock')) {dev.state.lock = payload.state.lock};
-				if (payload.state.hasOwnProperty('mute')) {dev.state.mute = payload.state.mute};
-				if (payload.state.hasOwnProperty('percentage')) {dev.state.percentage = payload.state.percentage};
-				if (payload.state.hasOwnProperty('percentageDelta')) {
-					if (dev.state.hasOwnProperty('percentage')) {
-						var newPercentage = dev.state.percentage + payload.state.percentageDelta;
-						if (newPercentage > 100) {newPercentage = 100}
-						else if (newPercentage < 0) {newPercentage = 0}
-						dev.state.percentage = newPercentage;
+				if (payload.state.hasOwnProperty('brightness')) { // Brightness, with validation
+					if (typeof payload.state.brightness == 'number' && payload.state.brightness >= 0 && payload.state.brightness <= 100) {dev.state.brightness = payload.state.brightness};
+				};
+				if (payload.state.hasOwnProperty('channel')) { // Channel, with basic validation - can be either string or number
+					if (typeof payload.state.channel == 'string' || payload.state.channel == 'number'){dev.state.channel = payload.state.channel};
+				};
+				if (payload.state.hasOwnProperty('colorBrightness') && payload.state.hasOwnProperty('colorHue') && payload.state.hasOwnProperty('colorSaturation')) { // Color, with validation
+					if ((typeof payload.state.colorHue == 'number'
+						&& typeof payload.state.colorSaturation == 'number'
+						&& typeof payload.state.colorBrightness == 'number'
+						&& payload.state.colorHue >= 0 && payload.state.colorHue <= 360)
+						&& (payload.state.colorSaturation >= 0 && payload.state.colorSaturation <= 1)
+						&& (payload.state.colorBrightness >= 0 && payload.state.colorBrightness <= 1)) {
+							dev.state.colorBrightness = payload.state.colorBrightness;
+							dev.state.colorHue = payload.state.colorHue;
+							dev.state.colorSaturation = payload.state.colorSaturation;
+							delete dev.state.colorTemperature;
 					}
 				};
-				if (payload.state.hasOwnProperty('playback')) {dev.state.playback = payload.state.playback};
-				if (payload.state.hasOwnProperty('power')) {dev.state.power = payload.state.power};
-				if (payload.state.hasOwnProperty('rangeValue')) {dev.state.rangeValue = payload.state.rangeValue};
-				if (payload.state.hasOwnProperty('rangeValueDelta')) {
-					if (dev.state.hasOwnProperty('rangeValue')) {
-						var newRangeValue = dev.state.rangeValue + payload.state.rangeValueDelta;
-						dev.state.rangeValue = newRangeValue;
+				if (payload.state.hasOwnProperty('colorTemperature')) { // ColorTemperature, with validation
+					if (typeof payload.state.colorTemperature == 'number' && (payload.state.colorTemperature >= 0 && payload.state.colorTemperature) <= 10000) {
+						dev.state.colorTemperature = payload.state.colorTemperature;
+						delete dev.state.colorBrightness;
+						delete dev.state.colorHue;
+						delete dev.state.colorSaturation;		
+					};
+				};
+				if (payload.state.hasOwnProperty('contact')) { // Contact, with validation
+					if (typeof payload.state.contact == 'string' && (payload.state.contact == 'DETECTED' || payload.state.contact == 'NOT_DETECTED')) {dev.state.contact = payload.state.contact};
+				};
+				if (payload.state.hasOwnProperty('input')) { // Input, with basic validation
+					if (typeof payload.state.input == 'string'){dev.state.input = payload.state.input};
+				};
+				if (payload.state.hasOwnProperty('lock')) { // Lock, with validation
+					if (typeof payload.state.lock == 'string' && (payload.state.lock == 'LOCKED' || payload.state.lock == 'UNLOCKED')) {dev.state.lock = payload.state.lock};
+				};
+				if (payload.state.hasOwnProperty('mute')) { // Mute, with validation
+					if (typeof payload.state.mute == 'boolean' && (payload.state.mute == true || payload.state.mute == false)) {dev.state.mute = payload.state.mute};
+				};
+				if (payload.state.hasOwnProperty('percentage')) { // Percentage, with validation
+					if (typeof payload.state.percentage == 'number' && payload.state.percentage >= 0 && payload.state.percentage <= 100) {dev.state.percentage = payload.state.percentage};
+				};
+				if (payload.state.hasOwnProperty('percentageDelta')) { // Percentage Delta, with validation
+					if (typeof payload.state.percentageDelta == 'number' && payload.state.percentageDelta >= -100 && payload.state.percentageDelta <= 100) {
+						if (dev.state.hasOwnProperty('percentage')) {
+							var newPercentage = dev.state.percentage + payload.state.percentageDelta;
+							if (newPercentage > 100) {newPercentage = 100}
+							else if (newPercentage < 0) {newPercentage = 0}
+							dev.state.percentage = newPercentage;
+						}
+					};
+				};
+				if (payload.state.hasOwnProperty('playback')) { // Playback, with basic validation
+					if (typeof payload.state.playback == 'string'){dev.state.playback = payload.state.playback};
+				};
+				if (payload.state.hasOwnProperty('power')) { // Power, with validation
+					if (typeof payload.state.power == 'string' && (payload.state.power == 'ON' || payload.state.power == 'OFF')) {dev.state.power = payload.state.power};
+
+				};
+				if (payload.state.hasOwnProperty('rangeValue')) { // Range Value, with basic validation
+					if (typeof payload.state.rangeValue == 'number'){
+						dev.state.rangeValue = payload.state.rangeValue;
+					}
+				};
+				if (payload.state.hasOwnProperty('rangeValueDelta')) { // Range Value Delta, with basic validation
+					if (typeof payload.state.rangeValueDelta == 'number'){
+						if (dev.state.hasOwnProperty('rangeValue')) {
+							var newRangeValue = dev.state.rangeValue + payload.state.rangeValueDelta;
+							dev.state.rangeValue = newRangeValue;
+						}
 					}
 				};
 				// Handle targetSetpointDelta, thermostatSetPoint and thermostatMode state updates
@@ -238,14 +271,20 @@ function setstate(username, endpointId, payload) {
 					var newTemp = undefined;
 					var newMode = undefined;
 					if (dev.state.hasOwnProperty('thermostatSetPoint') && payload.state.hasOwnProperty('targetSetpointDelta')) {
-						newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+						if (typeof payload.state.targetSetpointDelta == 'number'){ // Thermostat Set Point Delta, with basic validation
+							newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
+						}
 					}
 					else if (dev.state.hasOwnProperty('thermostatSetPoint') && payload.state.hasOwnProperty('thermostatSetPoint')) {
-						newTemp = payload.state.thermostatSetPoint;
+						if (typeof payload.state.thermostatSetPoint == 'number'){ // Thermostat Set Point, with basic validation
+							newTemp = payload.state.thermostatSetPoint;
+						}
 					}
 					// Use included thermostatMode if exists
-					if (payload.state.hasOwnProperty('thermostatMode')) {
-						newMode = payload.state.thermostatMode
+					if (payload.state.hasOwnProperty('thermostatMode')) { // Thermostat Mode, with basic validation
+						if (typeof payload.state.thermostatMode == 'string'){
+							newMode = payload.state.thermostatMode;
+						}
 					}
 					// Use existing thermostatMode if possible
 					else if (!payload.state.hasOwnProperty('thermostatMode') && deviceJSON.attributes.hasOwnProperty('thermostatModes')){
@@ -269,14 +308,24 @@ function setstate(username, endpointId, payload) {
 					// 	}
 					// }
 				};
-				if (payload.state.hasOwnProperty('temperature')) {dev.state.temperature = payload.state.temperature};
-				if (payload.state.hasOwnProperty('volume')) {dev.state.volume = payload.state.volume}
-				if (payload.state.hasOwnProperty('volumeDelta')) {
-					if (dev.state.hasOwnProperty('volume')) {
-						var newVolume = dev.state.volume + payload.state.volumeDelta;
-						dev.state.volume = newVolume;
+				if (payload.state.hasOwnProperty('temperature')) { // Temperature, with basic validation
+					if (typeof payload.state.temperature == 'number'){
+						dev.state.temperature = payload.state.temperature;
 					}
-				}
+				};
+				if (payload.state.hasOwnProperty('volume')) { // Volume, with basic validation
+					if (typeof payload.state.volume == 'number'){
+						dev.state.volume = payload.state.volume;
+					}
+				};
+				if (payload.state.hasOwnProperty('volumeDelta')) { // Volume Delta, with basic validation
+					if (dev.state.hasOwnProperty('volume')) { 
+						if (typeof payload.state.volumeDelta == 'number'){
+							var newVolume = dev.state.volume + payload.state.volumeDelta;
+							dev.state.volume = newVolume;
+						}
+					}
+				};
 
 				logger.log('debug', "[State API] Endpoint state update: " + JSON.stringify(dev.state));
 				// Update state element with modified properties
