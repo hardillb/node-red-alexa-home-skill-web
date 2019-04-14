@@ -111,7 +111,7 @@ const defaultLimiter = limiter({
 			ec: "Express-limiter",
 			ea: "Default: rate-limited path: " + req.path + ", IP address: " + req.ip,
 			uip: req.ip
-		  }
+		  }		  
 		if (enableAnalytics) {visitor.event(params).send()};
 		res.status(429).json('Rate limit exceeded');
 	  }
@@ -125,24 +125,31 @@ const getStateLimiter = limiter({
 		  return next()
 	},
 	onRateLimited: function (req, res, next) {
-		if (req.user) {
-			logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for user: " + req.user.username)
-			var params = {
-				ec: "Express-limiter",
-				ea: "Rate limited: " + req.user.username,
-				uid: req.user.username,
-				uip: req.ip
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
+		logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for IP address: " + req.ip)
+		var params = {
+			ec: "Express-limiter",
+			ea: "GetState: rate-limited path: " + req.path + ", IP address: " + req.ip,
+			uip: req.ip
+			}
+		if (enableAnalytics) {visitor.event(params).send()};
+		// MQTT message code, will provide client-side notification in Node-RED console
+		var endpointId = (req.params.dev_id || 0);
+		if (endpointId != 0) {
+			// Future development, create redis key pair for endpointId and username then check if this exists before querying mongodb
+			var pDevice = Devices.findOne({endpointId:endpointId});
+			Promise.all([pDevice]).then(([device]) => {
+				var username = getSafe(() => device.username);
+				if (username != undefined) {
+					alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
+					notifyUser('warn', username, endpointId, alert);
+				}
+				else {
+					logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup username");
+				}
+			});
 		}
 		else {
-			logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for IP address: " + req.ip)
-			var params = {
-				ec: "Express-limiter",
-				ea: "GetState: rate-limited path: " + req.path + ", IP address: " + req.ip,
-				uip: req.ip
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
+			logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup dev_id param");
 		}
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
@@ -1267,227 +1274,19 @@ function replaceCapability(capability, reportState, attributes) {
 	}
 };
 
-/*
-///////////////////////////////////////////////////////////////////////////
-// Get State API
-///////////////////////////////////////////////////////////////////////////
-router.get('/getstate/:dev_id', getStateLimiter,
-	passport.authenticate(['bearer', 'basic'], { session: false }),
-	function(req,res,next){
-		var id = req.params.dev_id;
-
-		var params = {
-			ec: "Get State",
-			ea: "GetState API request for username: " + req.user.username + ", endpointId: " + id,
-			uid: req.user.username,
-			uip: req.ip,
-			dp: "/api/v1/getstate"
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-
-		var serviceName = "Amazon"; // As user has authenticated, assume activeService
-		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
-
-		// Identify device, we know who user is from request
-		logger.log('debug', "[State API] Received GetState API request for user:" + req.user.username + " endpointId:" + id);
-
-		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
-			if (err) {
-				logger.log('warn',"[State API] No device found for username: " + req.user.username + " endpointId:" + id);
-				res.status(500).send();
-			}
-			if (data) {
-				var deviceJSON = JSON.parse(JSON.stringify(data)); // Convert "model" object class to JSON object so that properties are query-able
-				if (deviceJSON && deviceJSON.hasOwnProperty('reportState')) {
-					if (deviceJSON.reportState = true) { // Only respond if device element 'reportState' is set to true
-						if (deviceJSON.hasOwnProperty('state')) {
-								// Inspect state element and build response based upon device type /state contents
-								// Will need to group multiple states into correct update format
-								var properties = [];
-								
-								deviceJSON.capabilities.forEach(function(capability) {
-									switch (capability)  {
-										case "BrightnessController":
-											// Return brightness percentage
-											if (deviceJSON.state.hasOwnProperty('brightness') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-														"namespace": "Alexa.BrightnessController",
-														"name": "brightness",
-														"value": deviceJSON.state.brightness,
-														"timeOfSample": deviceJSON.state.time,
-														"uncertaintyInMilliseconds": 10000
-													});
-											}
-											break;
-										case "ChannelController":
-											// Return Channel State - no reportable state as of December 2018
-											break;
-										case "ColorController":
-											// Return color
-											if (deviceJSON.state.hasOwnProperty('colorHue') && deviceJSON.state.hasOwnProperty('colorSaturation') && deviceJSON.state.hasOwnProperty('colorBrightness') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-														"namespace": "Alexa.ColorController",
-														"name": "color",
-														"value": {
-															"hue": deviceJSON.state.colorHue,
-															"saturation": deviceJSON.state.colorSaturation,
-															"brightness": deviceJSON.state.colorBrightness
-														},
-														"timeOfSample": deviceJSON.state.time,
-														"uncertaintyInMilliseconds": 10000
-														});
-												}
-											break;
-										case "ColorTemperatureController":
-											// Return color temperature
-											if (deviceJSON.state.hasOwnProperty('colorTemperature') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-														"namespace": "Alexa.ColorTemperatureController",
-														"name": "colorTemperatureInKelvin",
-														"value": deviceJSON.state.colorTemperature,
-														"timeOfSample": deviceJSON.state.time,
-														"uncertaintyInMilliseconds": 10000
-													});
-											}
-											break;
-										case "InputController":
-											// Return Input
-											if (deviceJSON.state.hasOwnProperty('input') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-														"namespace": "Alexa.InputController",
-														"name": "input",
-														"value": deviceJSON.state.input,
-														"timeOfSample": deviceJSON.state.time,
-														"uncertaintyInMilliseconds": 10000
-													});
-											}
-											break;
-										case "LockController":
-											// Return Lock State
-											if (deviceJSON.state.hasOwnProperty('lock') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-														"namespace": "Alexa.LockController",
-														"name": "lockState",
-														"value": deviceJSON.state.lock,
-														"timeOfSample": deviceJSON.state.time,
-														"uncertaintyInMilliseconds": 10000
-													});
-											}
-											break;
-										case "PlaybackController":
-											// Return Playback State - no reportable state as of November 2018
-											break;
-										case "PercentageController":
-											// Return Power State
-											if (deviceJSON.state.hasOwnProperty('percentage') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-															"namespace": "Alexa.PercentageController",
-															"name": "percentage",
-															"value": deviceJSON.state.percentage,
-															"timeOfSample": deviceJSON.state.time,
-															"uncertaintyInMilliseconds": 10000
-													});
-											}
-											break;
-										case "PowerController":
-											// Return Power State
-											if (deviceJSON.state.hasOwnProperty('power') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-															"namespace": "Alexa.PowerController",
-															"name": "powerState",
-															"value": deviceJSON.state.power,
-															"timeOfSample": deviceJSON.state.time,
-															"uncertaintyInMilliseconds": 10000
-													});
-											}
-											break;
-										case "TemperatureSensor":
-											// Return temperature
-											if (deviceJSON.state.hasOwnProperty('temperature') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-													"namespace": "Alexa.TemperatureSensor",
-													"name": "temperature",
-													"value": {
-														"value": deviceJSON.state.temperature,
-														"scale": deviceJSON.attributes.temperatureScale.toUpperCase()
-													  },
-													"timeOfSample": deviceJSON.state.time,
-													"uncertaintyInMilliseconds": 10000
-												});
-											}
-											break;
-										case "ThermostatController":
-											// Return thermostatSetPoint
-											if (deviceJSON.state.hasOwnProperty('thermostatSetPoint') && deviceJSON.state.hasOwnProperty('thermostatMode') && deviceJSON.state.hasOwnProperty('time')) {
-												properties.push({
-														"namespace":"Alexa.ThermostatController",
-														"name":"targetSetpoint",
-														"value":{  
-															"value":deviceJSON.state.thermostatSetPoint,
-															"scale":deviceJSON.attributes.temperatureScale.toUpperCase()
-															},
-														"timeOfSample":deviceJSON.state.time,
-														"uncertaintyInMilliseconds":10000
-													});
-												properties.push({
-														"namespace":"Alexa.ThermostatController",
-														"name":"thermostatMode",
-														"value":deviceJSON.state.thermostatMode,
-														"timeOfSample":deviceJSON.state.time,
-														"uncertaintyInMilliseconds":10000
-													});
-											}
-											break;
-									}
-								});
-								
-								properties.push({
-									"namespace": "Alexa.EndpointHealth",
-									"name": "connectivity",
-									"value": {
-									  "value": "OK"
-									},
-									"timeOfSample": deviceJSON.state.time,
-									"uncertaintyInMilliseconds": 10000
-								});
-								logger.log('debug', "[State API] State response properties: " + JSON.stringify(properties));
-								res.status(200).json(properties);
-								}
-							else {
-								// Device has no state, return as such
-								logger.log('warn',"[State API] No state found for username: " + req.user.username + " endpointId:" + id);
-								res.status(500).send();
-							}
-						}
-						// State reporting not enabled for device, send error code
-						else {
-							logger.log('debug',"[State API] State requested for user: " + req.user.username + " device: " + id +  " but device state reporting disabled");
-							var properties = [];
-							properties.push({
-								"namespace": "Alexa.EndpointHealth",
-								"name": "connectivity",
-								"value": {
-								  "value": "OK"
-								},
-								"timeOfSample": deviceJSON.state.time,
-								"uncertaintyInMilliseconds": 10000
-							});
-
-							//res.status(500).send();
-							res.status(200).json(properties);
-						}
-					}
-					// 'reportState' element missing on device, send error code
-					else {
-						logger.log('warn', "[State API] User: " + req.user.username + " device: " + id +  " has no reportState attribute, check MongoDB schema");
-						res.status(500).send();
-					}
-				}
-		});
- 	}
-);
-
-*/
+// Post MQTT message that users' Node-RED instance will display in GUI as warning
+function notifyUser(severity, username, endpointId, message){
+	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifiations
+	var alert = {};
+	alert.severity = severity;
+	alert.message = message
+	try{
+		mqttClient.publish(topic,JSON.stringify(alert));
+		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
+	} catch (err) {
+		logger.log('warn', "[State API] Failed to publish MQTT alert, error: " + err);
+	}
+};
 
 module.exports = router;
 
