@@ -192,13 +192,23 @@ function setstate(username, endpointId, payload) {
 			if (dev) {
 				var dt = new Date().toISOString();
 				var deviceJSON = JSON.parse(JSON.stringify(dev));
+				var alert;
+
 				dev.state = (dev.state || {});
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) { // Brightness, with validation
-					if (typeof payload.state.brightness == 'number' && payload.state.brightness >= 0 && payload.state.brightness <= 100) {dev.state.brightness = payload.state.brightness};
+					if (typeof payload.state.brightness == 'number' && payload.state.brightness >= 0 && payload.state.brightness <= 100) {dev.state.brightness = payload.state.brightness}
+					else {
+						alert = 'Invalid brightness state, expecting payload.state.brightness (number, 0-100)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('channel')) { // Channel, with basic validation - can be either string or number
-					if (typeof payload.state.channel == 'string' || payload.state.channel == 'number'){dev.state.channel = payload.state.channel};
+					if (typeof payload.state.channel == 'string' || payload.state.channel == 'number'){dev.state.channel = payload.state.channel}
+					else {
+						alert = 'Invalid channel state, expecting payload.state.channel (either string or number)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('colorBrightness') && payload.state.hasOwnProperty('colorHue') && payload.state.hasOwnProperty('colorSaturation')) { // Color, with validation
 					if ((typeof payload.state.colorHue == 'number'
@@ -212,6 +222,10 @@ function setstate(username, endpointId, payload) {
 							dev.state.colorSaturation = payload.state.colorSaturation;
 							delete dev.state.colorTemperature;
 					}
+					else {
+						alert = 'Invalid color state, expecting payload.state.colorHue (number, 0-360), payload.state.colorSaturation (number, 0-1) and payload.state.colorBrightness (number, 0-1)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('colorTemperature')) { // ColorTemperature, with validation
 					if (typeof payload.state.colorTemperature == 'number' && (payload.state.colorTemperature >= 0 && payload.state.colorTemperature) <= 10000) {
@@ -219,22 +233,46 @@ function setstate(username, endpointId, payload) {
 						delete dev.state.colorBrightness;
 						delete dev.state.colorHue;
 						delete dev.state.colorSaturation;		
-					};
+					}
+					else {
+						alert = 'Invalid colorTemperature state, expecting payload.state.colorTemperature (number, 0-10000)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('contact')) { // Contact, with validation
-					if (typeof payload.state.contact == 'string' && (payload.state.contact == 'DETECTED' || payload.state.contact == 'NOT_DETECTED')) {dev.state.contact = payload.state.contact};
+					if (typeof payload.state.contact == 'string' && (payload.state.contact == 'DETECTED' || payload.state.contact == 'NOT_DETECTED')) {dev.state.contact = payload.state.contact}
+					else {
+						alert = 'Invalid contact state, expecting payload.state.contact (string, DETECTED or NOT_DETECTED)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('input')) { // Input, with basic validation
-					if (typeof payload.state.input == 'string'){dev.state.input = payload.state.input};
+					if (typeof payload.state.input == 'string'){dev.state.input = payload.state.input}
+					else {
+						alert = 'Invalid input state, expecting payload.state.input (string)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('lock')) { // Lock, with validation
-					if (typeof payload.state.lock == 'string' && (payload.state.lock == 'LOCKED' || payload.state.lock == 'UNLOCKED')) {dev.state.lock = payload.state.lock};
+					if (typeof payload.state.lock == 'string' && (payload.state.lock == 'LOCKED' || payload.state.lock == 'UNLOCKED')) {dev.state.lock = payload.state.lock}
+					else {
+						alert = 'Invalid lock state, expecting payload.state.lock (string, LOCKED or UNLOCKED)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('mute')) { // Mute, with validation
-					if (typeof payload.state.mute == 'boolean' && (payload.state.mute == true || payload.state.mute == false)) {dev.state.mute = payload.state.mute};
+					if (typeof payload.state.mute == 'boolean' && (payload.state.mute == true || payload.state.mute == false)) {dev.state.mute = payload.state.mute}
+					else {
+						alert = 'Invalid mute state, expecting payload.state.mute (boolean)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('percentage')) { // Percentage, with validation
-					if (typeof payload.state.percentage == 'number' && payload.state.percentage >= 0 && payload.state.percentage <= 100) {dev.state.percentage = payload.state.percentage};
+					if (typeof payload.state.percentage == 'number' && payload.state.percentage >= 0 && payload.state.percentage <= 100) {dev.state.percentage = payload.state.percentage}
+					else {
+						alert = 'Invalid percentage state, expecting payload.state.percentage (number, 0-100)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('percentageDelta')) { // Percentage Delta, with validation
 					if (typeof payload.state.percentageDelta == 'number' && payload.state.percentageDelta >= -100 && payload.state.percentageDelta <= 100) {
@@ -244,18 +282,33 @@ function setstate(username, endpointId, payload) {
 							else if (newPercentage < 0) {newPercentage = 0}
 							dev.state.percentage = newPercentage;
 						}
-					};
+					}
+					else {
+						alert = 'Invalid percentageDelta state, expecting payload.state.percentageDelta (number, -100-100)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('playback')) { // Playback, with basic validation
-					if (typeof payload.state.playback == 'string'){dev.state.playback = payload.state.playback};
+					if (typeof payload.state.playback == 'string'){dev.state.playback = payload.state.playback}
+					else {
+						alert = 'Invalid playback state, expecting payload.state.playback (string)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('power')) { // Power, with validation
-					if (typeof payload.state.power == 'string' && (payload.state.power == 'ON' || payload.state.power == 'OFF')) {dev.state.power = payload.state.power};
-
+					if (typeof payload.state.power == 'string' && (payload.state.power == 'ON' || payload.state.power == 'OFF')) {dev.state.power = payload.state.power}
+					else {
+						alert = 'Invalid power state, expecting payload.state.power (string, ON or OFF)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('rangeValue')) { // Range Value, with basic validation
 					if (typeof payload.state.rangeValue == 'number'){
 						dev.state.rangeValue = payload.state.rangeValue;
+					}
+					else {
+						alert = 'Invalid rangeValue state, expecting payload.state.rangeValue (number)';
+						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('rangeValueDelta')) { // Range Value Delta, with basic validation
@@ -264,6 +317,10 @@ function setstate(username, endpointId, payload) {
 							var newRangeValue = dev.state.rangeValue + payload.state.rangeValueDelta;
 							dev.state.rangeValue = newRangeValue;
 						}
+					}
+					else {
+						alert = 'Invalid rangeValueDelta state, expecting payload.state.rangeValueDelta (number)';
+						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				// Handle targetSetpointDelta, thermostatSetPoint and thermostatMode state updates
@@ -274,16 +331,28 @@ function setstate(username, endpointId, payload) {
 						if (typeof payload.state.targetSetpointDelta == 'number'){ // Thermostat Set Point Delta, with basic validation
 							newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
 						}
+						else {
+							alert = 'Invalid targetSetpointDelta state, expecting payload.state.targetSetpointDelta (number)';
+							notifyUser('warn', username, endpointId, alert);
+						}
 					}
 					else if (dev.state.hasOwnProperty('thermostatSetPoint') && payload.state.hasOwnProperty('thermostatSetPoint')) {
 						if (typeof payload.state.thermostatSetPoint == 'number'){ // Thermostat Set Point, with basic validation
 							newTemp = payload.state.thermostatSetPoint;
+						}
+						else {
+							alert = 'Invalid thermostatSetPoint state, expecting payload.state.thermostatSetPoint (number)';
+							notifyUser('warn', username, endpointId, alert);
 						}
 					}
 					// Use included thermostatMode if exists
 					if (payload.state.hasOwnProperty('thermostatMode')) { // Thermostat Mode, with basic validation
 						if (typeof payload.state.thermostatMode == 'string'){
 							newMode = payload.state.thermostatMode;
+						}
+						else {
+							alert = 'Invalid thermostatMode state, expecting payload.state.thermostatMode (string)';
+							notifyUser('warn', username, endpointId, alert);
 						}
 					}
 					// Use existing thermostatMode if possible
@@ -312,10 +381,18 @@ function setstate(username, endpointId, payload) {
 					if (typeof payload.state.temperature == 'number'){
 						dev.state.temperature = payload.state.temperature;
 					}
+					else {
+						alert = 'Invalid temperature state, expecting payload.state.temperature (number)';
+						notifyUser('warn', username, endpointId, alert);
+					}
 				};
 				if (payload.state.hasOwnProperty('volume')) { // Volume, with basic validation
 					if (typeof payload.state.volume == 'number'){
 						dev.state.volume = payload.state.volume;
+					}
+					else {
+						alert = 'Invalid volume state, expecting payload.state.volume (number)';
+						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('volumeDelta')) { // Volume Delta, with basic validation
@@ -323,6 +400,10 @@ function setstate(username, endpointId, payload) {
 						if (typeof payload.state.volumeDelta == 'number'){
 							var newVolume = dev.state.volume + payload.state.volumeDelta;
 							dev.state.volume = newVolume;
+						}
+						else {
+							alert = 'Invalid volumeDelta state, expecting payload.state.volumeDelta (number)';
+							notifyUser('warn', username, endpointId, alert);
 						}
 					}
 				};
@@ -437,6 +518,21 @@ function setstate(username, endpointId, payload) {
 		logger.log('warn', "[State API] setstate called, but MQTT payload has no 'state' property!");
 	}
 }
+
+// Post MQTT message that users' Node-RED instance will display in GUI as warning
+function notifyUser(severity, username, endpointId, message);{
+	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifiations
+	var alert = {};
+	alert.severity = severity;
+	alert.message = message
+	try{
+		mqttClient.publish(topic,JSON.stringify(alert));
+		logger.log('warn', "[State API] Published MQTT invalid state warning for user: " + username + " endpointId: " + endpointId + " message:" + message);
+	} catch (err) {
+		logger.log('warn', "[State API] Failed to publish MQTT invalid state warning, error: " + err);
+	}
+};
+
 // Nested attribute/ element tester
 function getSafe(fn) {
 	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
@@ -446,4 +542,6 @@ function getSafe(fn) {
 		//logger.log('debug', "[getSafe] Element not found:" + fn)
         return undefined;
     }
-}
+};
+
+
