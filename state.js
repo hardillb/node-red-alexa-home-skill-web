@@ -188,12 +188,13 @@ function setstate(username, endpointId, payload) {
 		Devices.findOne({username:username, endpointId:endpointId},function(error,dev){
 			if (error) {
 				logger.log('warn', "[State API] Unable to find enpointId: " + endpointId + " for username: " + username);
+				alert = 'State update sent for non-existent device (likely deleted), please review your flows!';
+				notifyUser('error', username, endpointId, alert);
 			}
 			if (dev) {
 				var dt = new Date().toISOString();
 				var deviceJSON = JSON.parse(JSON.stringify(dev));
 				var alert;
-
 				dev.state = (dev.state || {});
 				dev.state.time = dt;
 				if (payload.state.hasOwnProperty('brightness')) { // Brightness, with validation
@@ -527,9 +528,9 @@ function notifyUser(severity, username, endpointId, message){
 	alert.message = message
 	try{
 		mqttClient.publish(topic,JSON.stringify(alert));
-		logger.log('warn', "[State API] Published MQTT invalid state warning for user: " + username + " endpointId: " + endpointId + " message:" + message);
+		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
 	} catch (err) {
-		logger.log('warn', "[State API] Failed to publish MQTT invalid state warning, error: " + err);
+		logger.log('warn', "[State API] Failed to publish MQTT alert, error: " + err);
 	}
 };
 
