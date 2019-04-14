@@ -57,7 +57,8 @@ Account.findOne({username: mqtt_user}, function(error, account){
 			var topics = new Topics({topics: [
 					'command/' +account.username+'/#', 
 					'state/' + account.username + '/#',
-					'response/' + account.username + '/#'
+					'response/' + account.username + '/#',
+					'message/' + account.username + '/#'
 				]});
 			topics.save(function(err){
 				if (!err){

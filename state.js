@@ -199,14 +199,14 @@ function setstate(username, endpointId, payload) {
 				if (payload.state.hasOwnProperty('brightness')) { // Brightness, with validation
 					if (typeof payload.state.brightness == 'number' && payload.state.brightness >= 0 && payload.state.brightness <= 100) {dev.state.brightness = payload.state.brightness}
 					else {
-						alert = 'Invalid brightness state, expecting payload.state.brightness (number, 0-100)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid brightness state, expecting payload.state.brightness (number, 0-100)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('channel')) { // Channel, with basic validation - can be either string or number
 					if (typeof payload.state.channel == 'string' || payload.state.channel == 'number'){dev.state.channel = payload.state.channel}
 					else {
-						alert = 'Invalid channel state, expecting payload.state.channel (either string or number)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid channel state, expecting payload.state.channel (either string or number)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -223,7 +223,7 @@ function setstate(username, endpointId, payload) {
 							delete dev.state.colorTemperature;
 					}
 					else {
-						alert = 'Invalid color state, expecting payload.state.colorHue (number, 0-360), payload.state.colorSaturation (number, 0-1) and payload.state.colorBrightness (number, 0-1)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid color state, expecting payload.state.colorHue (number, 0-360), payload.state.colorSaturation (number, 0-1) and payload.state.colorBrightness (number, 0-1)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -235,42 +235,42 @@ function setstate(username, endpointId, payload) {
 						delete dev.state.colorSaturation;		
 					}
 					else {
-						alert = 'Invalid colorTemperature state, expecting payload.state.colorTemperature (number, 0-10000)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid colorTemperature state, expecting payload.state.colorTemperature (number, 0-10000)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('contact')) { // Contact, with validation
 					if (typeof payload.state.contact == 'string' && (payload.state.contact == 'DETECTED' || payload.state.contact == 'NOT_DETECTED')) {dev.state.contact = payload.state.contact}
 					else {
-						alert = 'Invalid contact state, expecting payload.state.contact (string, DETECTED or NOT_DETECTED)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid contact state, expecting payload.state.contact (string, DETECTED or NOT_DETECTED)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('input')) { // Input, with basic validation
 					if (typeof payload.state.input == 'string'){dev.state.input = payload.state.input}
 					else {
-						alert = 'Invalid input state, expecting payload.state.input (string)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid input state, expecting payload.state.input (string)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('lock')) { // Lock, with validation
 					if (typeof payload.state.lock == 'string' && (payload.state.lock == 'LOCKED' || payload.state.lock == 'UNLOCKED')) {dev.state.lock = payload.state.lock}
 					else {
-						alert = 'Invalid lock state, expecting payload.state.lock (string, LOCKED or UNLOCKED)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid lock state, expecting payload.state.lock (string, LOCKED or UNLOCKED)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('mute')) { // Mute, with validation
 					if (typeof payload.state.mute == 'boolean' && (payload.state.mute == true || payload.state.mute == false)) {dev.state.mute = payload.state.mute}
 					else {
-						alert = 'Invalid mute state, expecting payload.state.mute (boolean)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid mute state, expecting payload.state.mute (boolean)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('percentage')) { // Percentage, with validation
 					if (typeof payload.state.percentage == 'number' && payload.state.percentage >= 0 && payload.state.percentage <= 100) {dev.state.percentage = payload.state.percentage}
 					else {
-						alert = 'Invalid percentage state, expecting payload.state.percentage (number, 0-100)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid percentage state, expecting payload.state.percentage (number, 0-100)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -284,21 +284,21 @@ function setstate(username, endpointId, payload) {
 						}
 					}
 					else {
-						alert = 'Invalid percentageDelta state, expecting payload.state.percentageDelta (number, -100-100)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid percentageDelta state, expecting payload.state.percentageDelta (number, -100-100)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('playback')) { // Playback, with basic validation
 					if (typeof payload.state.playback == 'string'){dev.state.playback = payload.state.playback}
 					else {
-						alert = 'Invalid playback state, expecting payload.state.playback (string)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid playback state, expecting payload.state.playback (string)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
 				if (payload.state.hasOwnProperty('power')) { // Power, with validation
 					if (typeof payload.state.power == 'string' && (payload.state.power == 'ON' || payload.state.power == 'OFF')) {dev.state.power = payload.state.power}
 					else {
-						alert = 'Invalid power state, expecting payload.state.power (string, ON or OFF)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid power state, expecting payload.state.power (string, ON or OFF)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -307,7 +307,7 @@ function setstate(username, endpointId, payload) {
 						dev.state.rangeValue = payload.state.rangeValue;
 					}
 					else {
-						alert = 'Invalid rangeValue state, expecting payload.state.rangeValue (number)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid rangeValue state, expecting payload.state.rangeValue (number)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -319,7 +319,7 @@ function setstate(username, endpointId, payload) {
 						}
 					}
 					else {
-						alert = 'Invalid rangeValueDelta state, expecting payload.state.rangeValueDelta (number)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid rangeValueDelta state, expecting payload.state.rangeValueDelta (number)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -332,7 +332,7 @@ function setstate(username, endpointId, payload) {
 							newTemp = dev.state.thermostatSetPoint + payload.state.targetSetpointDelta;
 						}
 						else {
-							alert = 'Invalid targetSetpointDelta state, expecting payload.state.targetSetpointDelta (number)';
+							alert = '[' + dev.friendlyName + '] ' + 'Invalid targetSetpointDelta state, expecting payload.state.targetSetpointDelta (number)';
 							notifyUser('warn', username, endpointId, alert);
 						}
 					}
@@ -341,7 +341,7 @@ function setstate(username, endpointId, payload) {
 							newTemp = payload.state.thermostatSetPoint;
 						}
 						else {
-							alert = 'Invalid thermostatSetPoint state, expecting payload.state.thermostatSetPoint (number)';
+							alert = '[' + dev.friendlyName + '] ' + 'Invalid thermostatSetPoint state, expecting payload.state.thermostatSetPoint (number)';
 							notifyUser('warn', username, endpointId, alert);
 						}
 					}
@@ -351,7 +351,7 @@ function setstate(username, endpointId, payload) {
 							newMode = payload.state.thermostatMode;
 						}
 						else {
-							alert = 'Invalid thermostatMode state, expecting payload.state.thermostatMode (string)';
+							alert = '[' + dev.friendlyName + '] ' + 'Invalid thermostatMode state, expecting payload.state.thermostatMode (string)';
 							notifyUser('warn', username, endpointId, alert);
 						}
 					}
@@ -382,7 +382,7 @@ function setstate(username, endpointId, payload) {
 						dev.state.temperature = payload.state.temperature;
 					}
 					else {
-						alert = 'Invalid temperature state, expecting payload.state.temperature (number)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid temperature state, expecting payload.state.temperature (number)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -391,7 +391,7 @@ function setstate(username, endpointId, payload) {
 						dev.state.volume = payload.state.volume;
 					}
 					else {
-						alert = 'Invalid volume state, expecting payload.state.volume (number)';
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid volume state, expecting payload.state.volume (number)';
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
@@ -402,7 +402,7 @@ function setstate(username, endpointId, payload) {
 							dev.state.volume = newVolume;
 						}
 						else {
-							alert = 'Invalid volumeDelta state, expecting payload.state.volumeDelta (number)';
+							alert = '[' + dev.friendlyName + '] ' + 'Invalid volumeDelta state, expecting payload.state.volumeDelta (number)';
 							notifyUser('warn', username, endpointId, alert);
 						}
 					}
