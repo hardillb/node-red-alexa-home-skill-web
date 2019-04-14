@@ -520,7 +520,7 @@ function setstate(username, endpointId, payload) {
 }
 
 // Post MQTT message that users' Node-RED instance will display in GUI as warning
-function notifyUser(severity, username, endpointId, message);{
+function notifyUser(severity, username, endpointId, message){
 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifiations
 	var alert = {};
 	alert.severity = severity;
