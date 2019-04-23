@@ -8,6 +8,14 @@
         <input name="auth_url" value="<%= decodeURIComponent(currentURL) %>" hidden>
         <input name="scope" value="<%= scope.join(',') %>" hidden>
 
+        <div id="google_translate_element"></div>
+
+        <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL}, 'google_translate_element');
+        }
+        </script>
+
         <div>
             <p>To use this skill you need to:</p>
             <ul>
@@ -24,7 +32,7 @@
             <% if (user) { %>
                 <p>Click <em>Authorise</em> to allow <%= application.title %> access to control your devices.</p>
             <% } else { %>
-                <p>Please sign in using your Node-RED Smart Home Control account to allow <%= application.title %> access to control your devices.</p>
+                <p>Please sign-in using your Node-RED Smart Home Control account to link your <%= application.title %> account.</p>
             <% } %>
         <div>
 
