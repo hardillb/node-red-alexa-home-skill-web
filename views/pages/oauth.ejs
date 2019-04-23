@@ -7,15 +7,12 @@
         <input name="client_id" value="<%= application.oauth_id %>" hidden>
         <input name="auth_url" value="<%= decodeURIComponent(currentURL) %>" hidden>
         <input name="scope" value="<%= scope.join(',') %>" hidden>
-
-        <div id="google_translate_element"></div>
-
         <div>
             <p>To use this skill you need to:</p>
             <ul>
-                <li>Create a <a href='/newuser'>Node-RED Smart Home Control account.</a></li>
-                <li>Define one or more <a href='/newuser'>devices.</a></li>
-                <li>Setup Node-RED flows using your account/ defined devices.</li>
+                <li><img class="octicon octicon-shield" src="octicons/shield.svg"></img> Create a <a href='/newuser'>Node-RED Smart Home Control account.</a></li>
+                <li><img class="octicon octicon-checklist" src="octicons/checklist.svg"></img> Define one or more <a href='/newuser'>devices.</a></li>
+                <li><img class="octicon octicon-repo-forked" src="octicons/repo-forked.svg"></img> Setup Node-RED flows using your account/ defined devices.</li>
             </ul>
             <p><%= application.title %> requires permission to:</p>
             <ul>
@@ -26,7 +23,7 @@
             <% if (user) { %>
                 <p>Click <em>Authorise</em> to allow <%= application.title %> access to control your devices.</p>
             <% } else { %>
-                <p>Please sign-in using your Node-RED Smart Home Control account to link your <%= application.title %> account.</p>
+                <p>Please sign-in using your Node-RED Smart Home Control account in order to allow <%= application.title %> access to control your devices.</p>
             <% } %>
         <div>
 
