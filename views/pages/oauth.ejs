@@ -18,8 +18,13 @@
             <% if (user) { %>
                 <p>Click <em>Authorise</em> to allow <%= application.title %> access to your Node-RED Smart Home Control devices.</p>
             <% } else { %>
+                <p>To use this skill you need to:</p>
+                <ul>
+                    <li>Create a <a href='/newuser'>Node-RED Smart Home Control account.</a></li>
+                    <li>Define one or more <a href='/newuser'>devices.</a></li>
+                    <li>Setup Node-RED flows using your account/ defined devices.</li>
+                </ul>
                 <p>Please sign in using your Node-RED Smart Home Control account to allow <%= application.title %> access to your Node-RED Smart Home Control devices.</p>
-                <p>Don't have a <em>Node-RED Smart Home Control</em> account? <a href='/newuser'>You can create one here.</a></p>
             <% } %>
         <div>
 
@@ -37,12 +42,16 @@
               <p style="color: red"><%= errors %></p>
             <% } %>
             <div class="form-group">
-                <label for="username">Username: </label>
-                <input type="text" id="username" name="username"/>
+                <!-- <label for="username">Username: </label>
+                <input type="text" id="username" name="username"/>-->
+                <label for="username" class="sr-only">Username</label>
+                <input type="text" id="username" name="username" class="form-control" autocomplete="username" placeholder="Username" required autofocus>
             </div>
             <div>
-                <label for="password">Password: </label>
-                <input type="password" id="password" name="password">
+               <!--<label for="password">Password: </label>
+                <input type="password" id="password" name="password">-->
+                <label for="password" class="sr-only">Password</label>
+                <input type="password" id="password" name="password" class="form-control" autocomplete="current-password" placeholder="Password" required>
             </div>
             <div>
                 <input class="btn btn-lg btn-secondary btn-block" type="submit" value="Authorise">
