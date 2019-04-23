@@ -74,7 +74,7 @@ router.get('/start',oauthServer.authorize(function(applicationID, redirectURI, d
 				done(new Error("ERROR: Could not find service definition associated with redirectURI: ", redirectURI), false);
 			}
 		} else if (!error) {
-			done(new Error("ERROR: No serevice definition associated with oauth client_id: ", applicationID), false);
+			done(new Error("ERROR: No service definition associated with oauth client_id: ", applicationID), false);
 		} else {
 			done(error);
 		}
@@ -128,6 +128,8 @@ router.post('/finish',function(req,res,next) {
 	//console.log("decision user: ", req);
 	done(null, { scope: req.oauth2.req.scope });
 }));
+
+
 ///////////////////////////////////////////////////////////////////////////
 // Access Token URI
 ///////////////////////////////////////////////////////////////////////////

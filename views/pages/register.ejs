@@ -13,30 +13,7 @@
       <!-- <div id="register"> -->
         <!-- <form class="form-register" id="form-register" onsubmit="submitUser()"> -->
         <form class="form-register" id="form-register">
-            <h1 class="h3 mb-3 font-weight-normal">Register for an Account</h1>
-            <label for="username" class="sr-only">Username</label>
-            <input type="text" id="username" name="username" pattern="^[a-z,A-Z,0-9,_]{5,15}$" class="form-control" placeholder="Username" required autofocus title="a-z, A-Z, 0-9 characters and be 5-15 chars." autocomplete="username">
-            <small id="usernameHelpBlock" class="form-text text-muted">Username must only include a-z, A-Z, 0-9 characters and be 5-15 chars.</small>
-            <br>
-            <label for="email" class="sr-only">Email Address</label>
-            <input type="email" id="email" class="form-control" placeholder="Email Address" required title="Email address.">
-            <br>
-            <label for="country" class="sr-only">Country</label>
-            <small id="countryHelpBlock" class="form-text text-muted">Used to route Alexa API requests to correct Amazon region gateway.</small>
-
-            <input type="text" id="country" class="form-control" required>
-            <input type="text" id="country_code" name="country_code" data-countrycodeinput="1" readonly="readonly" hidden />
-            <br>
-            <label for="password" class="sr-only">Password</label>
-            <input type="password" id="password" name="password" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" autocomplete="new-password" placeholder="Password" required title="Minimum 10, maximum 32 chars.">
-            <small id="passwordHelpBlock" class="form-text text-muted">Password must be 10-32 chars, a-Z, 0-9.</small>
-            <br>
-            <label for="verify" class="sr-only">Re-enter Password</label>
-            <input type="password" id="verify" name="verify" pattern="^[a-z,A-Z,0-9,_]{10,32}$" class="form-control" autocomplete="new-password" placeholder="Re-enter Password" required title="Re-enter Password">
-            <small id="tosLink" class="form-text text-muted"><a href="#tosModal">View Terms of Service</a></small>
-            <small id="privacyLink" class="form-text text-muted"><a href="#privacyModal">View Privacy Policy</a></small>
-            <br>
-            <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Register</button>
+          <% include ../fragments/register.ejs %>
         </form>
       <!--  </div> -->
       <!--  <script type="text/javascript" src="js/zxcvbn.js"></script> -->
