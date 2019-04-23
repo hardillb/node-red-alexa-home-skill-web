@@ -8,18 +8,19 @@
         <input name="auth_url" value="<%= decodeURIComponent(currentURL) %>" hidden>
         <input name="scope" value="<%= scope.join(',') %>" hidden>
         <div>
-            <p>To use this skill you need to:</p>
+            <p>To use this service you need to:</p>
             <ul class="list-unstyled">
                 <li><img class="octicon octicon-shield" src="/octicons/shield.svg"></img> Create an <a href='/newuser'> account.</a></li>
                 <li><img class="octicon octicon-checklist" src="/octicons/checklist.svg"></img> Define one or more <a href='/newuser'>devices.</a></li>
                 <li><img class="octicon octicon-repo-forked" src="/octicons/repo-forked.svg"></img> Setup Node-RED flows using your devices.</li>
             </ul>
-            <p><%= application.title %> requires permission to:</p>
+            <hr>
+            <!-- <p><%= application.title %> is requesting permission to:</p>
             <ul>
                 <% scope.forEach(function(i){ %>
                     <li><%= map[i] %></li>
                 <% });%>
-            </ul>
+            </ul> -->
             <% if (user) { %>
                 <p>Click <em>Authorise</em> to allow <%= application.title %> access to control your devices.</p>
             <% } else { %>
