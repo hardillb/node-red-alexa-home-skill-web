@@ -9,7 +9,7 @@
         <input name="scope" value="<%= scope.join(',') %>" hidden>
         <div>
                 <a href="#googtrans(fr|fr)"><img src="/images/blank.gif" class="flag flag-fr" alt="France" /></a>
-                <a href="#googtrans(de|de)"><img src="/images/blank.gif" class="flag flag-de" alt="Germany" /></a>
+                <img src="/images/blank.gif" class="flag flag-de" alt="Germany" onclick="translate('de|de')"/>
                 <a href="#googtrans(en|es)"><img src="/images/blank.gif" class="flag flag-jp" alt="Japan" /></a>
                 <a href="#googtrans(en|mx)"><img src="/images/blank.gif" class="flag flag-mx" alt="Mexico" /></a>
                 <a href="#googtrans(it|it)"><img src="/images/blank.gif" class="flag flag-it" alt="Italy" /></a>
@@ -71,4 +71,20 @@
 
     </form>
   </div>
+  <script>
+    function translate(language) {
+        //var language = document.getElementById("language").value;
+        var selectField = document.querySelector("#google_translate_element select");
+        for(var i=0; i < selectField.children.length; i++){
+            var option = selectField.children[i];
+            // find desired langauge and change the former language of the hidden selection-field 
+            if(option.value==language){
+                selectField.selectedIndex = i;
+                // trigger change event afterwards to make google-lib translate this side
+                selectField.dispatchEvent(new Event('change'));
+                break;
+            }
+        }
+    }
+  </script>
 <% include ../fragments/footer.ejs %>
