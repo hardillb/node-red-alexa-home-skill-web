@@ -9,7 +9,7 @@
         <input name="scope" value="<%= scope.join(',') %>" hidden>
         <div>
                 <a href="#googtrans(fr|fr)"><img src="/images/blank.gif" class="flag flag-fr" alt="France" /></a>
-                <img src="/images/blank.gif" class="flag flag-de" alt="Germany" role="button" onclick="translate('de|de')" />
+                <img src="/images/blank.gif" class="flag flag-de" alt="Germany" role="button" onclick="gTranslate('de|de')" />
                 <a href="#googtrans(en|es)"><img src="/images/blank.gif" class="flag flag-jp" alt="Japan" /></a>
                 <a href="#googtrans(en|mx)"><img src="/images/blank.gif" class="flag flag-mx" alt="Mexico" /></a>
                 <a href="#googtrans(it|it)"><img src="/images/blank.gif" class="flag flag-it" alt="Italy" /></a>
@@ -72,7 +72,7 @@
     </form>
   </div>
   <script>
-    function translate(language) {
+    function gTranslate(language) {
         //var language = document.getElementById("language").value;
         var selectField = document.querySelector("#google_translate_element select");
         for(var i=0; i < selectField.children.length; i++){
