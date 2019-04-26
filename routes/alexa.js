@@ -135,17 +135,31 @@ const getStateLimiter = limiter({
 		// MQTT message code, will provide client-side notification in Node-RED console
 		var endpointId = (req.params.dev_id || 0);
 		if (endpointId != 0) {
-			// Future development, create redis key pair for endpointId and username then check if this exists before querying mongodb
-			var pDevice = Devices.findOne({endpointId:endpointId});
-			Promise.all([pDevice]).then(([device]) => {
-				var username = getSafe(() => device.username);
-				if (username != undefined) {
-					alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
-					notifyUser('warn', username, endpointId, alert);
+			client.get(endpointId, function(err, reply) {
+				// No endpointId:username match in Redis, query MongoDB
+				if (!err && reply == undefined) {
+					var pDevice = Devices.findOne({endpointId:endpointId});
+					Promise.all([pDevice]).then(([device]) => {
+						var username = getSafe(() => device.username);
+						if (username != undefined) {
+							alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
+							// Add endpointId : username pair to Redis as its likely we'll get repeat hits!
+							client.set(endpointId, username);
+							notifyUser('warn', username, endpointId, alert);
+						}
+						else {
+							logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup username");
+						}
+					});
 				}
+				// Matched endpointId:username match in Redis, saved MongoDB query
+				else if (!err) {
+					notifyUser('warn', reply, endpointId, alert);
+				}
+				// An error occurred on Redis client.get
 				else {
-					logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup username");
-				}
+					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
+				}			
 			});
 		}
 		else {
