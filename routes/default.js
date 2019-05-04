@@ -60,7 +60,8 @@ const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
 const defaultLimiter = limiter({
 	lookup: function(req, res, opts, next) {
-		opts.lookup = 'connection.remoteAddress'
+		//opts.lookup = 'connection.remoteAddress'
+		opts.lookup = 'headers.x-forwarded-for'
 		opts.total = 1000
 		opts.expire = 1000 * 60 * 60
 		return next()
@@ -79,7 +80,8 @@ const defaultLimiter = limiter({
 // Restrictive Limiter, used to prevenmt abuse on NewUser, Login, 10 reqs/ hr
 const restrictiveLimiter = limiter({
 	lookup: function(req, res, opts, next) {
-		opts.lookup = 'connection.remoteAddress'
+		//opts.lookup = 'connection.remoteAddress'
+		opts.lookup = 'headers.x-forwarded-for'
 		opts.total = 100
 		opts.expire = 1000 * 60 * 60
 		return next()
