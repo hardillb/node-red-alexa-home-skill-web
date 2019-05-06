@@ -586,10 +586,10 @@
     </tr>
     </tbody>
     </table>
-    <ul>
-    <li>Google Home support for these states is platform specific (namely, and ironically, iOS support these states)
-    See <a href="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/State-Reporting">here</a> for more information on generating state data.</li>
-    </ul>
+
+    <p>* Google Home support for these states is platform specific (namely, and ironically, iOS support these states).</p>
+    <p>See <a href="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/State-Reporting">here</a> for more information on generating state data.</p>
+ 
     <h2 id="example-flows">Example Flows</h2>
     <p>Have some more you&#39;d like to include? Share the screenshots/ example function code and I&#39;ll add them to the Wiki! Better still, contribute to the Wiki yourself!</p>
     <h3 id="powercontroller-and-brightnesscontroller">PowerController and BrightnessController</h3>
@@ -641,33 +641,35 @@
     <p>For AdjustPercentage commands to function you <strong>must include a State node on any device with a PercentageController capability</strong>. Whilst PercentageController state is not shown in the Alexa App, the state data is used to calculate the actual value following an AdjustPercentage command (which will return with minus 25 or plus 25, nothe the actual percentage of the device).</p>
     <h4 id="example-outputs">Example Outputs</h4>
     <p>AdjustPercentage</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"80708daa-a56e-4ed9-8394-7d725d2796c7"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustPercentage"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
+    <pre><code>msg : {
+        topic: ""
+        name: "Test Fan"
+        _messageId: "80708daa-a56e-4ed9-8394-7d725d2796c7"
+        _endpointId: "104"
+        _confId: "bfd0fcf4.bc90e"
+        command: "AdjustPercentage"
+        extraInfo: object
         empty
-        <span class="hljs-attribute">payload</span>: -<span class="hljs-number">25</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"34bf582c.901a68"</span>
+        payload: -25
+        acknowledge: true
+        _msgid: "34bf582c.901a68"
     }
-    </code></pre><p>SetPercentage</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"ef87c33a-209b-487e-b883-ff18204936aa"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetPercentage"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"e88837e.c1733c8"</span>
+    </code></pre>
+    <p>SetPercentage</p>
+    <pre><code>msg : {
+        topic: ""
+        name: "Test Fan"
+        _messageId: "ef87c33a-209b-487e-b883-ff18204936aa"
+        _endpointId: "104"
+        _confId: "bfd0fcf4.bc90e"
+        command: "SetPercentage"
+        extraInfo: object
+        payload: 25
+        acknowledge: true
+        _msgid: "e88837e.c1733c8"
     }
-    </code></pre><h3 id="playbackcontroller">PlaybackController</h3>
+    </code></pre>
+    <h3 id="playbackcontroller">PlaybackController</h3>
     <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client). Note that you must install the json-cec plugin on your KODI client for this flow to work.</p>
     <p><strong>There is no state supported by the PlaybackController capability.</strong></p>
     <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/static/images/PlaybackControllerExample.png?raw=true" alt="PowerController flow example"></p>
