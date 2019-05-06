@@ -1,13 +1,706 @@
 <% include ../fragments/header.ejs %>
 <div class="container main">
-    <div class="container main-content">
-      <h1>Documentation</h1>
-      <p>Welcome to the Node-RED Smart Home Control bridge documentation</p>
-      <br>
-      <p>To get up and running follow <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Use-the-Hosted-Instance'>these instructions.</a></p>
-      <br>
-      <h2>Example Flows</h2>
-      <p>You can view example flows in the <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Example-Flows'>GitHub Wiki</a> for the service.</p>     
+  <div class="container main-content">
+    <h1>Documentation</h1>
+    <div>
+        <p>Select flag to translate:</p>
+        <img src="/images/blank.gif" class="flag flag-fr" alt="France" role="button" onclick="gTranslate('fr')" />
+        <img src="/images/blank.gif" class="flag flag-de" alt="Germany" role="button" onclick="gTranslate('de')" />
+        <img src="/images/blank.gif" class="flag flag-jp" alt="Japan" role="button" onclick="gTranslate('ja')" />
+        <img src="/images/blank.gif" class="flag flag-mx" alt="Mexico" role="button" onclick="gTranslate('es')" />
+        <img src="/images/blank.gif" class="flag flag-it" alt="Italy" role="button" onclick="gTranslate('it')" />
+        <img src="/images/blank.gif" class="flag flag-es" alt="Spain" role="button" onclick="gTranslate('es')" />
+        <img src="/images/blank.gif" class="flag flag-us" alt="United States of America" role="button" onclick="gTranslate('en')" />
     </div>
+    <hr>
+    <h2>Getting Started</h2>
+    <div>
+        <p>To use this service you need to:</p>
+        <ul class="list-unstyled">
+            <li><img class="octicon octicon-shield" src="/octicons/shield.svg"></img> Create an <a href='/newuser'> account.</a></li>
+            <li><img class="octicon octicon-checklist" src="/octicons/checklist.svg"></img> Define one or more <a href='/devices'>devices.</a></li>
+            <li><img class="octicon octicon-checklist" src="/octicons/cloud-download.svg"></img> <a href="#install-node-red-nodes">Install the associated <span translate="no">Node-RED</span> nodes</a></li>
+            <li><img class="octicon octicon-repo-forked" src="/octicons/repo-forked.svg"></img> <a href="#example-flows-and-node-outputs">Setup <span translate="no">Node-RED</span> flows</a> using your devices.</li>
+        </ul>
+        <hr>
+    </div>
+
+    <h3>Account Linking</h3>
+    <blockquote>
+    <p><strong>Note that there are restrictions based on region/ locale, <a href="https://developer.amazon.com/it/docs/device-apis/list-of-interfaces.html">Amazon publish and update their region-specific restrictions here.</a></strong></p>
+    </blockquote>
+    <p><a href="mailto:node-red@cb-net.co.uk">You currently have to request extension of the skill to your Amazon and/ or Google accounts</a> - please ensure you advise whether you want Google Assistant, Alexa or both - supplying your Amazon Account email address/ Google account email address respectively. <strong>Once you have received confirmation the skill has been extended to your account</strong>:</p>
+
+    <p>Not all capabilities are supported by Google Home, the device creation wizard highlights which capabilities/ traits are supported. To remove the need to define Google or Alexa-specific devices the API itself will automatically only expose a devices&#39; supported capabilities/ actions to Google Home. You can see a <a href="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki#features">comparison between the two services here</a>.</p>
+    
+    <p>Flow message output is <strong>the same</strong> irrespective of whether you interact with the service using Alexa or Google Home. The API was engineered this way in order to avoid the need to re-engineer Flows/ create separate flows for both Alexa and Google Home command processing.</p>
+    
+    <h4>Link your Amazon Account</h4>
+    <p>When this skill is out of Development/ beta account linking process will not require you to request acces.</p>
+    <ul>
+      <li>Open Alexa App</li>
+      <li>Browse to Skills and Games</li>
+      <li>Under "Your Skills" move the carousel along to "Dev" / or where it shows "Enabled" hit the down arrow and select "Dev" - you should find the "Node-RED Smart Home Control" skill listed there</li>
+      <li>Can't find an email from Amazon with your invite? <a href="https://skills-store.amazon.com/deeplink/tvt/c1ade4129f301c80a6fc9a7499108ee0fe70b1b3a2a592870720eb4ae76b93fea1008d1190f3e85e7151c24f8f8f07eb735e28e7005be345da956487a7c68b324bd7f55b8a851b9489ea8e909b6018d9c902dd2ff69a65079f78e1669f846a570ba8ae4059d0048ba5d67af658f9f8bf" rel="nofollow">Use this link on your mobile device.</a></li>
+    </ul>
+
+    <h4>Link your Google Account</h4>
+    <p>When this skill is out of Development/ beta account linking process will not require you to request acces.</p>
+    <ul>
+      <li>Open the Google Home App</li>
+      <li>Hit Account icon (bottom right)</li>
+      <li>Under Account go to Settings</li>
+      <li>Under Settings go to Assistant</li>
+      <li>Under Assistant go to Home Control</li>
+      <li>Under Home Control open top-left menu and select "Manage account"</li>
+    </ul>
+    <hr>
+
+    <h2 id="example-flows-and-node-outputs">Example Flows and Node Outputs</h2>
+    <ul>
+    <li><a href="#install-node-red-nodes">Install Node-RED Nodes</a></li>
+    <li><a href="#basic-configuration">Basic Configuration</a></li>
+    <li><a href="#google-home-vs-alexa">Google Home vs Alexa</a></li>
+    <li><a href="#concept-flow">Concept Flow</a><ul>
+    <li><a href="#start-simple">Start Simple</a></li>
+    <li><a href="#auto-acknowledge">Auto-Acknowledge</a></li>
+    <li><a href="#with-response-node">With Response Node</a></li>
+    </ul>
+    </li>
+    <li><a href="#default-node-outputs">Default Node Outputs</a><ul>
+    <li><a href="#brightnesscontroller">BrightnessController</a></li>
+    <li><a href="#channelcontroller">ChannelController</a></li>
+    <li><a href="#colorcontroller">ColorController</a></li>
+    <li><a href="#colortemperaturecontroller">ColorTemperatureController</a></li>
+    <li><a href="#inputcontroller">InputController</a></li>
+    <li><a href="#lockcontroller">LockController</a></li>
+    <li><a href="#percentagecontroller">PercentageController</a></li>
+    <li><a href="#playbackcontroller">PlaybackController</a></li>
+    <li><a href="#powercontroller">PowerController</a></li>
+    <li><a href="#scenecontroller">SceneController</a></li>
+    <li><a href="#speaker">Speaker</a></li>
+    <li><a href="#stepspeaker">StepSpeaker</a></li>
+    <li><a href="#thermostatcontroller">ThermostatController</a></li>
+    </ul>
+    </li>
+    <li><a href="#state-reporting">State Reporting</a><ul>
+    <li><a href="#expected-state-payload">Expected State Payload</a></li>
+    <li><a href="#capabilities-that-support-state">Capabilities that Support State</a></li>
+    </ul>
+    </li>
+    <li><a href="#example-flows">Example Flows</a><ul>
+    <li><a href="#percentagecontroller">Percentage Controller</a></li>
+    <li><a href="#powercontroller-and-brightnesscontroller">Power Controller and Brightness Controller</a></li>
+    <li><a href="#playbackcontroller">Playback Controller</a></li>
+    <li><a href="#inputcontroller">Input Controller</a></li>
+    </ul>
+    </li>
+    <li><a href="#response-nodes">Response Nodes</a></li>
+    </ul>
+    <h2 id="install-node-red-nodes">Install Node-RED Nodes</h2>
+    <p>Install the <a href="https://www.npmjs.com/package/node-red-contrib-alexa-smart-home">Node-RED Smart Home Nodes</a> by either:</p>
+    <ul>
+    <li>Using the command: <code>npm i node-red-contrib-alexa-smart-home</code></li>
+    <li>Using the palette look for &quot;node-red-contrib-alexa-smart-home&quot;</li>
+    </ul>
+    <h2 id="basic-configuration">Basic Configuration</h2>
+    <p>On creating your first flow you&#39;ll need to define a configuration for the bridge. If you are using the hosted bridge, you can leave the default values.</p>
+    <p>If you are hosting your own, then be sure to set the correct Web API and MQTT host names.</p>
+
+    <h2 id="concept-flow">Concept Flow</h2>
+    <p>Refer to <a href="#capabilities-that-support-state">this table</a> for capabilities that support state</p>
+    <h3 id="start-simple">Start Simple</h3>
+    <p>If you are only planning to use voice control you only need a default and a state node. This is a good starting point for any flow, you can then extend the flow to enable external state updates, or to perform other functions as outlined below.</p>
+    <p><strong>You should only include a single default and state node per device.</strong></p>
+    <h3 id="auto-acknowledge">Auto-Acknowledge</h3>
+    <p>Essentially, to use this Node-RED &lt;&gt; Alexa bridge your flows will require:</p>
+    <ul>
+    <li>An &quot;alexa-smart-home-v3&quot; node</li>
+    <li>A function node (with your own code) to format <a href="#default-node-outputs">command output</a> appropriately for your chosen endpoint</li>
+    <li>A receiving node for commands, such as MQTT out/ publishing</li>
+    <li>An &quot;alexa-smart-home-v3-state&quot; node</li>
+    <li>A sending node for state data, such as MQTT in/ subscription</li>
+    <li>A function node (with your own code) to format <a href="#state-reporting">state input</a> appropriately for your chosen endpoint</li>
+    </ul>
+    <p>Both the &quot;alexa-smart-home-v3&quot; and &quot;alexa-smart-home-v3-state&quot; nodes must be configured for the same bridge device that you have defined.</p>
+    <p>A concept flow is shown below:</p>
+    <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/development/static/images/ConceptFlow.PNG?raw=true" alt="Concept Flow Diagram"></p>
+    <h3 id="with-response-node">With Response Node</h3>
+    <p>A concept flow is shown below, perform your logic to establish whether msg.acknowledge is set to true or false in the Command Function Node. </p>
+    <p>Note that if msg.acknowledge is not set to <strong>true</strong> Alexa will report that &quot;<em>the device is not responding</em>&quot; and the state update will be dropped (to ensure Alexa App shows state correctly).</p>
+    <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/development/static/images/ConceptFlowResponse.PNG?raw=true" alt="Concept Flow Diagram w/ Response"></p>
+    <p>Command Function Node output will need to match the node outputs listed below in order for response and state nodes to function correctly.</p>
+    <h2 id="default-node-outputs">Default Node Outputs</h2>
+    <p>Output varies based upon capability, as below, use these outputs to control your MQTT publishing, HTTP(S), Yamaha AVR nodes etc. </p>
+    <p>Note that Node output is <strong>the same</strong> for both Alexa and Google Home initiated commands.</p>
+    <p><strong>It is highly likely you&#39;ll need to &quot;massage&quot; the output to fit your flow/ target endpoint.</strong></p>
+    <h3 id="brightnesscontroller">BrightnessController</h3>
+    <h4 id="setbrightness">SetBrightness</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"9c289ee2-fd71-4222-ad55-8a894f70b319"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"29"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetBrightness"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">80</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c484148c.0aa918"</span>
+    }
+    </code></pre><h4 id="adjustbrightness">AdjustBrightness</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"8cbe1407-34f1-4eef-97c9-007b4b4edcfd"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"29"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustBrightness"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: -<span class="hljs-number">25</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"87891d99.acdbb"</span>
+    }
+    </code></pre><h3 id="channelcontroller">ChannelController</h3>
+    <h4 id="changechannel-numerical-">ChangeChannel (Numerical)</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"01843371-f3e1-429c-9a68-199b77ffe577"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"ChangeChannel"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"101"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"bd3268f0.742d98"</span>
+    }
+    </code></pre><h4 id="changechannel-name-">ChangeChannel (Name)</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"c3f8fb2d-5882-491f-b0ce-7aa79eaad2fe"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"ChangeChannel"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"BBC 1"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"db9cc171.e30de"</span>
+    }
+    </code></pre><h3 id="colorcontroller">ColorController</h3>
+    <h4 id="setcolor">SetColor</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Smartlight"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"245ae0ea-40cb-4a44-8618-fdea822de1bf"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"99"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetColor"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: object
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"334fa7b2.f8d148"</span>
+        }
+    </code></pre><h3 id="colortemperaturecontroller">ColorTemperatureController</h3>
+    <h4 id="setcolortemperature">SetColorTemperature</h4>
+    <p>Message msg.payload will vary based on requested color temperature:</p>
+    <ul>
+    <li>warm || warmwhite: 2200</li>
+    <li>incandescent || soft white: 2700</li>
+    <li>white: 4000</li>
+    <li>daylight || daylight white:5500</li>
+    <li>cool || cool white: 7000<pre><code><span class="hljs-attribute">msg </span>: {
+      <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+      <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
+      <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"d506edb8-29a4-4009-9882-b17fe18e982d"</span>
+      <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"99"</span>
+      <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+      <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetColorTemperature"</span>
+      <span class="hljs-attribute">extraInfo</span>: object
+      <span class="hljs-attribute">payload</span>: <span class="hljs-number">2200</span>
+      <span class="hljs-attribute">acknowledge</span>: true
+      <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"47f1c84f.65f138"</span>
+    }
+    </code></pre><h3 id="inputcontroller">InputController</h3>
+    <h4 id="selectinput">SelectInput</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+      <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+      <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+      <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"4e12b3dd-c5a0-457a-ad8b-db1799e10398"</span>
+      <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+      <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+      <span class="hljs-attribute">command</span>: <span class="hljs-string">"SelectInput"</span>
+      <span class="hljs-attribute">extraInfo</span>: object
+      <span class="hljs-attribute">payload</span>: <span class="hljs-string">"HDMI 2"</span>
+      <span class="hljs-attribute">acknowledge</span>: true
+      <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"74f61e13.34871"</span>
+    }
+    </code></pre><h3 id="lockcontroller">LockController</h3>
+    <h4 id="lock">Lock</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+      <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+      <span class="hljs-attribute">name</span>: <span class="hljs-string">"Door Lock"</span>
+      <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"5a15c0c4-1e05-4ca6-bf40-fca4393c2ec4"</span>
+      <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"128"</span>
+      <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+      <span class="hljs-attribute">command</span>: <span class="hljs-string">"Lock"</span>
+      <span class="hljs-attribute">extraInfo</span>: object
+      <span class="hljs-attribute">payload</span>: <span class="hljs-string">"Lock"</span>
+      <span class="hljs-attribute">acknowledge</span>: true
+      <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"7ce7f0e3.e96bd"</span>
+    }
+    </code></pre><h3 id="playbackcontroller">PlaybackController</h3>
+    <strong>No msg.payload</strong>, command will change between Play, Pause, Stop, FastForward, Rewind, StartOver, Next, Previous.</li>
+    </ul>
+    <h4 id="play">Play</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"f4379dcb-f431-4662-afdc-dc0452d313a0"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"Play"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"fda4a47c.e79c08"</span>
+    }
+    </code></pre><h3 id="percentagecontroller">PercentageController</h3>
+    <h4 id="setpercentage">SetPercentage</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"6851dbbf-e826-41f9-89ee-7cd4c9699a17"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetPercentage"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"a9433270.f9ea8"</span>
+    }
+    </code></pre><h4 id="adjustpercentage">AdjustPercentage</h4>
+    <p>Message msg.payload will contain +/- adjustment value. Example below is for a 25% increase.</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"ffa95808-dc09-4c50-a242-d166acb05d1b"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustPercentage"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"68eadf30.4f1a4"</span>
+    }
+    </code></pre><h3 id="powercontroller">PowerController</h3>
+    <h4 id="turnon-command">TurnOn command</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Light"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"0791c4b3-c874-4192-a5ac-4c4b643c36ab"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"17"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"TurnOn"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c94c43fa.41d31"</span>
+    }
+    </code></pre><h4 id="turnoff-command">TurnOff Command</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Light"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"912cc5c0-4014-4fbf-9178-22bff9f55ef2"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"17"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"TurnOff"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"OFF"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"ca26cee2.12a86"</span>
+    }
+    </code></pre><h3 id="scenecontroller">SceneController</h3>
+    <h4 id="activate">Activate</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Movie Night"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"3b6f7aa1-38c3-45a4-a94d-96e488c6d5ad"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"7"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"Activate"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        empty
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c3f50a98.9e0b08"</span>
+    }
+    </code></pre><h3 id="speaker">Speaker</h3>
+    <h4 id="adjustvolume">AdjustVolume</h4>
+    <p>If no value specified message msg.payload will be +/- 10.</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Speaker"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"77c8161c-8935-446a-9087-2ee0b9b90cdc"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"98"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustVolume"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">10</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"9f95ad7e.c2574"</span>
+    }
+    </code></pre><h4 id="setvolume">SetVolume</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"0bfd0aac-8dd1-4c8c-a341-9cfb14fa06d6"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetVolume"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">50</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"aa31e847.2da6e8"</span>
+    }
+    </code></pre><h4 id="setmute">SetMute</h4>
+    <p>Payload will change from &quot;ON&quot; for &quot;mute&quot; command, to &quot;OFF&quot; for &quot;unmute&quot; command.</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7fd278b4-1e9f-4195-9dc9-40e378a5f24b"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetMute"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"8fcd1348.907e1"</span>
+    }
+    </code></pre><h3 id="stepspeaker">StepSpeaker</h3>
+    <h4 id="adjustvolume">AdjustVolume</h4>
+    <p>Message msg.payload will be either 10 (volume up/ increase volume) or -10 (volume down/ decrease volume).</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Speaker"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"14ece61e-d8e9-4de1-a927-76cea0795f12"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"127"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustVolume"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">10</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"95fa4219.7f2f"</span>
+    }
+    </code></pre><h4 id="setmute">SetMute</h4>
+    <p>Payload will change from &quot;ON&quot; for &quot;mute&quot; command, to &quot;OFF&quot; for &quot;unmute&quot; command.</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7fd278b4-1e9f-4195-9dc9-40e378a5f24b"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetMute"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"8fcd1348.907e1"</span>
+    }
+    </code></pre><h3 id="thermostatcontroller">ThermostatController</h3>
+    <h4 id="settargettemperature">SetTargetTemperature</h4>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"67ebfd1b-dd16-4681-afb3-e0d0f3152865"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetTargetTemperature"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">22</span>
+        <span class="hljs-attribute">temperatureScale</span>: <span class="hljs-string">"CELSIUS"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"b8afdc95.b06fe"</span>
+        }
+    </code></pre><h4 id="adjusttargettemperature">AdjustTargetTemperature</h4>
+    <p>Message msg.payload will be either 1 (increase) or -1 (decrease).</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"3b618e03-f112-4e54-a291-62953467a1f3"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustTargetTemperature"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">1</span>
+        <span class="hljs-attribute">temperatureScale</span>: <span class="hljs-string">"CELSIUS"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"26950952.9183b6"</span>
+    }
+    </code></pre><h4 id="setthermostatmode">SetThermostatMode</h4>
+    <p>Message msg.payload will be either ON, OFF, HEAT, COOL:</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7f5b0559-f015-4e75-9443-3feac8fe6ac5"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetThermostatMode"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"OFF"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"6a879991.5d6d38"</span>
+    }
+    </code></pre><h2 id="state-reporting">State Reporting</h2>
+    <blockquote>
+    <p>If you are only using Alexa or Google Home to control your devices, i.e. there are no physical buttons/ interactions, then a simple flow taht includes a &quot;default&quot; and &quot;state&quot; node is sufficient.</p>
+    </blockquote>
+    <p>If the device you are controlling has buttons/ a remote control or another interface to control it you will need to find out how to capture those state changes and feed them into the state node. Every automation / endpoint is different, but I have included some examples below.</p>
+    <p>Generally speaking, if you want to be able to view device state in the Alexa App, you should be using an &quot;alexa-smart-home-v3&quot; and an &quot;alexa-smart-home-v3-state&quot; node on every flow - most capabilities support state reporting.</p>
+    <p>For some commands (increment/ decrement %, temperature, volume), <em>irrespective of your requirement to use the Alexa App</em> you will also require an &quot;alexa-smart-home-v3-state&quot; node.</p>
+    <h3 id="expected-state-payload">Expected State Payload</h3>
+    <p>State payload format is <em>very specific</em> - as a minimum you must include msg.acknowledge set to <code>true</code> and a state element update that is relevant for the device. For example, a device that has a PowerController capability can have it&#39;s state set if the following is passed to the &quot;alexa-smart-home-v3-state&quot; node:</p>
+    <pre><code>msg : {
+        <span class="hljs-string">"acknowledge"</span>:<span class="hljs-literal">true</span>,
+        <span class="hljs-string">"payload"</span> : {
+           <span class="hljs-string">"state"</span> : {
+               <span class="hljs-string">"power"</span>: <span class="hljs-string">"ON"</span>
+           }
+        }
+    }
+    </code></pre><blockquote>
+    <p>Remember, if you disable the Auto Acknowledge option on the Default node you must set msg.acknowledge to true later in the flow, otherwise any command and state update will be dropped.</p>
+    </blockquote>
+    <p>Message msg.state.playback can be one of: &quot;Play&quot;, &quot;Pause&quot;, &quot;Stop&quot;, &quot;FastForward&quot;, &quot;Rewind&quot;, &quot;StartOver&quot;, &quot;Next&quot;, &quot;Previous&quot;</p>
+    <p>Where &quot;||&quot; is listed this implies &quot;OR&quot; - do not include this in your state responses, they will be dropped.</p>
+    <blockquote>
+    <p>Finally, <strong>ensure you use the correct object type in your state updates.</strong> For example, where a numerical range or &#39;number&#39; is specified below ensure you do not supply a string!</p>
+    </blockquote>
+    <pre><code>msg {
+        acknowledge: <span class="hljs-literal">true</span>,
+        payload {
+            state { 
+                <span class="hljs-string">"brightness"</span>: <span class="hljs-number">0</span><span class="hljs-number">-100</span>,
+                <span class="hljs-string">"colorbrightness"</span>: <span class="hljs-number">0</span><span class="hljs-number">-1</span>,
+                <span class="hljs-string">"colorHue"</span>: <span class="hljs-number">0</span><span class="hljs-number">-360</span>,
+                <span class="hljs-string">"colorSaturation"</span>: <span class="hljs-number">0</span><span class="hljs-number">-1</span>,
+                <span class="hljs-string">"colorTemperature"</span>: <span class="hljs-number">0</span><span class="hljs-number">-10000</span>,
+                <span class="hljs-string">"contact"</span>: <span class="hljs-string">"DETECTED"</span> || <span class="hljs-string">"NOT_DETECTED"</span>
+                <span class="hljs-string">"input"</span>: <span class="hljs-built_in">string</span>,
+                <span class="hljs-string">"lock"</span>: <span class="hljs-string">"LOCKED"</span> || <span class="hljs-string">"UNLOCKED"</span>,
+                <span class="hljs-string">"percentage"</span>: <span class="hljs-built_in">number</span>,
+                <span class="hljs-string">"percentageDelta"</span>: <span class="hljs-built_in">number</span>,
+                <span class="hljs-string">"playback"</span>: <span class="hljs-string">"Play"</span>,
+                <span class="hljs-string">"power"</span>: <span class="hljs-string">"ON"</span> || <span class="hljs-string">"OFF"</span>,
+                <span class="hljs-string">"temperature"</span>: <span class="hljs-built_in">number</span>,
+                <span class="hljs-string">"thermostatMode"</span>: <span class="hljs-string">"HEAT"</span> || <span class="hljs-string">"COOL"</span>,
+                <span class="hljs-string">"thermostatSetPoint"</span> : <span class="hljs-built_in">number</span>,
+                <span class="hljs-string">"targetSetpointDelta"</span>: <span class="hljs-built_in">number</span>,
+                <span class="hljs-string">"volume"</span>: <span class="hljs-built_in">number</span>,
+                <span class="hljs-string">"volumeDelta"</span>: <span class="hljs-built_in">number</span>
+            }
+        }
+    }
+    </code></pre><h3 id="capabilities-that-support-state">Capabilities that Support State</h3>
+    <table>
+    <thead>
+    <tr>
+    <th>Capability</th>
+    <th>Alexa App</th>
+    <th>Google Home</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>BrightnessController</td>
+    <td>YES</td>
+    <td>YES</td>
+    </tr>
+    <tr>
+    <td>ChannelController</td>
+    <td>NO</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>ColorController</td>
+    <td>YES</td>
+    <td>YES*</td>
+    </tr>
+    <tr>
+    <td>ColorTemperatureController</td>
+    <td>YES</td>
+    <td>YES*</td>
+    </tr>
+    <tr>
+    <td>ContactSensor</td>
+    <td>YES</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>InputController</td>
+    <td>NO</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>LockController</td>
+    <td>YES</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>PercentageController</td>
+    <td>YES</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>PlaybackController</td>
+    <td>NO</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>PowerController</td>
+    <td>YES</td>
+    <td>YES</td>
+    </tr>
+    <tr>
+    <td>SceneController</td>
+    <td>NO</td>
+    <td>NO</td>
+    </tr>
+    <tr>
+    <td>Speaker</td>
+    <td>YES</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>StepSpeaker</td>
+    <td>NO</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>TemperatureSensor</td>
+    <td>YES</td>
+    <td>N/A</td>
+    </tr>
+    <tr>
+    <td>ThermostatController</td>
+    <td>YES</td>
+    <td>YES</td>
+    </tr>
+    </tbody>
+    </table>
+    <ul>
+    <li>Google Home support for these states is platform specific (namely, and ironically, iOS support these states)
+    See <a href="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/State-Reporting">here</a> for more information on generating state data.</li>
+    </ul>
+    <h2 id="example-flows">Example Flows</h2>
+    <p>Have some more you&#39;d like to include? Share the screenshots/ example function code and I&#39;ll add them to the Wiki! Better still, contribute to the Wiki yourself!</p>
+    <h3 id="powercontroller-and-brightnesscontroller">PowerController and BrightnessController</h3>
+    <p>Use to control Smart Switches, Plugs, Bulbs and other devices that need to be turned on and off. You need to include this capability on Smart Bulbs, AVRs etc. The example below controls a Tasmota flashed smart light switch that supports PowerController and BrightnessController functionality.</p>
+    <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/static/images/PowerControllerExample.png" alt="PowerController flow example"></p>
+    <p>&quot;Handle Power and Brightness Commands&quot; function code below:</p>
+    <pre><code><span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"TurnOn"</span> || msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"TurnOff"</span>) {
+        msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/POWER"</span>
+        return msg;
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"SetBrightness"</span>) {
+        msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
+        return msg;
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"AdjustBrightness"</span>) {
+        <span class="hljs-keyword">if</span> (msg.payload &gt; <span class="hljs-number">0</span>) {
+            msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
+            msg.<span class="hljs-attr">payload</span> = <span class="hljs-string">"+"</span>
+            return msg;
+        }
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.payload &lt; <span class="hljs-number">0</span>) {
+            msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
+            msg.<span class="hljs-attr">payload</span> = <span class="hljs-string">"-"</span>
+            return msg;
+        }
+    }
+    </code></pre><p>&quot;MQTT &gt; Alexa Home State&quot; function code below. This function builds the message format expected by the state Node based on the MQTT subscription output.</p>
+    <pre><code><span class="hljs-keyword">var</span> tokens = msg.topic.split(<span class="hljs-string">"/"</span>);
+    <span class="hljs-keyword">var</span> device = tokens[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">var</span> element = tokens[<span class="hljs-number">2</span>]
+    <span class="hljs-keyword">var</span> state = msg.payload;
+    
+    <span class="hljs-comment">// MQTT POWER State</span>
+    <span class="hljs-keyword">if</span> (element == <span class="hljs-string">'POWER'</span>) {
+        <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : state } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> };
+    }
+    
+    <span class="hljs-comment">// MQTT Brightness State</span>
+    <span class="hljs-keyword">if</span> (element == <span class="hljs-string">"RESULT"</span>) {
+        <span class="hljs-keyword">var</span> payloadJSON = JSON.parse(state);
+        <span class="hljs-keyword">if</span> (payloadJSON.hasOwnProperty(<span class="hljs-string">'Dimmer'</span>)) {
+            <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : payloadJSON.POWER, <span class="hljs-string">"brightness"</span> : payloadJSON.Dimmer } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> }; 
+        }
+        <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : payloadJSON.POWER } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> };    
+        }
+    }
+    </code></pre><h3 id="percentagecontroller">PercentageController</h3>
+    <p>For AdjustPercentage commands to function you <strong>must include a State node on any device with a PercentageController capability</strong>. Whilst PercentageController state is not shown in the Alexa App, the state data is used to calculate the actual value following an AdjustPercentage command (which will return with minus 25 or plus 25, nothe the actual percentage of the device).</p>
+    <h4 id="example-outputs">Example Outputs</h4>
+    <p>AdjustPercentage</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"80708daa-a56e-4ed9-8394-7d725d2796c7"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustPercentage"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        empty
+        <span class="hljs-attribute">payload</span>: -<span class="hljs-number">25</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"34bf582c.901a68"</span>
+    }
+    </code></pre><p>SetPercentage</p>
+    <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"ef87c33a-209b-487e-b883-ff18204936aa"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetPercentage"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"e88837e.c1733c8"</span>
+    }
+    </code></pre><h3 id="playbackcontroller">PlaybackController</h3>
+    <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client). Note that you must install the json-cec plugin on your KODI client for this flow to work.</p>
+    <p><strong>There is no state supported by the PlaybackController capability.</strong></p>
+    <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/static/images/PlaybackControllerExample.png" alt="PowerController flow example"></p>
+    <p>Example flow:</p>
+    <pre><code>[{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"519d45a2.45356c"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"http request"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Bedroom Kodi Power On"</span>,<span class="hljs-attr">"method"</span>:<span class="hljs-string">"GET"</span>,<span class="hljs-attr">"ret"</span>:<span class="hljs-string">"txt"</span>,<span class="hljs-attr">"url"</span>:<span class="hljs-string">"http://:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Addons.ExecuteAddon\",\"params\":{\"addonid\":\"script.json-cec\",\"params\":{\"command\":\"activate\"}},\"id\":1}"</span>,<span class="hljs-attr">"tls"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">750</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">660</span>,<span class="hljs-attr">"wires"</span>:[[]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"f2ec1012.29ae2"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"http request"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Bedroom Kodi Power Off"</span>,<span class="hljs-attr">"method"</span>:<span class="hljs-string">"GET"</span>,<span class="hljs-attr">"ret"</span>:<span class="hljs-string">"txt"</span>,<span class="hljs-attr">"url"</span>:<span class="hljs-string">"http://:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Addons.ExecuteAddon\",\"params\":{\"addonid\":\"script.json-cec\",\"params\":{\"command\":\"standby\"}},\"id\":1}"</span>,<span class="hljs-attr">"tls"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">1130</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">700</span>,<span class="hljs-attr">"wires"</span>:[[]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"f99e0eb9.00291"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"http request"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Bedroom Kodi Stop"</span>,<span class="hljs-attr">"method"</span>:<span class="hljs-string">"GET"</span>,<span class="hljs-attr">"ret"</span>:<span class="hljs-string">"txt"</span>,<span class="hljs-attr">"url"</span>:<span class="hljs-string">"http://:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.Stop\",\"params\":{\"playerid\":1},\"id\":1}"</span>,<span class="hljs-attr">"tls"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">730</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">700</span>,<span class="hljs-attr">"wires"</span>:[[<span class="hljs-string">"eb1ffd69.c955b"</span>]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"eb1ffd69.c955b"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"delay"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"pauseType"</span>:<span class="hljs-string">"delay"</span>,<span class="hljs-attr">"timeout"</span>:<span class="hljs-string">"5"</span>,<span class="hljs-attr">"timeoutUnits"</span>:<span class="hljs-string">"seconds"</span>,<span class="hljs-attr">"rate"</span>:<span class="hljs-string">"1"</span>,<span class="hljs-attr">"nbRateUnits"</span>:<span class="hljs-string">"1"</span>,<span class="hljs-attr">"rateUnits"</span>:<span class="hljs-string">"second"</span>,<span class="hljs-attr">"randomFirst"</span>:<span class="hljs-string">"1"</span>,<span class="hljs-attr">"randomLast"</span>:<span class="hljs-string">"5"</span>,<span class="hljs-attr">"randomUnits"</span>:<span class="hljs-string">"seconds"</span>,<span class="hljs-attr">"drop"</span>:<span class="hljs-literal">false</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">940</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">700</span>,<span class="hljs-attr">"wires"</span>:[[<span class="hljs-string">"f2ec1012.29ae2"</span>]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"7379f6e7.023b28"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"comment"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Uses HDMI CEC to Turn on TV"</span>,<span class="hljs-attr">"info"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">770</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">620</span>,<span class="hljs-attr">"wires"</span>:[]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"a917b54d.a91138"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"switch"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"switch msg.command"</span>,<span class="hljs-attr">"property"</span>:<span class="hljs-string">"command"</span>,<span class="hljs-attr">"propertyType"</span>:<span class="hljs-string">"msg"</span>,<span class="hljs-attr">"rules"</span>:[{<span class="hljs-attr">"t"</span>:<span class="hljs-string">"eq"</span>,<span class="hljs-attr">"v"</span>:<span class="hljs-string">"TurnOn"</span>,<span class="hljs-attr">"vt"</span>:<span class="hljs-string">"str"</span>},{<span class="hljs-attr">"t"</span>:<span class="hljs-string">"eq"</span>,<span class="hljs-attr">"v"</span>:<span class="hljs-string">"TurnOff"</span>,<span class="hljs-attr">"vt"</span>:<span class="hljs-string">"str"</span>},{<span class="hljs-attr">"t"</span>:<span class="hljs-string">"eq"</span>,<span class="hljs-attr">"v"</span>:<span class="hljs-string">"Pause"</span>,<span class="hljs-attr">"vt"</span>:<span class="hljs-string">"str"</span>},{<span class="hljs-attr">"t"</span>:<span class="hljs-string">"eq"</span>,<span class="hljs-attr">"v"</span>:<span class="hljs-string">"Play"</span>,<span class="hljs-attr">"vt"</span>:<span class="hljs-string">"str"</span>},{<span class="hljs-attr">"t"</span>:<span class="hljs-string">"eq"</span>,<span class="hljs-attr">"v"</span>:<span class="hljs-string">"Stop"</span>,<span class="hljs-attr">"vt"</span>:<span class="hljs-string">"str"</span>}],<span class="hljs-attr">"checkall"</span>:<span class="hljs-string">"true"</span>,<span class="hljs-attr">"repair"</span>:<span class="hljs-literal">false</span>,<span class="hljs-attr">"outputs"</span>:<span class="hljs-number">5</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">360</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">720</span>,<span class="hljs-attr">"wires"</span>:[[<span class="hljs-string">"519d45a2.45356c"</span>],[<span class="hljs-string">"f99e0eb9.00291"</span>],[<span class="hljs-string">"393cc3e.680103c"</span>],[<span class="hljs-string">"393cc3e.680103c"</span>],[<span class="hljs-string">"42be5f30.30ed5"</span>]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"133b1547.a2447b"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"alexa-smart-home-v3"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"conf"</span>:<span class="hljs-string">"bfd0fcf4.bc90e"</span>,<span class="hljs-attr">"device"</span>:<span class="hljs-string">"10"</span>,<span class="hljs-attr">"acknowledge"</span>:<span class="hljs-literal">true</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Bedroom TV"</span>,<span class="hljs-attr">"topic"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">150</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">720</span>,<span class="hljs-attr">"wires"</span>:[[<span class="hljs-string">"a917b54d.a91138"</span>]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"393cc3e.680103c"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"http request"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Bedroom Kodi PlayPause"</span>,<span class="hljs-attr">"method"</span>:<span class="hljs-string">"GET"</span>,<span class="hljs-attr">"ret"</span>:<span class="hljs-string">"txt"</span>,<span class="hljs-attr">"url"</span>:<span class="hljs-string">"http://:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.PlayPause\",\"params\":{\"playerid\":1},\"id\":1}"</span>,<span class="hljs-attr">"tls"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">750</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">740</span>,<span class="hljs-attr">"wires"</span>:[[]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"42be5f30.30ed5"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"http request"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Bedroom Kodi Stop"</span>,<span class="hljs-attr">"method"</span>:<span class="hljs-string">"GET"</span>,<span class="hljs-attr">"ret"</span>:<span class="hljs-string">"txt"</span>,<span class="hljs-attr">"url"</span>:<span class="hljs-string">"http://:8080/jsonrpc?request={\"jsonrpc\":\"2.0\",\"method\":\"Player.Stop\",\"params\":{\"playerid\":1},\"id\":1}"</span>,<span class="hljs-attr">"tls"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">730</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">780</span>,<span class="hljs-attr">"wires"</span>:[[]]}]
+    </code></pre><h3 id="inputcontroller">InputController</h3>
+    <p>This flow shows a simple Input Controller example for a Yamaha MusicCast AV Receiver (using Yamaha AVR Nodes as endpoint). Note that you must install/ use the Yamaha AVR Node-RED nodes.</p>
+    <p><strong>There is no state supported by the InputController capability.</strong></p>
+    <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/static/images/InputControllerExample.png" alt="PowerController flow example"></p>
+    <p>Example flow:</p>
+    <pre><code>[{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"b2e5a71f.ce6948"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"alexa-smart-home-v3"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"conf"</span>:<span class="hljs-string">"bfd0fcf4.bc90e"</span>,<span class="hljs-attr">"device"</span>:<span class="hljs-string">"8"</span>,<span class="hljs-attr">"acknowledge"</span>:<span class="hljs-literal">true</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"AV Receiver"</span>,<span class="hljs-attr">"topic"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">130</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">"wires"</span>:[[<span class="hljs-string">"b1cb891c.e1d0a8"</span>]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"78b9e3f4.f9401c"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"AVR-Yamaha-put"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"device"</span>:<span class="hljs-string">"d15a41e7.73539"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Set AVR to Input Payload"</span>,<span class="hljs-attr">"topic"</span>:<span class="hljs-string">"Main_Zone.Input.Input_Sel"</span>,<span class="hljs-attr">"payload"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">670</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">"wires"</span>:[[]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"b1cb891c.e1d0a8"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"change"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">"affa0b92.8813b8"</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Remove spaces from payload"</span>,<span class="hljs-attr">"rules"</span>:[{<span class="hljs-attr">"t"</span>:<span class="hljs-string">"change"</span>,<span class="hljs-attr">"p"</span>:<span class="hljs-string">"payload"</span>,<span class="hljs-attr">"pt"</span>:<span class="hljs-string">"msg"</span>,<span class="hljs-attr">"from"</span>:<span class="hljs-string">" "</span>,<span class="hljs-attr">"fromt"</span>:<span class="hljs-string">"str"</span>,<span class="hljs-attr">"to"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"tot"</span>:<span class="hljs-string">"str"</span>}],<span class="hljs-attr">"action"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"property"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"from"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"to"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"reg"</span>:<span class="hljs-literal">false</span>,<span class="hljs-attr">"x"</span>:<span class="hljs-number">390</span>,<span class="hljs-attr">"y"</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">"wires"</span>:[[<span class="hljs-string">"78b9e3f4.f9401c"</span>]]},{<span class="hljs-attr">"id"</span>:<span class="hljs-string">"d15a41e7.73539"</span>,<span class="hljs-attr">"type"</span>:<span class="hljs-string">"avr-yamaha"</span>,<span class="hljs-attr">"z"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"name"</span>:<span class="hljs-string">"Lounge AV Receiver"</span>,<span class="hljs-attr">"address"</span>:<span class="hljs-string">"0.0.0.0"</span>,<span class="hljs-attr">"port"</span>:<span class="hljs-string">""</span>,<span class="hljs-attr">"debug"</span>:<span class="hljs-literal">false</span>}]
+    </code></pre><h2 id="response-nodes">Response Nodes</h2>
+    <p>By default nodes will automatically acknowledge any request via the Skill API. This means that irrespective of whether the flow generates the desired outcome Alexa will respond as if it has.</p>
+    <p>You can change this by disabling the &quot;Auto Acknowledge&quot; option and using a Alexa Smart Home v3 Response Node:</p>
+    <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/static/images/AutoAcknowledge.png?raw=true" alt="Auto Acknowledge"></p>
+    <p>You must inject <strong>msg.acknowledge</strong> with either a boolean <strong>true</strong> or <strong>false</strong> value into the flow prior to the response and state nodes receive the message. Without this element any state update will be discarded and Alexa will report that the device is not responding. </p>
+
+  </div>
 </div>
+<script>
+    function gTranslate(language) {
+        //var language = document.getElementById("language").value;
+        var selectField = document.querySelector("#google_translate_element select");
+        for(var i=0; i < selectField.children.length; i++){
+            var option = selectField.children[i];
+            // find desired langauge and change the former language of the hidden selection-field 
+            if(option.value==language){
+                selectField.selectedIndex = i;
+                // trigger change event afterwards to make google-lib translate this side
+                selectField.dispatchEvent(new Event('change'));
+                break;
+            }
+        }
+    }
+  </script>
 <% include ../fragments/footer.ejs %>
