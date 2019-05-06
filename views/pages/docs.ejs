@@ -136,73 +136,89 @@
     <p><strong>It is highly likely you&#39;ll need to &quot;massage&quot; the output to fit your flow/ target endpoint.</strong></p>
     <h3 id="brightnesscontroller">BrightnessController</h3>
     <h4 id="setbrightness">SetBrightness</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"9c289ee2-fd71-4222-ad55-8a894f70b319"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"29"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetBrightness"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">80</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c484148c.0aa918"</span>
-    }
-    </code></pre><h4 id="adjustbrightness">AdjustBrightness</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"8cbe1407-34f1-4eef-97c9-007b4b4edcfd"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"29"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustBrightness"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: -<span class="hljs-number">25</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"87891d99.acdbb"</span>
-    }
-    </code></pre><h3 id="channelcontroller">ChannelController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"9c289ee2-fd71-4222-ad55-8a894f70b319"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"29"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetBrightness"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">80</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c484148c.0aa918"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="adjustbrightness">AdjustBrightness</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"8cbe1407-34f1-4eef-97c9-007b4b4edcfd"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"29"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustBrightness"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: -<span class="hljs-number">25</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"87891d99.acdbb"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="channelcontroller">ChannelController</h3>
     <h4 id="changechannel-numerical-">ChangeChannel (Numerical)</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"01843371-f3e1-429c-9a68-199b77ffe577"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"ChangeChannel"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"101"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"bd3268f0.742d98"</span>
-    }
-    </code></pre><h4 id="changechannel-name-">ChangeChannel (Name)</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"c3f8fb2d-5882-491f-b0ce-7aa79eaad2fe"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"ChangeChannel"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"BBC 1"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"db9cc171.e30de"</span>
-    }
-    </code></pre><h3 id="colorcontroller">ColorController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"01843371-f3e1-429c-9a68-199b77ffe577"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"ChangeChannel"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"101"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"bd3268f0.742d98"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="changechannel-name-">ChangeChannel (Name)</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"c3f8fb2d-5882-491f-b0ce-7aa79eaad2fe"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"ChangeChannel"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"BBC 1"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"db9cc171.e30de"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="colorcontroller">ColorController</h3>
     <h4 id="setcolor">SetColor</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Smartlight"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"245ae0ea-40cb-4a44-8618-fdea822de1bf"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"99"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetColor"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: object
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"334fa7b2.f8d148"</span>
-        }
-    </code></pre><h3 id="colortemperaturecontroller">ColorTemperatureController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Smartlight"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"245ae0ea-40cb-4a44-8618-fdea822de1bf"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"99"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetColor"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: object
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"334fa7b2.f8d148"</span>
+          }
+      </code></pre>
+    </div>
+    
+    <h3 id="colortemperaturecontroller">ColorTemperatureController</h3>
     <h4 id="setcolortemperature">SetColorTemperature</h4>
     <p>Message msg.payload will vary based on requested color temperature:</p>
     <ul>
@@ -210,246 +226,299 @@
     <li>incandescent || soft white: 2700</li>
     <li>white: 4000</li>
     <li>daylight || daylight white:5500</li>
-    <li>cool || cool white: 7000<pre><code><span class="hljs-attribute">msg </span>: {
-      <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-      <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
-      <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"d506edb8-29a4-4009-9882-b17fe18e982d"</span>
-      <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"99"</span>
-      <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-      <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetColorTemperature"</span>
-      <span class="hljs-attribute">extraInfo</span>: object
-      <span class="hljs-attribute">payload</span>: <span class="hljs-number">2200</span>
-      <span class="hljs-attribute">acknowledge</span>: true
-      <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"47f1c84f.65f138"</span>
-    }
-    </code></pre><h3 id="inputcontroller">InputController</h3>
+    <li>cool || cool white: 7000
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Bedroom Light"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"d506edb8-29a4-4009-9882-b17fe18e982d"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"99"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetColorTemperature"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-number">2200</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"47f1c84f.65f138"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="inputcontroller">InputController</h3>
     <h4 id="selectinput">SelectInput</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-      <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-      <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-      <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"4e12b3dd-c5a0-457a-ad8b-db1799e10398"</span>
-      <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-      <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-      <span class="hljs-attribute">command</span>: <span class="hljs-string">"SelectInput"</span>
-      <span class="hljs-attribute">extraInfo</span>: object
-      <span class="hljs-attribute">payload</span>: <span class="hljs-string">"HDMI 2"</span>
-      <span class="hljs-attribute">acknowledge</span>: true
-      <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"74f61e13.34871"</span>
-    }
-    </code></pre><h3 id="lockcontroller">LockController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"4e12b3dd-c5a0-457a-ad8b-db1799e10398"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SelectInput"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"HDMI 2"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"74f61e13.34871"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="lockcontroller">LockController</h3>
     <h4 id="lock">Lock</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-      <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-      <span class="hljs-attribute">name</span>: <span class="hljs-string">"Door Lock"</span>
-      <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"5a15c0c4-1e05-4ca6-bf40-fca4393c2ec4"</span>
-      <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"128"</span>
-      <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-      <span class="hljs-attribute">command</span>: <span class="hljs-string">"Lock"</span>
-      <span class="hljs-attribute">extraInfo</span>: object
-      <span class="hljs-attribute">payload</span>: <span class="hljs-string">"Lock"</span>
-      <span class="hljs-attribute">acknowledge</span>: true
-      <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"7ce7f0e3.e96bd"</span>
-    }
-    </code></pre><h3 id="playbackcontroller">PlaybackController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Door Lock"</span>
+        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"5a15c0c4-1e05-4ca6-bf40-fca4393c2ec4"</span>
+        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"128"</span>
+        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+        <span class="hljs-attribute">command</span>: <span class="hljs-string">"Lock"</span>
+        <span class="hljs-attribute">extraInfo</span>: object
+        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"Lock"</span>
+        <span class="hljs-attribute">acknowledge</span>: true
+        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"7ce7f0e3.e96bd"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="playbackcontroller">PlaybackController</h3>
     <strong>No msg.payload</strong>, command will change between Play, Pause, Stop, FastForward, Rewind, StartOver, Next, Previous.</li>
     </ul>
     <h4 id="play">Play</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"f4379dcb-f431-4662-afdc-dc0452d313a0"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"Play"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"fda4a47c.e79c08"</span>
-    }
-    </code></pre><h3 id="percentagecontroller">PercentageController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"f4379dcb-f431-4662-afdc-dc0452d313a0"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"Play"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"fda4a47c.e79c08"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="percentagecontroller">PercentageController</h3>
     <h4 id="setpercentage">SetPercentage</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"6851dbbf-e826-41f9-89ee-7cd4c9699a17"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetPercentage"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"a9433270.f9ea8"</span>
-    }
-    </code></pre><h4 id="adjustpercentage">AdjustPercentage</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"6851dbbf-e826-41f9-89ee-7cd4c9699a17"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetPercentage"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"a9433270.f9ea8"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="adjustpercentage">AdjustPercentage</h4>
     <p>Message msg.payload will contain +/- adjustment value. Example below is for a 25% increase.</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"ffa95808-dc09-4c50-a242-d166acb05d1b"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustPercentage"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"68eadf30.4f1a4"</span>
-    }
-    </code></pre><h3 id="powercontroller">PowerController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Fan"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"ffa95808-dc09-4c50-a242-d166acb05d1b"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"104"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustPercentage"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">25</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"68eadf30.4f1a4"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="powercontroller">PowerController</h3>
     <h4 id="turnon-command">TurnOn command</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Light"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"0791c4b3-c874-4192-a5ac-4c4b643c36ab"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"17"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"TurnOn"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c94c43fa.41d31"</span>
-    }
-    </code></pre><h4 id="turnoff-command">TurnOff Command</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Light"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"912cc5c0-4014-4fbf-9178-22bff9f55ef2"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"17"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"TurnOff"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"OFF"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"ca26cee2.12a86"</span>
-    }
-    </code></pre><h3 id="scenecontroller">SceneController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Light"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"0791c4b3-c874-4192-a5ac-4c4b643c36ab"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"17"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"TurnOn"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c94c43fa.41d31"</span>
+      }
+      </code></pre>
+    </div>
+
+    <h4 id="turnoff-command">TurnOff Command</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Light"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"912cc5c0-4014-4fbf-9178-22bff9f55ef2"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"17"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"TurnOff"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"OFF"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"ca26cee2.12a86"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="scenecontroller">SceneController</h3>
     <h4 id="activate">Activate</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Movie Night"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"3b6f7aa1-38c3-45a4-a94d-96e488c6d5ad"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"7"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"Activate"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        empty
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c3f50a98.9e0b08"</span>
-    }
-    </code></pre><h3 id="speaker">Speaker</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Movie Night"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"3b6f7aa1-38c3-45a4-a94d-96e488c6d5ad"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"7"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"Activate"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          empty
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"c3f50a98.9e0b08"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="speaker">Speaker</h3>
     <h4 id="adjustvolume">AdjustVolume</h4>
     <p>If no value specified message msg.payload will be +/- 10.</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Speaker"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"77c8161c-8935-446a-9087-2ee0b9b90cdc"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"98"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustVolume"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">10</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"9f95ad7e.c2574"</span>
-    }
-    </code></pre><h4 id="setvolume">SetVolume</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"0bfd0aac-8dd1-4c8c-a341-9cfb14fa06d6"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetVolume"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">50</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"aa31e847.2da6e8"</span>
-    }
-    </code></pre><h4 id="setmute">SetMute</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Test Speaker"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"77c8161c-8935-446a-9087-2ee0b9b90cdc"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"98"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustVolume"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">10</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"9f95ad7e.c2574"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="setvolume">SetVolume</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"0bfd0aac-8dd1-4c8c-a341-9cfb14fa06d6"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetVolume"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">50</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"aa31e847.2da6e8"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="setmute">SetMute</h4>
     <p>Payload will change from &quot;ON&quot; for &quot;mute&quot; command, to &quot;OFF&quot; for &quot;unmute&quot; command.</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7fd278b4-1e9f-4195-9dc9-40e378a5f24b"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetMute"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"8fcd1348.907e1"</span>
-    }
-    </code></pre><h3 id="stepspeaker">StepSpeaker</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7fd278b4-1e9f-4195-9dc9-40e378a5f24b"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetMute"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"8fcd1348.907e1"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="stepspeaker">StepSpeaker</h3>
     <h4 id="adjustvolume">AdjustVolume</h4>
     <p>Message msg.payload will be either 10 (volume up/ increase volume) or -10 (volume down/ decrease volume).</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Speaker"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"14ece61e-d8e9-4de1-a927-76cea0795f12"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"127"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustVolume"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">10</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"95fa4219.7f2f"</span>
-    }
-    </code></pre><h4 id="setmute">SetMute</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Study Speaker"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"14ece61e-d8e9-4de1-a927-76cea0795f12"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"127"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustVolume"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">10</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"95fa4219.7f2f"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="setmute">SetMute</h4>
     <p>Payload will change from &quot;ON&quot; for &quot;mute&quot; command, to &quot;OFF&quot; for &quot;unmute&quot; command.</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7fd278b4-1e9f-4195-9dc9-40e378a5f24b"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetMute"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"8fcd1348.907e1"</span>
-    }
-    </code></pre><h3 id="thermostatcontroller">ThermostatController</h3>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Lounge TV"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7fd278b4-1e9f-4195-9dc9-40e378a5f24b"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"11"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetMute"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"ON"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"8fcd1348.907e1"</span>
+      }
+      </code></pre>
+    </div>
+    <h3 id="thermostatcontroller">ThermostatController</h3>
     <h4 id="settargettemperature">SetTargetTemperature</h4>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"67ebfd1b-dd16-4681-afb3-e0d0f3152865"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetTargetTemperature"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">22</span>
-        <span class="hljs-attribute">temperatureScale</span>: <span class="hljs-string">"CELSIUS"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"b8afdc95.b06fe"</span>
-        }
-    </code></pre><h4 id="adjusttargettemperature">AdjustTargetTemperature</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"67ebfd1b-dd16-4681-afb3-e0d0f3152865"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetTargetTemperature"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">22</span>
+          <span class="hljs-attribute">temperatureScale</span>: <span class="hljs-string">"CELSIUS"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"b8afdc95.b06fe"</span>
+          }
+      </code></pre>
+    </div>
+    <h4 id="adjusttargettemperature">AdjustTargetTemperature</h4>
     <p>Message msg.payload will be either 1 (increase) or -1 (decrease).</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"3b618e03-f112-4e54-a291-62953467a1f3"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustTargetTemperature"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-number">1</span>
-        <span class="hljs-attribute">temperatureScale</span>: <span class="hljs-string">"CELSIUS"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"26950952.9183b6"</span>
-    }
-    </code></pre><h4 id="setthermostatmode">SetThermostatMode</h4>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"3b618e03-f112-4e54-a291-62953467a1f3"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"AdjustTargetTemperature"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-number">1</span>
+          <span class="hljs-attribute">temperatureScale</span>: <span class="hljs-string">"CELSIUS"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"26950952.9183b6"</span>
+      }
+      </code></pre>
+    </div>
+    <h4 id="setthermostatmode">SetThermostatMode</h4>
     <p>Message msg.payload will be either ON, OFF, HEAT, COOL:</p>
-    <pre><code><span class="hljs-attribute">msg </span>: {
-        <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
-        <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
-        <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7f5b0559-f015-4e75-9443-3feac8fe6ac5"</span>
-        <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
-        <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
-        <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetThermostatMode"</span>
-        <span class="hljs-attribute">extraInfo</span>: object
-        <span class="hljs-attribute">payload</span>: <span class="hljs-string">"OFF"</span>
-        <span class="hljs-attribute">acknowledge</span>: true
-        <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"6a879991.5d6d38"</span>
-    }
-    </code></pre><h2 id="state-reporting">State Reporting</h2>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-attribute">msg </span>: {
+          <span class="hljs-attribute">topic</span>: <span class="hljs-string">""</span>
+          <span class="hljs-attribute">name</span>: <span class="hljs-string">"Thermostat"</span>
+          <span class="hljs-attribute">_messageId</span>: <span class="hljs-string">"7f5b0559-f015-4e75-9443-3feac8fe6ac5"</span>
+          <span class="hljs-attribute">_endpointId</span>: <span class="hljs-string">"91"</span>
+          <span class="hljs-attribute">_confId</span>: <span class="hljs-string">"bfd0fcf4.bc90e"</span>
+          <span class="hljs-attribute">command</span>: <span class="hljs-string">"SetThermostatMode"</span>
+          <span class="hljs-attribute">extraInfo</span>: object
+          <span class="hljs-attribute">payload</span>: <span class="hljs-string">"OFF"</span>
+          <span class="hljs-attribute">acknowledge</span>: true
+          <span class="hljs-attribute">_msgid</span>: <span class="hljs-string">"6a879991.5d6d38"</span>
+      }
+      </code></pre>
+    </div>
+    <h2 id="state-reporting">State Reporting</h2>
     <blockquote>
     <p>If you are only using Alexa or Google Home to control your devices, i.e. there are no physical buttons/ interactions, then a simple flow taht includes a &quot;default&quot; and &quot;state&quot; node is sufficient.</p>
     </blockquote>
@@ -474,32 +543,35 @@
     <blockquote>
     <p>Finally, <strong>ensure you use the correct object type in your state updates.</strong> For example, where a numerical range or &#39;number&#39; is specified below ensure you do not supply a string!</p>
     </blockquote>
-    <pre><code>msg {
-        acknowledge: <span class="hljs-literal">true</span>,
-        payload {
-            state { 
-                <span class="hljs-string">"brightness"</span>: <span class="hljs-number">0</span><span class="hljs-number">-100</span>,
-                <span class="hljs-string">"colorbrightness"</span>: <span class="hljs-number">0</span><span class="hljs-number">-1</span>,
-                <span class="hljs-string">"colorHue"</span>: <span class="hljs-number">0</span><span class="hljs-number">-360</span>,
-                <span class="hljs-string">"colorSaturation"</span>: <span class="hljs-number">0</span><span class="hljs-number">-1</span>,
-                <span class="hljs-string">"colorTemperature"</span>: <span class="hljs-number">0</span><span class="hljs-number">-10000</span>,
-                <span class="hljs-string">"contact"</span>: <span class="hljs-string">"DETECTED"</span> || <span class="hljs-string">"NOT_DETECTED"</span>
-                <span class="hljs-string">"input"</span>: <span class="hljs-built_in">string</span>,
-                <span class="hljs-string">"lock"</span>: <span class="hljs-string">"LOCKED"</span> || <span class="hljs-string">"UNLOCKED"</span>,
-                <span class="hljs-string">"percentage"</span>: <span class="hljs-built_in">number</span>,
-                <span class="hljs-string">"percentageDelta"</span>: <span class="hljs-built_in">number</span>,
-                <span class="hljs-string">"playback"</span>: <span class="hljs-string">"Play"</span>,
-                <span class="hljs-string">"power"</span>: <span class="hljs-string">"ON"</span> || <span class="hljs-string">"OFF"</span>,
-                <span class="hljs-string">"temperature"</span>: <span class="hljs-built_in">number</span>,
-                <span class="hljs-string">"thermostatMode"</span>: <span class="hljs-string">"HEAT"</span> || <span class="hljs-string">"COOL"</span>,
-                <span class="hljs-string">"thermostatSetPoint"</span> : <span class="hljs-built_in">number</span>,
-                <span class="hljs-string">"targetSetpointDelta"</span>: <span class="hljs-built_in">number</span>,
-                <span class="hljs-string">"volume"</span>: <span class="hljs-built_in">number</span>,
-                <span class="hljs-string">"volumeDelta"</span>: <span class="hljs-built_in">number</span>
-            }
-        }
-    }
-    </code></pre><h3 id="capabilities-that-support-state">Capabilities that Support State</h3>
+    <div class="bg-light text-dark">
+      <pre><code>msg {
+          acknowledge: <span class="hljs-literal">true</span>,
+          payload {
+              state { 
+                  <span class="hljs-string">"brightness"</span>: <span class="hljs-number">0</span><span class="hljs-number">-100</span>,
+                  <span class="hljs-string">"colorbrightness"</span>: <span class="hljs-number">0</span><span class="hljs-number">-1</span>,
+                  <span class="hljs-string">"colorHue"</span>: <span class="hljs-number">0</span><span class="hljs-number">-360</span>,
+                  <span class="hljs-string">"colorSaturation"</span>: <span class="hljs-number">0</span><span class="hljs-number">-1</span>,
+                  <span class="hljs-string">"colorTemperature"</span>: <span class="hljs-number">0</span><span class="hljs-number">-10000</span>,
+                  <span class="hljs-string">"contact"</span>: <span class="hljs-string">"DETECTED"</span> || <span class="hljs-string">"NOT_DETECTED"</span>
+                  <span class="hljs-string">"input"</span>: <span class="hljs-built_in">string</span>,
+                  <span class="hljs-string">"lock"</span>: <span class="hljs-string">"LOCKED"</span> || <span class="hljs-string">"UNLOCKED"</span>,
+                  <span class="hljs-string">"percentage"</span>: <span class="hljs-built_in">number</span>,
+                  <span class="hljs-string">"percentageDelta"</span>: <span class="hljs-built_in">number</span>,
+                  <span class="hljs-string">"playback"</span>: <span class="hljs-string">"Play"</span>,
+                  <span class="hljs-string">"power"</span>: <span class="hljs-string">"ON"</span> || <span class="hljs-string">"OFF"</span>,
+                  <span class="hljs-string">"temperature"</span>: <span class="hljs-built_in">number</span>,
+                  <span class="hljs-string">"thermostatMode"</span>: <span class="hljs-string">"HEAT"</span> || <span class="hljs-string">"COOL"</span>,
+                  <span class="hljs-string">"thermostatSetPoint"</span> : <span class="hljs-built_in">number</span>,
+                  <span class="hljs-string">"targetSetpointDelta"</span>: <span class="hljs-built_in">number</span>,
+                  <span class="hljs-string">"volume"</span>: <span class="hljs-built_in">number</span>,
+                  <span class="hljs-string">"volumeDelta"</span>: <span class="hljs-built_in">number</span>
+              }
+          }
+      }
+      </code></pre>
+    </div>
+    <h3 id="capabilities-that-support-state">Capabilities that Support State</h3>
     <table>
     <thead>
     <tr>
@@ -596,52 +668,59 @@
     <p>Use to control Smart Switches, Plugs, Bulbs and other devices that need to be turned on and off. You need to include this capability on Smart Bulbs, AVRs etc. The example below controls a Tasmota flashed smart light switch that supports PowerController and BrightnessController functionality.</p>
     <p><img src="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/blob/master/static/images/PowerControllerExample.png?raw=true" alt="PowerController flow example"></p>
     <p>&quot;Handle Power and Brightness Commands&quot; function code below:</p>
-    <pre><code><span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"TurnOn"</span> || msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"TurnOff"</span>) {
-        msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/POWER"</span>
-        return msg;
-    }
-    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"SetBrightness"</span>) {
-        msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
-        return msg;
-    }
-    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"AdjustBrightness"</span>) {
-        <span class="hljs-keyword">if</span> (msg.payload &gt; <span class="hljs-number">0</span>) {
-            msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
-            msg.<span class="hljs-attr">payload</span> = <span class="hljs-string">"+"</span>
-            return msg;
-        }
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.payload &lt; <span class="hljs-number">0</span>) {
-            msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
-            msg.<span class="hljs-attr">payload</span> = <span class="hljs-string">"-"</span>
-            return msg;
-        }
-    }
-    </code></pre><p>&quot;MQTT &gt; Alexa Home State&quot; function code below. This function builds the message format expected by the state Node based on the MQTT subscription output.</p>
-    <pre><code><span class="hljs-keyword">var</span> tokens = msg.topic.split(<span class="hljs-string">"/"</span>);
-    <span class="hljs-keyword">var</span> device = tokens[<span class="hljs-number">1</span>];
-    <span class="hljs-keyword">var</span> element = tokens[<span class="hljs-number">2</span>]
-    <span class="hljs-keyword">var</span> state = msg.payload;
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"TurnOn"</span> || msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"TurnOff"</span>) {
+          msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/POWER"</span>
+          return msg;
+      }
+      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"SetBrightness"</span>) {
+          msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
+          return msg;
+      }
+      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.<span class="hljs-attr">command</span> == <span class="hljs-string">"AdjustBrightness"</span>) {
+          <span class="hljs-keyword">if</span> (msg.payload &gt; <span class="hljs-number">0</span>) {
+              msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
+              msg.<span class="hljs-attr">payload</span> = <span class="hljs-string">"+"</span>
+              return msg;
+          }
+          <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.payload &lt; <span class="hljs-number">0</span>) {
+              msg.<span class="hljs-attr">topic</span> = <span class="hljs-string">"cmnd/sonoff-ydm-2/Dimmer"</span>
+              msg.<span class="hljs-attr">payload</span> = <span class="hljs-string">"-"</span>
+              return msg;
+          }
+      }
+      </code></pre>
+    </div>
+    <p>&quot;MQTT &gt; Alexa Home State&quot; function code below. This function builds the message format expected by the state Node based on the MQTT subscription output.</p>
+    <div class="bg-light text-dark">
+      <pre><code><span class="hljs-keyword">var</span> tokens = msg.topic.split(<span class="hljs-string">"/"</span>);
+      <span class="hljs-keyword">var</span> device = tokens[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">var</span> element = tokens[<span class="hljs-number">2</span>]
+      <span class="hljs-keyword">var</span> state = msg.payload;
+      
+      <span class="hljs-comment">// MQTT POWER State</span>
+      <span class="hljs-keyword">if</span> (element == <span class="hljs-string">'POWER'</span>) {
+          <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : state } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> };
+      }
+      
+      <span class="hljs-comment">// MQTT Brightness State</span>
+      <span class="hljs-keyword">if</span> (element == <span class="hljs-string">"RESULT"</span>) {
+          <span class="hljs-keyword">var</span> payloadJSON = JSON.parse(state);
+          <span class="hljs-keyword">if</span> (payloadJSON.hasOwnProperty(<span class="hljs-string">'Dimmer'</span>)) {
+              <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : payloadJSON.POWER, <span class="hljs-string">"brightness"</span> : payloadJSON.Dimmer } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> }; 
+          }
+          <span class="hljs-keyword">else</span> {
+              <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : payloadJSON.POWER } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> };    
+          }
+      }
+      </code></pre>
+    </div>
     
-    <span class="hljs-comment">// MQTT POWER State</span>
-    <span class="hljs-keyword">if</span> (element == <span class="hljs-string">'POWER'</span>) {
-        <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : state } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> };
-    }
-    
-    <span class="hljs-comment">// MQTT Brightness State</span>
-    <span class="hljs-keyword">if</span> (element == <span class="hljs-string">"RESULT"</span>) {
-        <span class="hljs-keyword">var</span> payloadJSON = JSON.parse(state);
-        <span class="hljs-keyword">if</span> (payloadJSON.hasOwnProperty(<span class="hljs-string">'Dimmer'</span>)) {
-            <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : payloadJSON.POWER, <span class="hljs-string">"brightness"</span> : payloadJSON.Dimmer } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> }; 
-        }
-        <span class="hljs-keyword">else</span> {
-            <span class="hljs-keyword">return</span> { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"power"</span> : payloadJSON.POWER } }, <span class="hljs-string">"acknowledge"</span> : <span class="hljs-literal">true</span> };    
-        }
-    }
-    </code></pre><h3 id="percentagecontroller">PercentageController</h3>
+    <h3 id="percentagecontroller">PercentageController</h3>
     <p>For AdjustPercentage commands to function you <strong>must include a State node on any device with a PercentageController capability</strong>. Whilst PercentageController state is not shown in the Alexa App, the state data is used to calculate the actual value following an AdjustPercentage command (which will return with minus 25 or plus 25, nothe the actual percentage of the device).</p>
     <h4 id="example-outputs">Example Outputs</h4>
     <p>AdjustPercentage</p>
-    <div class="bg-secondary text-white">
+    <div class="bg-light text-dark">
       <pre><code>msg : {
           topic: ""
           name: "Test Fan"
@@ -658,7 +737,7 @@
       </code></pre>
     </div>
     <p>SetPercentage</p>
-    <div class="bg-secondary text-white">
+    <div class="bg-light text-dark">
     <pre><code>msg : {
         topic: ""
         name: "Test Fan"
