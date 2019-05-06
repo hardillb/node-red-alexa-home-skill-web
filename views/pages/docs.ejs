@@ -15,25 +15,25 @@
     <hr>
     <h2>Getting Started</h2>
     <div>
-        <p>To use this service you need to:</p>
+        <p>Before you can use this service with Alexa or Google Home you need to:</p>
         <ul class="list-unstyled">
             <li><img class="octicon octicon-shield" src="/octicons/shield.svg"></img> Create an <a href='/newuser'> account.</a></li>
             <li><img class="octicon octicon-checklist" src="/octicons/checklist.svg"></img> Define one or more <a href='/devices'>devices.</a></li>
-            <li><img class="octicon octicon-checklist" src="/octicons/cloud-download.svg"></img> <a href="#install-node-red-nodes">Install the associated <span translate="no">Node-RED</span> nodes</a></li>
-            <li><img class="octicon octicon-repo-forked" src="/octicons/repo-forked.svg"></img> <a href="#example-flows-and-node-outputs">Setup <span translate="no">Node-RED</span> flows</a> using your devices.</li>
+            <li><img class="octicon octicon-checklist" src="/octicons/cloud-download.svg"></img> <a href="#install-node-red-nodes">Install the associated <span translate="no">Node-RED</span> nodes.</a></li>
+            <li><img class="octicon octicon-repo-forked" src="/octicons/repo-forked.svg"></img> <a href="#example-flows-and-node-outputs"> Setup <span translate="no">Node-RED</span> flows</a> using your devices.</li>
         </ul>
         <hr>
     </div>
 
     <h3>Account Linking</h3>
-    <blockquote>
-    <p><strong>Note that there are restrictions based on region/ locale, <a href="https://developer.amazon.com/it/docs/device-apis/list-of-interfaces.html">Amazon publish and update their region-specific restrictions here.</a></strong></p>
-    </blockquote>
     <p><a href="mailto:node-red@cb-net.co.uk">You currently have to request extension of the skill to your Amazon and/ or Google accounts</a> - please ensure you advise whether you want Google Assistant, Alexa or both - supplying your Amazon Account email address/ Google account email address respectively. <strong>Once you have received confirmation the skill has been extended to your account</strong>:</p>
 
     <p>Not all capabilities are supported by Google Home, the device creation wizard highlights which capabilities/ traits are supported. To remove the need to define Google or Alexa-specific devices the API itself will automatically only expose a devices&#39; supported capabilities/ actions to Google Home. You can see a <a href="https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki#features">comparison between the two services here</a>.</p>
+    <blockquote>
+        <p><strong>Note that there are restrictions based on region/ locale, <a href="https://developer.amazon.com/it/docs/device-apis/list-of-interfaces.html">Amazon publish and update their region-specific restrictions here.</a></strong></p>
+    </blockquote>
     
-    <p>Flow message output is <strong>the same</strong> irrespective of whether you interact with the service using Alexa or Google Home. The API was engineered this way in order to avoid the need to re-engineer Flows/ create separate flows for both Alexa and Google Home command processing.</p>
+    <p>Node-RED Flow message output is <strong>the same</strong> irrespective of whether you interact with the service using Alexa or Google Home. The API was engineered this way in order to avoid the need to re-engineer Flows/ create separate flows for both Alexa and Google Home command processing.</p>
     
     <h4>Link your Amazon Account</h4>
     <p>When this skill is out of Development/ beta account linking process will not require you to request acces.</p>
