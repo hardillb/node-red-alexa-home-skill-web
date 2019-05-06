@@ -641,21 +641,24 @@
     <p>For AdjustPercentage commands to function you <strong>must include a State node on any device with a PercentageController capability</strong>. Whilst PercentageController state is not shown in the Alexa App, the state data is used to calculate the actual value following an AdjustPercentage command (which will return with minus 25 or plus 25, nothe the actual percentage of the device).</p>
     <h4 id="example-outputs">Example Outputs</h4>
     <p>AdjustPercentage</p>
-    <pre><code>msg : {
-        topic: ""
-        name: "Test Fan"
-        _messageId: "80708daa-a56e-4ed9-8394-7d725d2796c7"
-        _endpointId: "104"
-        _confId: "bfd0fcf4.bc90e"
-        command: "AdjustPercentage"
-        extraInfo: object
-        empty
-        payload: -25
-        acknowledge: true
-        _msgid: "34bf582c.901a68"
-    }
-    </code></pre>
+    <div class="bg-secondary text-white">
+      <pre><code>msg : {
+          topic: ""
+          name: "Test Fan"
+          _messageId: "80708daa-a56e-4ed9-8394-7d725d2796c7"
+          _endpointId: "104"
+          _confId: "bfd0fcf4.bc90e"
+          command: "AdjustPercentage"
+          extraInfo: object
+          empty
+          payload: -25
+          acknowledge: true
+          _msgid: "34bf582c.901a68"
+      }
+      </code></pre>
+    </div>
     <p>SetPercentage</p>
+    <div class="bg-secondary text-white">
     <pre><code>msg : {
         topic: ""
         name: "Test Fan"
@@ -669,6 +672,7 @@
         _msgid: "e88837e.c1733c8"
     }
     </code></pre>
+    </div>
     <h3 id="playbackcontroller">PlaybackController</h3>
     <p>This flow shows a simple Playback Controller example for a Kodi RPC endpoint (used as a Plex client). Note that you must install the json-cec plugin on your KODI client for this flow to work.</p>
     <p><strong>There is no state supported by the PlaybackController capability.</strong></p>
