@@ -138,7 +138,7 @@ module.exports.sendState = function sendState(token, response) {
 				if (res.statusCode == 200) {
 					logger.log('verbose', "[State API] State report to HomeGraph successful!");
 				}
-				else {logger.log('verbose', "[State API] State report reponse code:" + res.statusCode)}
+				else {logger.log('verbose', "[State API] HomeGraph state report reponse code:" + res.statusCode)}
 			}
 		});
 	}
