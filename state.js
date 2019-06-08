@@ -420,7 +420,9 @@ function setstate(username, endpointId, payload) {
 						///////////////////////////////////////////////////////////////////////////
 						// ASync State Updates
 						///////////////////////////////////////////////////////////////////////////
-/* 						if (gHomeReportState == true || alexaReportState == true) {
+
+						// Limit to specific device types?
+ 						if (gHomeReportState == true || alexaReportState == true) {
 							var pUser = Account.findOne({username: username});
 							var pDevice = Devices.findOne({username: username, endpointId: endpointId});
 							Promise.all([pUser, pDevice]).then(([user, device]) => {
@@ -430,7 +432,7 @@ function setstate(username, endpointId, payload) {
 								isGhomeUser(user, function(returnValue) { // Check user is has linked account w/ Google
 									if (returnValue == true && gHomeReportState == true) {
 										try {
-											logger.log('debug', "[State API] GHome Report State using device:" + JSON.stringify(device));
+											//logger.log('debug', "[State API] GHome Report State using device:" + JSON.stringify(device));
 											gHomeQueryDeviceState(device, function(response) {
 												if (response != undefined) {
 													var stateReport = {
@@ -444,13 +446,14 @@ function setstate(username, endpointId, payload) {
 													var countProps = Object.keys(response).length; // Drop anything that simply has online: true property
 													if (countProps >= 2) {
 														stateReport.payload.devices.states[device.endpointId] = response;
-														logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
-
+														//logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
 														if (gToken != undefined) {
-															logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
+															//logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
 															gHomeSendState(gToken, stateReport);
 														}
-														else {logger.log('verbose', '[State API] Unable to call Send State, no token, gToken value:' + JSON.stringify(gToken))}
+														else {
+															logger.log('verbose', '[State API] Unable to call Send State, no gToken');
+														}
 													}
 												}
 											});											
@@ -458,7 +461,7 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
 									}
 									else {
-										if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not a Google Home user")};
+										//if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not a Google Home user")};
 										if (gHomeReportState == false){logger.log('debug', "[State API] GHome state reporting DISABLED")};
 									}
 								});
@@ -468,7 +471,7 @@ function setstate(username, endpointId, payload) {
 								isAlexaUser(user, function(returnValue) {
 									if (returnValue == true && alexaReportState == true) {
 										try {
-											logger.log('debug', "[State API] Alexa Change report using device:" + JSON.stringify(device));
+											//logger.log('debug', "[State API] Alexa Change report using device:" + JSON.stringify(device));
 											alexaQueryDeviceState(device, function(state) {
 												if (state != undefined) {
 													var messageId = uuidv4(); // Generate messageId
@@ -504,12 +507,12 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] alexaSendState error: " + e)}
 									}
 									else {
-										if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not an Alexa user")};
+										//if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not an Alexa user")};
 										if (alexaReportState == false){logger.log('debug', "[State API] Alexa Report State DISABLED")};
 									}
 								});
 							});
-						} */
+						} 
 					}
 				});
 			}

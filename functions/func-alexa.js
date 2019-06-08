@@ -311,7 +311,7 @@ module.exports.sendState = function sendState(user, state) {
     requestAccessToken(user, function(accesstoken) {
         if (accesstoken != undefined) {
             state.event.endpoint.scope.token = accesstoken.token;
-            logger.log('verbose', "[State API] Sending Alexa Change Report to: " + stateURI + ", state:" +  JSON.stringify(state));
+            // logger.log('verbose', "[State API] Sending Alexa Change Report to: " + stateURI + ", state:" +  JSON.stringify(state));
             // Send state update
             request.post({
                 url: stateURI,
