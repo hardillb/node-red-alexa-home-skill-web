@@ -421,8 +421,15 @@ function setstate(username, endpointId, payload) {
 						// ASync State Updates
 						///////////////////////////////////////////////////////////////////////////
 
-						// Limit to specific device types?
- 						if (gHomeReportState == true || alexaReportState == true) {
+						// Limit to specific device types
+						var enableDevTypeStateReport = false;
+						var hasdisplayCategories = getSafe(() => dev.displayCategories);
+						if (hasdisplayCategories != undefined) {
+							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {enableDevTypeStateReport = true};
+							if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true}; // For testing only
+						}
+
+ 						if (enableDevTypeStateReport == true && (gHomeReportState == true || alexaReportState == true)) {
 							var pUser = Account.findOne({username: username});
 							var pDevice = Devices.findOne({username: username, endpointId: endpointId});
 							Promise.all([pUser, pDevice]).then(([user, device]) => {
