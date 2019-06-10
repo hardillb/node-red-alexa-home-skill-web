@@ -1059,6 +1059,21 @@ function replaceCapability(capability, reportState, attributes) {
 				}
 			};
 	}
+	// MotionSensor
+	if(capability == "MotionSensor")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.MotionSensor",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "detectionState"
+						}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
 	// PercentageController
 	if(capability == "PercentageController") {
 		return {

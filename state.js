@@ -426,9 +426,9 @@ function setstate(username, endpointId, payload) {
 						var hasdisplayCategories = getSafe(() => dev.displayCategories);
 						if (hasdisplayCategories != undefined) {
 							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {enableDevTypeStateReport = true};
+							if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {enableDevTypeStateReport = true};
 							if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true}; // For testing only
 						}
-
  						if (enableDevTypeStateReport == true && (gHomeReportState == true || alexaReportState == true)) {
 							var pUser = Account.findOne({username: username});
 							var pDevice = Devices.findOne({username: username, endpointId: endpointId});

@@ -340,6 +340,23 @@ function checkType(type) {
 			}
 		});
 	}
+	else if (type.id== "MOTION_SENSOR" && type.checked && !$('#OTHER').prop('checked')) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$("#MotionSensor").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "MOTION_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "MotionSensor"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
 	else if (type.id== "SMARTLOCK" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
@@ -970,6 +987,9 @@ function generateState(deviceState) {
 					break;
 				case "ContactSensor": // set to closed
 					dummyState.contact = "DETECTED";
+					break;
+				case "MotionSensor": // set to not detected
+					dummyState.motion = "NOT_DETECTED";
 					break;				
 				case "LockController":
 					dummyState.lock = "UNLOCKED";
@@ -1052,6 +1072,14 @@ function generateState(deviceState) {
 						}
 					}
 					else {dummyState.lock = "UNLOCKED"}
+					break;
+				case "MotionSensor":
+					if (deviceState.hasOwnProperty('motion')) {
+						if (typeof deviceState.motion == 'string' && (deviceState.motion == 'DETECTED' || deviceState.motion == 'NOT_DETECTED')) {
+							dummyState.motion = deviceState.motion;
+						}
+					}
+					else {dummyState.motion = "NOT_DETECTED"}
 					break;
 				case "PercentageController":
 					if (deviceState.hasOwnProperty('percentage')) {

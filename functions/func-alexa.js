@@ -146,6 +146,18 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                         });
                                 }
                                 break;
+                            case "MotionSensor":
+                                // Return detectionState
+                                if (deviceJSON.state.hasOwnProperty('motion') && deviceJSON.state.hasOwnProperty('time')) {
+                                    properties.push({
+                                            "namespace": "Alexa.MotionSensor",
+                                            "name": "detectionState",
+                                            "value": deviceJSON.state.motion,
+                                            "timeOfSample": deviceJSON.state.time,
+                                            "uncertaintyInMilliseconds": 1000
+                                            });
+                                    }
+                                break;
                             case "PlaybackController":
                                 // Return Playback State - no reportable state as of November 2018
                                 break;

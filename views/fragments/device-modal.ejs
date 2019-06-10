@@ -58,6 +58,12 @@
 										<br />
 								</div>
 								<div class="form-check">
+									<input title="Motion Sensor" type="checkbox" class="form-check-input" id="MOTION_SENSOR" name="appType" value="MOTION_SENSOR" onclick='checkType(this)'>
+									<label class="form-check-label" for="MOTION_SENSOR"> 
+											Motion Sensor  <img src="/images/alexa-24px.png"></img>
+									</label>
+								</div>		
+								<div class="form-check">
 										<input title="Smart Lock" type="checkbox" class="form-check-input" id="SMARTLOCK" name="appType" value="SMARTLOCK" onclick='checkType(this)'>
 										<label class="form-check-label" for="SMARTLOCK"> 
 												Smart Lock <img src="/images/alexa-24px.png"></img><img src="/images/google-24px.png"></img>
@@ -165,6 +171,12 @@
 											<a data-toggle="tooltip" data-placement="right" title="Lock and unlock">Lock <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
 										</label>
 										<br />
+									</div>
+									<div class="form-check">
+										<input title="Motion Sensor" type="checkbox" class="form-check-input" name="capabilities" id="MotionSensor" value="MotionSensor">
+										<label class="form-check-label" for="MotionSensor">
+											<a data-toggle="tooltip" data-placement="right" title="Make sensor data retrievable">Motion Sensor <img class="octicon octicon-question" src="octicons/question.svg"></img></a> 
+										</label>
 									</div>
 									<div class="form-check">
 										<input title="Percentage Control" type="checkbox" class="form-check-input" name="capabilities" id="PercentageController" value="PercentageController">
