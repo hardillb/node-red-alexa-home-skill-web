@@ -6,7 +6,7 @@
         <input name="response_type" value="<%= response_type %>" hidden>
         <input name="client_id" value="<%= application.oauth_id %>" hidden>
         <input name="auth_url" value="<%= decodeURIComponent(currentURL) %>" hidden>
-        <input name="scope" value="<%= scope.join(',') %>" hidden>
+        <input name="scope" value="<%= scopes.join(',') %>" hidden>
         <div>
             <p>Select flag to translate:</p>
             <!-- <img src="/images/blank.gif" class="flag flag-au" alt="Australia" role="button" onclick="gTranslate('en')" />-->
