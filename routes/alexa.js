@@ -136,7 +136,38 @@ const getStateLimiter = limiter({
 		// MQTT message code, will provide client-side notification in Node-RED console
 		var endpointId = (req.params.dev_id || 0);
 		if (endpointId != 0) {
-			client.get(endpointId, function(err, reply) {
+			// New Redis hash-based lookup
+			var strAlert;
+			client.hgetall('endpointId', function(err, object) {
+				// No endpointId:username match in Redis, query MongoDB
+				if (!err && object == undefined) {
+					var pDevice = Devices.findOne({endpointId:endpointId});
+					Promise.all([pDevice]).then(([device]) => {
+						var username = getSafe(() => device.username);
+						if (username != undefined) {
+							strAlert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
+							// Add endpointId : username | friendlyName hash to Redis as its likely we'll get repeat hits!
+							client.hmset('endpointId', 'username', device.username, 'deviceFriendlyName', device.friendlyName);
+							notifyUser('warn', username, endpointId, strAlert);
+						}
+						else {
+							logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup username");
+						}
+					});
+				}
+				// Matched endpointId hash in Redis, saved MongoDB query
+				else if (!err) {
+					strAlert = '[' + object.deviceFriendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
+					notifyUser('warn', object.username, endpointId, strAlert);
+				}
+				// An error occurred on Redis client.get
+				else {
+					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
+				}	
+			});
+
+			// Old Redis key/pair-based lookup
+			/*	client.get(endpointId, function(err, reply) {
 				// No endpointId:username match in Redis, query MongoDB
 				if (!err && reply == undefined) {
 					var pDevice = Devices.findOne({endpointId:endpointId});
@@ -146,6 +177,10 @@ const getStateLimiter = limiter({
 							alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
 							// Add endpointId : username pair to Redis as its likely we'll get repeat hits!
 							client.set(endpointId, username);
+
+							// Need to use HASH in REDIS, not a key pair, require: enpointId, device.username and device.friendlyName
+							// client.hmset('endpointId', 'username', device.username, 'deviceFriendlyName', 'device.friendlyName');
+
 							notifyUser('warn', username, endpointId, alert);
 						}
 						else {
@@ -155,13 +190,14 @@ const getStateLimiter = limiter({
 				}
 				// Matched endpointId:username match in Redis, saved MongoDB query
 				else if (!err) {
+					//alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
 					notifyUser('warn', reply, endpointId, alert);
 				}
 				// An error occurred on Redis client.get
 				else {
 					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
 				}			
-			});
+			}); */
 		}
 		else {
 			logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup dev_id param");

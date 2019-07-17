@@ -11,6 +11,7 @@ var debug = (process.env.ALEXA_DEBUG || false);
 var awscredentials = '/root/.aws/credentials'
 var logGroup = (process.env.WEB_HOSTNAME || "node-red")
 var startTime = new Date().toISOString();
+var consoleLoglevel = "info";
 if (debug == "true") {consoleLoglevel = "debug"};
 ///////////////////////////////////////////////////////////////////////////
 // Exports
