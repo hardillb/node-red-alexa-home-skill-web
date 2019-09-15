@@ -208,7 +208,7 @@ const getStateLimiter = limiter({
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
 ///////////////////////////////////////////////////////////////////////////
-router.get('/devices', defaultLimiter,
+router.get('/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
 		var params = {
