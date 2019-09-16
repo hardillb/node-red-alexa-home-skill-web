@@ -1,0 +1,3 @@
+https://alexa-node-red.bm.hardill.me.uk/docs
+The payload for a TurnOffRequest is false, not true
+GetTargetTemperatureRequests should be GetTargetTemperatureRequest
