@@ -951,12 +951,12 @@ var timeout = setInterval(function(){
 	for (key in keys){
 		var waiting = onGoingCommands[keys[key]];
 		//logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
-		logger.log('debug', "[MQTT] Queued MQTT message for user:" + waiting.user + ", message" + keys[key]);
+		logger.log('debug', "[MQTT] Queued MQTT message for user: " + waiting.user + ", message: " + keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 6000) {
 				//logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
-				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged for user:" + waiting.user + ", message:" + keys[key]);
+				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged for user: " + waiting.user + ", message: " + keys[key]);
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
