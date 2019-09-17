@@ -144,7 +144,7 @@ router.post('/action', defaultLimiter,
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 
-			if (debug == "true") {console.time('ghome-sync')};
+			//if (debug == "true") {console.time('ghome-sync')};
 			var pFindUser = Account.find({username: req.user.username});
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
@@ -236,22 +236,22 @@ router.post('/action', defaultLimiter,
 					logger.log('verbose', "[GHome Sync API] Discovery Response: " + JSON.stringify(response));
 					// Send Response
 					res.status(200).json(response);
-					if (debug == "true") {console.timeEnd('ghome-sync')};
+					//if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Sync API] User not found");
 					res.status(500).json({message: "User not found"});
-					if (debug == "true") {console.timeEnd('ghome-sync')};
+					//if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Sync API] Device not found");
 					res.status(500).json({message: "Device not found"});
-					if (debug == "true") {console.timeEnd('ghome-sync')};
+					//if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Sync API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
-				if (debug == "true") {console.timeEnd('ghome-sync')};
+				//if (debug == "true") {console.timeEnd('ghome-sync')};
 			});
 			break;
 
@@ -269,7 +269,7 @@ router.post('/action', defaultLimiter,
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 
-			if (debug == "true") {console.time('ghome-exec')};
+			//if (debug == "true") {console.time('ghome-exec')};
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindDevices]).then(([devices]) => {
 				if (devices) {
@@ -430,17 +430,17 @@ router.post('/action', defaultLimiter,
 							}
 						});
 					}
-					if (debug == "true") {console.timeEnd('ghome-exec')};
+					//if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Exec API] Device not found");
 					res.status(500).json({message: "Device not found"});
-					if (debug == "true") {console.timeEnd('ghome-exec')};
+					//if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Exec API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
-				if (debug == "true") {console.timeEnd('ghome-exec')};
+				//if (debug == "true") {console.timeEnd('ghome-exec')};
 			});
 			break;
 		///////////////////////////////////////////////////////////////////////////
@@ -458,7 +458,7 @@ router.post('/action', defaultLimiter,
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 
-			if (debug == "true") {console.time('ghome-query')};
+			//if (debug == "true") {console.time('ghome-query')};
 			var pFindUser = Account.find({username: req.user.username});
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
@@ -487,25 +487,25 @@ router.post('/action', defaultLimiter,
 							// Send Response
 							logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 							res.status(200).json(response);
-							if (debug == "true") {console.timeEnd('ghome-query')};
+							//if (debug == "true") {console.timeEnd('ghome-query')};
 						}
 						start()
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Query API] User not found");
 					res.status(500).json({message: "User not found"});
-					if (debug == "true") {console.timeEnd('ghome-query')};
+					//if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Query API] Device not found");
 					res.status(500).json({message: "Device not found"});
-					if (debug == "true") {console.timeEnd('ghome-query')};
+					//if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 
 			}).catch(err => {
 				logger.log('error', "[GHome Query API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
-				if (debug == "true") {console.timeEnd('ghome-query')};
+				//if (debug == "true") {console.timeEnd('ghome-query')};
 			});
 			break;
 		///////////////////////////////////////////////////////////////////////////
@@ -554,7 +554,7 @@ mqttClient.on('message',function(topic,message){
 	var endpointId = arrTopic[2];
 	if (topic.startsWith('response/')){
 		logger.log('info', "[GHome API] Acknowledged MQTT response message for topic: " + topic);
-		if (debug == "true") {console.time('mqtt-response')};
+		//if (debug == "true") {console.time('mqtt-response')};
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
@@ -583,7 +583,7 @@ mqttClient.on('message',function(topic,message){
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
-		if (debug == "true") {console.timeEnd('mqtt-response')};
+		//if (debug == "true") {console.timeEnd('mqtt-response')};
 	}
 	// Leave Alexa API MQTT state listener to pickup all other MQTT state messages
 });

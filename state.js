@@ -112,7 +112,7 @@ mqttClient.on('message',function(topic,message){
 	var endpointId = arrTopic[2];
     if (topic.startsWith('state/')){
 		logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
-		if (debug == "true") {console.time('mqtt-state')};
+		//if (debug == "true") {console.time('mqtt-state')};
 		// Split topic/ get username and endpointId
 		var messageJSON = JSON.parse(message);
 		var payload = messageJSON.payload;
@@ -132,7 +132,7 @@ mqttClient.on('message',function(topic,message){
                     uid: username,
                 }
                 if (enableAnalytics) {visitor.event(params).send()};
-                if (debug == "true") {console.timeEnd('mqtt-state')};
+                //if (debug == "true") {console.timeEnd('mqtt-state')};
             } 
             else {
 				logger.log('warn', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
@@ -143,7 +143,7 @@ mqttClient.on('message',function(topic,message){
                     uid: username,
                 }
                 if (enableAnalytics) {visitor.event(params).send()};
-                if (debug == "true") {console.timeEnd('mqtt-state')};
+                //if (debug == "true") {console.timeEnd('mqtt-state')};
 			}
 		}
 	}

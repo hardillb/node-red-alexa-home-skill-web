@@ -897,7 +897,7 @@ mqttClient.on('message',function(topic,message){
 
 	if (topic.startsWith('response/')){
 		logger.log('info', "[Alexa API] Acknowledged MQTT response message for topic: " + topic);
-		if (debug == "true") {console.time('mqtt-response')};
+		//if (debug == "true") {console.time('mqtt-response')};
 		var payload = JSON.parse(message.toString());
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
@@ -936,7 +936,7 @@ mqttClient.on('message',function(topic,message){
 			  }
 			if (enableAnalytics) {visitor.event(params).send()};
 		}
-		if (debug == "true") {console.timeEnd('mqtt-response')};
+		//if (debug == "true") {console.timeEnd('mqtt-response')};
 	}
 	else {
 		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
