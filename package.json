@@ -1,6 +1,6 @@
 {
   "name": "node-red-alexa-home-skill-v3",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -13,27 +13,40 @@
     "home",
     "google"
   ],
+  "bugs": {
+    "url": "https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coldfire84/node-red-alexa-home-skill-v3-web"
+  },
+  "homepage": "https://red.cb-net.co.uk/",
+  "node-red": {
+    "nodes": {
+      "alexa": "alexa.js"
+    }
+  },
   "author": "chrismbradford@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
-    "cookie-parser": "^1.4.3",
+    "cookie-parser": "^1.4.4",
     "countries-api": "^2.0.2",
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
     "express-limiter": "^1.6.1",
-    "express-session": "^1.15.6",
-    "jsonwebtoken": "^8.4.0",
-    "mongoose": "^5.2.15",
-    "mongoose-sequence": "^4.0.1",
-    "connect-mongo": "^2.0.1",
+    "express-session": "^1.16.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.7.1",
+    "mongoose-sequence": "^5.2.1",
+    "connect-mongo": "^3.0.0",
     "morgan": "^1.9.1",
-    "mqtt": "^2.18.8",
-    "nodemailer": "^4.6.8",
+    "mqtt": "^3.0.0",
+    "nodemailer": "^6.3.0",
     "oauth2orize": "^1.11.0",
-    "octicons": "^8.2.0",
-    "passport": "^0.3.2",
+    "@primer/octicons": "^9.1.1",
+    "passport": "^0.4.0",
     "passport-http": "^0.3.0",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
@@ -42,14 +55,15 @@
     "querystring": "^0.2.0",
     "redis": "^2.8.0",
     "request": "^2.88.0",
+    "saslprep": "^1.0.3",
     "serve-favicon": "^2.5.0",
     "uid2": "0.0.3",
     "universal-analytics": "^0.4.20",
-    "uuid": "^3.3.2",
-    "winston": "^3.1.0",
-    "winston-cloudwatch": "^2.0.5"
+    "uuid": "^3.3.3",
+    "winston": "^3.2.1",
+    "winston-cloudwatch": "^2.0.9"
   },
   "devDependencies": {
-    "passport-oauth2": "^1.4.0"
+    "passport-oauth2": "^1.5.0"
   }
 }
