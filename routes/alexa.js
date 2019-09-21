@@ -261,8 +261,9 @@ router.get('/devices',
 ///////////////////////////////////////////////////////////////////////////
 // Get State API res.status(200).json(properties);
 ///////////////////////////////////////////////////////////////////////////
+// Modified authentication due to service abuse, original configuration: passport.authenticate(['bearer', 'basic'], { session: false }),
 router.get('/getstate/:dev_id', getStateLimiter,
-	passport.authenticate(['bearer', 'basic'], { session: false }),
+	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		var id = req.params.dev_id;
 
@@ -308,12 +309,12 @@ router.get('/getstate/:dev_id', getStateLimiter,
 ///////////////////////////////////////////////////////////////////////////
 // Set State API (Not in Use)
 ///////////////////////////////////////////////////////////////////////////
-router.post('/setstate/:dev_id',
-	passport.authenticate(['bearer', 'basic'], { session: false }),
-	function(req,res,next){
-		// do nothing, disused for now, may use along side command API 
-	}
-);
+// router.post('/setstate/:dev_id',
+// 	passport.authenticate(['bearer', 'basic'], { session: false }),
+// 	function(req,res,next){
+// 		// do nothing, disused for now, may use along side command API 
+// 	}
+// );
 
 ///////////////////////////////////////////////////////////////////////////
 // Start Alexa Command API v2 (replaces much of the Lambda functionality)
