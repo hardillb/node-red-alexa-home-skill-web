@@ -120,8 +120,9 @@ const defaultLimiter = limiter({
 ///////////////////////////////////////////////////////////////////////////
 // Main GHome Action API
 ///////////////////////////////////////////////////////////////////////////
+// Removed basic auth, original line: passport.authenticate(['bearer', 'basic'], { session: false }),
 router.post('/action', defaultLimiter,
-	passport.authenticate(['bearer', 'basic'], { session: false }),
+	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 	logger.log('verbose', "[GHome API] Request:" + JSON.stringify(req.body));
 	var intent = req.body.inputs[0].intent;
