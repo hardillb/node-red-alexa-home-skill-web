@@ -464,7 +464,7 @@ function setstate(username, endpointId, payload) {
 														//logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
 														if (gToken != undefined) {
 															//logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
-															gHomeSendState(gToken, stateReport);
+															gHomeSendState(gToken, stateReport, user.username);
 														}
 														else {
 															logger.log('verbose', '[State API] Unable to call Send State, no gToken');
