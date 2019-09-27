@@ -35,22 +35,22 @@ server.exchange(oauth2orize.exchange.code({
 			var now = (new Date().getTime())
 			OAuth.AccessToken.findOne({application:application, user: grant.user, expires: {$gt: now}}, function(error,token){
 				if (token) {
-					logger.log("debug", "[OAuth Server] Found valid AccessToken for user:" + grant.user);
+					logger.log("debug", "[OAuth Server] Found valid AccessToken for user: " + grant.user);
 					OAuth.RefreshToken.findOne({application:application, user: grant.user},function(error, refreshToken){
 						if (refreshToken){
-							logger.log("debug", "[OAuth Server] Found valid RefreshToken for user:" + grant.user);
+							logger.log("debug", "[OAuth Server] Found valid RefreshToken for user: " + grant.user);
 							var expires = Math.round((token.expires - (new Date().getTime()))/1000);
 							done(null,token.token, refreshToken.token,{token_type: 'Bearer', expires_in: expires});
 							logger.log("debug", "[OAuth Server] AccessToken sent expires_in: " + expires);
 						} else {
 							// Shouldn't get here unless there is an error as there
 							// should be a refresh token if there is an access token
-							logger.log("debug", "[OAuth Server] Error, could not find valid RefreshToken for user:" + grant.user);
+							logger.log("debug", "[OAuth Server] Error, could not find valid RefreshToken for user: " + grant.user);
 							done(error);
 						}
 					});
 				} else if (!error) {
-					logger.log("debug", "[OAuth Server] Valid AccessToken not found for user:" + grant.user);
+					logger.log("debug", "[OAuth Server] Valid AccessToken not found for user: " + grant.user);
 					var token = new OAuth.AccessToken({
 						application: grant.application,
 						user: grant.user,
@@ -68,7 +68,7 @@ server.exchange(oauth2orize.exchange.code({
 									user: grant.user,
 									application: grant.application
 								});
-								logger.log("debug", "[OAuth Server] Created RefreshToken for user:" + grant.user + ", expires_in:" + expires);
+								logger.log("debug", "[OAuth Server] Created RefreshToken for user: " + grant.user + ", expires_in:" + expires);
 								logger.log("debug", "[OAuth Server] refreshToken:" + JSON.stringify(refreshToken));
 								refreshToken.save(function(error){
 									done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope});
@@ -106,7 +106,7 @@ server.exchange(oauth2orize.exchange.refreshToken({
 					newToken.save(function(error){
 						var expires = Math.round((newToken.expires - (new Date().getTime()))/1000);
 						if (!error) {
-							logger.log("debug", "[OAuth Server] Created AccessToken for user:" + refresh.user  + ", expires_in:" + expires);
+							logger.log("debug", "[OAuth Server] Created AccessToken for user: " + refresh.user  + ", expires_in:" + expires);
 							logger.log("debug", "[OAuth Server] AccessToken:" + JSON.stringify(newToken));
 							logger.log("debug", "[OAuth Server] AccessToken saved");
 							done(null, newToken.token, refresh.token, {token_type: 'Bearer', expires_in: expires, scope: newToken.scope});

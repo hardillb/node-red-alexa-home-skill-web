@@ -146,7 +146,7 @@
 	// Generate javascript object for use in JS code only
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
-			//console.log("user:" + JSON.stringify(user));
+			//console.log("user: " + JSON.stringify(user));
 			var objUser = {
 				"_id": user._id,
 				"superuser": user.superuser,
@@ -156,7 +156,7 @@
 				"region": user.region,
 				"countDevices": user.countDevices
 			};
-			//console.log("Constructed user:" + JSON.stringify(objUser));
+			//console.log("Constructed user: " + JSON.stringify(objUser));
 			users[objUser._id] = objUser; // Users now contained under _id element
 	});
 	//console.log("Final JSON object:" + JSON.stringify(users));

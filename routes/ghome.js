@@ -135,7 +135,7 @@ router.post('/action', defaultLimiter,
 		// SYNC
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
-			logger.log('verbose', "[GHome Sync API] Running device discovery for user:" + req.user.username);
+			logger.log('verbose', "[GHome Sync API] Running device discovery for user: " + req.user.username);
 			var params = {
 				ec: "SYNC",
 				ea: "GHome SYNC event for username: " + req.user.username,
@@ -260,7 +260,7 @@ router.post('/action', defaultLimiter,
 		// EXECUTE
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' : 
-			logger.log('verbose', "[GHome Exec API] Execute command for user:" + req.user.username);
+			logger.log('verbose', "[GHome Exec API] Execute command for user: " + req.user.username);
 			var params = {
 				ec: "EXECUTE",
 				ea: "GHome EXECUTE event for username: " + req.user.username,
@@ -448,7 +448,7 @@ router.post('/action', defaultLimiter,
 		// QUERY
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.QUERY' :
-			logger.log('verbose', "[GHome Query API] Running device state query for user:" + req.user.username);
+			logger.log('verbose', "[GHome Query API] Running device state query for user: " + req.user.username);
 
 			var params = {
 				ec: "QUERY",

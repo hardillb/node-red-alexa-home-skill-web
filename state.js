@@ -122,7 +122,7 @@ mqttClient.on('message',function(topic,message){
 		var stateWaiting = onGoingCommands[payload.messageId];
 		if (stateWaiting) {
 			if (payload.success) {
-				logger.log('info', "[State API] Succesful MQTT state update for user:" + username + " device:" + endpointId);
+				logger.log('info', "[State API] Succesful MQTT state update for user: " + username + " device:" + endpointId);
                 stateWaiting.res.status(200).send();
                 // If successful remove messageId from onGoingCommands
                 delete onGoingCommands[payload.messageId];
@@ -135,7 +135,7 @@ mqttClient.on('message',function(topic,message){
                 //if (debug == "true") {console.timeEnd('mqtt-state')};
             } 
             else {
-				logger.log('warn', "[State API] Failed MQTT state update for user:" + username + " device:" + endpointId);
+				logger.log('warn', "[State API] Failed MQTT state update for user: " + username + " device:" + endpointId);
                 stateWaiting.res.status(503).send();
                 var params = {
                     ec: "Set State",
@@ -434,6 +434,7 @@ function setstate(username, endpointId, payload) {
 						if (hasdisplayCategories != undefined) {
 							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {enableDevTypeStateReport = true};
 							if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {enableDevTypeStateReport = true};
+							if (dev.displayCategories.indexOf("THERMOSTAT") > -1) {enableDevTypeStateReport = true};
 							if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true}; // For testing only
 						}
  						if (enableDevTypeStateReport == true && (gHomeReportState == true || alexaReportState == true)) {
@@ -475,7 +476,7 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
 									}
 									else {
-										//if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not a Google Home user")};
+										//if (returnValue == false){logger.log('debug', "[State API] User: " + username + ", is not a Google Home user")};
 										if (gHomeReportState == false){logger.log('debug', "[State API] GHome state reporting DISABLED")};
 									}
 								});
@@ -521,7 +522,7 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] alexaSendState error: " + e)}
 									}
 									else {
-										//if (returnValue == false){logger.log('debug', "[State API] User:" + username + ", is not an Alexa user")};
+										//if (returnValue == false){logger.log('debug', "[State API] User: " + username + ", is not an Alexa user")};
 										if (alexaReportState == false){logger.log('debug', "[State API] Alexa Report State DISABLED")};
 									}
 								});

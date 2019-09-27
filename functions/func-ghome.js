@@ -193,15 +193,15 @@ module.exports.gHomeSync = function gHomeSync(userid){
 					},
 					function(err, resp, body) {
 						if (!err) {
-							logger.log('debug', "[GHome Sync Devices] Success for user:" + user.username + ", userid" + user._id);
+							logger.log('debug', "[GHome Sync Devices] Success for user: " + user.username + ", userid" + user._id);
 						} else {
-							logger.log('debug', "[GHome Sync Devices] Failure for user:" + user.username + ", error: " + err);
+							logger.log('debug', "[GHome Sync Devices] Failure for user: " + user.username + ", error: " + err);
 						}
 					}
 				);
 			}
 			else {
-				logger.log('debug', "[GHome Sync Devices] Not sending Sync Request for user:" + user.username + ", user has not linked Google Account with bridge account");
+				logger.log('debug', "[GHome Sync Devices] Not sending Sync Request for user: " + user.username + ", user has not linked Google Account with bridge account");
 			}
 		}
 	});
