@@ -436,6 +436,7 @@ function setstate(username, endpointId, payload) {
 							if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {enableDevTypeStateReport = true};
 							if (dev.displayCategories.indexOf("THERMOSTAT") > -1) {enableDevTypeStateReport = true};
 							if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true}; // For testing only
+							if (dev.displayCategories.indexOf("SMARTLOCK") > -1) {enableDevTypeStateReport = true}; // For testing only
 						}
  						if (enableDevTypeStateReport == true && (gHomeReportState == true || alexaReportState == true)) {
 							var pUser = Account.findOne({username: username});
