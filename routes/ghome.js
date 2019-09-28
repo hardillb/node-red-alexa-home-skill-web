@@ -556,9 +556,8 @@ mqttClient.on('message',function(topic,message){
 	var endpointId = arrTopic[2];
 	if (topic.startsWith('response/')){
 		logger.log('info', "[GHome API] Acknowledged MQTT response message for topic: " + topic);
-		//if (debug == "true") {console.time('mqtt-response')};
 		var payload = JSON.parse(message.toString());
-		//console.log("response payload", payload)
+		logger.log('debug', "[GHome API] Response MQTT message for user: " + username + ", payload: " + payload);
 		var commandWaiting = onGoingCommands[payload.messageId];
 		if (commandWaiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
