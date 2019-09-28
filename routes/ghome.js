@@ -274,7 +274,7 @@ router.post('/action', defaultLimiter,
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindDevices]).then(([devices]) => {
 				if (devices) {
-					logger.log('debug', "[GHome Exec API] Execute command(s) for user: " + req.user.username + ", command: " +  req.body.inputs[0].payload.commands.toString());
+					logger.log('debug', "[GHome Exec API] Execute command(s) for user: " + req.user.username + ", command: " +  JSON.stringify(req.body.inputs[0].payload.commands));
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
 					//logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
 					//var devicesJSON = JSON.parse(JSON.stringify(devices));
