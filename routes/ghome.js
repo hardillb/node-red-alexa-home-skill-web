@@ -260,7 +260,7 @@ router.post('/action', defaultLimiter,
 		// EXECUTE
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' : 
-			logger.log('verbose', "[GHome Exec API] Execute command for user: " + req.user.username);
+			logger.log('verbose', "[GHome Exec API] Execute command(s) for user: " + req.user.username);
 			var params = {
 				ec: "EXECUTE",
 				ea: "GHome EXECUTE event for username: " + req.user.username,
@@ -274,8 +274,9 @@ router.post('/action', defaultLimiter,
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindDevices]).then(([devices]) => {
 				if (devices) {
+					logger.log('debug', "[GHome Exec API] Execute command(s) for user: " + req.user.username + ", command: " +  req.body.inputs[0].payload.commands.toString());
 					var arrCommands = req.body.inputs[0].payload.commands; // Array of commands, assume match with device array at same index?!
-					logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
+					//logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
 					//var devicesJSON = JSON.parse(JSON.stringify(devices));
 					//logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
