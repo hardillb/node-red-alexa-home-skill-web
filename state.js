@@ -428,15 +428,24 @@ function setstate(username, endpointId, payload) {
 						// ASync State Updates
 						///////////////////////////////////////////////////////////////////////////
 
-						// Limit to specific device types
+						// Limit state reporting to specific device types
 						var enableDevTypeStateReport = false;
 						var hasdisplayCategories = getSafe(() => dev.displayCategories);
 						if (hasdisplayCategories != undefined) {
-							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {enableDevTypeStateReport = true};
-							if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {enableDevTypeStateReport = true};
-							if (dev.displayCategories.indexOf("THERMOSTAT") > -1) {enableDevTypeStateReport = true};
-							if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true};
-							if (dev.displayCategories.indexOf("SMARTLOCK") > -1) {enableDevTypeStateReport = true};
+							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1 
+								|| dev.displayCategories.indexOf("MOTION_SENSOR") > -1
+								|| dev.displayCategories.indexOf("THERMOSTAT") > -1
+								|| dev.displayCategories.indexOf("LIGHT") > -1
+								|| dev.displayCategories.indexOf("SMARTLOCK") > -1)
+								{enableDevTypeStateReport = true}
+							else {
+								// Device tyep not enabled for state reporting
+							}
+							// if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {enableDevTypeStateReport = true};
+							// if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {enableDevTypeStateReport = true};
+							// if (dev.displayCategories.indexOf("THERMOSTAT") > -1) {enableDevTypeStateReport = true};
+							// if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true};
+							// if (dev.displayCategories.indexOf("SMARTLOCK") > -1) {enableDevTypeStateReport = true};
 						}
  						if (enableDevTypeStateReport == true && (gHomeReportState == true || alexaReportState == true)) {
 							var pUser = Account.findOne({username: username});
@@ -477,7 +486,7 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
 									}
 									else {
-										//if (returnValue == false){logger.log('debug', "[State API] User: " + username + ", is not a Google Home user")};
+										if (returnValue == false){logger.log('debug', "[State API] Not sending GHome state report, user: " + username + ", is not a Google Home user")};
 										if (gHomeReportState == false){logger.log('debug', "[State API] GHome state reporting DISABLED")};
 									}
 								});
@@ -523,7 +532,7 @@ function setstate(username, endpointId, payload) {
 										catch (e) {logger.log('debug', "[State API] alexaSendState error: " + e)}
 									}
 									else {
-										//if (returnValue == false){logger.log('debug', "[State API] User: " + username + ", is not an Alexa user")};
+										if (returnValue == false){logger.log('debug', "[State API] Not sending Alexa state report, user: " + username + ", is not an Alexa user")};
 										if (alexaReportState == false){logger.log('debug', "[State API] Alexa Report State DISABLED")};
 									}
 								});
