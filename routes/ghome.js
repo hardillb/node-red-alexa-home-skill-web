@@ -560,7 +560,7 @@ mqttClient.on('message',function(topic,message){
 		//logger.log('debug', "[GHome API] Response MQTT message for user: " + username + ", message: " + message);
 		var commandWaiting = onGoingCommands[payload.messageId];
 		if (commandWaiting) {
-			if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[GHome API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting,source));};
+			if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[GHome API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				logger.log('debug', "[GHome API] MQTT response message is success for topic: " + topic);
