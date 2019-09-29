@@ -69,7 +69,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 					}
 				}
 				if (trait == "action.devices.traits.LockUnlock") {
-					if (device.state.lock.toLowerCase() == 'LOCKED') {
+					if (device.state.lock.toLowerCase() == 'locked') {
 						dev.isLocked = true;
 					}
 					else {

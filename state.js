@@ -111,7 +111,8 @@ mqttClient.on('message',function(topic,message){
 	var username = arrTopic[1];
 	var endpointId = arrTopic[2];
     if (topic.startsWith('state/')){
-		logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
+		//logger.log('info', "[State API] Acknowledged MQTT state message topic: " + topic);
+		logger.log('info', "[State API] Acknowledged MQTT state message for user: " + username + ", message: " + message);
 		//if (debug == "true") {console.time('mqtt-state')};
 		// Split topic/ get username and endpointId
 		var messageJSON = JSON.parse(message);
