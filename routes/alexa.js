@@ -903,21 +903,21 @@ mqttClient.on('message',function(topic,message){
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
 		if (commandWaiting) {
-			if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[Alexa API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
+			//if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[Alexa API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
-				logger.log('debug', "[Alexa API] MQTT response message is success for topic: " + topic);
+				//logger.log('debug', "[Alexa API] MQTT response message is success for topic: " + topic);
 				// Alexa success response send to Lambda for full response construction
 				if (commandWaiting.hasOwnProperty('source')) {
 					var commandSource = JSON.stringify(commandWaiting.source);
 					commandSource = commandSource.replace(/['"]+/g, '');
 					if (commandSource == "Alexa") {
 						if (commandWaiting.hasOwnProperty('response')) {
-							logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
+							logger.log('debug', "[Alexa API] Successful MQTT command for user: " + username + ", response: " + JSON.stringify(commandWaiting.response));
 							commandWaiting.res.status(200).json(commandWaiting.response)
 						}
 						else {
-							logger.log('debug', "[Alexa API] Alexa MQTT command successful");
+							logger.log('debug', "[Alexa API] Successful MQTT command for user: " + username);
 							commandWaiting.res.status(200).send()
 						}
 					}
@@ -929,11 +929,11 @@ mqttClient.on('message',function(topic,message){
 					commandSource = commandSource.replace(/['"]+/g, '');
 					if (commandSource == "Alexa") {
 						if (commandWaiting.hasOwnProperty('response')) {
-							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API, response: " + + JSON.stringify(commandWaiting.response));
+							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command for user: " + username + ", response: " + + JSON.stringify(commandWaiting.response));
 							commandWaiting.res.status(503).json(commandWaiting.response)
 						}
 						else {
-							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API response");
+							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command for user: " + username);
 							commandWaiting.res.status(503).send()
 						}
 					}
