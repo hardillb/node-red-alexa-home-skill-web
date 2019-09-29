@@ -46,6 +46,7 @@ mongoose.set('useUnifiedTopology', true);
 logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 mongoose.connect(mongo_url, {
 		useNewUrlParser: true,
+		useUnifiedTopology: true,
 		autoReconnect: true,
 		reconnectTries: Number.MAX_VALUE,
 		reconnectInterval: 1000
