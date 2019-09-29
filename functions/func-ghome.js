@@ -121,7 +121,7 @@ module.exports.isGhomeUser = function isGhomeUser(user, callback) {
 // Send State Update
 module.exports.sendState = function sendState(token, response, username) {
 	if (reportState == true && token != undefined) {
-		//logger.log('verbose', "[State API] Sending HomeGraph State report:" + JSON.stringify(response));
+		logger.log('verbose', "[State API] Sending HomeGraph State report for user: " + username + ", report: " + JSON.stringify(response));
 		request.post({
 			url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
 				headers:{
