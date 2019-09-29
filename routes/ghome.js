@@ -560,6 +560,7 @@ mqttClient.on('message',function(topic,message){
 		//logger.log('debug', "[GHome API] Response MQTT message for user: " + username + ", message: " + message);
 		var commandWaiting = onGoingCommands[payload.messageId];
 		if (commandWaiting) {
+			logger.log('debug', "[GHome API] Found waiting command for user: " + username + ", command: " + JSON.stringify(commandWaiting));
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
 				// Google Home success response
