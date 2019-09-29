@@ -41,6 +41,7 @@ mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
 mongoose.connect(mongo_url, {
 		useNewUrlParser: true,
+		useUnifiedTopology: true,
 		autoReconnect: true,
 		reconnectTries: Number.MAX_VALUE,
 		reconnectInterval: 1000
