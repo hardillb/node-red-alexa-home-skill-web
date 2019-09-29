@@ -909,7 +909,7 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source')) {
 					var commandSource = JSON.stringify(commandWaiting.source);
 					commandSource = commandSource.replace(/['"]+/g, '');
-					if (commandWaiting.source == "Alexa") {
+					if (commandSource == "Alexa") {
 						if (commandWaiting.hasOwnProperty('response')) {
 							logger.log('debug', "[Alexa API] Successful MQTT command, response: " + JSON.stringify(commandWaiting.response));
 							commandWaiting.res.status(200).json(commandWaiting.response)
@@ -925,7 +925,7 @@ mqttClient.on('message',function(topic,message){
 				if (commandWaiting.hasOwnProperty('source')) {
 					var commandSource = JSON.stringify(commandWaiting.source);
 					commandSource = commandSource.replace(/['"]+/g, '');
-					if (commandWaiting.source == "Alexa") {
+					if (commandSource == "Alexa") {
 						if (commandWaiting.hasOwnProperty('response')) {
 							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command API, response: " + + JSON.stringify(commandWaiting.response));
 							commandWaiting.res.status(503).json(commandWaiting.response)
