@@ -903,8 +903,10 @@ mqttClient.on('message',function(topic,message){
 		//console.log("response payload", payload)
 		var commandWaiting = onGoingCommands[payload.messageId];
 		if (commandWaiting) {
+			if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[Alexa API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
 			if (payload.success) {
+				logger.log('debug', "[Alexa API] MQTT response message is success for topic: " + topic);
 				// Alexa success response send to Lambda for full response construction
 				if (commandWaiting.hasOwnProperty('source')) {
 					var commandSource = JSON.stringify(commandWaiting.source);
