@@ -471,7 +471,7 @@ function setstate(username, endpointId, payload) {
 													var countProps = Object.keys(response).length; // Drop anything that simply has online: true property
 													if (countProps >= 2) {
 														stateReport.payload.devices.states[device.endpointId] = response;
-														//logger.log('debug', "[State API] Generated GHome state report: " + JSON.stringify(stateReport));
+														logger.log('debug', "[State API] Generated GHome state report for user: " + user.username + ", report: " + JSON.stringify(stateReport));
 														if (gToken != undefined) {
 															//logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
 															gHomeSendState(gToken, stateReport, user.username);
