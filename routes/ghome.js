@@ -569,8 +569,8 @@ mqttClient.on('message',function(topic,message){
 					var commandSource = JSON.stringify(commandWaiting.source);
 					logger.log('debug', "[GHome API] Response message for username: " + username + ", commandSource: " + commandSource);
 
-					if (commandSource == "\"Google\"") {
-						logger.log('debug', "[GHome API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+					if (commandSource == "Google") {
+						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  "response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response);
 					}
 				}
