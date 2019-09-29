@@ -17,7 +17,6 @@ var mongoose_connection = mongoose.connection;
 ///////////////////////////////////////////////////////////////////////////
 // Connect to Mongo Instance
 ///////////////////////////////////////////////////////////////////////////
-logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 mongoose_connection.on('connecting', function() {
 	logger.log('info', "[Core] Connecting to MongoDB...");
 });
@@ -37,11 +36,16 @@ mongoose_connection.on('reconnected', function () {
 mongoose_connection.on('disconnected', function() {
 	logger.log('warn', "[Core] MongoDB disconnected!");
 });
+
+// Fix Mongoose Deprecation Warnings; https://mongoosejs.com/docs/deprecations.html
+mongoose.set('useNewUrlParser', true);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
+mongoose.set('useUnifiedTopology', true);
+
+logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 mongoose.connect(mongo_url, {
 		useNewUrlParser: true,
-		useUnifiedTopology: true,
 		autoReconnect: true,
 		reconnectTries: Number.MAX_VALUE,
 		reconnectInterval: 1000
