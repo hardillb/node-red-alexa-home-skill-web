@@ -565,10 +565,19 @@ mqttClient.on('message',function(topic,message){
 			if (payload.success) {
 				//logger.log('debug', "[GHome API] MQTT response message is success for topic: " + topic);
 				// Google Home success response
-				if (commandWaiting.hasOwnProperty('source') && JSON.stringify(commandWaiting.source) == "Google") {
-					logger.log('debug', "[GHome API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
-					commandWaiting.res.status(200).json(commandWaiting.response);
-				}		
+				if (commandWaiting.hasOwnProperty('source')){
+					var commandSource = JSON.stringify(commandWaiting.source);
+					logger.log('debug', "[GHome API] Response message for username: " + username + ", commandSource: " + commandSource);
+
+					if (commandSource == "Google") {
+						logger.log('debug', "[GHome API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+						commandWaiting.res.status(200).json(commandWaiting.response);
+					}
+				}
+				// if (commandWaiting.hasOwnProperty('source') && commandSource == "Google") {
+				// 	logger.log('debug', "[GHome API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
+				// 	commandWaiting.res.status(200).json(commandWaiting.response);
+				// }		
 			} else {
 				logger.log('debug', "[GHome API] MQTT response message is failure for topic: " + topic);
 				// Google Home failure response
