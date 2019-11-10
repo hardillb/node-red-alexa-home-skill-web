@@ -96,7 +96,10 @@ app.use(session({
 	}),
 	resave: true,
 	saveUninitialized: true,
-	secret: cookieSecret
+	secret: cookieSecret,
+	cookie: {
+		secure: true
+	}
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
