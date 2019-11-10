@@ -31,7 +31,6 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
-    "cookie-parser": "^1.4.4",
     "countries-api": "^2.0.2",
     "ejs": "^2.7.1",
     "express": "^4.17.1",

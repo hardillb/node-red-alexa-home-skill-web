@@ -9,7 +9,7 @@ const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
+//var cookieParser = require('cookie-parser');
 ///////////////////////////////////////////////////////////////////////////
 // MongoDB
 ///////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ app.set('view engine', 'ejs');
 app.enable('trust proxy');
 app.use(favicon('static/favicon.ico'));
 app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
-app.use(cookieParser(cookieSecret));
+//app.use(cookieParser(cookieSecret));
 app.use(flash());
 // Session handler
 app.use(session({
