@@ -109,6 +109,7 @@ router.get('/', defaultLimiter, function(req,res){
 		ua: req.headers['user-agent']
 	}
 	if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/");
 
 	res.render('pages/index', {user: req.user, home: true});
 });
@@ -124,6 +125,7 @@ router.get('/docs', defaultLimiter, function(req,res){
 		ua: req.headers['user-agent']
 	}
 	if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/docs");
 
 	res.render('pages/docs', {user: req.user, docs: true});
 });
@@ -139,6 +141,7 @@ router.get('/about', defaultLimiter, function(req,res){
 		ua: req.headers['user-agent']
 	}
 	if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/about");
 
 	res.render('pages/about', {user: req.user, about: true});
 });
@@ -154,6 +157,7 @@ router.get('/privacy', defaultLimiter, function(req,res){
 		ua: req.headers['user-agent']
 	}
 	if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/privacy");
 
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
@@ -169,6 +173,7 @@ router.get('/tos', defaultLimiter, function(req,res){
 		ua: req.headers['user-agent']
 	}
 	if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/tos");
 
 	res.render('pages/tos', {user: req.user, tos: true});
 });
@@ -184,6 +189,7 @@ router.get('/login', defaultLimiter, function(req,res){
 		ua: req.headers['user-agent']
 	}
 	if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/login");
 
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
@@ -198,7 +204,7 @@ router.get('/logout', defaultLimiter, function(req,res){
 	} else {
 		res.redirect('/');
 	}
-	
+	outputSessionID(req, "/logout");
 });
 
 ///////////////////////////////////////////////////////////////////////////
@@ -239,6 +245,7 @@ router.get('/newuser', defaultLimiter, function(req,res){
         ua: req.headers['user-agent']
     }
     if (enableAnalytics) {visitor.pageview(view).send()};
+	outputSessionID(req, "/newuser");
 
     res.render('pages/register',{user: req.user, newuser: true});
 });
@@ -338,7 +345,7 @@ router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req,
         ua: req.headers['user-agent']
     }
     if (enableAnalytics) {visitor.pageview(view).send()};
-    
+    outputSessionID(req, "/changePassword");
     res.render('pages/changePassword', {user: req.user});
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -393,7 +400,7 @@ router.get('/lostPassword', defaultLimiter, function(req, res, next){
         ua: req.headers['user-agent']
     }
     if (enableAnalytics) {visitor.pageview(view).send()};
-
+	outputSessionID(req, "/lostPassword");
     res.render('pages/lostPassword', { user: req.user});
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -436,7 +443,7 @@ router.get('/my-account', defaultLimiter,
             ua: req.headers['user-agent']
         }
         if (enableAnalytics) {visitor.pageview(view).send()};
-
+		outputSessionID(req, "/my-account");
         const pUser = Account.findOne({username: req.user.username});
         Promise.all([pUser]).then(([userAccount]) => {
             //logger.log('info', "userAccount: " + userAccount);
@@ -460,6 +467,7 @@ router.get('/devices', defaultLimiter,
 			ua: req.headers['user-agent']
 		}
 		if (enableAnalytics) {visitor.pageview(view).send()};
+		outputSessionID(req, "/devices");
 		var user = req.user.username;
 		const pUserDevices = Devices.find({username:user});
 		const pCountDevices = Devices.countDocuments({username:user});
@@ -742,6 +750,17 @@ function ensureAuthenticated(req,res,next) {
         //console.log("failed auth?");
         res.redirect('/login');
     }
+}
+
+function outputSessionID(req, path) {
+	if (req.session.id) {
+		if (req.user) {
+			logger.log("debug","[Express Session] User: " + req.user + ", path: " + path + ", sessionID: " + req.session.id);
+		}
+		else {
+			logger.log("debug","[Express Session] User path: " + path + ", sessionID: " + req.session.id);
+		}
+	}
 }
 
 module.exports = router;
