@@ -755,7 +755,7 @@ function ensureAuthenticated(req,res,next) {
 function outputSessionID(req, path) {
 	if (req.session.id) {
 		if (req.user) {
-			logger.log("debug","[Express Session] User: " + req.user + ", path: " + path + ", sessionID: " + req.session.id);
+			logger.log("debug","[Express Session] User: " + req.user.username + ", path: " + path + ", sessionID: " + req.session.id);
 		}
 		else {
 			logger.log("debug","[Express Session] User path: " + path + ", sessionID: " + req.session.id);
