@@ -3,6 +3,7 @@ node_modules/*
 test.sh
 test-aws.sh
 .aws/*
+config.json
 node-red-208520-70f2b1da662d.json
 config/node-red-208520-70f2b1da662d.json
 views/fragments/de/privacy-policy.ejs

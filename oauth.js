@@ -62,15 +62,19 @@ server.exchange(oauth2orize.exchange.code({
 						//delete old refreshToken or reuse?
 						OAuth.RefreshToken.findOne({application:application, user: grant.user},function(error, refreshToken){
 							if (refreshToken) {
+								logger.log("debug", "[OAuth Server] Created AccessToken for user: " + grant.user + ", expires_in:" + expires);
+								logger.log("debug", "[OAuth Server] AccessToken:" + JSON.stringify(token));
 								done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope});
 							} else if (!error) {
 								var refreshToken = new OAuth.RefreshToken({
 									user: grant.user,
 									application: grant.application
 								});
-								logger.log("debug", "[OAuth Server] Created RefreshToken for user: " + grant.user + ", expires_in:" + expires);
+								logger.log("debug", "[OAuth Server] Created RefreshToken for user: " + grant.user);
 								logger.log("debug", "[OAuth Server] refreshToken:" + JSON.stringify(refreshToken));
 								refreshToken.save(function(error){
+									logger.log("debug", "[OAuth Server] Created AccessToken for user: " + grant.user + ", expires_in:" + expires);
+									logger.log("debug", "[OAuth Server] AccessToken:" + JSON.stringify(token));
 									done(error, error ? null : token.token, refreshToken.token, error ? null : { token_type: 'Bearer', expires_in: expires, scope: token.scope});
 								});
 							} else {
