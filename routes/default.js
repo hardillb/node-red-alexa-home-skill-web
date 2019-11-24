@@ -77,12 +77,12 @@ const defaultLimiter = limiter({
 		res.status(429).json('Rate limit exceeded');
 	  }
 });
-// Restrictive Limiter, used to prevenmt abuse on NewUser, Login, 10 reqs/ hr
+// Restrictive Limiter, used to prevent abuse on NewUser, Login, 10 reqs/ hr
 const restrictiveLimiter = limiter({
 	lookup: function(req, res, opts, next) {
 		//opts.lookup = 'connection.remoteAddress'
 		opts.lookup = 'headers.x-forwarded-for'
-		opts.total = 100
+		opts.total = 10
 		opts.expire = 1000 * 60 * 60
 		return next()
   },
