@@ -450,6 +450,10 @@ function setstate(username, endpointId, payload) {
 								enableDevTypeStateReport = true;
 								sendGoogleStateUpdate = true;
 							}
+							else if (dev.displayCategories.indexOf("SMARTPLUG") > -1) {
+								enableDevTypeStateReport = true;
+								sendGoogleStateUpdate = true;
+							}
 							else if (dev.displayCategories.indexOf("SMARTLOCK") > -1) {
 								enableDevTypeStateReport = true;
 								sendGoogleStateUpdate = true;
