@@ -431,22 +431,32 @@ function setstate(username, endpointId, payload) {
 
 						// Limit state reporting to specific device types
 						var enableDevTypeStateReport = false;
+						var sendAlexaStateUpdate = true; // ALL state-supporting devices by default send updates to Alexa
+						var sendGoogleStateUpdate = false; // NO state-supporting devices by default send updates to Google
 						var hasdisplayCategories = getSafe(() => dev.displayCategories);
 						if (hasdisplayCategories != undefined) {
-							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1 
-								|| dev.displayCategories.indexOf("MOTION_SENSOR") > -1
-								|| dev.displayCategories.indexOf("THERMOSTAT") > -1
-								|| dev.displayCategories.indexOf("LIGHT") > -1
-								|| dev.displayCategories.indexOf("SMARTLOCK") > -1)
-								{enableDevTypeStateReport = true}
-							else {
-								// Device tyep not enabled for state reporting
+							// Per-device type send-state configuration, can enable/ disable Alexa and/ or Google Home
+							if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {
+								enableDevTypeStateReport = true;
 							}
-							// if (dev.displayCategories.indexOf("CONTACT_SENSOR") > -1) {enableDevTypeStateReport = true};
-							// if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {enableDevTypeStateReport = true};
-							// if (dev.displayCategories.indexOf("THERMOSTAT") > -1) {enableDevTypeStateReport = true};
-							// if (dev.displayCategories.indexOf("LIGHT") > -1) {enableDevTypeStateReport = true};
-							// if (dev.displayCategories.indexOf("SMARTLOCK") > -1) {enableDevTypeStateReport = true};
+							else if (dev.displayCategories.indexOf("MOTION_SENSOR") > -1) {
+								enableDevTypeStateReport = true;
+							}
+							else if (dev.displayCategories.indexOf("THERMOSTAT") > -1) {
+								enableDevTypeStateReport = true;
+								sendGoogleStateUpdate = true;
+							}
+							else if (dev.displayCategories.indexOf("LIGHT") > -1) {
+								enableDevTypeStateReport = true;
+								sendGoogleStateUpdate = true;
+							}
+							else if (dev.displayCategories.indexOf("SMARTLOCK") > -1) {
+								enableDevTypeStateReport = true;
+								sendGoogleStateUpdate = true;
+							}
+							else {
+								// Unless device type specifically defined above, state updates will NOT be sent
+							}
 						}
  						if (enableDevTypeStateReport == true && (gHomeReportState == true || alexaReportState == true)) {
 							var pUser = Account.findOne({username: username});
@@ -456,7 +466,7 @@ function setstate(username, endpointId, payload) {
 								// Google Home
 								///////////////////////////////////////////////////////////////////////////
 								isGhomeUser(user, function(returnValue) { // Check user is has linked account w/ Google
-									if (returnValue == true && gHomeReportState == true) {
+									if (returnValue == true && gHomeReportState == true && sendGoogleStateUpdate == true) {
 										try {
 											//logger.log('debug', "[State API] GHome Report State using device:" + JSON.stringify(device));
 											gHomeQueryDeviceState(device, function(response) {
@@ -495,7 +505,7 @@ function setstate(username, endpointId, payload) {
 								// Alexa
 								///////////////////////////////////////////////////////////////////////////
 								isAlexaUser(user, function(returnValue) {
-									if (returnValue == true && alexaReportState == true) {
+									if (returnValue == true && alexaReportState == true && sendAlexaStateUpdate == true) {
 										try {
 											//logger.log('debug', "[State API] Alexa Change report using device:" + JSON.stringify(device));
 											alexaQueryDeviceState(device, function(state) {
