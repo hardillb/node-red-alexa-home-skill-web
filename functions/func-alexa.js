@@ -456,6 +456,8 @@ function requestAccessToken(user, callback) {
                             logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user: " + user.username + ", error: " + err);
                             callback(undefined);
                         } else {
+                            logger.log('debug', "[AlexaAuth API] Access Token response code: " + res.statusCode);
+                            
                             // Store the AccessToken
                             var jsonBody = JSON.parse(body);
                             logger.log('debug', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
