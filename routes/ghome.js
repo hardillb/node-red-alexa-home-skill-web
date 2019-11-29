@@ -431,15 +431,25 @@ router.post('/action', defaultLimiter,
 									timestamp: Date.now()
 								};
 								
-								// Check whether this command is targeted at multiple endpoints
-								//if (arrCommandsDevices.length > 1){
-								//	command.expectedResponseCount = arrCommandsDevices.length;
-								//}
+								// Add additional deviceIds to response
+								for (x = 0; x < arrCommandsDevices.length; x++) {
+									try {
+										command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
+										logger.log('debug', "[GHome Exec API] Added endpointId to multi-command response: " + JSON.stringify(command));
+									}
+									catch(e) {
+										logger.log('error', "[GHome Exec API] Unable to add endpointId to multi-command response, error: " + e);
+									}
+								}
 
 								onGoingCommands[requestId + element.id] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
 							}
 						});
 					}
+					// All commands issued
+
+
+
 					//if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 				else if (!device) {
@@ -584,7 +594,7 @@ mqttClient.on('message',function(topic,message){
 
 							// Add to list of devices in response?
 
-							// Look at how to separate out the incoming commands - current keys get overwritten due to duplicate requestId
+							// FIXED - Look at how to separate out the incoming commands - current keys get overwritten due to duplicate requestId
 
 							// Review how waiting commands are being deleted/ stored
 								// Need to capture successful commands and then send state as combined message
@@ -607,9 +617,10 @@ mqttClient.on('message',function(topic,message){
 
 
 						//}
-						
+
 						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 						try {
+							// Multi-devices this generates an error as res is sent after first device
 							commandWaiting.res.status(200).json(commandWaiting.response);
 						}
 						catch(e) {
@@ -617,10 +628,7 @@ mqttClient.on('message',function(topic,message){
 						}
 					}
 				}
-				// if (commandWaiting.hasOwnProperty('source') && commandSource == "Google") {
-				// 	logger.log('debug', "[GHome API] Successful Google Home MQTT command, response: " + JSON.stringify(commandWaiting.response));
-				// 	commandWaiting.res.status(200).json(commandWaiting.response);
-				// }		
+	
 			} else {
 				logger.log('debug', "[GHome API] MQTT response message is failure for topic: " + topic);
 				// Google Home failure response
