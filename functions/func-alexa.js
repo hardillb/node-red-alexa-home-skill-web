@@ -455,7 +455,8 @@ function requestAccessToken(user, callback) {
                         if (err) {
                             logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user: " + user.username + ", error: " + err);
                             callback(undefined);
-                        } else {
+                        } 
+                        else if (res.statusCode == 200) {
                             logger.log('debug', "[AlexaAuth API] Access Token response code: " + res.statusCode);
                             
                             // Store the AccessToken
@@ -487,6 +488,12 @@ function requestAccessToken(user, callback) {
                                 logger.log('error', "[AlexaAuth API] requestAccessToken error:" + err);
                                 callback(undefined);
                             });
+                        }
+                        else {
+                            logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user: " + user.username);
+                            logger.log('error', "[AlexaAuth API] Access Token response code: " + res.statusCode);
+                            logger.log('error', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
+                            callback(undefined);
                         }
                     }
                 );
