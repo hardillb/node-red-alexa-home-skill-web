@@ -434,7 +434,7 @@ router.post('/action', defaultLimiter,
 								// Add additional deviceIds to response if multi-device command
 								for (x = 0; x < arrCommandsDevices.length; x++) {
 									try {
-										command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
+										if (arrCommandsDevices[x].id != element.id){command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id)};
 									}
 									catch(e) {
 										logger.log('error', "[GHome Exec API] Unable to add endpointId to multi-command response, error: " + e);
