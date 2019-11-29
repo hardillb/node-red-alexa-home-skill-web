@@ -1210,15 +1210,21 @@ function replaceCapability(capability, reportState, attributes) {
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.SettingValues.Low"
+							"assetId": "Alexa.Value.Low"
 						  }
 						},
                         {
                           "@type": "asset",
                           "value": {
-                            "assetId": "Alexa.SettingValues.Minimum"
+                            "assetId": "Alexa.Value.Minimum"
                           }
-                        }
+                        },
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Closed"
+						  }
+						}
 					  ]
 					}
 				  },
@@ -1229,7 +1235,7 @@ function replaceCapability(capability, reportState, attributes) {
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.SettingValues.Medium"
+							"assetId": "Alexa.Value.Medium"
 						  }
 						}
 					  ]
@@ -1242,13 +1248,19 @@ function replaceCapability(capability, reportState, attributes) {
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.SettingValues.Maximum"
+							"assetId": "Alexa.Value.Maximum"
 						  }
 						},
 						{
 						  "@type": "asset",
 						  "value": {
-							"assetId": "Alexa.SettingValues.High"
+							"assetId": "Alexa.Value.High"
+						  }
+						},
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Open"
 						  }
 						}
 					  ]

@@ -592,28 +592,14 @@ mqttClient.on('message',function(topic,message){
 
 							// Add to list of devices in response?
 
-							// FIXED - Look at how to separate out the incoming commands - current keys get overwritten due to duplicate requestId
-
 							// Review how waiting commands are being deleted/ stored
 								// Need to capture successful commands and then send state as combined message
 								// 
 
-							// Look for any other command with same messageId / match endpointId
-							// if (Array.isArray(commandWaiting)){
-							// 	for (i = 0; i < commandWaiting.length; i++) {
-							// 		if (commandWaiting[i].hasOwnProperty("success") && commandWaiting[i].success == true){
-							// 			//commandWaiting[i].response.payload.commands[0].ids.push(endpointId)
-							// 		}
-							// 		if (commandWaiting[i].hasOwnProperty("success") && commandWaiting[i].success == false){
-							// 			// Don't add to list of devices that are successful
-							// 		}
-							// 	}
-							// }
+							//commandWaiting[i].response.payload.commands[0].ids.push(endpointId)
 								  
 							// If also successful send response and delete all waiting commands with same messageId
 							// What to do about clearing the message, think you can't - have to wait for both/ or a timeout on the other then send correct endpoinIds
-
-
 						//}
 
 						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
