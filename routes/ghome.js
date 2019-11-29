@@ -431,17 +431,15 @@ router.post('/action', defaultLimiter,
 									timestamp: Date.now()
 								};
 								
-								// Add additional deviceIds to response
+								// Add additional deviceIds to response if multi-device command
 								for (x = 0; x < arrCommandsDevices.length; x++) {
 									try {
 										command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
-										logger.log('debug', "[GHome Exec API] Added endpointId to multi-command response: " + JSON.stringify(command));
 									}
 									catch(e) {
 										logger.log('error', "[GHome Exec API] Unable to add endpointId to multi-command response, error: " + e);
 									}
 								}
-
 								onGoingCommands[requestId + element.id] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
 							}
 						});
