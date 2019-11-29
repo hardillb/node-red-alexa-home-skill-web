@@ -280,7 +280,7 @@ router.post('/action', defaultLimiter,
 					//var devicesJSON = JSON.parse(JSON.stringify(devices));
 					//logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
 					logger.log('debug', "[GHome Exec API] # of endpoints in command request: " + arrCommands.length);
-					
+
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
@@ -430,7 +430,13 @@ router.post('/action', defaultLimiter,
 									source: "Google",
 									timestamp: Date.now()
 								};
-								onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
+								
+								// Check whether this command is targeted at multiple endpoints
+								//if (arrCommandsDevices.length > 1){
+								//	command.expectedResponseCount = arrCommandsDevices.length;
+								//}
+
+								onGoingCommands[requestId + element.id] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
 							}
 						});
 					}
@@ -560,7 +566,7 @@ mqttClient.on('message',function(topic,message){
 		logger.log('info', "[GHome API] Acknowledged MQTT response message for topic: " + topic);
 		var payload = JSON.parse(message.toString());
 		//logger.log('debug', "[GHome API] Response MQTT message for user: " + username + ", message: " + message);
-		var commandWaiting = onGoingCommands[payload.messageId];
+		var commandWaiting = onGoingCommands[payload.messageId + endpointId];
 		if (commandWaiting) {
 			//if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[GHome API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
@@ -571,6 +577,38 @@ mqttClient.on('message',function(topic,message){
 					var commandSource = JSON.stringify(commandWaiting.source);
 					commandSource = commandSource.replace(/['"]+/g, '');
 					if (commandSource == "Google") {
+
+						//if (commandWaiting.hasOwnProperty("expectedResponseCount") && commandWaiting.expectedResponseCount > 1 ) {
+							// Tag command as successful: 
+							//commandWaiting.success = true;
+
+							// Add to list of devices in response?
+
+							// Look at how to separate out the incoming commands - current keys get overwritten due to duplicate requestId
+
+							// Review how waiting commands are being deleted/ stored
+								// Need to capture successful commands and then send state as combined message
+								// 
+
+							// Look for any other command with same messageId / match endpointId
+							// if (Array.isArray(commandWaiting)){
+							// 	for (i = 0; i < commandWaiting.length; i++) {
+							// 		if (commandWaiting[i].hasOwnProperty("success") && commandWaiting[i].success == true){
+							// 			//commandWaiting[i].response.payload.commands[0].ids.push(endpointId)
+							// 		}
+							// 		if (commandWaiting[i].hasOwnProperty("success") && commandWaiting[i].success == false){
+							// 			// Don't add to list of devices that are successful
+							// 		}
+							// 	}
+							// }
+								  
+							// If also successful send response and delete all waiting commands with same messageId
+							// What to do about clearing the message, think you can't - have to wait for both/ or a timeout on the other then send correct endpoinIds
+
+
+						//}
+
+
 						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 						commandWaiting.res.status(200).json(commandWaiting.response);
 					}
@@ -593,7 +631,8 @@ mqttClient.on('message',function(topic,message){
 					}
 				}
 			}
-			delete onGoingCommands[payload.messageId];
+
+			delete onGoingCommands[payload.messageId + endpointId];
 			var params = {
 				ec: "Command",
 				ea: "Command API successfully processed MQTT command for username: " + username,
