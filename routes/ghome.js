@@ -607,10 +607,14 @@ mqttClient.on('message',function(topic,message){
 
 
 						//}
-
-
+						
 						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
-						commandWaiting.res.status(200).json(commandWaiting.response);
+						try {
+							commandWaiting.res.status(200).json(commandWaiting.response);
+						}
+						catch(e) {
+							logger.log('warning', "[GHome API] Warning: " + e);
+						}
 					}
 				}
 				// if (commandWaiting.hasOwnProperty('source') && commandSource == "Google") {
