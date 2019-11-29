@@ -34,11 +34,16 @@ const ghomeJWT = process.env.GHOMEJWT;
 var gHomeReportState = false;
 var keys;
 if (!ghomeJWT) {
-	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
+	logger.log('warn', "[State API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
 }
 else {
-	gHomeReportState = true;
-	keys = JSON.parse(ghomeJWT);
+	try {
+		keys = JSON.parse(ghomeJWT);
+		gHomeReportState = true;
+    } catch (e) {
+		logger.log('warn', "[State API] Error parsing ghomeJWT environment variable: " + e )
+	}
+
 }
 // Alexa State Reporting
 var alexaReportState = false;

@@ -279,6 +279,8 @@ router.post('/action', defaultLimiter,
 					//logger.log('debug', "[GHome Exec API] Returned mongodb devices typeof:" + typeof devices);
 					//var devicesJSON = JSON.parse(JSON.stringify(devices));
 					//logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
+					logger.log('debug', "[GHome Exec API] # of endpoints in command request: " + arrCommands.length);
+					
 					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
@@ -428,7 +430,7 @@ router.post('/action', defaultLimiter,
 									source: "Google",
 									timestamp: Date.now()
 								};
-								onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+								onGoingCommands[requestId] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
 							}
 						});
 					}

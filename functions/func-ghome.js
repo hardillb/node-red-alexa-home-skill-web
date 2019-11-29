@@ -17,8 +17,13 @@ if (!ghomeJWT) {
 	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
 }
 else {
-	reportState = true;
-	keys = JSON.parse(ghomeJWT);
+	try {
+		keys = JSON.parse(ghomeJWT);
+		reportState = true;
+    } catch (e) {
+		logger.log('warn', "[GHome API] Error parsing ghomeJWT environment variable: " + e )
+        reportState = false;
+	}
 }
 // Google Home Sync =========================
 var enableGoogleHomeSync = true;
