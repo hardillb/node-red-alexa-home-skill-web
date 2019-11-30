@@ -115,7 +115,7 @@ $("#ThermostatController").change(function(e) {
 		$("#ColorTemperatureController").prop('checked', false);
 	}
 });
-//Enable Celsius and Farenheit options for Temperature Sesnor
+//Enable Celsius and Farenheit options for Temperature Sensor
 $("#TemperatureSensor").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		if ($('#ThermostatController').prop('checked') == false){
@@ -312,6 +312,40 @@ function checkType(type) {
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "CONTACT_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "ContactSensor"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if (type.id== "EXTERIOR_BLIND" && type.checked && !$('#OTHER').prop('checked')) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$("#RangeController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "EXTERIOR_BLIND") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "RangeController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
+	else if (type.id== "INTERIOR_BLIND" && type.checked && !$('#OTHER').prop('checked')) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$("#RangeController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "INTERIOR_BLIND") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "RangeController"){
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
 				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
 			}
