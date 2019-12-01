@@ -267,6 +267,13 @@ function setstate(username, endpointId, payload) {
 						notifyUser('warn', username, endpointId, alert);
 					}
 				};
+				if (payload.state.hasOwnProperty('mode')) { // Mode, with basic validation
+					if (typeof payload.state.mode == 'string'){dev.state.mode = payload.state.mode}
+					else {
+						alert = '[' + dev.friendlyName + '] ' + 'Invalid mode state, expecting payload.state.mode (string)';
+						notifyUser('warn', username, endpointId, alert);
+					}
+				};				
 				if (payload.state.hasOwnProperty('motion')) { // Motion, with validation
 					if (typeof payload.state.motion == 'string' && (payload.state.motion == 'DETECTED' || payload.state.motion == 'NOT_DETECTED')) {dev.state.motion = payload.state.motion}
 					else {

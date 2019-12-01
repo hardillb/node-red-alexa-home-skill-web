@@ -165,7 +165,7 @@ router.post('/action', defaultLimiter,
 						if (dev.type != "NA") {
 							// Check supported capability/ trait
 							devices[i].capabilities.forEach(function(capability){
-								var trait = gHomeReplaceCapability(capability);
+								var trait = gHomeReplaceCapability(capability, dev.type);
 								// Add supported traits, don't add duplicates
 								if (trait != "Not Supported" && dev.traits.indexOf(trait) == -1){
 									dev.traits.push(trait);
@@ -608,7 +608,7 @@ mqttClient.on('message',function(topic,message){
 							commandWaiting.res.status(200).json(commandWaiting.response);
 						}
 						catch(e) {
-							logger.log('warning', "[GHome API] Warning: " + e);
+							logger.log('warn', "[GHome API] Warning: " + e);
 						}
 					}
 				}
@@ -669,31 +669,41 @@ var timeout = setInterval(function(){
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 // Convert Alexa Device Capabilities to Google Home-compatible
-function gHomeReplaceCapability(capability) {
-	// Limit supported traits, add new ones here
+function gHomeReplaceCapability(capability, type) {
+	// Generic mappings - capabilities, limited to GHome supported traits, add new ones here
 	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
 	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
 	else if(capability == "InputController"){return "action.devices.traits.InputSelector"} 
-	else if (capability == "PlaybackController"){return "action.devices.traits.MediaState"}
+	else if(capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
 	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
 	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
+	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
+	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){
+		return "action.devices.traits.OpenClose"
+	}
+	//else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
+	//	return "action.devices.traits.FanSpeed"
+	//}
 	else {return "Not Supported"}
 }
 // Convert Alexa Device Types to Google Home-compatible
 function gHomeReplaceType(type) {
 	// Limit supported device types, add new ones here
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
+	else if (type == "EXTERIOR_BLIND") {return "action.devices.types.AWNING"}
+	//else if (type == "FAN") {return "action.devices.types.FAN"}
+	else if (type == "INTERIOR_BLIND") {return "action.devices.types.BLINDS"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}
 	else if (type == "SMARTLOCK") {return "action.devices.types.LOCK"}
 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
-	else if (type == "TV") {return "action.devices.types.TV"}
 	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
 	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
+	else if (type == "TV") {return "action.devices.types.TV"}
 	else {return "NA"}
 }
 // Nested attribute/ element tester

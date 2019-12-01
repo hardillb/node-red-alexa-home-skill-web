@@ -235,9 +235,9 @@ router.get('/devices',
 					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
 					dev.capabilities = [];
 					// Grab device attributes for use in building discovery response
-					var devAttribues = (data[i].attributes || null);
+					var devAttributes = (data[i].attributes || null);
 					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttribues));
+						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttributes, dev.displayCategories));
 					});
 					// Add specific RangeController interface
 					if (data[i].capabilities.indexOf('RangeController') > -1){
@@ -509,6 +509,25 @@ router.post('/command2',
 						}]
 					};
 				}
+				// Build Mode Controller Response Context - Interior and Exterior Blinds
+				// if (namespace == "Alexa.ModeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+				// 	if (name == "SetMode") {
+				// 		var contextResult = {
+				// 			"properties": [{
+				// 				"namespace": "Alexa.ModeController",
+				// 				"instance" : "Blinds.Position",
+				// 				"name": "mode",
+				// 				"value": req.body.directive.payload.percentage,
+				// 				"timeOfSample": dt.toISOString(),
+				// 				"uncertaintyInMilliseconds": 500
+				// 			}]
+				// 		};	
+				// 	}
+				// 	if (name == "AdjustMode ") {
+				// 		// Unsupported for Interior/ Exterior Blinds
+				// 		// Send INVALID_DIRECTIVE : https://developer.amazon.com/docs/device-apis/alexa-errorresponse.html#error-types
+				// 	}
+				// }
 				// Build PercentageController Response Context
 				if (namespace == "Alexa.PercentageController") {
 					if (name == "SetPercentage") {
@@ -561,8 +580,43 @@ router.post('/command2',
 						}]
 					};
 				}
-				// Build RangeController Response Context
-				if (namespace == "Alexa.RangeController") {
+				// Build RangeController Interior/ Exterior Blind Response Context
+				if (namespace == "Alexa.RangeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+					if (name == "SetRangeValue") {
+						var contextResult = {
+							"properties": [
+								{
+								"namespace": "Alexa.RangeController",
+								"instance" : "Blind.Lift",
+								"name": "rangeValue",
+								"value":  req.body.directive.payload.rangeValue,
+								"timeOfSample": dt.toISOString(),
+								"uncertaintyInMilliseconds": 50
+								}
+							]}
+					}
+					else if (name == "AdjustRangeValue") {
+						var rangeValue;
+						var hasrangeValue = getSafe(() => deviceJSON.state.rangeValue);
+						if (hasrangeValue != undefined) {
+							if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta > 100) {rangeValue = 100}
+							else if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta < 0) {rangeValue = 0}
+							else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValue}
+							var contextResult = {
+								"properties": [{
+									"namespace": "Alexa.RangeController",
+									"instance" : "Blind.Lift",
+									"name": "rangeValue",
+									"value":  rangeValue,
+									"timeOfSample": dt.toISOString(),
+									"uncertaintyInMilliseconds": 50
+									}]
+								};
+							}
+					}
+				}
+				// Build Generic RangeController Response Context
+				else if (namespace == "Alexa.RangeController") {
 					if (name == "SetRangeValue") {
 						var contextResult = {
 							"properties": [
@@ -783,7 +837,14 @@ router.post('/command2',
 					}
 					else {logger.log('debug', "[Alexa API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
 				}
-				
+
+				// Generate 418 error, INVALID_DIRECTIVE on ModeController AdjustMode
+				// if (req.body.directive.header.namespace == "Alexa.ModeController" && req.body.directive.header.name == "AdjustMode" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+				// 	logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested AdjustMode directive which is unsupported on the device type." );
+				// 	res.status(418).send();
+				// 	validationStatus = false;
+				// }
+
 				if (validationStatus) {
 					try{
 						mqttClient.publish(topic,message);
@@ -800,7 +861,7 @@ router.post('/command2',
 						timestamp: Date.now()
 					};
 			
-					// Command drops into buffer w/ 6000ms timeout (see defined funcitonm above) - ACK comes from N/R flow
+					// Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
 					onGoingCommands[req.body.directive.header.messageId] = command;
 				}
 			}
@@ -992,7 +1053,7 @@ function getSafe(fn) {
     }
 }
 // Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
-function replaceCapability(capability, reportState, attributes) {
+function replaceCapability(capability, reportState, attributes, type) {
 	// BrightnessController
 	if(capability == "BrightnessController")  {
 		return {
@@ -1161,6 +1222,115 @@ function replaceCapability(capability, reportState, attributes) {
 				"retrievable": reportState
 				}
 			};
+	}
+	// RangeController | Interior and Exterior Blinds
+	if(capability == "RangeController" && (type.indexOf("INTERIOR_BLIND") > 1 || type.indexOf("EXTERIOR_BLIND") > 1)) {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.RangeController",
+			"instance": "Blind.Lift",
+			"version": "3",
+			"properties": {
+				"supported": [
+				{
+					"name": "rangeValue"
+				}
+				],
+				"proactivelyReported": true,
+				"retrievable": true
+			},
+			"capabilityResources": {
+				"friendlyNames": [
+				{
+					"@type": "asset",
+					"value": {
+					"assetId": "Alexa.Setting.Opening"
+					}
+				}
+				]
+			},
+			"configuration": {
+				"supportedRange": {
+				"minimumValue": 0,
+				"maximumValue": 100,
+				"precision": 1
+				},
+				"unitOfMeasure": "Alexa.Unit.Percent"
+			},
+			"semantics": {
+				"actionMappings": [
+				{
+					"@type": "ActionsToDirective",
+					"actions": [
+					"Alexa.Actions.Close"
+					],
+					"directive": {
+					"name": "SetRangeValue",
+					"payload": {
+						"rangeValue": 0
+					}
+					}
+				},
+				{
+					"@type": "ActionsToDirective",
+					"actions": [
+					"Alexa.Actions.Open"
+					],
+					"directive": {
+					"name": "SetRangeValue",
+					"payload": {
+						"rangeValue": 100
+					}
+					}
+				},
+				{
+					"@type": "ActionsToDirective",
+					"actions": [
+					"Alexa.Actions.Lower"
+					],
+					"directive": {
+					"name": "AdjustRangeValue",
+					"payload": {
+						"rangeValueDelta": -10,
+						"rangeValueDeltaDefault": false
+					}
+					}
+				},
+				{
+					"@type": "ActionsToDirective",
+					"actions": [
+					"Alexa.Actions.Raise"
+					],
+					"directive": {
+					"name": "AdjustRangeValue",
+					"payload": {
+						"rangeValueDelta": 10,
+						"rangeValueDeltaDefault": false
+					}
+					}
+				}
+				],
+				"stateMappings": [
+				{
+					"@type": "StatesToValue",
+					"states": [
+					"Alexa.States.Closed"
+					],
+					"value": 0
+				},
+				{
+					"@type": "StatesToRange",
+					"states": [
+					"Alexa.States.Open"
+					],
+					"range": {
+					"minimumValue": 1,
+					"maximumValue": 100
+					}
+				}
+				]
+			}
+			}
 	}
 	// RangeController
 	if(capability == "RangeController") {

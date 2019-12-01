@@ -146,6 +146,9 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                         });
                                 }
                                 break;
+                            //case "ModeController":
+                                // Return Mode State
+                                //break;
                             case "MotionSensor":
                                 // Return detectionState
                                 if (deviceJSON.state.hasOwnProperty('motion') && deviceJSON.state.hasOwnProperty('time')) {
@@ -186,8 +189,19 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                 }
                                 break;
                             case "RangeController":
-                                // Return Power State
-                                if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time')) {
+                                // Interior and Exterior Blinds
+                                if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time') && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+                                    properties.push({
+                                        "namespace": "Alexa.RangeController",
+                                        "instance" : "Blind.Lift",
+                                        "name": "rangeValue",
+                                        "value": deviceJSON.state.rangeValue,
+                                        "timeOfSample": deviceJSON.state.time,
+                                        "uncertaintyInMilliseconds": 1000
+                                        });
+                                }
+                                // General/ fall-back return rangeValue
+                                else if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time')) {
                                     properties.push({
                                                 "namespace": "Alexa.RangeController",
                                                 "instance": "NodeRed.Fan.Speed",
