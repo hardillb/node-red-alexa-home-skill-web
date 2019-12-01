@@ -190,7 +190,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                 break;
                             case "RangeController":
                                 // Interior and Exterior Blinds
-                                if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time') && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+                                if (deviceJSON.state.hasOwnProperty('rangeValue') && deviceJSON.state.hasOwnProperty('time') && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
                                     properties.push({
                                         "namespace": "Alexa.RangeController",
                                         "instance" : "Blind.Lift",

@@ -510,7 +510,7 @@ router.post('/command2',
 					};
 				}
 				// Build Mode Controller Response Context - Interior and Exterior Blinds
-				// if (namespace == "Alexa.ModeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+				// if (namespace == "Alexa.ModeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
 				// 	if (name == "SetMode") {
 				// 		var contextResult = {
 				// 			"properties": [{
@@ -581,7 +581,7 @@ router.post('/command2',
 					};
 				}
 				// Build RangeController Interior/ Exterior Blind Response Context
-				if (namespace == "Alexa.RangeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+				if (namespace == "Alexa.RangeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
 					if (name == "SetRangeValue") {
 						var contextResult = {
 							"properties": [
@@ -839,7 +839,7 @@ router.post('/command2',
 				}
 
 				// Generate 418 error, INVALID_DIRECTIVE on ModeController AdjustMode
-				// if (req.body.directive.header.namespace == "Alexa.ModeController" && req.body.directive.header.name == "AdjustMode" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLINDS') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLINDS') > -1)) {
+				// if (req.body.directive.header.namespace == "Alexa.ModeController" && req.body.directive.header.name == "AdjustMode" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
 				// 	logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested AdjustMode directive which is unsupported on the device type." );
 				// 	res.status(418).send();
 				// 	validationStatus = false;
