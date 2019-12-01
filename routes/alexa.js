@@ -1224,7 +1224,7 @@ function replaceCapability(capability, reportState, attributes, type) {
 			};
 	}
 	// RangeController | Interior and Exterior Blinds
-	if(capability == "RangeController" && (type.indexOf("INTERIOR_BLIND") > 1 || type.indexOf("EXTERIOR_BLIND") > 1)) {
+	if(capability == "RangeController" && (type.indexOf("INTERIOR_BLIND") > -1 || type.indexOf("EXTERIOR_BLIND") > -1)) {
 		return {
 			"type": "AlexaInterface",
 			"interface": "Alexa.RangeController",
@@ -1388,13 +1388,7 @@ function replaceCapability(capability, reportState, attributes, type) {
                           "value": {
                             "assetId": "Alexa.Value.Minimum"
                           }
-                        },
-						{
-						  "@type": "asset",
-						  "value": {
-							"assetId": "Alexa.Value.Closed"
-						  }
-						}
+                        }
 					  ]
 					}
 				  },
@@ -1425,12 +1419,6 @@ function replaceCapability(capability, reportState, attributes, type) {
 						  "@type": "asset",
 						  "value": {
 							"assetId": "Alexa.Value.High"
-						  }
-						},
-						{
-						  "@type": "asset",
-						  "value": {
-							"assetId": "Alexa.Value.Open"
 						  }
 						}
 					  ]
