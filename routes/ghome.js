@@ -234,7 +234,7 @@ router.post('/action', defaultLimiter,
 							"devices" : devs
 						}
 					}
-					logger.log('verbose', "[GHome Sync API] Discovery Response: " + JSON.stringify(response));
+					logger.log('verbose', "[GHome Sync API] Discovery Response for user: " + req.user.username + ", response: " + JSON.stringify(response));
 					// Send Response
 					res.status(200).json(response);
 					//if (debug == "true") {console.timeEnd('ghome-sync')};
