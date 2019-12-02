@@ -601,7 +601,7 @@ router.post('/command2',
 						if (hasrangeValue != undefined) {
 							if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta > 100) {rangeValue = 100}
 							else if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta < 0) {rangeValue = 0}
-							else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValue}
+							else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta}
 							var contextResult = {
 								"properties": [{
 									"namespace": "Alexa.RangeController",
@@ -636,7 +636,7 @@ router.post('/command2',
 						if (hasrangeValue != undefined) {
 							if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta > 10) {rangeValue = 10}
 							else if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta < 1) {rangeValue = 1}
-							else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValue}
+							else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta}
 							var contextResult = {
 								"properties": [{
 									"namespace": "Alexa.RangeController",
