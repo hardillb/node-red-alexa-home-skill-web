@@ -75,6 +75,9 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 						}
 					}
 				}
+				if (trait == "action.devices.traits.FanSpeed") {
+					dev.currentFanSpeedSetting = "S" + device.state.rangeValue.toString();
+				}
 				if (trait == "action.devices.traits.LockUnlock") {
 					if (device.state.lock.toLowerCase() == 'locked') {
 						dev.isLocked = true;
@@ -82,7 +85,6 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 					else {
 						dev.isLocked = false;
 					}
-					
 				}
 				if (trait == "action.devices.traits.OnOff") {
 					if (device.state.power.toLowerCase() == 'on') {
@@ -234,11 +236,11 @@ function gHomeReplaceCapability(capability, type) {
 	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
 	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
 	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){
-		return "action.devices.traits.OpenClose"
+		return "action.devices.traits.OpenClose";
 	}
-	//else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
-	//	return "action.devices.traits.FanSpeed"
-	//}
+	else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
+		return "action.devices.traits.FanSpeed";
+	}
 	else {return "Not Supported"}
 }
 // Convert Alexa Device Types to Google Home-compatible
@@ -246,7 +248,7 @@ function gHomeReplaceType(type) {
 	// Limit supported device types, add new ones here
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "EXTERIOR_BLIND") {return "action.devices.types.AWNING"}
-	//else if (type == "FAN") {return "action.devices.types.FAN"}
+	else if (type == "FAN") {return "action.devices.types.FAN"}
 	else if (type == "INTERIOR_BLIND") {return "action.devices.types.BLINDS"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}

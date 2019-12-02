@@ -338,6 +338,23 @@ function checkType(type) {
 			}
 		});
 	}
+	else if (type.id== "FAN" && type.checked && !$('#OTHER').prop('checked')) {
+		$('#simpleOptions').show();
+		$('#ReportState').prop('checked', true);
+		$('#stateReporting').show(); 
+		$("#RangeController").prop('checked',true);
+		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "FAN") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
+		$('input[name=capabilities]').each(function(index){
+			if ($(this).attr("id") != "RangeController"){
+				$('input[id^='+$(this).attr("id")+']').prop("checked", false);
+				$('input[id^='+$(this).attr("id")+']').attr("disabled", "disabled");
+			}
+			else {
+				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			}
+		});
+	}
 	else if (type.id== "INTERIOR_BLIND" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);

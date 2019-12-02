@@ -202,6 +202,75 @@ router.post('/action', defaultLimiter,
 							dev.attributes.colorTemperatureRange.temperatureMinK = parseInt(dev.attributes.colorTemperatureRange.temperatureMinK);
 							dev.attributes.colorTemperatureRange.temperatureMaxK = parseInt(dev.attributes.colorTemperatureRange.temperatureMaxK);
 						}
+						// FanSpeed, map 1:1 with RangeController 1-10
+						if (devices[i].capabilities.indexOf("RangeController") > -1 && (dev.type.indexOf('action.devices.types.FAN') > -1 || dev.type.indexOf('action.devices.types.THERMOSTAT') > -1 )){
+							dev.attributes.availableFanSpeeds = {
+								"availableFanSpeeds": {
+								  "speeds": [{
+									"speed_name": "S1",
+									"speed_values": [{
+									  "speed_synonym": ["low", "speed 1"],
+									  "lang": "en" }]
+									},
+									{
+									"speed_name": "S2",
+									"speed_values": [{
+									  "speed_synonym": ["speed 2"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S3",
+									"speed_values": [{
+									  "speed_synonym": ["speed 3"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S4",
+									"speed_values": [{
+									  "speed_synonym": ["speed 4"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S5",
+									"speed_values": [{
+									  "speed_synonym": ["medium", "speed 5"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S6",
+									"speed_values": [{
+									  "speed_synonym": ["speed 6"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S7",
+									"speed_values": [{
+									  "speed_synonym": ["speed 7"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S8",
+									"speed_values": [{
+									  "speed_synonym": ["speed 8"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S9",
+									"speed_values": [{
+									  "speed_synonym": ["speed 9"],
+									   "lang": "en" }]
+									},
+									{
+									"speed_name": "S10",
+									"speed_values": [{
+									  "speed_synonym": ["high", "maximum", "speed 10"],
+									   "lang": "en" }]
+									}],
+								  "ordered": true
+								  },
+								"reversible": false
+							  }
+						}
 						// action.devices.traits.TemperatureSetting, adjust dev.attributes to suit Google Home
 						if (dev.traits.indexOf("action.devices.traits.TemperatureSetting") > -1 ){
 							// Is a HVAC unit, change device type accordingly
@@ -683,11 +752,11 @@ function gHomeReplaceCapability(capability, type) {
 	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
 	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
 	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){
-		return "action.devices.traits.OpenClose"
+		return "action.devices.traits.OpenClose";
 	}
-	//else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
-	//	return "action.devices.traits.FanSpeed"
-	//}
+	else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
+		return "action.devices.traits.FanSpeed";
+	}
 	else {return "Not Supported"}
 }
 // Convert Alexa Device Types to Google Home-compatible
@@ -695,7 +764,7 @@ function gHomeReplaceType(type) {
 	// Limit supported device types, add new ones here
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "EXTERIOR_BLIND") {return "action.devices.types.AWNING"}
-	//else if (type == "FAN") {return "action.devices.types.FAN"}
+	else if (type == "FAN") {return "action.devices.types.FAN"}
 	else if (type == "INTERIOR_BLIND") {return "action.devices.types.BLINDS"}
 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
 	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}
