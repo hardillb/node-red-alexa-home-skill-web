@@ -1232,9 +1232,9 @@ function replaceCapability(capability, reportState, attributes, type) {
 			"version": "3",
 			"properties": {
 				"supported": [
-				{
-					"name": "rangeValue"
-				}
+					{
+						"name": "rangeValue"
+					}
 				],
 				"proactivelyReported": true,
 				"retrievable": true
@@ -1244,16 +1244,16 @@ function replaceCapability(capability, reportState, attributes, type) {
 				{
 					"@type": "asset",
 					"value": {
-					"assetId": "Alexa.Setting.Opening"
+						"assetId": "Alexa.Setting.Opening"
 					}
 				}
 				]
 			},
 			"configuration": {
 				"supportedRange": {
-				"minimumValue": 0,
-				"maximumValue": 100,
-				"precision": 1
+					"minimumValue": 0,
+					"maximumValue": 100,
+					"precision": 1
 				},
 				"unitOfMeasure": "Alexa.Unit.Percent"
 			},
@@ -1261,71 +1261,59 @@ function replaceCapability(capability, reportState, attributes, type) {
 				"actionMappings": [
 				{
 					"@type": "ActionsToDirective",
-					"actions": [
-					"Alexa.Actions.Close"
-					],
+					"actions": ["Alexa.Actions.Close"],
 					"directive": {
-					"name": "SetRangeValue",
-					"payload": {
-						"rangeValue": 0
-					}
+						"name": "SetRangeValue",
+						"payload": {
+							"rangeValue": 0
+						}
 					}
 				},
 				{
 					"@type": "ActionsToDirective",
-					"actions": [
-					"Alexa.Actions.Open"
-					],
+					"actions": ["Alexa.Actions.Open"],
 					"directive": {
-					"name": "SetRangeValue",
-					"payload": {
-						"rangeValue": 100
-					}
+						"name": "SetRangeValue",
+						"payload": {
+							"rangeValue": 100
+						}
 					}
 				},
 				{
 					"@type": "ActionsToDirective",
-					"actions": [
-					"Alexa.Actions.Lower"
-					],
+					"actions": ["Alexa.Actions.Lower"],
 					"directive": {
-					"name": "AdjustRangeValue",
-					"payload": {
-						"rangeValueDelta": -10,
-						"rangeValueDeltaDefault": false
-					}
+						"name": "AdjustRangeValue",
+						"payload": {
+							"rangeValueDelta": -10,
+							"rangeValueDeltaDefault": false
+						}
 					}
 				},
 				{
 					"@type": "ActionsToDirective",
-					"actions": [
-					"Alexa.Actions.Raise"
-					],
+					"actions": ["Alexa.Actions.Raise"],
 					"directive": {
-					"name": "AdjustRangeValue",
-					"payload": {
-						"rangeValueDelta": 10,
-						"rangeValueDeltaDefault": false
-					}
+						"name": "AdjustRangeValue",
+						"payload": {
+							"rangeValueDelta": 10,
+							"rangeValueDeltaDefault": false
+						}
 					}
 				}
 				],
 				"stateMappings": [
 				{
 					"@type": "StatesToValue",
-					"states": [
-					"Alexa.States.Closed"
-					],
+					"states": ["Alexa.States.Closed"],
 					"value": 0
 				},
 				{
 					"@type": "StatesToRange",
-					"states": [
-					"Alexa.States.Open"
-					],
+					"states": ["Alexa.States.Open"],
 					"range": {
-					"minimumValue": 1,
-					"maximumValue": 100
+						"minimumValue": 1,
+						"maximumValue": 100
 					}
 				}
 				]
