@@ -497,13 +497,18 @@ router.post('/action', defaultLimiter,
 									res: res,
 									response: response,
 									source: "Google",
+									devices: [],
+									acknowledged: false,
 									timestamp: Date.now()
 								};
 								
-								// Add additional deviceIds to response if multi-device command
+								// Add additional deviceIds to command.devices if multi-device command to enable correlation of responses
 								for (x = 0; x < arrCommandsDevices.length; x++) {
 									try {
-										if (arrCommandsDevices[x].id != element.id){command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id)};
+										if (arrCommandsDevices[x].id != element.id){
+											//command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
+											command.devices.push(arrCommandsDevices[x].id);
+										}
 									}
 									catch(e) {
 										logger.log('error', "[GHome Exec API] Unable to add endpointId to multi-command response, error: " + e);
@@ -513,10 +518,6 @@ router.post('/action', defaultLimiter,
 							}
 						});
 					}
-					// All commands issued
-
-
-
 					//if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 				else if (!device) {
@@ -551,32 +552,32 @@ router.post('/action', defaultLimiter,
 			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
 				if (user && devices) {
 					var arrQueryDevices = req.body.inputs[0].payload.devices;
-						var response = {
-							"requestId": requestId,
-							"payload": {
-								"devices" : {}
+					var response = {
+						"requestId": requestId,
+						"payload": {
+							"devices" : {}
+						}
+					}
+					const start = async () => {
+						await Promise.all(arrQueryDevices.map(async dev => {
+							var data = devices.find(obj => obj.endpointId == dev.id);
+							if (data) {
+								await queryDeviceState(data, function(state) {
+									if (response != undefined) {
+										response.payload.devices[data.endpointId] = state;
+									}
+								});
 							}
-						}
-						const start = async () => {
-							await Promise.all(arrQueryDevices.map(async dev => {
-								var data = devices.find(obj => obj.endpointId == dev.id);
-								if (data) {
-									await queryDeviceState(data, function(state) {
-										if (response != undefined) {
-											response.payload.devices[data.endpointId] = state;
-										}
-									});
-								}
-								else {
-									logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
-								}
-							}))
-							// Send Response
-							logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
-							res.status(200).json(response);
-							//if (debug == "true") {console.timeEnd('ghome-query')};
-						}
-						start()
+							else {
+								logger.log('warn', "[GHome Query API] Unable to match a requested device with user endpointId");
+							}
+						}))
+						// Send Response
+						logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
+						res.status(200).json(response);
+						//if (debug == "true") {console.timeEnd('ghome-query')};
+					}
+					start()
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Query API] User not found");
@@ -654,30 +655,74 @@ mqttClient.on('message',function(topic,message){
 					var commandSource = JSON.stringify(commandWaiting.source);
 					commandSource = commandSource.replace(/['"]+/g, '');
 					if (commandSource == "Google") {
+						// Check if command had >1 target device, if so we need to ensure all commands are successful
+						var arrCommandDevices =  commandWaiting.devices;
+						///////////////////////////////////////////////////////////////////////////
+						// Multi-device command, perform correlation of responses
+						///////////////////////////////////////////////////////////////////////////
+						if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
+							// Mark this command as acknowledged/ successful as we have a response for it
+							commandWaiting.acknowledged = true;
+							// Add endpointId to response (if it isn't already there)
+							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){commandWaiting.response.payload.commands[0].ids.push(endpointId)};
+							// Check for other commands, and that all are acknowledged
+							var sendResponse = true;
+							for (x = 0; x < arrCommandDevices.length; x++) {
+								var additionalCommand = onGoingCommands[payload.messageId + arrCommandDevices[x].id];
+								// Check that endpointId hasn't already been added to response
+								if (additionalCommand && additionalCommand.acknowledged == true && commandWaiting.response.payload.commands[0].ids.indexOf(arrCommandDevices[x].id) == -1){
+									// Add successful command endpointId to response and delete the additionalCommand that is waiting
+									// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
+									if (additionalCommand.acknowledged == true) {
+										commandWaiting.response.payload.commands[0].ids.push(arrCommandDevices[x].id);
+										delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
+									}
+									// This additional command is yet to be acknowledged via MQTT response from Node-RED
+									else {
+										sendResponse = false;
+									}
+								}
+							}
+							// All commands in multi-device command have been executed successfully
+							if (sendResponse == true) {
+								logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
+								try {
+									// Multi-devices this generates an error as res is sent after first device
+									commandWaiting.res.status(200).json(commandWaiting.response);
+									delete onGoingCommands[payload.messageId + endpointId];
 
-						//if (commandWaiting.hasOwnProperty("expectedResponseCount") && commandWaiting.expectedResponseCount > 1 ) {
-							// Tag command as successful: 
-							//commandWaiting.success = true;
+									var params = {
+										ec: "Command",
+										ea: "Command API successfully processed MQTT command for username: " + username,
+										uid: username,
+									  }
+									if (enableAnalytics) {visitor.event(params).send()};
+								}
+								catch(e) {
+									logger.log('warn', "[GHome API] Warning: " + e);
+								}
+							}
 
-							// Add to list of devices in response?
-
-							// Review how waiting commands are being deleted/ stored
-								// Need to capture successful commands and then send state as combined message
-								// 
-
-							//commandWaiting[i].response.payload.commands[0].ids.push(endpointId)
-								  
-							// If also successful send response and delete all waiting commands with same messageId
-							// What to do about clearing the message, think you can't - have to wait for both/ or a timeout on the other then send correct endpoinIds
-						//}
-
-						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
-						try {
-							// Multi-devices this generates an error as res is sent after first device
-							commandWaiting.res.status(200).json(commandWaiting.response);
 						}
-						catch(e) {
-							logger.log('warn', "[GHome API] Warning: " + e);
+						///////////////////////////////////////////////////////////////////////////
+						// Single-device command
+						///////////////////////////////////////////////////////////////////////////
+						else {
+							logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
+							try {
+								commandWaiting.res.status(200).json(commandWaiting.response);
+								delete onGoingCommands[payload.messageId + endpointId];
+
+								var params = {
+									ec: "Command",
+									ea: "Command API successfully processed MQTT command for username: " + username,
+									uid: username,
+								  }
+								if (enableAnalytics) {visitor.event(params).send()};
+							}
+							catch(e) {
+								logger.log('warn', "[GHome API] Warning: " + e);
+							}
 						}
 					}
 				}
@@ -689,21 +734,22 @@ mqttClient.on('message',function(topic,message){
 					var commandSource = JSON.stringify(commandWaiting.source);
 					commandSource = commandSource.replace(/['"]+/g, '');
 					if (commandSource == "Google") {
+						// Change response to FAILED
 						delete commandWaiting.response.state;
 						commandWaiting.response.status = "FAILED";
+						// Send Response
 						logger.log('warn', "[GHome API] Failed Google Home MQTT command for user: " + username + ", response: " + JSON.stringify(commandWaiting.response));
-						commandWaiting.res.status(200).json(commandWaiting.response);
+						try {
+							commandWaiting.res.status(200).json(commandWaiting.response);
+						}
+						catch(e) {
+							logger.log('warn', "[GHome API] Error sending failed command response for user: " + username + ", error: " + e);
+						}
+						delete onGoingCommands[payload.messageId + endpointId];
 					}
 				}
 			}
-
-			delete onGoingCommands[payload.messageId + endpointId];
-			var params = {
-				ec: "Command",
-				ea: "Command API successfully processed MQTT command for username: " + username,
-				uid: username,
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
+			//delete onGoingCommands[payload.messageId + endpointId];
 		}
 		//if (debug == "true") {console.timeEnd('mqtt-response')};
 	}
@@ -720,16 +766,60 @@ var timeout = setInterval(function(){
 		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
 		if (waiting) {
 			var diff = now - waiting.timestamp;
-			if (diff > 6000) {
+			if (diff > 2000) {
 				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
-				waiting.res.status(504).send('{"error": "timeout"}');
-				delete onGoingCommands[keys[key]];
-				//measurement.send({
-				//	t:'event', 
-				//	ec:'command', 
-				//	ea: 'timeout',
-				//	uid: waiting.user
-				//});
+
+				var arrCommandDevices =  waiting.devices;
+				///////////////////////////////////////////////////////////////////////////
+				// Multi-device command, perform correlation of responses
+				///////////////////////////////////////////////////////////////////////////
+				// Check for other commands, should only find one as we've cleaned up further up
+				var sendResponse = true;
+				var response = undefined;
+				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){ 
+					for (x = 0; x < arrCommandDevices.length; x++) {
+						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x].id];
+						if (additionalCommand.acknowledged == true) {
+							response = additionalCommand.response;
+							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
+						}
+						// Additional command yet to be acknowledged/ i.e. not successful
+						else {
+							sendResponse = false;
+						}
+					}
+					// All commands in multi-device command have been executed successfully
+					if (sendResponse == true && response !== undefined) {
+						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(waiting.response));
+						try {
+							// Multi-devices this generates an error as res is sent after first device
+							waiting.res.status(200).json(response);
+							delete onGoingCommands[keys[key]];
+
+						}
+						catch(e) {
+							logger.log('warn', "[GHome API] Warning: " + e);
+						}
+					}
+					// No acknowledged commands, so send timeout
+					else {
+						waiting.res.status(504).send('{"error": "timeout"}');
+						delete onGoingCommands[keys[key]];
+					}
+				}
+				///////////////////////////////////////////////////////////////////////////
+				// Single device command, perform correlation of responses
+				///////////////////////////////////////////////////////////////////////////
+				else {
+					waiting.res.status(504).send('{"error": "timeout"}');
+					delete onGoingCommands[keys[key]];
+					//measurement.send({
+					//	t:'event', 
+					//	ec:'command', 
+					//	ea: 'timeout',
+					//	uid: waiting.user
+					//});
+				}
 			}
 		}
 	}
