@@ -684,12 +684,12 @@ mqttClient.on('message',function(topic,message){
 								///
 
 								// Check that endpointId hasn't already been added to response
-								if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true && commandWaiting.response.payload.commands[0].ids.indexOf(arrCommandDevices[x].id) == -1){
+								if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true && commandWaiting.response.payload.commands[0].ids.indexOf(arrCommandDevices[x]) == -1){
 									// Add successful command endpointId to response and delete the additionalCommand that is waiting
 									// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
 									if (additionalCommand.acknowledged == true) {
-										commandWaiting.response.payload.commands[0].ids.push(arrCommandDevices[x].id);
-										delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
+										commandWaiting.response.payload.commands[0].ids.push(arrCommandDevices[x]);
+										delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 										logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
 									}
 									// This additional command is yet to be acknowledged via MQTT response from Node-RED
@@ -795,11 +795,11 @@ var timeout = setInterval(function(){
 				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){ 
 					logger.log('debug', "[GHome API] Multi-device command waiting");
 					for (x = 0; x < arrCommandDevices.length; x++) {
-						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x].id];
+						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x]];
 						if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true) {
 							logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
 							response = additionalCommand.response;
-							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
+							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 						}
 						// Additional command yet to be acknowledged/ i.e. not successful
 						else {
