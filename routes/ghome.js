@@ -676,15 +676,11 @@ mqttClient.on('message',function(topic,message){
 
 								/// Temporary
 								if (additionalCommand){logger.log('debug', "[GHome API] Found Additional Command")}
+									if (additionalCommand.acknowledged){logger.log('debug', "[GHome API] Found Additional Command acknowledged element")}
+									if (additionalCommand.acknowledged == true){logger.log('debug', "[GHome API] Additional Command acknowledged element TRUE")}
 								else {logger.log('debug', "[GHome API] Did Not Find Additional Command")}
-
-								if (additionalCommand.acknowledged){logger.log('debug', "[GHome API] Found Additional Command acknowledged element")}
-								else {logger.log('debug', "[GHome API] Did not Find Additional Command acknowledged element")}
-
-								if (additionalCommand.acknowledged == true){logger.log('debug', "[GHome API] Additional Command acknowledged element TRUE")}
-								else {logger.log('debug', "[GHome API] Additional Command acknowledged element FALSE")}
 								///
-								
+
 								// Check that endpointId hasn't already been added to response
 								if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true && commandWaiting.response.payload.commands[0].ids.indexOf(arrCommandDevices[x].id) == -1){
 									// Add successful command endpointId to response and delete the additionalCommand that is waiting
