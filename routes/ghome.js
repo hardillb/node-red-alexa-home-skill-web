@@ -689,7 +689,7 @@ mqttClient.on('message',function(topic,message){
 										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
 										if (additionalCommand.acknowledged == true) {
 											onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
-											//delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
+											delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 											logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
 										}
 										// This additional command is yet to be acknowledged via MQTT response from Node-RED
