@@ -662,7 +662,9 @@ mqttClient.on('message',function(topic,message){
 						// Multi-device command, perform correlation of responses
 						///////////////////////////////////////////////////////////////////////////
 						if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
-							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
+							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", ***existing*** response: " + JSON.stringify(commandWaiting.response));
+							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", additional devices: " + JSON.stringify(commandWaiting.devices));
+
 							// Mark this command as acknowledged/ successful as we have a response for it
 							commandWaiting.acknowledged = true;
 							// Add endpointId to response (if it isn't already there)
@@ -678,11 +680,11 @@ mqttClient.on('message',function(topic,message){
 									if (additionalCommand.acknowledged == true) {
 										commandWaiting.response.payload.commands[0].ids.push(arrCommandDevices[x].id);
 										delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
-										logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
+										logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
 									}
 									// This additional command is yet to be acknowledged via MQTT response from Node-RED
 									else {
-										logger.log('debug', "[GHome API] Google Home multi-device command *not* acknowledged: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
+										logger.log('debug', "[GHome API] Google Home multi-device command *not* acknowledged: " + username +  ", ***un-modified*** response: " + JSON.stringify(commandWaiting.response));
 										sendResponse = false;
 									}
 								}
