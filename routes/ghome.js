@@ -666,9 +666,9 @@ mqttClient.on('message',function(topic,message){
 							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", additional devices: " + JSON.stringify(commandWaiting.devices));
 
 							// Mark this command as acknowledged/ successful as we have a response for it
-							commandWaiting.acknowledged = true;
+							onGoingCommands[payload.messageId + endpointId].acknowledged = true;
 							// Add endpointId to response (if it isn't already there)
-							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){commandWaiting.response.payload.commands[0].ids.push(endpointId)};
+							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(endpointId)};
 							// Check for other commands, and that all are acknowledged
 							var sendResponse = true;
 							for (x = 0; x < arrCommandDevices.length; x++) {
@@ -689,7 +689,7 @@ mqttClient.on('message',function(topic,message){
 									// Add successful command endpointId to response and delete the additionalCommand that is waiting
 									// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
 									if (additionalCommand.acknowledged == true) {
-										commandWaiting.response.payload.commands[0].ids.push(arrCommandDevices[x]);
+										onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
 										//delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 										logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
 									}
