@@ -806,6 +806,7 @@ var timeout = setInterval(function(){
 						}
 						catch(e) {
 							logger.log('warn', "[GHome API] Warning: " + e);
+							delete onGoingCommands[keys[key]];
 						}
 					}
 					// No acknowledged commands, so send timeout
@@ -817,6 +818,7 @@ var timeout = setInterval(function(){
 						}
 						catch(e) {
 							logger.log('debug', "[GHome API] Google Home multi-device command timed-out, unable to send result, error: " + e);
+							delete onGoingCommands[keys[key]];
 						}
 					}
 				}
@@ -831,6 +833,7 @@ var timeout = setInterval(function(){
 					}
 					catch(e) {
 						logger.log('debug', "[GHome API] Google Home single-device command timed-out, unable to send result, error: " + e);
+						delete onGoingCommands[keys[key]];
 					}
 
 					//measurement.send({
