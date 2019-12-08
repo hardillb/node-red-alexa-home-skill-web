@@ -509,6 +509,7 @@ router.post('/action', defaultLimiter,
 											//command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
 											command.devices.push(arrCommandsDevices[x].id);
 											logger.log('debug', "[GHome Exec API] Added endpointId to multi-device command");
+											logger.log('debug', "[GHome Exec API] Command object: " + JSON.stringify(command) );
 										}
 									}
 									catch(e) {
