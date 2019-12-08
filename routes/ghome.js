@@ -668,7 +668,9 @@ mqttClient.on('message',function(topic,message){
 							// Mark this command as acknowledged/ successful as we have a response for it
 							onGoingCommands[payload.messageId + endpointId].acknowledged = true;
 							// Add endpointId to response (if it isn't already there)
-							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(endpointId)};
+							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){
+								onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(endpointId);
+							}
 							// Check for other commands, and that all are acknowledged
 							var sendResponse = true;
 							for (x = 0; x < arrCommandDevices.length; x++) {
@@ -685,7 +687,7 @@ mqttClient.on('message',function(topic,message){
 								///
 
 								// Check that endpointId hasn't already been added to response
-								if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true && commandWaiting.response.payload.commands[0].ids.indexOf(arrCommandDevices[x]) == -1){
+								if (additionalCommand && additionalCommand.acknowledged && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x])){
 									// Add successful command endpointId to response and delete the additionalCommand that is waiting
 									// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
 									if (additionalCommand.acknowledged == true) {
