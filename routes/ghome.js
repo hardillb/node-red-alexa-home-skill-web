@@ -672,7 +672,7 @@ mqttClient.on('message',function(topic,message){
 							// Check for other commands, and that all are acknowledged
 							var sendResponse = true;
 							for (x = 0; x < arrCommandDevices.length; x++) {
-								var additionalCommand = onGoingCommands[payload.messageId + arrCommandDevices[x].id];
+								var additionalCommand = onGoingCommands[payload.messageId + arrCommandDevices[x]];
 
 								/// Temporary
 								if (additionalCommand){
