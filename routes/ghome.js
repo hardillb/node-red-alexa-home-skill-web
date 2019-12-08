@@ -666,7 +666,10 @@ mqttClient.on('message',function(topic,message){
 							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", additional devices: " + JSON.stringify(commandWaiting.devices));
 
 							// Mark this command as acknowledged/ successful as we have a response for it
+							delete onGoingCommands[payload.messageId + endpointId].acknowledged;
 							onGoingCommands[payload.messageId + endpointId].acknowledged = true;
+							logger.log('debug', "[GHome API] Updated waiting command acknowledged: " + JSON.stringify(onGoingCommands[payload.messageId + endpointId].acknowledged))
+
 							// Add endpointId to response (if it isn't already there)
 							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){
 								onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(endpointId);
