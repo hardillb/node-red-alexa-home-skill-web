@@ -788,7 +788,7 @@ var timeout = setInterval(function(){
 		if (waiting) {
 			var diff = now - waiting.timestamp;
 			if (diff > 2000) {
-				logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
+				//logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
 
 				var arrCommandDevices =  waiting.devices;
 				///////////////////////////////////////////////////////////////////////////
