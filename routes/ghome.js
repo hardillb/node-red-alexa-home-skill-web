@@ -683,7 +683,6 @@ mqttClient.on('message',function(topic,message){
 
 								/// Temporary
 								if (additionalCommand){
-									logger.log('debug', "[GHome API] Found Additional Command")
 									if (additionalCommand.hasOwnProperty('acknowledged')){logger.log('debug', "[GHome API] Found Additional Command acknowledged element")}
 									if (additionalCommand.acknowledged == true){logger.log('debug', "[GHome API] Additional Command acknowledged element TRUE")}
 								}
@@ -691,17 +690,23 @@ mqttClient.on('message',function(topic,message){
 								///
 
 								// Check that endpointId hasn't already been added to response
-								if (additionalCommand && additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x])){
-									// Add successful command endpointId to response and delete the additionalCommand that is waiting
-									// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
-									if (additionalCommand.acknowledged == true) {
-										onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
-										//delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
-										logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
+								if (additionalCommand) {
+									logger.log('debug', "[GHome API] Found Additional Command")
+									if (additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x])){
+										// Add successful command endpointId to response and delete the additionalCommand that is waiting
+										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
+										if (additionalCommand.acknowledged == true) {
+											onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
+											//delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
+											logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
+										}
+										// This additional command is yet to be acknowledged via MQTT response from Node-RED
+										else {
+											logger.log('debug', "[GHome API] Google Home multi-device command *not* acknowledged: " + username +  ", ***un-modified*** response: " + JSON.stringify(commandWaiting.response));
+											sendResponse = false;
+										}
 									}
-									// This additional command is yet to be acknowledged via MQTT response from Node-RED
 									else {
-										logger.log('debug', "[GHome API] Google Home multi-device command *not* acknowledged: " + username +  ", ***un-modified*** response: " + JSON.stringify(commandWaiting.response));
 										sendResponse = false;
 									}
 								}
