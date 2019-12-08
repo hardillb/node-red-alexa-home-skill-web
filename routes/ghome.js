@@ -672,6 +672,7 @@ mqttClient.on('message',function(topic,message){
 							// Check for other commands, and that all are acknowledged
 							var sendResponse = true;
 							for (x = 0; x < arrCommandDevices.length; x++) {
+								logger.log('debug', "[GHome API] Trying to match inbound response, messageId: " + payload.messageId + ", with additional endPointId: " + arrCommandDevices[x])
 								var additionalCommand = onGoingCommands[payload.messageId + arrCommandDevices[x]];
 
 								/// Temporary
