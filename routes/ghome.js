@@ -692,7 +692,7 @@ mqttClient.on('message',function(topic,message){
 								// Check that endpointId hasn't already been added to response
 								if (additionalCommand) {
 									logger.log('debug', "[GHome API] Found Additional Command")
-									if (additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x])){
+									if (additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x]) == false){
 										// Add successful command endpointId to response and delete the additionalCommand that is waiting
 										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
 										if (additionalCommand.acknowledged == true) {
