@@ -811,17 +811,28 @@ var timeout = setInterval(function(){
 					// No acknowledged commands, so send timeout
 					else {
 						logger.log('debug', "[GHome API] Google Home multi-device command timed-out");
-						waiting.res.status(504).send('{"error": "timeout"}');
-						delete onGoingCommands[keys[key]];
+						try {
+							waiting.res.status(504).send('{"error": "timeout"}');
+							delete onGoingCommands[keys[key]];
+						}
+						catch(e) {
+							logger.log('debug', "[GHome API] Google Home multi-device command timed-out, unable to send result, error: " + e);
+						}
 					}
 				}
 				///////////////////////////////////////////////////////////////////////////
 				// Single device command, perform correlation of responses
 				///////////////////////////////////////////////////////////////////////////
 				else {
-					waiting.res.status(504).send('{"error": "timeout"}');
-					logger.log('debug', "[GHome API] Google Home command timed-out");
-					delete onGoingCommands[keys[key]];
+					try {
+						waiting.res.status(504).send('{"error": "timeout"}');
+						logger.log('debug', "[GHome API] Google Home command timed-out");
+						delete onGoingCommands[keys[key]];
+					}
+					catch(e) {
+						logger.log('debug', "[GHome API] Google Home single-device command timed-out, unable to send result, error: " + e);
+					}
+
 					//measurement.send({
 					//	t:'event', 
 					//	ec:'command', 
