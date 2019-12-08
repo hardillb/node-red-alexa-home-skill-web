@@ -680,7 +680,7 @@ mqttClient.on('message',function(topic,message){
 								/// Temporary
 								if (additionalCommand){
 									logger.log('debug', "[GHome API] Found Additional Command")
-									if (additionalCommand.acknowledged){logger.log('debug', "[GHome API] Found Additional Command acknowledged element")}
+									if (additionalCommand.hasOwnProperty('acknowledged')){logger.log('debug', "[GHome API] Found Additional Command acknowledged element")}
 									if (additionalCommand.acknowledged == true){logger.log('debug', "[GHome API] Additional Command acknowledged element TRUE")}
 								}
 								else {logger.log('debug', "[GHome API] Did Not Find Additional Command")}
