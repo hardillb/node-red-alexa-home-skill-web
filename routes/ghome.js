@@ -784,7 +784,7 @@ var timeout = setInterval(function(){
 					logger.log('debug', "[GHome API] Multi-device command waiting");
 					for (x = 0; x < arrCommandDevices.length; x++) {
 						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x].id];
-						if (additionalCommand.acknowledged && additionalCommand.acknowledged == true) {
+						if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true) {
 							logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
 							response = additionalCommand.response;
 							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
