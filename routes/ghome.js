@@ -821,7 +821,7 @@ var timeout = setInterval(function(){
 					}
 					// All commands in multi-device command have been executed successfully
 					if (sendResponse == true && response !== undefined) {
-						logger.log('debug', "[GHome API] Successful Google Home multi-device command for user: " + username +  ", response: " + JSON.stringify(waiting.response));
+						logger.log('debug', "[GHome API] Successful Google Home multi-device command, response: " + JSON.stringify(waiting.response));
 						try {
 							// Multi-devices this generates an error as res is sent after first device
 							waiting.res.status(200).json(response);
