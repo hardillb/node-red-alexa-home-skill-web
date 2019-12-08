@@ -689,6 +689,7 @@ mqttClient.on('message',function(topic,message){
 										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
 										if (additionalCommand.acknowledged == true) {
 											onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
+											// Delete/ clean-up duplicate command response
 											delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 											logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
 										}
@@ -794,25 +795,27 @@ var timeout = setInterval(function(){
 				// Multi-device command, perform correlation of responses
 				///////////////////////////////////////////////////////////////////////////
 				// Check for other commands, should only find one as we've cleaned up further up
-				var sendResponse = true;
+				//var sendResponse = true;
 				var response = undefined;
 				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){ 
 					logger.log('debug', "[GHome API] Multi-device command waiting");
 					for (x = 0; x < arrCommandDevices.length; x++) {
 						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x]];
-						if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true) {
-							//logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
-							response = additionalCommand.response;
-							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
-						}
-						// Additional command yet to be acknowledged/ i.e. not successful
-						else {
-							//logger.log('debug', "[GHome API] Found command waiting, but multi-device command *not* acknowledged!");
-							sendResponse = false;
+						if (additionalCommand) {
+							if (additionalCommand.hasOwnProperty('acknowledged') && additionalCommand.acknowledged == true) {
+								//logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
+								response = additionalCommand.response;
+								delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
+							}
+							// Additional command yet to be acknowledged/ i.e. not successful
+							//else {
+							//  logger.log('debug', "[GHome API] Found command waiting, but multi-device command *not* acknowledged!");
+							//	sendResponse = false;
+							//}
 						}
 					}
 					// All commands in multi-device command have been executed successfully
-					if (sendResponse == true && response !== undefined) {
+					if (response !== undefined) {
 						logger.log('debug', "[GHome API] Successful Google Home multi-device command, response: " + JSON.stringify(waiting.response));
 						try {
 							// Multi-devices this generates an error as res is sent after first device
