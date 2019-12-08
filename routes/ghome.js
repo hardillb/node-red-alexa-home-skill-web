@@ -508,6 +508,7 @@ router.post('/action', defaultLimiter,
 										if (arrCommandsDevices[x].id != element.id){
 											//command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
 											command.devices.push(arrCommandsDevices[x].id);
+											logger.log('debug', "[GHome Exec API] Added endpointId to multi-device command");
 										}
 									}
 									catch(e) {
@@ -661,6 +662,7 @@ mqttClient.on('message',function(topic,message){
 						// Multi-device command, perform correlation of responses
 						///////////////////////////////////////////////////////////////////////////
 						if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
+							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 							// Mark this command as acknowledged/ successful as we have a response for it
 							commandWaiting.acknowledged = true;
 							// Add endpointId to response (if it isn't already there)
@@ -676,16 +678,18 @@ mqttClient.on('message',function(topic,message){
 									if (additionalCommand.acknowledged == true) {
 										commandWaiting.response.payload.commands[0].ids.push(arrCommandDevices[x].id);
 										delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
+										logger.log('debug', "[GHome API] Google Home multi-device command acknowledged: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 									}
 									// This additional command is yet to be acknowledged via MQTT response from Node-RED
 									else {
+										logger.log('debug', "[GHome API] Google Home multi-device command *not* acknowledged: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 										sendResponse = false;
 									}
 								}
 							}
 							// All commands in multi-device command have been executed successfully
 							if (sendResponse == true) {
-								logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
+								logger.log('debug', "[GHome API] Successful Google Home multi-device command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 								try {
 									// Multi-devices this generates an error as res is sent after first device
 									commandWaiting.res.status(200).json(commandWaiting.response);
@@ -708,9 +712,9 @@ mqttClient.on('message',function(topic,message){
 						// Single-device command
 						///////////////////////////////////////////////////////////////////////////
 						else {
-							logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 							try {
 								commandWaiting.res.status(200).json(commandWaiting.response);
+								logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
 								delete onGoingCommands[payload.messageId + endpointId];
 
 								var params = {
@@ -777,20 +781,23 @@ var timeout = setInterval(function(){
 				var sendResponse = true;
 				var response = undefined;
 				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){ 
+					logger.log('debug', "[GHome API] Multi-device command waiting");
 					for (x = 0; x < arrCommandDevices.length; x++) {
 						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x].id];
 						if (additionalCommand.acknowledged == true) {
+							logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
 							response = additionalCommand.response;
 							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x].id];
 						}
 						// Additional command yet to be acknowledged/ i.e. not successful
 						else {
+							logger.log('debug', "[GHome API] Found command waiting, but multi-device command *not* acknowledged!");
 							sendResponse = false;
 						}
 					}
 					// All commands in multi-device command have been executed successfully
 					if (sendResponse == true && response !== undefined) {
-						logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(waiting.response));
+						logger.log('debug', "[GHome API] Successful Google Home multi-device command for user: " + username +  ", response: " + JSON.stringify(waiting.response));
 						try {
 							// Multi-devices this generates an error as res is sent after first device
 							waiting.res.status(200).json(response);
@@ -803,6 +810,7 @@ var timeout = setInterval(function(){
 					}
 					// No acknowledged commands, so send timeout
 					else {
+						logger.log('debug', "[GHome API] Google Home multi-device command timed-out");
 						waiting.res.status(504).send('{"error": "timeout"}');
 						delete onGoingCommands[keys[key]];
 					}
@@ -812,6 +820,7 @@ var timeout = setInterval(function(){
 				///////////////////////////////////////////////////////////////////////////
 				else {
 					waiting.res.status(504).send('{"error": "timeout"}');
+					logger.log('debug', "[GHome API] Google Home command timed-out");
 					delete onGoingCommands[keys[key]];
 					//measurement.send({
 					//	t:'event', 
