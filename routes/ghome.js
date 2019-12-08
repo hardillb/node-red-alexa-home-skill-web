@@ -662,13 +662,13 @@ mqttClient.on('message',function(topic,message){
 						// Multi-device command, perform correlation of responses
 						///////////////////////////////////////////////////////////////////////////
 						if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
-							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", ***existing*** response: " + JSON.stringify(commandWaiting.response));
-							logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", additional devices: " + JSON.stringify(commandWaiting.devices));
+							//logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", ***existing*** response: " + JSON.stringify(commandWaiting.response));
+							//logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", additional devices: " + JSON.stringify(commandWaiting.devices));
 
 							// Mark this command as acknowledged/ successful as we have a response for it
 							delete onGoingCommands[payload.messageId + endpointId].acknowledged;
 							onGoingCommands[payload.messageId + endpointId].acknowledged = true;
-							logger.log('debug', "[GHome API] Updated waiting command acknowledged: " + JSON.stringify(onGoingCommands[payload.messageId + endpointId].acknowledged))
+							//logger.log('debug', "[GHome API] Updated waiting command acknowledged: " + JSON.stringify(onGoingCommands[payload.messageId + endpointId].acknowledged))
 
 							// Add endpointId to response (if it isn't already there)
 							if (commandWaiting.response.payload.commands[0].ids.includes(endpointId) == false){
@@ -677,21 +677,13 @@ mqttClient.on('message',function(topic,message){
 							// Check for other commands, and that all are acknowledged
 							var sendResponse = true;
 							for (x = 0; x < arrCommandDevices.length; x++) {
-								logger.log('debug', "[GHome API] Trying to match inbound response, messageId: " + payload.messageId + ", with additional endpointId: " + arrCommandDevices[x])
-								logger.log('debug', "[GHome API] Looking for waiting command with key: " + payload.messageId + arrCommandDevices[x])
+								//logger.log('debug', "[GHome API] Trying to match inbound response, messageId: " + payload.messageId + ", with additional endpointId: " + arrCommandDevices[x])
+								//logger.log('debug', "[GHome API] Looking for waiting command with key: " + payload.messageId + arrCommandDevices[x])
 								var additionalCommand = onGoingCommands[payload.messageId + arrCommandDevices[x]];
-
-								/// Temporary
-								if (additionalCommand){
-									if (additionalCommand.hasOwnProperty('acknowledged')){logger.log('debug', "[GHome API] Found Additional Command acknowledged element")}
-									if (additionalCommand.acknowledged == true){logger.log('debug', "[GHome API] Additional Command acknowledged element TRUE")}
-								}
-								else {logger.log('debug', "[GHome API] Did Not Find Additional Command")}
-								///
 
 								// Check that endpointId hasn't already been added to response
 								if (additionalCommand) {
-									logger.log('debug', "[GHome API] Found Additional Command")
+									//logger.log('debug', "[GHome API] Found Additional Command")
 									if (additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x]) == false){
 										// Add successful command endpointId to response and delete the additionalCommand that is waiting
 										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
@@ -809,13 +801,13 @@ var timeout = setInterval(function(){
 					for (x = 0; x < arrCommandDevices.length; x++) {
 						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x]];
 						if (additionalCommand && additionalCommand.acknowledged && additionalCommand.acknowledged == true) {
-							logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
+							//logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
 							response = additionalCommand.response;
 							delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 						}
 						// Additional command yet to be acknowledged/ i.e. not successful
 						else {
-							logger.log('debug', "[GHome API] Found command waiting, but multi-device command *not* acknowledged!");
+							//logger.log('debug', "[GHome API] Found command waiting, but multi-device command *not* acknowledged!");
 							sendResponse = false;
 						}
 					}
@@ -829,7 +821,7 @@ var timeout = setInterval(function(){
 
 						}
 						catch(e) {
-							logger.log('warn', "[GHome API] Warning: " + e);
+							logger.log('warn', "[GHome API] Send multi-command response error: " + e);
 							delete onGoingCommands[keys[key]];
 						}
 					}
