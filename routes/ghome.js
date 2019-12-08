@@ -671,7 +671,7 @@ mqttClient.on('message',function(topic,message){
 							logger.log('debug', "[GHome API] Updated waiting command acknowledged: " + JSON.stringify(onGoingCommands[payload.messageId + endpointId].acknowledged))
 
 							// Add endpointId to response (if it isn't already there)
-							if (commandWaiting.response.payload.commands[0].ids.indexOf(endpointId) == -1){
+							if (commandWaiting.response.payload.commands[0].ids.includes(endpointId) == false){
 								onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(endpointId);
 							}
 							// Check for other commands, and that all are acknowledged
