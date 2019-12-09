@@ -806,15 +806,12 @@ var timeout = setInterval(function(){
 						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x]];
 						if (additionalCommand) {
 							if (additionalCommand.hasOwnProperty('acknowledged') && additionalCommand.acknowledged == true) {
-								//logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
-								response = additionalCommand.response;
+								// Logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
+								if (response == undefined){response = additionalCommand.response}
+								else if (response.payload.commands[0].ids.includes(arrCommandDevices[x]) == false){response.payload.commands[0].ids.push(arrCommandDevices[x])}
+								// Cleanup waiting acknowledge command response, we're ready to send it
 								delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 							}
-							// Additional command yet to be acknowledged/ i.e. not successful
-							//else {
-							//  logger.log('debug', "[GHome API] Found command waiting, but multi-device command *not* acknowledged!");
-							//	sendResponse = false;
-							//}
 						}
 					}
 					// All commands in multi-device command have been executed successfully
@@ -824,7 +821,6 @@ var timeout = setInterval(function(){
 							// Multi-devices this generates an error as res is sent after first device
 							waiting.res.status(200).json(response);
 							delete onGoingCommands[keys[key]];
-
 						}
 						catch(e) {
 							logger.log('warn', "[GHome API] Send multi-command response error: " + e);

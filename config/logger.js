@@ -41,7 +41,7 @@ logger.stream = {
 // Check for AWS credentials
 fs.access(awscredentials, fs.F_OK, (err) => {
 	if (err) {
-		logger.log('warn', '[Logger] AWS credentials file does not exist at ~/.aws/credentials. Cludwatch logging disabled.');
+		logger.log('warn', '[Logger] AWS credentials file does not exist at ~/.aws/credentials. AWS CloudWatch logging disabled. See https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Deploy-Your-Own#configure-cloudwatch-logs for more information on setup.');
 		return
 	}
 	// Setup AWS CloudWatch Transport
