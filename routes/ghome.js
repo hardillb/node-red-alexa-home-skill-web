@@ -786,8 +786,9 @@ var timeout = setInterval(function(){
 		var waiting = onGoingCommands[keys[key]];
 		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
 		if (waiting) {
+			var maxTime = 2000;
 			var diff = now - waiting.timestamp;
-			if (diff > 2000) {
+			if (diff > maxTime) {
 				//logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
 
 				var arrCommandDevices =  waiting.devices;
@@ -813,6 +814,9 @@ var timeout = setInterval(function(){
 								delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 							}
 						}
+						// If we have a response, we can delete unacknowledged command older than > maxTime in ms
+						var diffAdditionalCommand = now - additionalCommand.timestamp;
+						if (diffAdditionalCommand > maxTime && response !== undefined) {delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];}
 					}
 					// All commands in multi-device command have been executed successfully
 					if (response !== undefined) {
