@@ -802,7 +802,7 @@ var timeout = setInterval(function(){
 					logger.log('debug', "[GHome API] Multi-device command waiting");
 					// If this command is acknowledged set response to this waiting command
 					if (waiting.acknowledged == true){response = waiting.response};
-
+					// Check for linked commands with same referenceId in onGoingCommands
 					for (x = 0; x < arrCommandDevices.length; x++) {
 						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x]];
 						if (additionalCommand) {
