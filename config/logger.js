@@ -37,7 +37,7 @@ logger.stream = {
 	  logger.verbose(message);
 	},
 	};
-	
+
 // Check for AWS credentials
 fs.access(awscredentials, fs.F_OK, (err) => {
 	if (err) {

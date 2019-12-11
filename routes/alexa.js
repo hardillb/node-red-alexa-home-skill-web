@@ -16,7 +16,7 @@ var PassportOAuthBearer = require('passport-http-bearer');
 var logger = require('../config/logger');
 var ua = require('universal-analytics');
 var mqtt = require('mqtt');
-var client = require('../config/redis')
+var client = require('../config/redis');
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ mqttClient.on('connect', function(){
 	mqttClient.subscribe('response/#');
 });
 ///////////////////////////////////////////////////////////////////////////
-// Rate-limiter 
+// Rate-limiter
 ///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
@@ -112,7 +112,7 @@ const defaultLimiter = limiter({
 			ec: "Express-limiter",
 			ea: "Default: rate-limited path: " + req.path + ", IP address: " + req.ip,
 			uip: req.ip
-		  }		  
+		  }
 		if (enableAnalytics) {visitor.event(params).send()};
 		res.status(429).json('Rate limit exceeded');
 	  }
@@ -145,7 +145,7 @@ const getStateLimiter = limiter({
 					Promise.all([pDevice]).then(([device]) => {
 						var username = getSafe(() => device.username);
 						if (username != undefined) {
-							strAlert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
+							strAlert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggered. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
 							// Add endpointId : username | friendlyName hash to Redis as its likely we'll get repeat hits!
 							client.hmset('endpointId', 'username', device.username, 'deviceFriendlyName', device.friendlyName);
 							notifyUser('warn', username, endpointId, strAlert);
@@ -157,13 +157,13 @@ const getStateLimiter = limiter({
 				}
 				// Matched endpointId hash in Redis, saved MongoDB query
 				else if (!err) {
-					strAlert = '[' + object.deviceFriendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
+					strAlert = '[' + object.deviceFriendlyName + '] ' + 'API Rate limiter triggered. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
 					notifyUser('warn', object.username, endpointId, strAlert);
 				}
 				// An error occurred on Redis client.get
 				else {
 					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
-				}	
+				}
 			});
 
 			// Old Redis key/pair-based lookup
@@ -196,7 +196,7 @@ const getStateLimiter = limiter({
 				// An error occurred on Redis client.get
 				else {
 					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
-				}			
+				}
 			}); */
 		}
 		else {
@@ -254,7 +254,7 @@ router.get('/devices',
 				}
 				//console.log(devs)
 				res.send(devs);
-			}	
+			}
 		});
 	}
 );
@@ -277,7 +277,7 @@ router.get('/getstate/:dev_id', getStateLimiter,
 		if (enableAnalytics) {visitor.event(params).send()};
 
 		var serviceName = "Amazon"; // As user has authenticated, assume activeService
-		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
+		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
 
 		// Identify device, we know who user is from request
 		logger.log('debug', "[State API] Received GetState API request for user: " + req.user.username + " endpointId: " + id);
@@ -312,7 +312,7 @@ router.get('/getstate/:dev_id', getStateLimiter,
 // router.post('/setstate/:dev_id',
 // 	passport.authenticate(['bearer', 'basic'], { session: false }),
 // 	function(req,res,next){
-// 		// do nothing, disused for now, may use along side command API 
+// 		// do nothing, disused for now, may use along side command API
 // 	}
 // );
 
@@ -332,14 +332,14 @@ router.post('/command2',
 		if (enableAnalytics) {visitor.event(params).send()};
 
 		var serviceName = "Amazon"; // As user has authenticated, assume activeService
-		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};	
-		
+		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
+
 		logger.log('debug', "[Alexa API] Received command for user: " + req.user.username + ", command: " + JSON.stringify(req.body));
 
 		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
 			if (err) {
 				logger.log('warn', "[Alexa API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username + ", command execution failed");
-				res.status(404).send();	
+				res.status(404).send();
 			}
 			if (data) {
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,12 +402,12 @@ router.post('/command2',
 								"timeOfSample": dt.toISOString(),
 								"uncertaintyInMilliseconds": 50
 							}]
-						}                
+						}
 					};
 				}
 				// Build Channel Controller Response Context
 				if (namespace == "Alexa.ChannelController") {
-					if (name == "ChangeChannel") { 
+					if (name == "ChangeChannel") {
 						if (req.body.directive.payload.channel.hasOwnProperty('number')) {
 							var contextResult = {
 							"properties": [
@@ -429,7 +429,7 @@ router.post('/command2',
 									"namespace": "Alexa.ChannelController",
 									"name": "channel",
 									"value": {
-										"callSign": req.body.directive.payload.channel.callSign                                
+										"callSign": req.body.directive.payload.channel.callSign
 									},
 									"timeOfSample": dt.toISOString(),
 									"uncertaintyInMilliseconds": 50
@@ -521,7 +521,7 @@ router.post('/command2',
 				// 				"timeOfSample": dt.toISOString(),
 				// 				"uncertaintyInMilliseconds": 500
 				// 			}]
-				// 		};	
+				// 		};
 				// 	}
 				// 	if (name == "AdjustMode ") {
 				// 		// Unsupported for Interior/ Exterior Blinds
@@ -701,7 +701,7 @@ router.post('/command2',
 						};
 				}
 				//Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
-				if (namespace == "Alexa.ThermostatController" 
+				if (namespace == "Alexa.ThermostatController"
 					&& (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
 					// Workout new targetSetpoint
 					if (name == "AdjustTargetTemperature") {
@@ -789,7 +789,7 @@ router.post('/command2',
 						endpoint: endpoint,
 						payload: payload
 						}
-					};                
+					};
 				}
 
 				//logger.log('debug', "[Alexa API] Command response: " + response);
@@ -860,7 +860,7 @@ router.post('/command2',
 						source: "Alexa",
 						timestamp: Date.now()
 					};
-			
+
 					// Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
 					onGoingCommands[req.body.directive.header.messageId] = command;
 				}
@@ -953,7 +953,7 @@ var onGoingCommands = {};
 
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
-	var arrTopic = topic.split("/"); 
+	var arrTopic = topic.split("/");
 	var username = arrTopic[1];
 	var endpointId = arrTopic[2];
 
@@ -982,7 +982,7 @@ mqttClient.on('message',function(topic,message){
 							commandWaiting.res.status(200).send()
 						}
 					}
-				}			
+				}
 			} else {
 				// Alexa failure response send to Lambda for full response construction
 				if (commandWaiting.hasOwnProperty('source')) {
@@ -1032,8 +1032,8 @@ var timeout = setInterval(function(){
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
-				//	t:'event', 
-				//	ec:'command', 
+				//	t:'event',
+				//	ec:'command',
 				//	ea: 'timeout',
 				//	uid: waiting.user
 				//});
@@ -1412,7 +1412,7 @@ function replaceCapability(capability, reportState, attributes, type) {
 					  ]
 					}
 				  }
-			  ]	
+			  ]
 			}
 		 };
 	 }
@@ -1432,7 +1432,7 @@ function replaceCapability(capability, reportState, attributes, type) {
 				]}
 			};
 	}
-	// SceneController 
+	// SceneController
 	if(capability == "SceneController") {
 		return {
 			"type": "AlexaInterface",
@@ -1457,7 +1457,7 @@ function replaceCapability(capability, reportState, attributes, type) {
 				]}
 			};
 	}
-	// TemperatureSensor 
+	// TemperatureSensor
 	if(capability == "TemperatureSensor") {
 		return {
 			"type": "AlexaInterface",

@@ -35,7 +35,7 @@ passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 ///////////////////////////////////////////////////////////////////////////
-// Rate-limiter 
+// Rate-limiter
 ///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
@@ -62,11 +62,11 @@ const defaultLimiter = limiter({
 // Services
 ///////////////////////////////////////////////////////////////////////////
 router.get('/services', defaultLimiter,
-	ensureAuthenticated, 
+	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
 			var view = {
-				dp: req.path, 
+				dp: req.path,
 				dh: 'https://' + process.env.WEB_HOSTNAME,
 				dt: 'Services Admin',
 				uid: req.user.username,
@@ -74,7 +74,7 @@ router.get('/services', defaultLimiter,
 				ua: req.headers['user-agent']
 			}
 			if (enableAnalytics) {visitor.pageview(view).send()};
-		
+
 			const pApplications = oauthModels.Application.find({});
 			Promise.all([pApplications]).then(([apps]) => {
 					res.render('pages/services',{user:req.user, services: apps});
@@ -94,7 +94,7 @@ router.get('/users', defaultLimiter,
 		if (req.user.username === mqtt_user) {
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
 			var view = {
-				dp: req.path, 
+				dp: req.path,
 				dh: 'https://' + process.env.WEB_HOSTNAME,
 				dt: 'User Admin',
 				uid: req.user.username,
@@ -113,7 +113,7 @@ router.get('/users', defaultLimiter,
 					  }},
 					  { "$count": "count" }
 					],
-					"as": "deviceCount"    
+					"as": "deviceCount"
 				  }},
 				  { "$addFields": {
 					"countDevices": { "$sum": "$deviceCount.count" }
@@ -137,7 +137,7 @@ router.get('/user-devices', defaultLimiter,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
 			var view = {
-				dp: req.path, 
+				dp: req.path,
 				dh: 'https://' + process.env.WEB_HOSTNAME,
 				dt: 'User Device Admin',
 				uid: req.user.username,

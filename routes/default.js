@@ -102,7 +102,7 @@ const restrictiveLimiter = limiter({
 ///////////////////////////////////////////////////////////////////////////
 router.get('/', defaultLimiter, function(req,res){
 	var view = {
-		dp: req.path, 
+		dp: req.path,
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'Home',
 		uip: req.ip,
@@ -118,7 +118,7 @@ router.get('/', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/docs', defaultLimiter, function(req,res){
 	var view = {
-		dp: req.path, 
+		dp: req.path,
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'Docs',
 		uip: req.ip,
@@ -134,7 +134,7 @@ router.get('/docs', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/about', defaultLimiter, function(req,res){
 	var view = {
-		dp: req.path, 
+		dp: req.path,
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'About',
 		uip: req.ip,
@@ -150,7 +150,7 @@ router.get('/about', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/privacy', defaultLimiter, function(req,res){
 	var view = {
-		dp: req.path, 
+		dp: req.path,
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'Privacy',
 		uip: req.ip,
@@ -166,7 +166,7 @@ router.get('/privacy', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/tos', defaultLimiter, function(req,res){
 	var view = {
-		dp: req.path, 
+		dp: req.path,
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'Terms of Service',
 		uip: req.ip,
@@ -182,7 +182,7 @@ router.get('/tos', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/login', defaultLimiter, function(req,res){
 	var view = {
-		dp: req.path, 
+		dp: req.path,
 		dh: 'https://' + process.env.WEB_HOSTNAME,
 		dt: 'Login',
 		uip: req.ip,
@@ -238,7 +238,7 @@ router.post('/login', restrictiveLimiter,
 ///////////////////////////////////////////////////////////////////////////
 router.get('/newuser', defaultLimiter, function(req,res){
     var view = {
-        dp: req.path, 
+        dp: req.path,
         dh: 'https://' + process.env.WEB_HOSTNAME,
         dt: 'New User',
         uip: req.ip,
@@ -266,7 +266,7 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
                         return res.status(400).send(err.message);
                     }
                     var topics = new Topics({topics: [
-                            'command/' + account.username +'/#', 
+                            'command/' + account.username +'/#',
                             'state/'+ account.username + '/#',
 							'response/' + account.username + '/#',
 							'message/' + account.username + '/#'
@@ -277,8 +277,8 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
                             var h = Buffer.from(account.hash, 'hex').toString(('base64'));
                             var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
                             Account.updateOne(
-                                {username: account.username}, 
-                                {$set: {mqttPass: mqttPass, topics: topics._id}}, 
+                                {username: account.username},
+                                {$set: {mqttPass: mqttPass, topics: topics._id}},
                                 function(err, count){
                                     if (err) {
                                         logger.log('error' , "[New User] New user creation error updating MQTT info: " + err);
@@ -337,7 +337,7 @@ router.get('/changePassword/:key', defaultLimiter, function(req, res, next){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
     var view = {
-        dp: req.path, 
+        dp: req.path,
         dh: 'https://' + process.env.WEB_HOSTNAME,
         dt: 'Change Password',
         uid: req.user.username,
@@ -393,7 +393,7 @@ router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req
 ///////////////////////////////////////////////////////////////////////////
 router.get('/lostPassword', defaultLimiter, function(req, res, next){
     var view = {
-        dp: req.path, 
+        dp: req.path,
         dh: 'https://' + process.env.WEB_HOSTNAME,
         dt: 'Lost Password',
         uip: req.ip,
@@ -435,7 +435,7 @@ router.get('/my-account', defaultLimiter,
     ensureAuthenticated,
     function(req,res){
         var view = {
-            dp: req.path, 
+            dp: req.path,
             dh: 'https://' + process.env.WEB_HOSTNAME,
             dt: 'My Account',
             uid: req.user.username,
@@ -459,7 +459,7 @@ router.get('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		var view = {
-			dp: req.path, 
+			dp: req.path,
 			dh: 'https://' + process.env.WEB_HOSTNAME,
 			dt: 'Devices',
 			uid: req.user.username,
@@ -484,7 +484,7 @@ router.get('/devices', defaultLimiter,
 					}},
 					{ "$count": "count" }
 				],
-				"as": "grantCount"    
+				"as": "grantCount"
 			}},
 			{ "$addFields": {
 			"countGrants": { "$sum": "$grantCount.count" }
@@ -723,7 +723,7 @@ router.post('/api/v1/devices', defaultLimiter,
 			for (var i=0; i<devices.lenght; i++) {
 				var endpointId = devices[i].endpointId;
 				Devices.updateOne({
-						username: req.user, 
+						username: req.user,
 						endpointId: endpointId
 					},
 					devices[i],

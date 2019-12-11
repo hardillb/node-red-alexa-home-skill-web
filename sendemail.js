@@ -34,7 +34,7 @@ fs.readFile(
 var transporter = nodemailer.createTransport(smtpOptions);
 
 var Mailer = function() {
-	
+
 };
 
 Mailer.prototype.send = function send(to, from, subject, text, html){

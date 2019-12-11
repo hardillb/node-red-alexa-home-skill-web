@@ -18,7 +18,7 @@ var mqtt = require('mqtt');
 var logger = require('../config/logger');
 const gHomeFunc = require('../functions/func-ghome');
 const servicesFunc = require('../functions/func-services');
-var client = require('../config/redis')
+var client = require('../config/redis');
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ mqttClient.on('connect', function(){
 	mqttClient.subscribe('response/#');
 });
 ///////////////////////////////////////////////////////////////////////////
-// Rate-limiter 
+// Rate-limiter
 ///////////////////////////////////////////////////////////////////////////
 const limiter = require('express-limiter')(router, client)
 // Default Limiter, used on majority of routers ex. OAuth2-related and Command API
@@ -129,7 +129,7 @@ router.post('/action', defaultLimiter,
 	var requestId = req.body.requestId;
 	var serviceName = "Google"; // As user has authenticated, assume activeService
 	if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
-	
+
 	switch (intent) {
 		///////////////////////////////////////////////////////////////////////////
 		// SYNC
@@ -155,7 +155,7 @@ router.post('/action', defaultLimiter,
 					// Build Device Array
 					var devs = [];
 					for (var i=0; i< devices.length; i++) {
-						var deviceJSON = JSON.parse(JSON.stringify(devices[i])); 
+						var deviceJSON = JSON.parse(JSON.stringify(devices[i]));
 						//logger.log('debug','[GHome Sync API] Building device data for device:' + JSON.stringify(devices[i]))
 						var dev = {}
 						dev.id = "" + devices[i].endpointId;
@@ -176,7 +176,7 @@ router.post('/action', defaultLimiter,
 							name : devices[i].friendlyName
 							}
 						dev.willReportState = devices[i].reportState;
-						
+
 						var hasAttributes = 'attributes' in deviceJSON;
 						if (hasAttributes == true) {
 							dev.attributes = devices[i].attributes;
@@ -328,7 +328,7 @@ router.post('/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		// EXECUTE
 		///////////////////////////////////////////////////////////////////////////
-		case 'action.devices.EXECUTE' : 
+		case 'action.devices.EXECUTE' :
 			logger.log('verbose', "[GHome Exec API] Execute command(s) for user: " + req.user.username);
 			var params = {
 				ec: "EXECUTE",
@@ -349,7 +349,7 @@ router.post('/action', defaultLimiter,
 					//var devicesJSON = JSON.parse(JSON.stringify(devices));
 					//logger.log('debug', "[GHome Exec API] User devices:" + JSON.stringify(devicesJSON));
 
-					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed 
+					for (var i=0; i< arrCommands.length; i++) { // Iterate through commands in payload, against each listed
 						var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
 						logger.log('debug', "[GHome Exec API] # of endpoints in command request: " + arrCommandsDevices.length);
 						var params = arrCommands[i].execution[0].params; // Google Home Parameters
@@ -501,7 +501,7 @@ router.post('/action', defaultLimiter,
 									acknowledged: false,
 									timestamp: Date.now()
 								};
-								
+
 								// Add additional deviceIds to command.devices if multi-device command to enable correlation of responses
 								for (x = 0; x < arrCommandsDevices.length; x++) {
 									try {
@@ -600,7 +600,7 @@ router.post('/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		// DISCONNECT
 		///////////////////////////////////////////////////////////////////////////
-		case 'action.devices.DISCONNECT' : 
+		case 'action.devices.DISCONNECT' :
 			// Find service definition with Google URLs
 			var userId = req.user._id;
 			var params = {
@@ -629,7 +629,7 @@ router.post('/action', defaultLimiter,
 					});
 				}
 			});
-			break; 
+			break;
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -638,7 +638,7 @@ router.post('/action', defaultLimiter,
 var onGoingCommands = {};
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
-	var arrTopic = topic.split("/"); 
+	var arrTopic = topic.split("/");
 	var username = arrTopic[1];
 	var endpointId = arrTopic[2];
 	if (topic.startsWith('response/')){
@@ -686,7 +686,7 @@ mqttClient.on('message',function(topic,message){
 									//logger.log('debug', "[GHome API] Found Additional Command")
 									if (additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x]) == false){
 										// Add successful command endpointId to response and delete the additionalCommand that is waiting
-										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command 
+										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command
 										if (additionalCommand.acknowledged == true) {
 											onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
 											// Delete/ clean-up duplicate command response
@@ -747,7 +747,7 @@ mqttClient.on('message',function(topic,message){
 						}
 					}
 				}
-	
+
 			} else {
 				logger.log('debug', "[GHome API] MQTT response message is failure for topic: " + topic);
 				// Google Home failure response
@@ -798,7 +798,7 @@ var timeout = setInterval(function(){
 				// Check for other commands, should only find one as we've cleaned up further up
 				//var sendResponse = true;
 				var response = undefined;
-				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){ 
+				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
 					logger.log('debug', "[GHome API] Multi-device command waiting");
 					// If this command is acknowledged set response to this waiting command
 					if (waiting.acknowledged == true){response = waiting.response};
@@ -859,8 +859,8 @@ var timeout = setInterval(function(){
 					}
 
 					//measurement.send({
-					//	t:'event', 
-					//	ec:'command', 
+					//	t:'event',
+					//	ec:'command',
 					//	ea: 'timeout',
 					//	uid: waiting.user
 					//});
@@ -879,11 +879,11 @@ function gHomeReplaceCapability(capability, type) {
 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
-	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
-	else if(capability == "InputController"){return "action.devices.traits.InputSelector"} 
+	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"}
+	else if(capability == "InputController"){return "action.devices.traits.InputSelector"}
 	else if(capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
-	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
+	else if(capability == "Speaker"){return "action.devices.traits.Volume"}
 	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
 	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
 	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){

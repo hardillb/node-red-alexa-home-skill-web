@@ -55,7 +55,7 @@ Account.findOne({username: mqtt_user}, function(error, account){
 		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1}),
 			mqtt_password, function(err, account){
 			var topics = new Topics({topics: [
-					'command/' +account.username+'/#', 
+					'command/' +account.username+'/#',
 					'state/' + account.username + '/#',
 					'response/' + account.username + '/#',
 					'message/' + account.username + '/#'
@@ -66,8 +66,8 @@ Account.findOne({username: mqtt_user}, function(error, account){
 					var h = Buffer.from(account.hash, 'hex').toString(('base64'));
 					var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
 					Account.updateOne(
-						{username: account.username}, 
-						{$set: {mqttPass: mqttPass, topics: topics._id}}, 
+						{username: account.username},
+						{$set: {mqttPass: mqttPass, topics: topics._id}},
 						function(err, count){
 							if (err) {
 								logger.log('error', err);
@@ -113,7 +113,7 @@ function requireHTTPS(req, res, next) {
         	url += ':' + port;
         }
         url  += req.url;
-        return res.redirect(url); 
+        return res.redirect(url);
     }
     next();
 }
@@ -126,11 +126,11 @@ app.use('/octicons', express.static('node_modules/@primer/octicons/build'), expr
 ///////////////////////////////////////////////////////////////////////////
 // Load Routes
 ///////////////////////////////////////////////////////////////////////////
-const rtDefault = require('./routes/default'); 
-const rtAdmin = require('./routes/admin'); 
-const rtAuth = require('./routes/auth'); 
-const rtGhome = require('./routes/ghome'); 
-const rtAlexa = require('./routes/alexa'); 
+const rtDefault = require('./routes/default');
+const rtAdmin = require('./routes/admin');
+const rtAuth = require('./routes/auth');
+const rtGhome = require('./routes/ghome');
+const rtAlexa = require('./routes/alexa');
 app.use('/', rtDefault);
 app.use('/admin', rtAdmin); // Admin Interface
 app.use('/auth', rtAuth); // OAuth endpoints

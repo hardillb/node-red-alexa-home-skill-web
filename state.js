@@ -112,7 +112,7 @@ if (gHomeReportState == true) {
 var onGoingCommands = {};
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
-	var arrTopic = topic.split("/"); 
+	var arrTopic = topic.split("/");
 	var username = arrTopic[1];
 	var endpointId = arrTopic[2];
     if (topic.startsWith('state/')){
@@ -139,7 +139,7 @@ mqttClient.on('message',function(topic,message){
                 }
                 if (enableAnalytics) {visitor.event(params).send()};
                 //if (debug == "true") {console.timeEnd('mqtt-state')};
-            } 
+            }
             else {
 				logger.log('warn', "[State API] Failed MQTT state update for user: " + username + " device:" + endpointId);
                 stateWaiting.res.status(503).send();
@@ -173,8 +173,8 @@ var timeout = setInterval(function(){
 				waiting.res.status(504).send('{"error": "timeout"}');
 				delete onGoingCommands[keys[key]];
 				//measurement.send({
-				//	t:'event', 
-				//	ec:'command', 
+				//	t:'event',
+				//	ec:'command',
 				//	ea: 'timeout',
 				//	uid: waiting.user
 				//});
@@ -239,7 +239,7 @@ function setstate(username, endpointId, payload) {
 						dev.state.colorTemperature = payload.state.colorTemperature;
 						delete dev.state.colorBrightness;
 						delete dev.state.colorHue;
-						delete dev.state.colorSaturation;		
+						delete dev.state.colorSaturation;
 					}
 					else {
 						alert = '[' + dev.friendlyName + '] ' + 'Invalid colorTemperature state, expecting payload.state.colorTemperature (number, 0-10000)';
@@ -273,7 +273,7 @@ function setstate(username, endpointId, payload) {
 						alert = '[' + dev.friendlyName + '] ' + 'Invalid mode state, expecting payload.state.mode (string)';
 						notifyUser('warn', username, endpointId, alert);
 					}
-				};				
+				};
 				if (payload.state.hasOwnProperty('motion')) { // Motion, with validation
 					if (typeof payload.state.motion == 'string' && (payload.state.motion == 'DETECTED' || payload.state.motion == 'NOT_DETECTED')) {dev.state.motion = payload.state.motion}
 					else {
@@ -417,7 +417,7 @@ function setstate(username, endpointId, payload) {
 					}
 				};
 				if (payload.state.hasOwnProperty('volumeDelta')) { // Volume Delta, with basic validation
-					if (dev.state.hasOwnProperty('volume')) { 
+					if (dev.state.hasOwnProperty('volume')) {
 						if (typeof payload.state.volumeDelta == 'number'){
 							var newVolume = dev.state.volume + payload.state.volumeDelta;
 							dev.state.volume = newVolume;
@@ -508,7 +508,7 @@ function setstate(username, endpointId, payload) {
 														}
 													}
 												}
-											});											
+											});
 										}
 										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
 									}
@@ -564,7 +564,7 @@ function setstate(username, endpointId, payload) {
 									}
 								});
 							});
-						} 
+						}
 					}
 				});
 			}

@@ -93,7 +93,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 					else {
 						dev.on = false;
 					}
-					
+
 				}
 				if (trait == "action.devices.traits.OpenClose") {
 					dev.openPercent = device.state.rangeValue;
@@ -185,7 +185,7 @@ module.exports.requestToken2 = function requestToken2(keys, callback) {
 	}
 	else {callback(undefined)}
 }
-// GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync 
+// GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync
 module.exports.gHomeSync = function gHomeSync(userid){
     const pUsers = Account.findOne({_id:userid});
 	Promise.all([pUsers]).then(([user]) => {
@@ -228,11 +228,11 @@ function gHomeReplaceCapability(capability, type) {
 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
-	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"} 
-	else if(capability == "InputController"){return "action.devices.traits.InputSelector"} 
+	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"}
+	else if(capability == "InputController"){return "action.devices.traits.InputSelector"}
 	else if(capability == "PlaybackController"){return "action.devices.traits.MediaState"}
 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
-	else if(capability == "Speaker"){return "action.devices.traits.Volume"} 
+	else if(capability == "Speaker"){return "action.devices.traits.Volume"}
 	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
 	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
 	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){

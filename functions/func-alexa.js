@@ -253,7 +253,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                     properties.push({
                                             "namespace":"Alexa.ThermostatController",
                                             "name":"targetSetpoint",
-                                            "value":{  
+                                            "value":{
                                                 "value":deviceJSON.state.thermostatSetPoint,
                                                 "scale":deviceJSON.attributes.temperatureScale.toUpperCase()
                                                 },
@@ -271,7 +271,7 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
                                 break;
                         }
                     });
-                    
+
                     properties.push({
                         "namespace": "Alexa.EndpointHealth",
                         "name": "connectivity",
@@ -332,7 +332,7 @@ module.exports.sendState = function sendState(user, state) {
             stateURI = 'https://api.fe.amazonalexa.com/v3/events';
             break;
     }
-    
+
     // Request access token and send change report
     requestAccessToken(user, function(accesstoken) {
         if (accesstoken != undefined) {
@@ -397,14 +397,14 @@ function requestAccessToken(user, callback) {
                         grant_type : "authorization_code",
                         code: grant.code,
                         client_id : client_id,
-                        client_secret : client_secret 
+                        client_secret : client_secret
                         }
                     },
                     function(err,res, body){
                         if (err) {
                             logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user: " + user.username + ", error: " + err);
                             callback(undefined);
-                        } 
+                        }
                         else if (res.statusCode == 200) { // Store the RefreshToken and AccessToken
                             var jsonBody = JSON.parse(body);
 
@@ -472,17 +472,17 @@ function requestAccessToken(user, callback) {
                         grant_type : "refresh_token",
                         refresh_token: refreshtoken.token,
                         client_id : client_id,
-                        client_secret : client_secret 
+                        client_secret : client_secret
                         }
                     },
                     function(err,res, body){
                         if (err) {
                             logger.log('error', "[AlexaAuth API] Failed to request access token using grant code for user: " + user.username + ", error: " + err);
                             callback(undefined);
-                        } 
+                        }
                         else if (res.statusCode == 200) {
                             logger.log('debug', "[AlexaAuth API] Access Token status code: " + res.statusCode);
-                            
+
                             // Store the AccessToken
                             var jsonBody = JSON.parse(body);
                             logger.log('debug', "[AlexaAuth API] Access Token response:" + JSON.stringify(jsonBody));
@@ -523,7 +523,7 @@ function requestAccessToken(user, callback) {
                 );
             }
             // User had grant code and refresh token, and valid access token
-            else if (hasGrantCode != undefined && hasRefreshToken != undefined && hasAccessToken != undefined) {    
+            else if (hasGrantCode != undefined && hasRefreshToken != undefined && hasAccessToken != undefined) {
             //else if (grant && refreshtoken && accesstoken) {
                 //logger.log('verbose', "[AlexaAuth API] User: " + user.username + " has existing grant code, refresh token and valid access token");
                 logger.log('debug', "[AlexaAuth API] Returned existing AccessToken for user: " + user.username + ", token:" + JSON.stringify(accesstoken));
