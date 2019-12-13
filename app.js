@@ -157,7 +157,7 @@ app.use(function(err, req, res, next) {
 		logger.log('warn', "[App] Not found: " + err.status + ", path: " + req.path);
 	}
 	else {
-		logger.log('error', "[App] Fall-back error handler, status code: " + err.status + ", message: " + err.message;
+		logger.log('error', "[App] Fall-back error handler, status code: " + err.status + ", message: " + err.message);
 	}
 });
 
