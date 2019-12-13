@@ -144,7 +144,7 @@ app.use(function(req, res, next) {
 	const err = new Error('Not Found');
 	err.status = 404;
 	next(err);
-  });
+});
 
 // Error Handler
 app.use(function(err, req, res, next) {
@@ -153,8 +153,13 @@ app.use(function(err, req, res, next) {
 	//  message: err.message,
 	//  error: {}
 	//});
-	logger.log('error', "[App] Fall-back error handler, status code: " + err.status + ", message: " + err.message);
-  });
+	if (err.status == 404){
+		logger.log('warn', "[App] Not found: " + err.status + ", path: " + req.path);
+	}
+	else {
+		logger.log('error', "[App] Fall-back error handler, status code: " + err.status + ", message: " + err.message;
+	}
+});
 
 module.exports = app;
 
