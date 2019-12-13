@@ -148,7 +148,7 @@ app.use(function(req, res, next) {
 
 // Error Handler
 app.use(function(err, req, res, next) {
-	res.status(err.status || 500);
+	res.status(err.status || 500).send(err.message);
 	//res.render('error', {
 	//  message: err.message,
 	//  error: {}
