@@ -139,6 +139,23 @@ app.use('/api/v1', rtAlexa); // Alexa API
 
 var state = require('./state'); // Load State API
 
+// 404 Handler
+app.use(function(req, res, next) {
+	const err = new Error('Not Found');
+	err.status = 404;
+	next(err);
+  });
+
+// Error Handler
+app.use(function(err, req, res, next) {
+	res.status(err.status || 500);
+	res.render('error', {
+	  message: err.message,
+	  error: {}
+	});
+	logger.log('error', "[App] Fall-back error handler, status code: " + err.status + ", message: " + err.message);
+  });
+
 module.exports = app;
 
 
