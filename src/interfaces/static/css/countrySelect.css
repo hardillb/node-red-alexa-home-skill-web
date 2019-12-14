@@ -129,7 +129,7 @@
 	height:15px;
 	-webkit-box-shadow:0px 0px 1px 0px #888;
 	box-shadow:0px 0px 1px 0px #888;
-	background-image:url("/images/flags.png");
+	background-image:url("/static/images/flags.png");
 	background-repeat:no-repeat;
 	background-color:#dbdbdb;
 	background-position:20px 0
@@ -140,7 +140,7 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (min-resolution: 2dppx){
 	.country-select .flag{
-		background-image:url("/images/flags@2x.png")
+		background-image:url("/static/images/flags@2x.png")
 	}
 }
 .country-select .flag{

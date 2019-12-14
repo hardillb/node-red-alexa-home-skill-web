@@ -1,0 +1,20 @@
+# You can generate the required file/ format for this JSON Web Token via the Google Actions IAM Console, here: https://developers.google.com/assistant/smarthome/develop/report-state#service-account-key
+
+# Save the generate file as '.ghomejwt' in a secure location
+# Map the customised .ghjwt.json file into your docker container at time of container creation by adding the following to the docker create command:
+#   -v /var/docker/red/.ghomejwt:/usr/src/app/ghomejwt.json \
+
+# The Wiki for this service has example of the full docker create command.
+
+{
+  "type": "service_account",
+  "project_id": "<project id>",
+  "private_key_id": "<private key id>",
+  "private_key": "<private key>",
+  "client_email": "<account email>",
+  "client_id": "<client id>",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "<cert url>"
+}

@@ -28,7 +28,7 @@
 					<td><%= device.description %></td>
 					<td>
 						<% device.capabilities.forEach(function(action){ %>
-							<img class="action" src="/images/<%= action %>.png" title="<%= action %>">
+							<img class="action" src="/static/images/<%= action %>.png" title="<%= action %>">
 						<% }); %>
 					</td>
 					<td>
@@ -53,7 +53,7 @@
 $(document).ready(function () {
 	$('[data-toggle="tooltip"]').tooltip();
 });
-		
+
 $("#form-device").submit(function(e) {
 	e.preventDefault();
 	saveDevice()
@@ -67,14 +67,14 @@ $("#ThermostatController").change(function(e) {
 	if ( $(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
 		$('#thermostatModeOptions').hide();
-		$('#maximumValue').attr("disabled", "disabled"); 
+		$('#maximumValue').attr("disabled", "disabled");
 		$('#minimumValue').attr("disabled", "disabled");
 		$("#maximumValue").prop('required',false);
 		$("#minimumValue").prop('required',false);
 		// Check if scale set, if so don't re-add validation requirement
 		if ($('#TemperatureSensor').prop('checked') == false && $('#TEMPERATURE_SENSOR').prop('checked') == false){
 			$('#validRangeScaleOptions').hide()
-			$('#Celsius').attr("disabled", "disabled"); 
+			$('#Celsius').attr("disabled", "disabled");
 			$('#Farenheit').attr("disabled", "disabled");
 			$("#Celsius").prop('required',false);
 			$("#Farenheit").prop('required',false);
@@ -86,11 +86,11 @@ $("#ThermostatController").change(function(e) {
 	}
 	else {
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$('#validRangeOptions').show();
 		$('#validRangeScaleOptions').show();
 		$('#thermostatModeOptions').show();
-		$('#maximumValue').removeAttr("disabled"); 
+		$('#maximumValue').removeAttr("disabled");
 		$('#minimumValue').removeAttr("disabled");
 		$('#Celsius').removeAttr("disabled");
 		$('#Farenheit').removeAttr("disabled");
@@ -101,8 +101,8 @@ $("#ThermostatController").change(function(e) {
 			$("#Celsius").prop('required',true);
 			$("#Farenheit").prop('required',true);
 		}
-		if ($('#HEAT').prop('checked') == false && $('#COOL').prop('checked') == false 
-			&& $('#AUTO').prop('checked') == false && $('#ECO').prop('checked') == false 
+		if ($('#HEAT').prop('checked') == false && $('#COOL').prop('checked') == false
+			&& $('#AUTO').prop('checked') == false && $('#ECO').prop('checked') == false
 			&& $('#OFF').prop('checked') == false && $('#ON').prop('checked') == false){
 				// By default, enable AUTO
 				$('#AUTO').prop('checked', true);
@@ -122,7 +122,7 @@ $("#TemperatureSensor").change(function(e) {
 			$('#validRangeScaleOptions').hide()
 			$("#Celsius").prop('required',false);
 			$("#Farenheit").prop('required',false);
-			$('#Celsius').attr("disabled", "disabled"); 
+			$('#Celsius').attr("disabled", "disabled");
 			$('#Farenheit').attr("disabled", "disabled");
 			$('#Celsius').prop('checked', false);
 			$('#Farenheit').prop('checked', false);
@@ -133,7 +133,7 @@ $("#TemperatureSensor").change(function(e) {
 	}
 	else {
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$('#validRangeScaleOptions').show();
 		$('#Celsius').removeAttr("disabled");
 		$('#Farenheit').removeAttr("disabled");
@@ -168,16 +168,16 @@ $("#Farenheit").change(function(e) {
 $("#ColorTemperatureController").change(function(e) {
 	if ($(this).is(':checked') == false) {
 		$('#validRangeOptions').hide();
-		$('#maximumValue').attr("disabled", "disabled"); 
+		$('#maximumValue').attr("disabled", "disabled");
 		$('#minimumValue').attr("disabled", "disabled");
 		$("#maximumValue").prop('required',false);
 		$("#minimumValue").prop('required',false);
 	}
 	else {
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$('#validRangeOptions').show();
-		$('#maximumValue').removeAttr("disabled"); 
+		$('#maximumValue').removeAttr("disabled");
 		$('#minimumValue').removeAttr("disabled");
 		$("#maximumValue").prop('required',true);
 		$("#minimumValue").prop('required',true);
@@ -188,7 +188,7 @@ $("#ColorTemperatureController").change(function(e) {
 // Prevent Step Speaker and Speaker being enabled at the same time
 $("#Speaker").change(function(e) {
 	$('#ReportState').prop('checked', true);
-	$('#stateReporting').show(); 
+	$('#stateReporting').show();
 	if ( $(this).is(':checked') == true ) {
 		$('#StepSpeaker').prop('checked', false)
 	}
@@ -203,7 +203,7 @@ $("#StepSpeaker").change(function(e) {
 $("#LockController").change(function(e) {
 	if ($(this).is(':checked')) {
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#LockController").prop('checked',true);
 		// Disable other capabilities
 		$('input[name=capabilities]').each(function(index){
@@ -213,7 +213,7 @@ $("#LockController").change(function(e) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
@@ -221,15 +221,15 @@ $("#LockController").change(function(e) {
 		$('#ReportState').prop('checked', false);
 		// Enable other capabilities
 		$('input[name=capabilities]').each(function(index){
-			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-		});	
+			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
+		});
 	}
 });
 // Ensure that if RequirePIN checked, PIN is entered/ required
 $("#RequirePIN").change(function(e) {
 	if ($(this).is(':checked')) {
 		$("#pin").prop('required',true);
-		$("#pin").removeAttr("disabled"); 
+		$("#pin").removeAttr("disabled");
 	}
 	else {
 		$("#pin").prop('required',false);
@@ -259,15 +259,15 @@ $("#SceneController").change(function(e) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else {
 		// Enable other capabilities
 		$('input[name=capabilities]').each(function(index){
-			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
-		});	
+			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
+		});
 	}
 });
 
@@ -280,7 +280,7 @@ function checkType(type) {
 	$('#thermostatModeOptions').hide();
 	$('#validRangeOptions').hide();
 	$('#validRangeScaleOptions').hide();
-	$('#Celsius').attr("disabled", "disabled"); 
+	$('#Celsius').attr("disabled", "disabled");
 	$('#Farenheit').attr("disabled", "disabled");
 	$("#maximumValue").prop('required',false);
 	$("#minimumValue").prop('required',false);
@@ -300,14 +300,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "CONTACT_SENSOR" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#ContactSensor").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "CONTACT_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -317,14 +317,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "EXTERIOR_BLIND" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#RangeController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "EXTERIOR_BLIND") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -334,14 +334,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "FAN" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#RangeController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "FAN") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -351,14 +351,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "INTERIOR_BLIND" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#RangeController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "INTERIOR_BLIND") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -368,14 +368,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "LIGHT" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#PowerController").prop('checked',true);
 		//$('#validRangeOptions').show();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "LIGHT") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
@@ -387,14 +387,14 @@ function checkType(type) {
 			else {
 				if ($(this).attr("id") == "PowerController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
 				else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "MOTION_SENSOR" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#MotionSensor").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "MOTION_SENSOR") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -404,14 +404,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "SMARTLOCK" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$('#ghomeSecurity').show();
 		$("#LockController").prop('checked',true);
 		$("#RequirePIN").change();
@@ -423,14 +423,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "SMARTPLUG" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#PowerController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SMARTPLUG") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -440,14 +440,14 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "SWITCH" && type.checked &&  !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', true);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#PowerController").prop('checked',true);
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SWITCH") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
@@ -457,7 +457,7 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
@@ -465,7 +465,7 @@ function checkType(type) {
 		$('#simpleOptions').show();
 		$("#SpeakerController").prop('checked',true);
 		$('#ReportState').prop('checked', false);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$('input[name=appType]').each(function(index){if ($(this).attr("id") != "SPEAKER") {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}});
 		$('input[name=capabilities]').each(function(index){
 			if ($(this).attr("id") != "Speaker" && $(this).attr("id") != "StepSpeaker"){
@@ -474,7 +474,7 @@ function checkType(type) {
 			}
 			else {
 				//$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
@@ -490,7 +490,7 @@ function checkType(type) {
 			}
 			else {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", true);
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
@@ -512,7 +512,7 @@ function checkType(type) {
 			else {
 				if ($(this).attr("id") == "TemperatureSensor" || $(this).attr("id") == "RangeController" || $(this).attr("id") == "PowerController" || $(this).attr("id") == "PercentageController" ){$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
 				else {$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 		if ($('#TEMPERATURE_SENSOR').prop('checked')){$("#TemperatureSensor").prop('checked',true)}
@@ -532,7 +532,7 @@ function checkType(type) {
 				else {
 					if ($(this).attr("id") == "TemperatureSensor"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
 					else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)}
-					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+					$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 				}
 			});
 		}
@@ -556,7 +556,7 @@ function checkType(type) {
 	else if (type.id== "TV" && type.checked && !$('#OTHER').prop('checked')) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$("#PlaybackController").prop('checked',true);
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "TV") {
@@ -571,14 +571,14 @@ function checkType(type) {
 			else {
 				if ($(this).attr("id") == "PlaybackController"){$('input[id^='+$(this).attr("id")+']').prop("checked", true)}
 				else {$('input[id^='+$(this).attr("id")+']').prop("checked", false)};
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 			}
 		});
 	}
 	else if (type.id== "OTHER" && type.checked) {
 		$('#simpleOptions').show();
 		$('#ReportState').prop('checked', false);
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 		$('input[name=appType]').each(function(index){
 			if ($(this).attr("id") != "OTHER") {
 				$('input[id^='+$(this).attr("id")+']').prop("checked", false)
@@ -587,13 +587,13 @@ function checkType(type) {
 		});
 		$('input[name=capabilities]').each(function(index){
 			$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+			$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 		});
 	}
 	else {
 		$('#simpleOptions').hide();
 		$('input[name=appType]').each(function(index){
-				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+				$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 		});
 	}
 }
@@ -644,13 +644,13 @@ function saveDevice() {
 		if ($('#ColorController').prop('checked')) {
 			device.attributes.commandOnlyColorSetting = false;
 		}
-		if ($('#ColorTemperatureController').prop('checked')) {	
+		if ($('#ColorTemperatureController').prop('checked')) {
 			device.attributes.colorTemperatureRange = {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
 			}
 			device.attributes.commandOnlyColorSetting = false;
-		}	
+		}
 		if ($('#SceneController').prop('checked')) {
 			device.attributes.sceneReversible = false;
 		}
@@ -738,7 +738,7 @@ function saveDevice() {
 		if ($('#ColorController').prop('checked')) {
 			device.attributes.commandOnlyColorSetting = false;
 		}
-		if ($('#ColorTemperatureController').prop('checked')) {		
+		if ($('#ColorTemperatureController').prop('checked')) {
 			device.attributes.colorTemperatureRange = {
 				temperatureMinK: $('#minimumValue').val(),
 				temperatureMaxK: $('#maximumValue').val()
@@ -807,9 +807,9 @@ function clearDevice() {
 	// Hide modal elements
 	$('#simpleOptions').hide();
 	$('#ghomeSecurity').hide();
-	$('#advancedCapabilities').hide(); 
-	$('#advancedOptions').hide(); 
-	$('#stateReporting').hide(); 
+	$('#advancedCapabilities').hide();
+	$('#advancedOptions').hide();
+	$('#stateReporting').hide();
 	$('#validRangeOptions').hide();
 	$('#validRangeScaleOptions').hide();
 	$('#thermostatModeOptions').hide();
@@ -818,17 +818,17 @@ function clearDevice() {
 	$('#friendlyName').val("");
 	$('#description').val("");
 	$('#roomHint').val("");
-	$('#maximumValue').val(""); 
+	$('#maximumValue').val("");
 	$('#minimumValue').val("");
 	$('#pin').val("");
 	// Reset checkboxes
 	$('input[name=appType]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false)
-		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 	});
 	$('input[name=capabilities]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false);
-		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled"); 
+		$('input[id^='+$(this).attr("id")+']').removeAttr("disabled");
 	});
 	$('input[name=radioScale]').each(function(index){
 		$('input[id^='+$(this).attr("id")+']').prop("checked", false);
@@ -844,9 +844,9 @@ function clearDevice() {
 	// Remove read-only property for new devices
 	$('#friendlyName').prop('readonly', false);
 	// Remove "required" property
-	$('#maximumValue').attr("disabled", "disabled"); 
+	$('#maximumValue').attr("disabled", "disabled");
 	$('#minimumValue').attr("disabled", "disabled");
-	$('#Celsius').attr("disabled", "disabled"); 
+	$('#Celsius').attr("disabled", "disabled");
 	$('#Farenheit').attr("disabled", "disabled");
 	// Remove "required" property
 	$("#maximumValue").prop('required',false);
@@ -922,7 +922,7 @@ function edit(id) {
 	}
 	// Show State Reporting options unless Scene Controller
 	if (device.capabilities.indexOf('SceneController') == -1) {
-		$('#stateReporting').show(); 
+		$('#stateReporting').show();
 	}
 	// Capabilities with range/ scale for element un-hide/ population
 	var colorTemperature = $('#ColorTemperatureController').prop('checked');
@@ -943,7 +943,7 @@ function edit(id) {
 		if (device.attributes.hasOwnProperty('require2FA') && device.attributes.require2FA == true) {
 			$("#ghomeSecurity").show();
 			$("#RequirePIN").prop('checked', true);
-			$('#pin').removeAttr("disabled"); 
+			$('#pin').removeAttr("disabled");
 			if (device.attributes.hasOwnProperty('pin')){
 				$("#pin").val(device.attributes.pin);
 				$('#pin').removeAttr("disabled");
@@ -954,13 +954,13 @@ function edit(id) {
 			if (device.attributes.colorTemperatureRange.hasOwnProperty('temperatureMaxK')) {
 				$('#validRangeOptions').show();
 				$("#maximumValue").prop('required',true);
-				$('#maximumValue').removeAttr("disabled"); 
+				$('#maximumValue').removeAttr("disabled");
 				$("#maximumValue").val(device.attributes.colorTemperatureRange.temperatureMaxK);
 			}
 			if (device.attributes.colorTemperatureRange.hasOwnProperty('temperatureMinK')) {
 				$('#validRangeOptions').show();
 				$("#minimumValue").prop('required',true);
-				$('#minimumValue').removeAttr("disabled"); 
+				$('#minimumValue').removeAttr("disabled");
 				$("#minimumValue").val(device.attributes.colorTemperatureRange.temperatureMinK);
 			}
 		}
@@ -986,13 +986,13 @@ function edit(id) {
 				if (device.attributes.temperatureRange.hasOwnProperty('temperatureMax')) {
 					$('#validRangeOptions').show();
 					$("#maximumValue").prop('required',true);
-					$('#maximumValue').removeAttr("disabled"); 
+					$('#maximumValue').removeAttr("disabled");
 					$("#maximumValue").val(device.attributes.temperatureRange.temperatureMax);
 				}
 				if (device.attributes.temperatureRange.hasOwnProperty('temperatureMin')) {
 					$('#validRangeOptions').show();
 					$("#minimumValue").prop('required',true);
-					$('#minimumValue').removeAttr("disabled"); 
+					$('#minimumValue').removeAttr("disabled");
 					$("#minimumValue").val(device.attributes.temperatureRange.temperatureMin);
 				}
 			}
@@ -1041,7 +1041,7 @@ function generateState(deviceState) {
 					break;
 				case "MotionSensor": // set to not detected
 					dummyState.motion = "NOT_DETECTED";
-					break;				
+					break;
 				case "LockController":
 					dummyState.lock = "UNLOCKED";
 					break;
@@ -1065,7 +1065,7 @@ function generateState(deviceState) {
 					if ($("#Farenheit").prop('checked') == true){dummyState.thermostatSetPoint = 74};
 					dummyState.thermostatMode = "HEAT";
 					break;
-				}		
+				}
 		});
 	}
 	else { // device has some state data already, ensure each capability has valid state data
@@ -1115,7 +1115,7 @@ function generateState(deviceState) {
 						}
 					}
 					else {dummyState.contact = "DETECTED"}
-					break;				
+					break;
 				case "LockController":
 					if (deviceState.hasOwnProperty('lock')) {
 						if (typeof deviceState.lock == 'string' && (deviceState.lock == 'UNLOCKED' || deviceState.lock == 'LOCKED')) {

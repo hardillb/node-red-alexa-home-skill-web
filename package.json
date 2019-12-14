@@ -1,11 +1,11 @@
 {
   "name": "node-red-alexa-home-skill-v3",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node src/server.js"
   },
   "keywords": [
     "alexa",
@@ -21,17 +21,13 @@
     "url": "https://github.com/coldfire84/node-red-alexa-home-skill-v3-web"
   },
   "homepage": "https://red.cb-net.co.uk/",
-  "node-red": {
-    "nodes": {
-      "alexa": "alexa.js"
-    }
-  },
   "author": "chrismbradford@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
     "countries-api": "^2.0.2",
+    "dotenv" : "^8.2.0",
     "ejs": "^2.7.1",
     "express": "^4.17.1",
     "express-limiter": "^1.6.1",

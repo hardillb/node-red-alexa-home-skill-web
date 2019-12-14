@@ -9,18 +9,19 @@ const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var bodyParser = require('body-parser');
+const path = require('path');
 //var cookieParser = require('cookie-parser');
 ///////////////////////////////////////////////////////////////////////////
 // MongoDB
 ///////////////////////////////////////////////////////////////////////////
-var db = require('./config/db');
+var db = require('./loaders/db');
 // Schema =======================
 var Account = require('./models/account');
 var Topics = require('./models/topics');
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
-var logger = require('./config/logger');
+var logger = require('./loaders/logger');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
@@ -85,7 +86,9 @@ Account.findOne({username: mqtt_user}, function(error, account){
 var app = express();
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
-app.use(favicon('static/favicon.ico'));
+//app.use(favicon('/interfaces/static/favicon.ico'));
+app.use(favicon(path.join(__dirname, '/interfaces/static', 'favicon.ico')))
+
 app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
 //app.use(cookieParser(cookieSecret));
 app.use(flash());
@@ -119,9 +122,9 @@ function requireHTTPS(req, res, next) {
 }
 
 app.use(requireHTTPS);
-
-app.use('/',express.static('static')); // Static content router
-app.use('/octicons', express.static('node_modules/@primer/octicons/build'), express.static('node_modules/@primer/octicons/build/svg')); // Octicons router
+app.set('views', path.join(__dirname, 'interfaces/views/'));
+app.use('/static', express.static(path.join(__dirname, '/interfaces/static')));
+app.use('/static/octicons', express.static('node_modules/@primer/octicons/build'), express.static('node_modules/@primer/octicons/build/svg')); // Octicons router
 
 ///////////////////////////////////////////////////////////////////////////
 // Load Routes
@@ -137,7 +140,7 @@ app.use('/auth', rtAuth); // OAuth endpoints
 app.use('/api/ghome', rtGhome); // Google Home API
 app.use('/api/v1', rtAlexa); // Alexa API
 
-var state = require('./state'); // Load State API
+var state = require('./services/state'); // Load State API
 
 // 404 Handler
 app.use(function(req, res, next) {

@@ -6,7 +6,7 @@ var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var Topics = require('../models/topics');
 var LostPassword = require('../models/lostPassword');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////

@@ -13,15 +13,15 @@ var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 var ua = require('universal-analytics');
 var mqtt = require('mqtt');
-var client = require('../config/redis');
+var client = require('../loaders/redis');
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-const servicesFunc = require('../functions/func-services');
-const alexaFunc = require('../functions/func-alexa');
+const servicesFunc = require('../services/func-services');
+const alexaFunc = require('../services/func-alexa');
 const updateUserServices = servicesFunc.updateUserServices;
 const queryDeviceState = alexaFunc.queryDeviceState;
 const saveGrant = alexaFunc.saveGrant;

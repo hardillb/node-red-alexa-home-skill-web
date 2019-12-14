@@ -4,7 +4,7 @@
 const request = require('request');
 var Account = require('../models/account');
 var Devices = require('../models/devices');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 var AlexaAuth = require('../models/alexa-auth');
 ///////////////////////////////////////////////////////////////////////////
 // Variables

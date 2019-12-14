@@ -1,17 +1,20 @@
 ///////////////////////////////////////////////////////////////////////////
 // Depends
 ///////////////////////////////////////////////////////////////////////////
-var Account = require('./models/account');
-var Devices = require('./models/devices');
+var Account = require('../models/account');
+var Devices = require('../models/devices');
 var ua = require('universal-analytics');
 var mqtt = require('mqtt');
 const uuidv4 = require('uuid/v4');
-var logger = require('./config/logger');
+var logger = require('../loaders/logger');
+const fs = require('fs');
+const util = require("util");
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-const gHomeFunc = require('./functions/func-ghome');
-const alexaFunc = require('./functions/func-alexa');
+const gHomeFunc = require('./func-ghome');
+const alexaFunc = require('./func-alexa');
+const ghomeJWT_file = './ghomejwt.json';
 const gHomeSendState =  gHomeFunc.sendState;
 const gHomeQueryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
@@ -23,28 +26,51 @@ const requestToken2 = gHomeFunc.requestToken2;
 // Variables
 ///////////////////////////////////////////////////////////////////////////
 var debug = (process.env.ALEXA_DEBUG || false);
+const readFile = util.promisify(fs.readFile);
 // MQTT ENV variables========================
 var mqtt_user = (process.env.MQTT_USER);
 var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
+
 // Google Auth JSON Web Token ================
 var gToken = undefined; // Store Report State OAuth Token
-const ghomeJWT = process.env.GHOMEJWT;
 var gHomeReportState = false;
-var keys;
-if (!ghomeJWT) {
-	logger.log('warn', "[State API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
-}
-else {
-	try {
-		keys = JSON.parse(ghomeJWT);
-		gHomeReportState = true;
-    } catch (e) {
-		logger.log('warn', "[State API] Error parsing ghomeJWT environment variable: " + e )
-	}
+var keys; // variable used to store JWT for Out-of-Band State Reporting to Google Home Graph API
 
+const readFileAsync = async() => {
+	var data = await readFile(ghomeJWT_file, 'utf8');
+	return data;
 }
+
+readFileAsync()
+	.then(result => {
+		// Read JSON file was successful, enable GHome HomeGraph state reporting
+		gHomeReportState = true;
+		keys = JSON.parse(result);
+		///////////////////////////////////////////////////////////////////////////
+		// Home Graph API Token Request/ Refresh
+		///////////////////////////////////////////////////////////////////////////
+		requestToken2(keys, function(returnValue) {
+			gToken = returnValue;
+			logger.log('info', "[State API] Obtained GHome HomeGraph OAuth token");
+			logger.log('debug', "[State API] GHome HomeGraph OAuth token:" + JSON.stringify(gToken));
+		});
+		// Refresh Google oAuth Token used for State Reporting
+		var refreshToken = setInterval(function(){
+			requestToken2(keys, function(returnValue) {
+				gToken = returnValue;
+				logger.log('info', "[State API] Refreshed GHome HomeGraph OAuth token");
+				logger.log('debug', "[State API] GHome HomeGraph OAuth token:" + JSON.stringify(gToken));
+			});
+		},3540000);
+	})
+	.catch(err => {
+		logger.log('warn', "[State API] Error reading GHome HomeGraph API JSON file, Report State disabled. Error message: " + err );
+		logger.log('warn', "[State API] Please ensure you have mapped a valid GHome HomeGraph API JSON file, to /usr/src/app/ghomejwt.json, see .ghomejwt.example for more information" );
+	})
+
+
 // Alexa State Reporting
 var alexaReportState = false;
 if (!process.env.ALEXA_CLIENTID && !process.env.ALEXA_CLIENTSECRET) {
@@ -88,24 +114,6 @@ mqttClient.on('connect', function(){
 	mqttClient.subscribe('state/#');
 });
 
-///////////////////////////////////////////////////////////////////////////
-// Homegraph API Token Request/ Refresh
-///////////////////////////////////////////////////////////////////////////
-if (gHomeReportState == true) {
-	requestToken2(keys, function(returnValue) {
-		gToken = returnValue;
-		logger.log('info', "[State API] Obtained Google HomeGraph OAuth token");
-		logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-	});
-	// Refresh Google oAuth Token used for State Reporting
-	var refreshToken = setInterval(function(){
-		requestToken2(keys, function(returnValue) {
-			gToken = returnValue;
-			logger.log('info', "[State API] Refreshed Google HomeGraph OAuth token");
-			logger.log('debug', "[State API] HomeGraph OAuth token:" + JSON.stringify(gToken));
-		});
-	},3540000);
-}
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Message Handlers
 ///////////////////////////////////////////////////////////////////////////
@@ -504,13 +512,13 @@ function setstate(username, endpointId, payload) {
 															gHomeSendState(gToken, stateReport, user.username);
 														}
 														else {
-															logger.log('verbose', '[State API] Unable to call Send State, no gToken');
+															logger.log('verbose', '[State API] Unable to call GHome Send State, no gToken');
 														}
 													}
 												}
 											});
 										}
-										catch (e) {logger.log('debug', "[State API] gHomeSendState error: " + e)};
+										catch (e) {logger.log('debug', "[State API] GHome gHomeSendState error: " + e)};
 									}
 									else {
 										if (returnValue == false){logger.log('debug', "[State API] Not sending GHome state report, user: " + username + ", is not a Google Home user")};

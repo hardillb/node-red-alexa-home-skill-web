@@ -9,26 +9,26 @@
         <input name="scope" value="<%= scopes.join(',') %>" hidden>
         <div>
             <p>Select flag to translate:</p>
-            <!-- <img src="/images/blank.gif" class="flag flag-au" alt="Australia" role="button" onclick="gTranslate('en')" />-->
-            <!--<img src="/images/blank.gif" class="flag flag-ca" alt="Canada" role="button" onclick="gTranslate('en')" />-->
-            <img src="/images/blank.gif" class="flag flag-fr" alt="France" role="button" onclick="gTranslate('fr')" />
-            <img src="/images/blank.gif" class="flag flag-de" alt="Germany" role="button" onclick="gTranslate('de')" />
-            <!--<img src="/images/blank.gif" class="flag flag-in" alt="India" role="button" onclick="gTranslate('en')" />-->
-            <img src="/images/blank.gif" class="flag flag-jp" alt="Japan" role="button" onclick="gTranslate('ja')" />
-            <img src="/images/blank.gif" class="flag flag-mx" alt="Mexico" role="button" onclick="gTranslate('es')" />
-            <img src="/images/blank.gif" class="flag flag-it" alt="Italy" role="button" onclick="gTranslate('it')" />
-            <img src="/images/blank.gif" class="flag flag-es" alt="Spain" role="button" onclick="gTranslate('es')" />
-            <!--<img src="/images/blank.gif" class="flag flag-gb" alt="United Kingdom" role="button" onclick="gTranslate('en')" />-->
-            <img src="/images/blank.gif" class="flag flag-us" alt="United States of America" role="button" onclick="gTranslate('en')" />
+            <!-- <img src="/static/images/blank.gif" class="flag flag-au" alt="Australia" role="button" onclick="gTranslate('en')" />-->
+            <!--<img src="/static/images/blank.gif" class="flag flag-ca" alt="Canada" role="button" onclick="gTranslate('en')" />-->
+            <img src="/static/images/blank.gif" class="flag flag-fr" alt="France" role="button" onclick="gTranslate('fr')" />
+            <img src="/static/images/blank.gif" class="flag flag-de" alt="Germany" role="button" onclick="gTranslate('de')" />
+            <!--<img src="/static/images/blank.gif" class="flag flag-in" alt="India" role="button" onclick="gTranslate('en')" />-->
+            <img src="/static/images/blank.gif" class="flag flag-jp" alt="Japan" role="button" onclick="gTranslate('ja')" />
+            <img src="/static/images/blank.gif" class="flag flag-mx" alt="Mexico" role="button" onclick="gTranslate('es')" />
+            <img src="/static/images/blank.gif" class="flag flag-it" alt="Italy" role="button" onclick="gTranslate('it')" />
+            <img src="/static/images/blank.gif" class="flag flag-es" alt="Spain" role="button" onclick="gTranslate('es')" />
+            <!--<img src="/static/images/blank.gif" class="flag flag-gb" alt="United Kingdom" role="button" onclick="gTranslate('en')" />-->
+            <img src="/static/images/blank.gif" class="flag flag-us" alt="United States of America" role="button" onclick="gTranslate('en')" />
         </div>
         <hr>
         <div>
             <p>To use this service you need to:</p>
             <ul class="list-unstyled">
-                <li><img class="octicon octicon-shield" src="/octicons/shield.svg"></img> Create an <a href='/newuser'> account.</a></li>
-                <li><img class="octicon octicon-checklist" src="/octicons/checklist.svg"></img> Define one or more <a href='/devices'>devices.</a></li>
-                <li><img class="octicon octicon-checklist" src="/octicons/cloud-download.svg"></img> <a href="#install-node-red-nodes">Install the associated <span translate="no">Node-RED</span> nodes.</a></li>
-                <li><img class="octicon octicon-repo-forked" src="/octicons/repo-forked.svg"></img> <a href="#example-flows-and-node-outputs"> Setup <span translate="no">Node-RED</span> flows</a> using your devices.</li>
+                <li><img class="octicon octicon-shield" src="/static/octicons/shield.svg"></img> Create an <a href='/newuser'> account.</a></li>
+                <li><img class="octicon octicon-checklist" src="/static/octicons/checklist.svg"></img> Define one or more <a href='/devices'>devices.</a></li>
+                <li><img class="octicon octicon-checklist" src="/static/octicons/cloud-download.svg"></img> <a href="#install-node-red-nodes">Install the associated <span translate="no">Node-RED</span> nodes.</a></li>
+                <li><img class="octicon octicon-repo-forked" src="/static/octicons/repo-forked.svg"></img> <a href="#example-flows-and-node-outputs"> Setup <span translate="no">Node-RED</span> flows</a> using your devices.</li>
             </ul>
             <hr>
             <!-- <p><%= application.title %> is requesting permission to:</p>
@@ -84,7 +84,7 @@
         var selectField = document.querySelector("#google_translate_element select");
         for(var i=0; i < selectField.children.length; i++){
             var option = selectField.children[i];
-            // find desired langauge and change the former language of the hidden selection-field 
+            // find desired langauge and change the former language of the hidden selection-field
             if(option.value==language){
                 selectField.selectedIndex = i;
                 // trigger change event afterwards to make google-lib translate this side

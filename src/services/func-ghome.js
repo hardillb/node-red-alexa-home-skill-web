@@ -3,28 +3,36 @@
 ///////////////////////////////////////////////////////////////////////////
 const request = require('request');
 var Account = require('../models/account');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const util = require("util");
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
+const ghomeJWT_file = 'ghomejwt.json';
+const readFile = util.promisify(fs.readFile);
 var debug = (process.env.ALEXA_DEBUG || false);
+
 // Google JWT OAuth =========================
-const ghomeJWT = process.env['GHOMEJWT'];
 var reportState = false;
-var keys;
-if (!ghomeJWT) {
-	logger.log('warn', "[GHome API] JSON Web Token not supplied via ghomeJWT environment variable. Google Home Report State disabled.")
+var keys; // variable used to store JWT for Out-of-Band State Reporting to Google Home Graph API
+
+const readFileAsync = async() => {
+	var data = await readFile(ghomeJWT_file, 'utf8');
+	return data;
 }
-else {
-	try {
-		keys = JSON.parse(ghomeJWT);
+
+readFileAsync()
+	.then(result => {
+		// Read JSON file was successful, enable GHome HomeGraph state reporting
 		reportState = true;
-    } catch (e) {
-		logger.log('warn', "[GHome API] Error parsing ghomeJWT environment variable: " + e )
-        reportState = false;
-	}
-}
+		keys = JSON.parse(result);
+	})
+	.catch(err => {
+		logger.log('warn', "[GHome API] Error reading GHome HomeGraph API JSON file, Report State disabled. Error message: " + err );
+	})
+
 // Google Home Sync =========================
 var enableGoogleHomeSync = true;
 if (!(process.env.HOMEGRAPH_APIKEY)){
@@ -133,7 +141,7 @@ module.exports.isGhomeUser = function isGhomeUser(user, callback) {
 // Send State Update
 module.exports.sendState = function sendState(token, response, username) {
 	if (reportState == true && token != undefined) {
-		logger.log('verbose', "[State API] Sending HomeGraph State report for user: " + username + ", report: " + JSON.stringify(response));
+		logger.log('verbose', "[State API] Sending GHome HomeGraph State report for user: " + username + ", report: " + JSON.stringify(response));
 		request.post({
 			url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
 				headers:{
@@ -144,13 +152,13 @@ module.exports.sendState = function sendState(token, response, username) {
 				json: response
 		}, function(err,res, body){
 			if (err) {
-				logger.log('warn', "[State API] Failed to send state report for user: " + username + " to HomeGraph, error:" + err);
+				logger.log('warn', "[State API] Failed to send GHome HomeGraph state report for user: " + username + ", error:" + err);
 			}
 			else {
 				if (res.statusCode == 200) {
-					logger.log('verbose', "[State API] Successfully sent state report for user: " + username + " to HomeGraph!");
+					logger.log('verbose', "[State API] Successfully sent GHome HomeGraph state report for user: " + username);
 				}
-				else {logger.log('verbose', "[State API] HomeGraph state report for user: " + username + " returned invalid status code:" + res.statusCode)}
+				else {logger.log('warn', "[State API] Invalid status code returned from GHome HomeGraph, user: " + username + ", status code:" + res.statusCode)}
 			}
 		});
 	}

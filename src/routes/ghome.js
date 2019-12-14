@@ -15,10 +15,10 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
 var mqtt = require('mqtt');
-var logger = require('../config/logger');
-const gHomeFunc = require('../functions/func-ghome');
-const servicesFunc = require('../functions/func-services');
-var client = require('../config/redis');
+var logger = require('../loaders/logger');
+const gHomeFunc = require('../services/func-ghome');
+const servicesFunc = require('../services/func-services');
+var client = require('../loaders/redis');
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////

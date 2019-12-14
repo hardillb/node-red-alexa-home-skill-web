@@ -6,7 +6,7 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-var sendemail = require('../sendemail');
+var sendemail = require('../services/sendemail');
 var mailer = new sendemail();
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
@@ -17,13 +17,13 @@ var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 var ua = require('universal-analytics');
-var client = require('../config/redis')
+var client = require('../loaders/redis')
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-const gHomeFunc = require('../functions/func-ghome');
+const gHomeFunc = require('../services/func-ghome');
 const sendState =  gHomeFunc.sendState;
 const queryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;

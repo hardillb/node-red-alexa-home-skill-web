@@ -12,9 +12,9 @@ var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var PassportOAuthBearer = require('passport-http-bearer');
-var oauthServer = require('../oauth');
+var oauthServer = require('../services/oauth');
 var url = require('url');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 var ua = require('universal-analytics');
 ///////////////////////////////////////////////////////////////////////////
 // Variables

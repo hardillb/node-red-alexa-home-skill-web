@@ -13,9 +13,9 @@ var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
-var logger = require('../config/logger');
+var logger = require('../loaders/logger');
 var ua = require('universal-analytics');
-var client = require('../config/redis')
+var client = require('../loaders/redis')
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////

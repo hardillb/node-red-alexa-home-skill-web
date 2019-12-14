@@ -1,6 +1,6 @@
 var oauth2orize = require('oauth2orize');
-var OAuth = require('./models/oauth');
-var logger = require('./config/logger'); // Moved to own module
+var OAuth = require('../models/oauth');
+var logger = require('../loaders/logger'); // Moved to own module
 
 var server = oauth2orize.createServer();
 
