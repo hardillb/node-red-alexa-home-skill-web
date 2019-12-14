@@ -41,7 +41,7 @@ if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
     var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
 }
 ///////////////////////////////////////////////////////////////////////////
-// Passport Configuration
+// Passport Configuration | Suspect Not Needed
 ///////////////////////////////////////////////////////////////////////////
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.use(new BasicStrategy(Account.authenticate()));
@@ -55,12 +55,18 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 		// Added check for user account active (boolean)
 		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
 			logger.log('debug', "[Core] GHome OAuth Token good, token: " + token);
-			logger.log('debug', "[Core] GHome OAuth Token User 'active' attribute: " + token.user.active);
 			done(null, token.user, { scope: token.scope });
-		} else if (!error) {
-			logger.log('error', "[Core] GHome OAuth Token error, token:" + token);
+		}
+		else if (!error) {
+			if (token.user && token.user.active == false) {
+				logger.log('warn', "[Core] GHome OAuth Token warning, user: " + token.user.username + ", 'active' is false");
+			}
+			else {
+				logger.log('warn', "[Core] GHome OAuth Token warning, token: " + token);
+			}
 			done(null, false);
-		} else {
+		}
+		else {
 			logger.log('error', "[Core] GHome OAuth Token error:" + error);
 			done(error);
 		}

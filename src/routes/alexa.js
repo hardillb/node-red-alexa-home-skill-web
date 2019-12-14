@@ -56,10 +56,17 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
 			logger.log('debug', "[Core] Alexa OAuth Token good, token: " + token);
 			done(null, token.user, { scope: token.scope });
-		} else if (!error) {
-			logger.log('error', "[Core] Alexa OAuth Token error, token: " + token);
+		}
+		else if (!error) {
+			if (token.user && token.user.active == false) {
+				logger.log('warn', "[Core] Alexa OAuth Token warning, user: " + token.user.username + ", 'active' is false");
+			}
+			else {
+				logger.log('warn', "[Core] Alexa OAuth Token warning, token: " + token);
+			}
 			done(null, false);
-		} else {
+		}
+		else {
 			logger.log('error', "[Core] Alexa OAuth Token error: " + error);
 			done(error);
 		}
