@@ -408,8 +408,7 @@ function requestAccessToken(user, callback) {
                         else if (res.statusCode == 200) { // Store the RefreshToken and AccessToken
                             var jsonBody = JSON.parse(body);
 
-                            // Look to add statusCode == 200 handler, w/ catch-all else and callback(undefined)
-                            logger.log('error', "[AlexaAuth API] Grant Code status code: " + res.statusCode);
+                            logger.log('debug', "[AlexaAuth API] Grant Code status code: " + res.statusCode);
                             logger.log('debug', "[AlexaAuth API] Grant Code only response:" + JSON.stringify(jsonBody));
 
                             var refreshToken = new AlexaAuth.AlexaAuthRefreshToken({
