@@ -17,7 +17,7 @@ const path = require('path');
 var db = require('./loaders/db');
 // Schema =======================
 var Account = require('./models/account');
-var oauthModels = require('../models/oauth');
+var oauthModels = require('./models/oauth');
 var Topics = require('./models/topics');
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
