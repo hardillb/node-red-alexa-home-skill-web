@@ -52,7 +52,8 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 		if (!error && token && !token.grant) {
 			logger.log('error', "[Core] Missing grant token:" + token);
 		}
-		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
+		// Added check for user account active (boolean)
+		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
 			logger.log('debug', "[Core] OAuth Token good, token:" + token);
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
