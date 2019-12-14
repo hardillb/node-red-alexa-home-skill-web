@@ -49,6 +49,7 @@ passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+		logger.log('debug', "[Core] OAuth Token User 'active' attribute: " + token.user.active);
 		if (!error && token && !token.grant) {
 			logger.log('error', "[Core] Missing grant token:" + token);
 		}
