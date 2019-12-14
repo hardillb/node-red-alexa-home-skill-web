@@ -50,18 +50,18 @@ passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
 		if (!error && token && !token.grant) {
-			logger.log('error', "[Core] Missing grant token:" + token);
+			logger.log('error', "[Core] GHome missing grant token:" + token);
 		}
 		// Added check for user account active (boolean)
 		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
-			logger.log('debug', "[Core] OAuth Token good, token: " + token);
-			logger.log('debug', "[Core] OAuth Token User 'active' attribute: " + token.user.active);
+			logger.log('debug', "[Core] GHome OAuth Token good, token: " + token);
+			logger.log('debug', "[Core] GHome OAuth Token User 'active' attribute: " + token.user.active);
 			done(null, token.user, { scope: token.scope });
 		} else if (!error) {
-			logger.log('error', "[Core] OAuth Token error, token:" + token);
+			logger.log('error', "[Core] GHome OAuth Token error, token:" + token);
 			done(null, false);
 		} else {
-			logger.log('error', "[Core] OAuth Token error:" + error);
+			logger.log('error', "[Core] GHome OAuth Token error:" + error);
 			done(error);
 		}
 	});
