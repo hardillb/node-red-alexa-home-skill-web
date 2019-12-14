@@ -33,7 +33,7 @@
     "express-limiter": "^1.6.1",
     "express-session": "^1.16.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.7.1",
+    "mongoose": "^5.8.1",
     "mongoose-sequence": "^5.2.1",
     "connect-mongo": "^3.0.0",
     "morgan": "^1.9.1",
