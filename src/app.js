@@ -21,6 +21,7 @@ var Topics = require('./models/topics');
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
+var PassportOAuthBearer = require('passport-http-bearer');
 var logger = require('./loaders/logger');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
@@ -141,6 +142,41 @@ app.use('/api/ghome', rtGhome); // Google Home API
 app.use('/api/v1', rtAlexa); // Alexa API
 
 var state = require('./services/state'); // Load State API
+
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.use(new BasicStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
+	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+		if (!error && token && !token.grant) {
+			logger.log('error', "[Core] App Missing grant token: " + token);
+		}
+		// Added check for user account active (boolean)
+		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
+			logger.log('debug', "[Core] App OAuth Token good, token: " + token);
+			done(null, token.user, { scope: token.scope });
+		}
+		else if (!error) {
+			if (token.user && token.user.active == false) {
+				logger.log('warn', "[Core] App OAuth Token warning, user: " + token.user.username + ", 'active' is false");
+			}
+			else {
+				logger.log('warn', "[Core] App OAuth Token warning, token: " + token);
+			}
+			done(null, false);
+		}
+		else {
+			logger.log('error', "[Core] App OAuth Token error: " + error);
+			done(error);
+		}
+	});
+});
+passport.use(accessTokenStrategy);
+
 
 // 404 Handler
 app.use(function(req, res, next) {
