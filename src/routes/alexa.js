@@ -10,9 +10,9 @@ var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var passport = require('passport');
-// var BasicStrategy = require('passport-http').BasicStrategy;
-// var LocalStrategy = require('passport-local').Strategy;
-// var PassportOAuthBearer = require('passport-http-bearer');
+var BasicStrategy = require('passport-http').BasicStrategy;
+var LocalStrategy = require('passport-local').Strategy;
+var PassportOAuthBearer = require('passport-http-bearer');
 var logger = require('../loaders/logger');
 var ua = require('universal-analytics');
 var mqtt = require('mqtt');
@@ -43,36 +43,36 @@ if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
 ///////////////////////////////////////////////////////////////////////////
 // Passport Configuration
 ///////////////////////////////////////////////////////////////////////////
-// passport.use(new LocalStrategy(Account.authenticate()));
-// passport.use(new BasicStrategy(Account.authenticate()));
-// passport.serializeUser(Account.serializeUser());
-// passport.deserializeUser(Account.deserializeUser());
-// var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
-// 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-// 		if (!error && token && !token.grant) {
-// 			logger.log('error', "[Core] Alexa Missing grant token: " + token);
-// 		}
-// 		// Added check for user account active (boolean)
-// 		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
-// 			logger.log('debug', "[Core] Alexa OAuth Token good, token: " + token);
-// 			done(null, token.user, { scope: token.scope });
-// 		}
-// 		else if (!error) {
-// 			if (token.user && token.user.active == false) {
-// 				logger.log('warn', "[Core] Alexa OAuth Token warning, user: " + token.user.username + ", 'active' is false");
-// 			}
-// 			else {
-// 				logger.log('warn', "[Core] Alexa OAuth Token warning, token: " + token);
-// 			}
-// 			done(null, false);
-// 		}
-// 		else {
-// 			logger.log('error', "[Core] Alexa OAuth Token error: " + error);
-// 			done(error);
-// 		}
-// 	});
-// });
-// passport.use(accessTokenStrategy);
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.use(new BasicStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
+	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+		if (!error && token && !token.grant) {
+			logger.log('error', "[Core] Alexa Missing grant token: " + token);
+		}
+		// Added check for user account active (boolean)
+		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
+			logger.log('debug', "[Core] Alexa OAuth Token good, token: " + token);
+			done(null, token.user, { scope: token.scope });
+		}
+		else if (!error) {
+			if (token.user && token.user.active == false) {
+				logger.log('warn', "[Core] Alexa OAuth Token warning, user: " + token.user.username + ", 'active' is false");
+			}
+			else {
+				logger.log('warn', "[Core] Alexa OAuth Token warning, token: " + token);
+			}
+			done(null, false);
+		}
+		else {
+			logger.log('error', "[Core] Alexa OAuth Token error: " + error);
+			done(error);
+		}
+	});
+});
+passport.use(accessTokenStrategy);
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Client Configuration
 ///////////////////////////////////////////////////////////////////////////

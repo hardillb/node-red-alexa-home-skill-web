@@ -14,8 +14,8 @@ var Devices = require('../models/devices');
 var Topics = require('../models/topics');
 var LostPassword = require('../models/lostPassword');
 var passport = require('passport');
-// var BasicStrategy = require('passport-http').BasicStrategy;
-// var LocalStrategy = require('passport-local').Strategy;
+var BasicStrategy = require('passport-http').BasicStrategy;
+var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
 var logger = require('../loaders/logger');
 var ua = require('universal-analytics');
@@ -49,10 +49,10 @@ if (!(process.env.HOMEGRAPH_APIKEY)){
 ///////////////////////////////////////////////////////////////////////////
 // Passport Configuration | Suspect Not Needed
 ///////////////////////////////////////////////////////////////////////////
-// passport.use(new LocalStrategy(Account.authenticate()));
-// passport.use(new BasicStrategy(Account.authenticate()));
-// passport.serializeUser(Account.serializeUser());
-// passport.deserializeUser(Account.deserializeUser());
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.use(new BasicStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
 ///////////////////////////////////////////////////////////////////////////
 // Rate-limiter
 ///////////////////////////////////////////////////////////////////////////
