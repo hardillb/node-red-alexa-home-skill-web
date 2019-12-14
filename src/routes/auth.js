@@ -9,9 +9,9 @@ router.use(bodyParser.json());
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var LocalStrategy = require('passport-local').Strategy;
-var PassportOAuthBearer = require('passport-http-bearer');
+// var BasicStrategy = require('passport-http').BasicStrategy;
+// var LocalStrategy = require('passport-local').Strategy;
+// var PassportOAuthBearer = require('passport-http-bearer');
 var oauthServer = require('../services/oauth');
 var url = require('url');
 var logger = require('../loaders/logger');
@@ -29,28 +29,28 @@ if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
 ///////////////////////////////////////////////////////////////////////////
 // Passport Configuration
 ///////////////////////////////////////////////////////////////////////////
-passport.use(new LocalStrategy(Account.authenticate()));
-passport.use(new BasicStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
-var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
-	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-		if (!error && token && !token.grant) {
-			logger.log('error', "[Core] Auth Missing grant token:" + token);
-		}
-		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
-			logger.log('debug', "[Core] Auth OAuth Token good, token:" + token);
-			done(null, token.user, { scope: token.scope });
-		} else if (!error) {
-			logger.log('error', "[Core] Auth OAuth Token error, token:" + token);
-			done(null, false);
-		} else {
-			logger.log('error', "[Core] Auth OAuth Token error:" + error);
-			done(error);
-		}
-	});
-});
-passport.use(accessTokenStrategy);
+// passport.use(new LocalStrategy(Account.authenticate()));
+// passport.use(new BasicStrategy(Account.authenticate()));
+// passport.serializeUser(Account.serializeUser());
+// passport.deserializeUser(Account.deserializeUser());
+// var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
+// 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+// 		if (!error && token && !token.grant) {
+// 			logger.log('error', "[Core] Auth Missing grant token:" + token);
+// 		}
+// 		if (!error && token && token.active && token.grant && token.grant.active && token.user) {
+// 			logger.log('debug', "[Core] Auth OAuth Token good, token:" + token);
+// 			done(null, token.user, { scope: token.scope });
+// 		} else if (!error) {
+// 			logger.log('error', "[Core] Auth OAuth Token error, token:" + token);
+// 			done(null, false);
+// 		} else {
+// 			logger.log('error', "[Core] Auth OAuth Token error:" + error);
+// 			done(error);
+// 		}
+// 	});
+// });
+// passport.use(accessTokenStrategy);
 ///////////////////////////////////////////////////////////////////////////
 // Authorization URI
 ///////////////////////////////////////////////////////////////////////////
