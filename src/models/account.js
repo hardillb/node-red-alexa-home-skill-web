@@ -14,7 +14,8 @@ var Account = new Schema({
     created: { type: Date, default: function(){
         return new Date();
     }},
-    activeServices: []
+    activeServices: [],
+    active: { type: Boolean, default: true}
 });
 
 var options = {
@@ -22,7 +23,12 @@ var options = {
 	saltlen: 12,
 	keylen: 24,
 	iterations: 901,
-	encoding: 'base64'
+    encoding: 'base64',
+    findByUsername: function(model, queryParameters) {
+        // Add additional query parameter - AND condition - active: true
+        queryParameters.active = true;
+        return model.findOne(queryParameters);
+      }
 };
 
 Account.plugin(passportLocalMongoose,options);

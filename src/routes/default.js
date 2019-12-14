@@ -260,7 +260,7 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
         Promise.all([pCountry]).then(([userCountry]) => {
 			if (userCountry.statusCode == 200) {
                 var region = userCountry.data[0].region;
-                Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo" }), req.body.password, function(err, account) {
+                Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo", active: true }), req.body.password, function(err, account) {
                     if (err) {
                         logger.log('error', "[New User] New user creation error: " + err);
                         return res.status(400).send(err.message);
