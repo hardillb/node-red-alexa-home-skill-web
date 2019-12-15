@@ -6,7 +6,7 @@
     display: inline-block;
     width: 32px;
     height: 32px;
-    background: url('/images/flags_oauth.png') no-repeat;
+    background: url('/static/images/flags_oauth.png') no-repeat;
 }
 
 
