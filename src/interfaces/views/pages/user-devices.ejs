@@ -70,7 +70,7 @@
 	<!-- State Modal End -->
 
 	<script type="application/javascript">
-	
+
 	function clearStateModal() {
 		$('#state').val("");
 	}
@@ -78,7 +78,7 @@
 	function viewState(id) {
 		clearStateModal()
 		var device = devices[id];
-		$('#state').val(device.state);
+		$('#state').val(JSON.stringify(device.state));
 		$("#stateModal").modal('show');
 	}
 
@@ -86,7 +86,7 @@
 	function saveDevice(id) {
 		var device = devices[id];
 	}
-	
+
 	// Currently not used, do we want to edit devices centrally? Duplicate lots of devices.ejs page here if so
 	function editDevice(id) {
 		clearModal()

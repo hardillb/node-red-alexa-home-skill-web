@@ -9,6 +9,7 @@
             <th scope="col">OAuth Id</th>
             <th scope="col">OAuth Secret</th>
             <th scope="col">Domains</th>
+            <th scope="col">Edit</th>
             <th scope="col">Manage</th>
           </tr>
         </thead>
@@ -19,10 +20,8 @@
                   <td><%= service.oauth_id %></td>
                   <td><%= service.oauth_secret %></td>
                   <td><%= service.domains.join(',') %></td>
-                  <td>
-                    <button class="btn btn-secondary" onclick="edit('<%= service._id %>')">Edit</button>
-                    <button class="btn btn-secondary" style="margin-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button>
-                  </td>
+                  <td><button class="btn btn-secondary" onclick="edit('<%= service._id %>')">Edit</button></td>
+                  <td><button class="btn btn-secondary" style="margin-left:5px" onclick="deleteService('<%= service._id%>')">Delete</button></td>
               </tr>
             <% }); %>
         </tbody>
