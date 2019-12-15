@@ -2,7 +2,7 @@
 	<div class="container main-content">
 		<h1>User Accounts</h1>
 		<h3>Total Count: <%= usercount %></h3>
-		<table class="table table-striped">
+		<table id="tblUsers" class="table table-striped" style="display:none">
 			<thead>
 				<tr>
 				  <th scope="col">Username</th>
@@ -63,18 +63,19 @@
 							<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 							<button class="btn btn-primary" id="submit" type="submit" value="submit">Save</button>
 					</div>
-				</form>				
+				</form>
 			</div>
 		</div>
 	</div>
 	<!-- User Modal End -->
 	<script>
 
-	$(document).ready(function() { 
+	$(document).ready(function() {
 		$("#form-user").submit(function(e) {
 			e.preventDefault();
 			saveAccount()
 		});
+		$("#tblUsers").show();
 	});
 
 	var cs = $("#country").countrySelect();
@@ -112,7 +113,7 @@
 			alert("Ensure email address and country are set!");
 		}
 	}
-	
+
 	function editAccount(id) {
 		clearModal()
 		var account = users[id];
