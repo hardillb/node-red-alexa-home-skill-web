@@ -2,7 +2,7 @@
 	<div class="container main-content">
 		<h1>User Devices</h1>
 		<h3>Total Count: <%= devicecount %></h3>
-		<table class="table table-striped">
+		<table id="tblDevices" class="table table-striped" style="display:none">
 			<thead>
 				<tr>
 				  <th scope="col">EndpointId</th>
@@ -70,6 +70,10 @@
 	<!-- State Modal End -->
 
 	<script type="application/javascript">
+
+	$(document).ready(function() {
+		$("#tblDevices").show();
+	});
 
 	function clearStateModal() {
 		$('#state').val("");
