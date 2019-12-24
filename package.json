@@ -34,7 +34,7 @@
     "express-session": "^1.17.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.8.3",
-    "mongoose-sequence": "^5.2.21",
+    "mongoose-sequence": "^5.2.2",
     "connect-mongo": "^3.2.0",
     "morgan": "^1.9.1",
     "mqtt": "^3.0.0",
