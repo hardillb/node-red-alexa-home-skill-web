@@ -1,4 +1,4 @@
-<% include ../fragments/header.ejs %>
+<%- include('../fragments/header'); -%>
 	<div class="container main-content">
 		<h1>User Devices</h1>
 		<h3>Total Count: <%= devicecount %></h3>
@@ -116,4 +116,4 @@
 		devices[device._id] = device;
 	});
 	</script>
-<% include ../fragments/footer.ejs %>
+<%- include('../fragments/footer'); -%>

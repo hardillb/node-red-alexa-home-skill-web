@@ -1,4 +1,4 @@
-<% include ../fragments/header.ejs %>
+<%- include('../fragments/header'); -%>
 
 <% if (isVerified == false) { %>
 	<div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -1211,4 +1211,4 @@ var devices = {};
 });
 
 </script>
-<% include ../fragments/footer.ejs %>
+<%- include('../fragments/footer'); -%>

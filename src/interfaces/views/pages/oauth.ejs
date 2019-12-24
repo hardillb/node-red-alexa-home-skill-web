@@ -1,4 +1,4 @@
-<% include ../fragments/header.ejs %>
+<%- include('../fragments/header'); -%>
   <div class="container main-content">
     <h1 class="h3 mb-3 font-weight-normal">Connect with <%= application.title %></h1>
     <form action="/auth/finish" method="post">
@@ -94,4 +94,4 @@
         }
     }
   </script>
-<% include ../fragments/footer.ejs %>
+<%- include('../fragments/footer'); -%>

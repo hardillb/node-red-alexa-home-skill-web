@@ -1,4 +1,4 @@
-<% include ../fragments/header.ejs %>
+<%- include('../fragments/header'); -%>
 <div class="container main-content col-sm-6">
   <form class="form-account" id="form-account">
     <h1>My Account</h1>
@@ -37,7 +37,7 @@
       <div class="col-sm-2">
       </div>
       <div class="col-sm-7 text-right">
-        <a href="/my-account" id="cancel" name="cancel" style="margin-left :5px" class="btn btn-secondary btn-space">Cancel</a>  
+        <a href="/my-account" id="cancel" name="cancel" style="margin-left :5px" class="btn btn-secondary btn-space">Cancel</a>
         <button class="btn btn-primary btn-space" style="margin-left :5px" id="submit" type="submit" value="submit">Save Changes</button>
       </div>
     </div>
@@ -167,4 +167,4 @@ user = <%-JSON.stringify(user)%>;
 
 </script>
 
-<% include ../fragments/footer.ejs %>
+<%- include('../fragments/footer'); -%>
