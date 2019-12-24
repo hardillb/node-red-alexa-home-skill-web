@@ -2,7 +2,7 @@
 	<div class="container main-content">
 		<h1>User Devices</h1>
 		<h3>Total Count: <%= devicecount %></h3>
-		<table id="tblDevices" class="table table-striped" style="display:none">
+		<table id="tblDevices" class="table table-responsive table-sm table-striped" style="display:none">
 			<thead>
 				<tr>
 				  <th scope="col">EndpointId</th>
@@ -39,7 +39,7 @@
                         <td><%= device.reportState %></td>
 						<td><button type="button" class="btn btn-secondary" onclick="viewState('<%= device._id %>')">State</button></td>
 						<!--<td><button type="button" class="btn btn-secondary" onclick="editDevice('<%= device._id %>')">Edit</button></td>-->
-                        <td><button type="button" class="btn btn-secondary" onclick="deleteDevice('<%= device._id %>')">Delete</button></td>
+                        <td><button type="button" class="btn btn-danger" onclick="deleteDevice('<%= device._id %>')">Delete</button></td>
 					</tr>
 				<% }); %>
 			</tbody>

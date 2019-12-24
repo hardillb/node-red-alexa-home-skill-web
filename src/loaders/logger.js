@@ -38,6 +38,9 @@ logger.stream = {
 	},
 	};
 
+// Output Log Level
+logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
+
 // Check for AWS credentials
 fs.access(awscredentials, fs.F_OK, (err) => {
 	if (err) {

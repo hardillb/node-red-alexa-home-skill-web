@@ -8,10 +8,10 @@ var logger = require('./loaders/logger');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var consoleLoglevel = "info"; // default console log level
-var debug = (process.env.ALEXA_DEBUG || false);
-if (debug == "true") {consoleLoglevel = "debug"};
-logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
+// var consoleLoglevel = "info"; // default console log level
+// var debug = (process.env.ALEXA_DEBUG || false);
+// if (debug == "true") {consoleLoglevel = "debug"};
+// logger.log('info', "[Core] Log Level set to: " + consoleLoglevel);
 ///////////////////////////////////////////////////////////////////////////
 // Main
 ///////////////////////////////////////////////////////////////////////////

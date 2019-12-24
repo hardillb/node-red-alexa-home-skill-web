@@ -1,0 +1,42 @@
+<% include ../fragments/header.ejs %>
+  <div class="container main-content">
+      <form class="form-verifyResend" id="form-verifyResend">
+          <% if (error_messages) { %>
+            <p><strong><%= error_messages %></strong></p>
+          <% } %>
+          <% if (success_messages) { %>
+            <p><strong><%= success_messages %></strong></p>
+          <% } %>
+          <h1 class="h3 mb-3 font-weight-normal">Re-send Verification Email</h1>
+          <p>Use this form to re-send your account verification email.</p>
+          <label for="email" class="sr-only">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="Email Address" required autofocus title="Email address.">
+          <br>
+          <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Send</button>
+        </form>
+
+        <script type="application/javascript">
+          $("#form-verifyResend").submit(function(e) {
+              e.preventDefault();
+              var xhr = new XMLHttpRequest();
+              var email = document.getElementById('email').value;
+              var params = 'email=' + encodeURIComponent(email);
+              xhr.open('POST', '/verify-resend',true);
+              xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+              xhr.onreadystatechange = function () {
+                if( xhr.readyState == 4 && xhr.status == 200) {
+                  //new verify token created / sent to users email address
+                  //alert(xhr.responseText);
+                  window.location = '/verify-resend';
+                } else if (xhr.readyState == 4 && (xhr.status == 400 || xhr.status == 500)) {
+                  //show error
+                  //alert(xhr.responseText);
+                  window.location = '/verify-resend';
+                }
+              }
+            xhr.send(params);
+          });
+      </script>
+    </div>
+  </div>
+<% include ../fragments/footer.ejs %>

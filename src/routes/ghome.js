@@ -9,16 +9,17 @@ router.use(bodyParser.json());
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
-var ua = require('universal-analytics');
 var passport = require('passport');
-// var BasicStrategy = require('passport-http').BasicStrategy;
-// var LocalStrategy = require('passport-local').Strategy;
-// var PassportOAuthBearer = require('passport-http-bearer');
-var mqtt = require('mqtt');
+var mqttClient = require('../loaders/mqtt').mqttClient;
+var ongoingCommands = require('../loaders/mqtt').ongoingCommands;
 var logger = require('../loaders/logger');
 const gHomeFunc = require('../services/func-ghome');
 const servicesFunc = require('../services/func-services');
-var client = require('../loaders/redis');
+//var client = require('../loaders/redis-mqtt'); // Redis MQTT Command Holding Area
+const defaultLimiter = require('../loaders/limiter').defaultLimiter;
+const sendPageView = require('../services/ganalytics').sendPageView;
+const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
+const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -28,103 +29,7 @@ const removeUserServices = servicesFunc.removeUserServices;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var debug = (process.env.ALEXA_DEBUG || false);
-// MQTT ENV variables========================
-var mqtt_user = (process.env.MQTT_USER);
-var mqtt_password = (process.env.MQTT_PASSWORD);
-var mqtt_port = (process.env.MQTT_PORT || "1883");
-var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-// Google Analytics ==========================
-var enableAnalytics = false;
-if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = true;
-    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
-}
-///////////////////////////////////////////////////////////////////////////
-// Passport Configuration | Suspect Not Needed
-///////////////////////////////////////////////////////////////////////////
-// passport.use(new LocalStrategy(Account.authenticate()));
-// passport.use(new BasicStrategy(Account.authenticate()));
-// passport.serializeUser(Account.serializeUser());
-// passport.deserializeUser(Account.deserializeUser());
-// var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
-// 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-// 		if (!error && token && !token.grant) {
-// 			logger.log('error', "[Core] GHome missing grant token:" + token);
-// 		}
-// 		// Added check for user account active (boolean)
-// 		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
-// 			logger.log('debug', "[Core] GHome OAuth Token good, token: " + token);
-// 			done(null, token.user, { scope: token.scope });
-// 		}
-// 		else if (!error) {
-// 			if (token.user && token.user.active == false) {
-// 				logger.log('warn', "[Core] GHome OAuth Token warning, user: " + token.user.username + ", 'active' is false");
-// 			}
-// 			else {
-// 				logger.log('warn', "[Core] GHome OAuth Token warning, token: " + token);
-// 			}
-// 			done(null, false);
-// 		}
-// 		else {
-// 			logger.log('error', "[Core] GHome OAuth Token error:" + error);
-// 			done(error);
-// 		}
-// 	});
-// });
-// passport.use(accessTokenStrategy);
-///////////////////////////////////////////////////////////////////////////
-// MQTT Client Configuration
-///////////////////////////////////////////////////////////////////////////
-var mqttClient;
-var mqttOptions = {
-	connectTimeout: 30 * 1000,
-	reconnectPeriod: 1000,
-	keepAlive: 10,
-	clean: true,
-	resubscribe: true,
-	clientId: 'gHomeAPI_' + Math.random().toString(16).substr(2, 8)
-};
-if (mqtt_user) {
-	mqttOptions.username = mqtt_user;
-	mqttOptions.password = mqtt_password;
-}
-logger.log('info', "[GHome API] Connecting to MQTT server: " + mqtt_url);
-mqttClient = mqtt.connect(mqtt_url, mqttOptions);
-mqttClient.on('error',function(err){
-	logger.log('error', "[GHome API] MQTT connect error");
-});
-mqttClient.on('reconnect', function(){
-	logger.log('warn', "[GHome API] MQTT reconnect event");
-});
-mqttClient.on('connect', function(){
-	logger.log('info', "[GHome API] MQTT connected, subscribing to 'response/#'")
-	mqttClient.subscribe('response/#');
-});
-///////////////////////////////////////////////////////////////////////////
-// Rate-limiter
-///////////////////////////////////////////////////////////////////////////
-const limiter = require('express-limiter')(router, client)
-// Default Limiter, used on majority of routers ex. OAuth2-related and Command API
-const defaultLimiter = limiter({
-	lookup: function(req, res, opts, next) {
-		//opts.lookup = 'connection.remoteAddress'
-		opts.lookup = 'headers.x-forwarded-for'
-		opts.total = 100
-		opts.expire = 1000 * 60 * 60
-		return next()
-  },
-	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
-		var params = {
-			ec: "Express-limiter",
-			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
-			uip: req.ip
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-		res.status(429).json('Rate limit exceeded');
-	  }
-});
+//var debug = (process.env.ALEXA_DEBUG || false);
 ///////////////////////////////////////////////////////////////////////////
 // Main GHome Action API
 ///////////////////////////////////////////////////////////////////////////
@@ -144,16 +49,8 @@ router.post('/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.SYNC' :
 			logger.log('verbose', "[GHome Sync API] Running device discovery for user: " + req.user.username);
-			var params = {
-				ec: "SYNC",
-				ea: "GHome SYNC event for username: " + req.user.username,
-				uid: req.user.username,
-				uip: req.ip,
-				dp: "/api/v1/action"
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
+			sendEventUid(req.path, "SYNC", "GHome SYNC Event", req.ip, req.user.username, req.headers['user-agent']);
 
-			//if (debug == "true") {console.time('ghome-sync')};
 			var pFindUser = Account.find({username: req.user.username});
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
@@ -314,22 +211,18 @@ router.post('/action', defaultLimiter,
 					logger.log('verbose', "[GHome Sync API] Discovery Response for user: " + req.user.username + ", response: " + JSON.stringify(response));
 					// Send Response
 					res.status(200).json(response);
-					//if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Sync API] User not found");
 					res.status(500).json({message: "User not found"});
-					//if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Sync API] Device not found");
 					res.status(500).json({message: "Device not found"});
-					//if (debug == "true") {console.timeEnd('ghome-sync')};
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Sync API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
-				//if (debug == "true") {console.timeEnd('ghome-sync')};
 			});
 			break;
 
@@ -338,16 +231,8 @@ router.post('/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' :
 			logger.log('verbose', "[GHome Exec API] Execute command(s) for user: " + req.user.username);
-			var params = {
-				ec: "EXECUTE",
-				ea: "GHome EXECUTE event for username: " + req.user.username,
-				uid: req.user.username,
-				uip: req.ip,
-				dp: "/api/v1/action"
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
+			sendEventUid(req.path, "EXECUTE", "GHome EXECUTE Event", req.ip, req.user.username, req.headers['user-agent']);
 
-			//if (debug == "true") {console.time('ghome-exec')};
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindDevices]).then(([devices]) => {
 				if (devices) {
@@ -479,7 +364,8 @@ router.post('/action', defaultLimiter,
 										id: element.id,
 										execution: arrCommands[i]
 									});
-									mqttClient.publish(topic,message); // Publish Command
+									// Publish Command
+									mqttClient.publish(topic,message);
 									logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 									logger.log('debug', "[GHome Exec API] MQTT message:" + message);
 
@@ -487,7 +373,7 @@ router.post('/action', defaultLimiter,
 									logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
 									logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
 								}
-								// Build success response and include in onGoingCommands
+								// Build success response and include in redis-stored command
 								var response = {
 									requestId: requestId,
 									payload: {
@@ -523,21 +409,19 @@ router.post('/action', defaultLimiter,
 										logger.log('error', "[GHome Exec API] Unable to add endpointId to multi-command response, error: " + e);
 									}
 								}
-								onGoingCommands[requestId + element.id] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
+								ongoingCommands[requestId + element.id] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
+								// client.hset(requestId + element.id, 'command', command); // Command drops into redis database, used to generate failure messages if not ack
 							}
 						});
 					}
-					//if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Exec API] Device not found");
 					res.status(500).json({message: "Device not found"});
-					//if (debug == "true") {console.timeEnd('ghome-exec')};
 				}
 			}).catch(err => {
 				logger.log('error', "[GHome Exec API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
-				//if (debug == "true") {console.timeEnd('ghome-exec')};
 			});
 			break;
 		///////////////////////////////////////////////////////////////////////////
@@ -545,17 +429,8 @@ router.post('/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.QUERY' :
 			logger.log('verbose', "[GHome Query API] Running device state query for user: " + req.user.username);
+			sendEventUid(req.path, "QUERY", "GHome QUERY Event", req.ip, req.user.username, req.headers['user-agent']);
 
-			var params = {
-				ec: "QUERY",
-				ea: "GHome QUERY event for username: " + req.user.username,
-				uid: req.user.username,
-				uip: req.ip,
-				dp: "/api/v1/action"
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
-
-			//if (debug == "true") {console.time('ghome-query')};
 			var pFindUser = Account.find({username: req.user.username});
 			var pFindDevices = Devices.find({username: req.user.username});
 			Promise.all([pFindUser, pFindDevices]).then(([user, devices]) => {
@@ -584,25 +459,21 @@ router.post('/action', defaultLimiter,
 						// Send Response
 						logger.log('verbose', "[GHome Query API] QUERY state: " + JSON.stringify(response));
 						res.status(200).json(response);
-						//if (debug == "true") {console.timeEnd('ghome-query')};
 					}
 					start()
 				}
 				else if (!user){
 					logger.log('warn', "[GHome Query API] User not found");
 					res.status(500).json({message: "User not found"});
-					//if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 				else if (!device) {
 					logger.log('warn', "[GHome Query API] Device not found");
 					res.status(500).json({message: "Device not found"});
-					//if (debug == "true") {console.timeEnd('ghome-query')};
 				}
 
 			}).catch(err => {
 				logger.log('error', "[GHome Query API] error:" + err)
 				res.status(500).json({message: "An error occurred."});
-				//if (debug == "true") {console.timeEnd('ghome-query')};
 			});
 			break;
 		///////////////////////////////////////////////////////////////////////////
@@ -611,15 +482,7 @@ router.post('/action', defaultLimiter,
 		case 'action.devices.DISCONNECT' :
 			// Find service definition with Google URLs
 			var userId = req.user._id;
-			var params = {
-				ec: "DISCONNECT",
-				ea: "GHome Disconnect event for username: " + req.user.username,
-				uid: req.user.username,
-				uip: req.ip,
-				dp: "/api/v1/action"
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
-
+			sendEventUid(req.path, "DISCONNECT", "GHome DISCONNECT Event", req.ip, req.user.username, req.headers['user-agent']);
 			oauthModels.Application.findOne({domains: "oauth-redirect.googleusercontent.com" },function(err, data){
 				if (data) {
 					// Remove OAuth tokens for **Google Home** only
@@ -640,243 +503,7 @@ router.post('/action', defaultLimiter,
 			break;
 	}
 });
-///////////////////////////////////////////////////////////////////////////
-// MQTT Message Event Handlers
-///////////////////////////////////////////////////////////////////////////
-var onGoingCommands = {};
-// Event handler for received MQTT messages - note subscribe near top of script.
-mqttClient.on('message',function(topic,message){
-	var arrTopic = topic.split("/");
-	var username = arrTopic[1];
-	var endpointId = arrTopic[2];
-	if (topic.startsWith('response/')){
-		logger.log('info', "[GHome API] Acknowledged MQTT response message for topic: " + topic);
-		var payload = JSON.parse(message.toString());
-		//logger.log('debug', "[GHome API] Response MQTT message for user: " + username + ", message: " + message);
-		var commandWaiting = onGoingCommands[payload.messageId + endpointId];
-		if (commandWaiting) {
-			//if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[GHome API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
-			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
-			if (payload.success) {
-				//logger.log('debug', "[GHome API] MQTT response message is success for topic: " + topic);
-				// Google Home success response
-				if (commandWaiting.hasOwnProperty('source')){
-					var commandSource = JSON.stringify(commandWaiting.source);
-					commandSource = commandSource.replace(/['"]+/g, '');
-					if (commandSource == "Google") {
-						// Check if command had >1 target device, if so we need to ensure all commands are successful
-						var arrCommandDevices =  commandWaiting.devices;
-						///////////////////////////////////////////////////////////////////////////
-						// Multi-device command, perform correlation of responses
-						///////////////////////////////////////////////////////////////////////////
-						if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
-							//logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", ***existing*** response: " + JSON.stringify(commandWaiting.response));
-							//logger.log('debug', "[GHome API] Google Home multi-device command response for user: " + username +  ", additional devices: " + JSON.stringify(commandWaiting.devices));
 
-							// Mark this command as acknowledged/ successful as we have a response for it
-							delete onGoingCommands[payload.messageId + endpointId].acknowledged;
-							onGoingCommands[payload.messageId + endpointId].acknowledged = true;
-							//logger.log('debug', "[GHome API] Updated waiting command acknowledged: " + JSON.stringify(onGoingCommands[payload.messageId + endpointId].acknowledged))
-
-							// Add endpointId to response (if it isn't already there)
-							if (commandWaiting.response.payload.commands[0].ids.includes(endpointId) == false){
-								onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(endpointId);
-							}
-							// Check for other commands, and that all are acknowledged
-							var sendResponse = true;
-							for (x = 0; x < arrCommandDevices.length; x++) {
-								//logger.log('debug', "[GHome API] Trying to match inbound response, messageId: " + payload.messageId + ", with additional endpointId: " + arrCommandDevices[x])
-								//logger.log('debug', "[GHome API] Looking for waiting command with key: " + payload.messageId + arrCommandDevices[x])
-								var additionalCommand = onGoingCommands[payload.messageId + arrCommandDevices[x]];
-
-								// Check that endpointId hasn't already been added to response
-								if (additionalCommand) {
-									//logger.log('debug', "[GHome API] Found Additional Command")
-									if (additionalCommand.hasOwnProperty('acknowledged') && commandWaiting.response.payload.commands[0].ids.includes(arrCommandDevices[x]) == false){
-										// Add successful command endpointId to response and delete the additionalCommand that is waiting
-										// Essentially we should get down to a single acknowledged waiting command with deviceIds in response that have successfully executed the command
-										if (additionalCommand.acknowledged == true) {
-											onGoingCommands[payload.messageId + endpointId].response.payload.commands[0].ids.push(arrCommandDevices[x]);
-											// Delete/ clean-up duplicate command response
-											delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
-											logger.log('debug', "[GHome API] Merged *acknowledged* multi-device command response: " + username +  ", ***updated*** response: " + JSON.stringify(commandWaiting.response));
-										}
-										// This additional command is yet to be acknowledged via MQTT response from Node-RED
-										else {
-											logger.log('debug', "[GHome API] Google Home multi-device command *not* acknowledged: " + username +  ", ***un-modified*** response: " + JSON.stringify(commandWaiting.response));
-											sendResponse = false;
-										}
-									}
-									else {
-										sendResponse = false;
-									}
-								}
-							}
-							// All commands in multi-device command have been executed successfully
-							if (sendResponse == true) {
-								logger.log('debug', "[GHome API] Successful Google Home multi-device command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
-								try {
-									// Multi-devices this generates an error as res is sent after first device
-									commandWaiting.res.status(200).json(commandWaiting.response);
-									delete onGoingCommands[payload.messageId + endpointId];
-
-									var params = {
-										ec: "Command",
-										ea: "Command API successfully processed MQTT command for username: " + username,
-										uid: username,
-									  }
-									if (enableAnalytics) {visitor.event(params).send()};
-								}
-								catch(e) {
-									logger.log('warn', "[GHome API] Warning: " + e);
-								}
-							}
-
-						}
-						///////////////////////////////////////////////////////////////////////////
-						// Single-device command
-						///////////////////////////////////////////////////////////////////////////
-						else {
-							try {
-								commandWaiting.res.status(200).json(commandWaiting.response);
-								logger.log('debug', "[GHome API] Successful Google Home MQTT command for user: " + username +  ", response: " + JSON.stringify(commandWaiting.response));
-								delete onGoingCommands[payload.messageId + endpointId];
-
-								var params = {
-									ec: "Command",
-									ea: "Command API successfully processed MQTT command for username: " + username,
-									uid: username,
-								  }
-								if (enableAnalytics) {visitor.event(params).send()};
-							}
-							catch(e) {
-								logger.log('warn', "[GHome API] Warning: " + e);
-							}
-						}
-					}
-				}
-
-			} else {
-				logger.log('debug', "[GHome API] MQTT response message is failure for topic: " + topic);
-				// Google Home failure response
-				if (commandWaiting.hasOwnProperty('source')) {
-					var commandSource = JSON.stringify(commandWaiting.source);
-					commandSource = commandSource.replace(/['"]+/g, '');
-					if (commandSource == "Google") {
-						// Change response to FAILED
-						delete commandWaiting.response.state;
-						commandWaiting.response.status = "FAILED";
-						// Send Response
-						logger.log('warn', "[GHome API] Failed Google Home MQTT command for user: " + username + ", response: " + JSON.stringify(commandWaiting.response));
-						try {
-							commandWaiting.res.status(200).json(commandWaiting.response);
-						}
-						catch(e) {
-							logger.log('warn', "[GHome API] Error sending failed command response for user: " + username + ", error: " + e);
-						}
-						delete onGoingCommands[payload.messageId + endpointId];
-					}
-				}
-			}
-			//delete onGoingCommands[payload.messageId + endpointId];
-		}
-		//if (debug == "true") {console.timeEnd('mqtt-response')};
-	}
-	// Leave Alexa API MQTT state listener to pickup all other MQTT state messages
-});
-///////////////////////////////////////////////////////////////////////////
-// Timer
-///////////////////////////////////////////////////////////////////////////
-var timeout = setInterval(function(){
-	var now = Date.now();
-	var keys = Object.keys(onGoingCommands);
-	for (key in keys){
-		var waiting = onGoingCommands[keys[key]];
-		logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
-		if (waiting) {
-			var maxTime = 2000;
-			var diff = now - waiting.timestamp;
-			if (diff > maxTime) {
-				//logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
-
-				var arrCommandDevices =  waiting.devices;
-				///////////////////////////////////////////////////////////////////////////
-				// Multi-device command, perform correlation of responses
-				///////////////////////////////////////////////////////////////////////////
-				// Check for other commands, should only find one as we've cleaned up further up
-				//var sendResponse = true;
-				var response = undefined;
-				if (Array.isArray(arrCommandDevices) && arrCommandDevices.length !== 0 ){
-					logger.log('debug', "[GHome API] Multi-device command waiting");
-					// If this command is acknowledged set response to this waiting command
-					if (waiting.acknowledged == true){response = waiting.response};
-					// Check for linked commands with same referenceId in onGoingCommands
-					for (x = 0; x < arrCommandDevices.length; x++) {
-						var additionalCommand = onGoingCommands[waiting.requestId + arrCommandDevices[x]];
-						if (additionalCommand) {
-							if (additionalCommand.hasOwnProperty('acknowledged') && additionalCommand.acknowledged == true) {
-								// Logger.log('debug', "[GHome API] Found command waiting, multi-device command acknowledged!");
-								if (response == undefined){response = additionalCommand.response}
-								else if (response.payload.commands[0].ids.includes(arrCommandDevices[x]) == false){response.payload.commands[0].ids.push(arrCommandDevices[x])}
-								// Cleanup waiting acknowledge command response, we're ready to send it
-								delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
-							}
-						}
-						// If we have a response, we can delete unacknowledged command older than > maxTime in ms
-						var diffAdditionalCommand = now - additionalCommand.timestamp;
-						if (diffAdditionalCommand > maxTime && response !== undefined) {delete onGoingCommands[additionalCommand.requestId + arrCommandDevices[x]];}
-					}
-					// All commands in multi-device command have been executed successfully
-					if (response !== undefined) {
-						logger.log('debug', "[GHome API] Successful Google Home multi-device command, response: " + JSON.stringify(waiting.response));
-						try {
-							// Multi-devices this generates an error as res is sent after first device
-							waiting.res.status(200).json(response);
-							delete onGoingCommands[keys[key]];
-						}
-						catch(e) {
-							logger.log('warn', "[GHome API] Send multi-command response error: " + e);
-							delete onGoingCommands[keys[key]];
-						}
-					}
-					// No acknowledged commands, so send timeout
-					else {
-						logger.log('debug', "[GHome API] Google Home multi-device command timed-out");
-						try {
-							waiting.res.status(504).send('{"error": "timeout"}');
-							delete onGoingCommands[keys[key]];
-						}
-						catch(e) {
-							logger.log('debug', "[GHome API] Google Home multi-device command timed-out, unable to send result, error: " + e);
-							delete onGoingCommands[keys[key]];
-						}
-					}
-				}
-				///////////////////////////////////////////////////////////////////////////
-				// Single device command, perform correlation of responses
-				///////////////////////////////////////////////////////////////////////////
-				else {
-					try {
-						waiting.res.status(504).send('{"error": "timeout"}');
-						logger.log('debug', "[GHome API] Google Home command timed-out");
-						delete onGoingCommands[keys[key]];
-					}
-					catch(e) {
-						logger.log('debug', "[GHome API] Google Home single-device command timed-out, unable to send result, error: " + e);
-						delete onGoingCommands[keys[key]];
-					}
-
-					//measurement.send({
-					//	t:'event',
-					//	ec:'command',
-					//	ea: 'timeout',
-					//	uid: waiting.user
-					//});
-				}
-			}
-		}
-	}
-},500);
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////

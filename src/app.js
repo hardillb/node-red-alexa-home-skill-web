@@ -12,10 +12,13 @@ var bodyParser = require('body-parser');
 const path = require('path');
 //var cookieParser = require('cookie-parser');
 ///////////////////////////////////////////////////////////////////////////
-// MongoDB
+// Loaders
 ///////////////////////////////////////////////////////////////////////////
 var db = require('./loaders/db');
-// Schema =======================
+var mqtt = require('./loaders/mqtt');
+///////////////////////////////////////////////////////////////////////////
+// Schema
+///////////////////////////////////////////////////////////////////////////
 var Account = require('./models/account');
 var oauthModels = require('./models/oauth');
 var Topics = require('./models/topics');
@@ -27,7 +30,7 @@ var logger = require('./loaders/logger');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var debug = (process.env.ALEXA_DEBUG || false);
+//var debug = (process.env.ALEXA_DEBUG || false);
 // MongoDB Settings, used for expression session handler DB connection
 var mongo_user = (process.env.MONGO_USER);
 var mongo_password = (process.env.MONGO_PASSWORD);
@@ -55,7 +58,7 @@ passport.deserializeUser(Account.deserializeUser());
 // Check admin account exists, if not create it using same credentials as MQTT user/password supplied
 Account.findOne({username: mqtt_user}, function(error, account){
 	if (!error && !account) {
-		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1}),
+		Account.register(new Account({username: mqtt_user, email: '', mqttPass: '', superuser: 1, active: true, isVerified: true}),
 			mqtt_password, function(err, account){
 			var topics = new Topics({topics: [
 					'command/' +account.username+'/#',
@@ -80,8 +83,22 @@ Account.findOne({username: mqtt_user}, function(error, account){
 				}
 			});
 		});
-	} else {
-		logger.log('info', "[App] Superuser MQTT account, " + mqtt_user + " already exists");
+	}
+	else if (!error && account && !account.active && !account.isVerified) {
+		// Check necessary elements are set on super user account
+		Account.updateOne(
+			{username: account.username},
+			{$set: {isVerified: true, active: true}},
+			function(err, count){
+				if (err) {
+					logger.log('error' , "[App] Update super user account failed, error: " + err);
+				}
+				logger.log('verbose' , "[App] Update super user account isVerified:true, active:true success!");
+			}
+		);
+	}
+	else {
+		logger.log('info', "[App] Superuser MQTT account, " + mqtt_user + " already exists/ is configured correctly!");
 	}
 });
 
@@ -128,6 +145,13 @@ app.set('views', path.join(__dirname, 'interfaces/views/'));
 app.use('/static', express.static(path.join(__dirname, '/interfaces/static')));
 app.use('/static/octicons', express.static('node_modules/@primer/octicons/build'), express.static('node_modules/@primer/octicons/build/svg')); // Octicons router
 
+// Add flash message handler
+app.use(function(req, res, next){
+    res.locals.success_messages = req.flash('success_messages');
+    res.locals.error_messages = req.flash('error_messages');
+    next();
+});
+
 ///////////////////////////////////////////////////////////////////////////
 // Load Routes
 ///////////////////////////////////////////////////////////////////////////
@@ -147,8 +171,48 @@ var state = require('./services/state'); // Load State API
 ///////////////////////////////////////////////////////////////////////////
 // Passport Configuration
 ///////////////////////////////////////////////////////////////////////////
+
 passport.use(new LocalStrategy(Account.authenticate()));
+// New Custom Local Strategy to provide user feedback
+//passport.use(new LocalStrategy(
+// 	function(username, password, done) {
+// 	  Account.findOne({ username: username }, function (err, user) {
+// 		if (err) { return done(err); }
+// 		if (!user || user.password != password) {
+// 		  return done(null, false, { message: 'Incorrect username or password!' });
+// 		}
+// 		if (!user.active == true) {
+// 		  return done(null, false, { message: 'Account disabled!' });
+// 		}
+// 		// else if (!user.isVerified == true) {
+// 		// 	return done(null, false, { message: 'Please verify your account before logging in!' });
+// 		// }
+// 		return done(null, user);
+// 	  });
+// 	}
+// ));
+
 passport.use(new BasicStrategy(Account.authenticate()));
+// New Custom Local Strategy to provide user feedback
+// passport.use(new BasicStrategy(
+// 	function(username, password, done) {
+// 	  Account.findOne({ username: username }, function (err, user) {
+// 		if (err) { return done(err); }
+// 		if (!user || !user.validPassword(password)) {
+// 		  return done(null, false, { message: 'Incorrect username or password!' });
+// 		}
+// 		if (!user.active == true) {
+// 		  return done(null, false, { message: 'Account disabled!' });
+// 		}
+// 		// else if (!user.isVerified == true) {
+// 		// 	return done(null, false, { message: 'Please verify your account before logging in!' });
+// 		// }
+// 		return done(null, user);
+// 	  });
+// 	}
+// ));
+
+
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
@@ -176,6 +240,7 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 		}
 	});
 });
+
 passport.use(accessTokenStrategy);
 
 ///////////////////////////////////////////////////////////////////////////

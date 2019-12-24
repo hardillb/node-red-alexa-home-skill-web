@@ -5,23 +5,24 @@
     <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  
+
   <% include ../fragments/tos-modal.ejs %>
   <% include ../fragments/privacy-modal.ejs %>
 
   <div class="container main-content">
-      <!-- <div id="register"> -->
-        <!-- <form class="form-register" id="form-register" onsubmit="submitUser()"> -->
-        <form class="form-register" id="form-register">
-          <% include ../fragments/register.ejs %>
-        </form>
-      <!--  </div> -->
-      <!--  <script type="text/javascript" src="js/zxcvbn.js"></script> -->
-
+      <% if (error_messages) { %>
+        <p><strong><%= error_messages %></strong></p>
+      <% } %>
+      <% if (success_messages) { %>
+        <p><strong><%= success_messages %></strong></p>
+      <% } %>
+      <form class="form-register" id="form-register">
+        <% include ../fragments/register.ejs %>
+      </form>
       <script type="application/javascript">
         // Load CountrySelect
         $("#country").countrySelect();
-        var password = document.getElementById("password")
+        var password = document.getElementById("password");
         var verify = document.getElementById("verify");
         password.onchange = validatePassword;
         verify.onkeyup = validatePassword;
@@ -36,7 +37,7 @@
         $("#form-register").submit(function(e) {
           e.preventDefault();
           // Username validation built-into input box
-          var username = $('#username').val().trim();
+          var username = $('#username').val().trim().toLowerCase();
           var password = $('#password').val().trim();
           var verify = $('#verify').val().trim();
           var email = $('#email').val().trim();
@@ -53,20 +54,14 @@
           xhr.open('POST', '/newUser',true);
           xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
           xhr.onreadystatechange = function () {
-            if( xhr.readyState == 4 && xhr.status == 201) {
+            if( xhr.readyState == 4 && xhr.status == 200) {
               console.log("Created new user")
-              //new user created
+              //new user created, flash that a verification email has been sent
+              alert(xhr.responseText);
               window.location.href = "/";
-            } else if (xhr.readyState == 4 && xhr.status == 400) {
-              //show error
-              alert("Failed to create user account, response: " + xhr.responseText);
             }
             else if (xhr.readyState == 4 && xhr.status == 500) {
-              //show error
               alert("Failed to create user account, response: " + xhr.responseText);
-            }
-            else {
-              console.log("Response:", xhr.status, xhr.readyState, xhr.responseText)
             }
           }
           xhr.send(params);
@@ -81,14 +76,5 @@
           }
         }
       </script>
-      <!-- Translate Bar Start
-      <script type="text/javascript">
-        function googleTranslateElementInit() {
-          new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL}, 'google_translate_element');
-        }
-      </script>
-        
-      <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-      Translate Bar End -->
   </div>
 <% include ../fragments/footer.ejs %>

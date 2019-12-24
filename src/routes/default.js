@@ -6,6 +6,7 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+const crypto = require('crypto');
 var sendemail = require('../services/sendemail');
 var mailer = new sendemail();
 var Account = require('../models/account');
@@ -13,13 +14,12 @@ var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var Topics = require('../models/topics');
 var LostPassword = require('../models/lostPassword');
+var verifyEmail = require('../models/verifyEmail');
 var passport = require('passport');
-// var BasicStrategy = require('passport-http').BasicStrategy;
-// var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
 var logger = require('../loaders/logger');
-var ua = require('universal-analytics');
-var client = require('../loaders/redis')
+const defaultLimiter = require('../loaders/limiter').defaultLimiter;
+const restrictiveLimiter = require('../loaders/limiter').restrictiveLimiter;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -29,17 +29,14 @@ const queryDeviceState = gHomeFunc.queryDeviceState;
 const isGhomeUser = gHomeFunc.isGhomeUser;
 const requestToken2 = gHomeFunc.requestToken2;
 const gHomeSync = gHomeFunc.gHomeSync;
+const sendPageView = require('../services/ganalytics').sendPageView;
+const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
+const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var debug = (process.env.ALEXA_DEBUG || false);
+//var debug = (process.env.ALEXA_DEBUG || false);
 var mqtt_user = (process.env.MQTT_USER);
-// Google Analytics ==========================
-var enableAnalytics = false;
-if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = true;
-    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
-}
 // Google Home Sync =========================
 var enableGoogleHomeSync = true;
 // Warn on SYNC_API not being specified/ request SYNC will be disabled
@@ -47,156 +44,58 @@ if (!(process.env.HOMEGRAPH_APIKEY)){
 	enableGoogleHomeSync = false;
 }
 ///////////////////////////////////////////////////////////////////////////
-// Passport Configuration | Suspect Not Needed
-///////////////////////////////////////////////////////////////////////////
-// passport.use(new LocalStrategy(Account.authenticate()));
-// passport.use(new BasicStrategy(Account.authenticate()));
-// passport.serializeUser(Account.serializeUser());
-// passport.deserializeUser(Account.deserializeUser());
-///////////////////////////////////////////////////////////////////////////
-// Rate-limiter
-///////////////////////////////////////////////////////////////////////////
-const limiter = require('express-limiter')(router, client)
-// Default Limiter, used on majority of routers ex. OAuth2-related and Command API
-const defaultLimiter = limiter({
-	lookup: function(req, res, opts, next) {
-		//opts.lookup = 'connection.remoteAddress'
-		opts.lookup = 'headers.x-forwarded-for'
-		opts.total = 1000
-		opts.expire = 1000 * 60 * 60
-		return next()
-  },
-	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
-		var params = {
-			ec: "Express-limiter",
-			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
-			uip: req.ip
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-		res.status(429).json('Rate limit exceeded');
-	  }
-});
-// Restrictive Limiter, used to prevent abuse on NewUser, Login, 10 reqs/ hr
-const restrictiveLimiter = limiter({
-	lookup: function(req, res, opts, next) {
-		//opts.lookup = 'connection.remoteAddress'
-		opts.lookup = 'headers.x-forwarded-for'
-		opts.total = 10
-		opts.expire = 1000 * 60 * 60
-		return next()
-  },
-	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] Restrictive rate-limit exceeded for path: " + req.path + ",  IP address:" + req.ip)
-		var params = {
-			ec: "Express-limiter",
-			ea: "Restrictive: rate-limited path: " + req.path + ", IP address:" + req.ip,
-			uip: req.ip
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-		res.status(429).json('Rate limit exceeded');
-	}
-});
-///////////////////////////////////////////////////////////////////////////
 // Home
 ///////////////////////////////////////////////////////////////////////////
 router.get('/', defaultLimiter, function(req,res){
-	var view = {
-		dp: req.path,
-		dh: 'https://' + process.env.WEB_HOSTNAME,
-		dt: 'Home',
-		uip: req.ip,
-		ua: req.headers['user-agent']
-	}
-	if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/");
-
+	sendPageView(req.path, 'Home', req.ip, req.headers['user-agent']);
+	// outputSessionID(req, "/");
 	res.render('pages/index', {user: req.user, home: true});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Docs
 ///////////////////////////////////////////////////////////////////////////
 router.get('/docs', defaultLimiter, function(req,res){
-	var view = {
-		dp: req.path,
-		dh: 'https://' + process.env.WEB_HOSTNAME,
-		dt: 'Docs',
-		uip: req.ip,
-		ua: req.headers['user-agent']
-	}
-	if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/docs");
-
+	sendPageView(req.path, 'Docs', req.ip, req.headers['user-agent']);
+	//outputSessionID(req, "/docs");
 	res.render('pages/docs', {user: req.user, docs: true});
 });
 ///////////////////////////////////////////////////////////////////////////
 // About
 ///////////////////////////////////////////////////////////////////////////
 router.get('/about', defaultLimiter, function(req,res){
-	var view = {
-		dp: req.path,
-		dh: 'https://' + process.env.WEB_HOSTNAME,
-		dt: 'About',
-		uip: req.ip,
-		ua: req.headers['user-agent']
-	}
-	if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/about");
-
+	sendPageView(req.path, 'About', req.ip, req.headers['user-agent']);
+	//outputSessionID(req, "/about");
 	res.render('pages/about', {user: req.user, about: true});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Privacy
 ///////////////////////////////////////////////////////////////////////////
 router.get('/privacy', defaultLimiter, function(req,res){
-	var view = {
-		dp: req.path,
-		dh: 'https://' + process.env.WEB_HOSTNAME,
-		dt: 'Privacy',
-		uip: req.ip,
-		ua: req.headers['user-agent']
-	}
-	if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/privacy");
-
+	sendPageView(req.path, 'Privacy', req.ip, req.headers['user-agent']);
+	//outputSessionID(req, "/privacy");
 	res.render('pages/privacy', {user: req.user, privacy: true});
 });
 ///////////////////////////////////////////////////////////////////////////
 // TOS
 ///////////////////////////////////////////////////////////////////////////
 router.get('/tos', defaultLimiter, function(req,res){
-	var view = {
-		dp: req.path,
-		dh: 'https://' + process.env.WEB_HOSTNAME,
-		dt: 'Terms of Service',
-		uip: req.ip,
-		ua: req.headers['user-agent']
-	}
-	if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/tos");
-
+	sendPageView(req.path, 'Terms of Service', req.ip, req.headers['user-agent']);
+	//outputSessionID(req, "/tos");
 	res.render('pages/tos', {user: req.user, tos: true});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Login (Get)
 ///////////////////////////////////////////////////////////////////////////
 router.get('/login', defaultLimiter, function(req,res){
-	var view = {
-		dp: req.path,
-		dh: 'https://' + process.env.WEB_HOSTNAME,
-		dt: 'Login',
-		uip: req.ip,
-		ua: req.headers['user-agent']
-	}
-	if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/login");
-
+	sendPageView(req.path, 'Login', req.ip, req.headers['user-agent']);
+	//outputSessionID(req, "/login");
 	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Logout
 ///////////////////////////////////////////////////////////////////////////
 router.get('/logout', defaultLimiter, function(req,res){
+	sendPageView(req.path, 'Logout', req.ip, req.headers['user-agent']);
 	req.logout();
 	if (req.query.next) {
 		//console.log(req.query.next);
@@ -204,24 +103,16 @@ router.get('/logout', defaultLimiter, function(req,res){
 	} else {
 		res.redirect('/');
 	}
-	outputSessionID(req, "/logout");
+	//outputSessionID(req, "/logout");
 });
 
 ///////////////////////////////////////////////////////////////////////////
 // Login (Post) - restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/login', restrictiveLimiter,
+router.post('/login', defaultLimiter,
 	passport.authenticate('local',{ failureRedirect: '/login', failureFlash: true, session: true }),
 	function(req,res){
-		var params = {
-			ec: "Security", // class
-			ea: "Login", //action
-			uid: req.user,
-			uip: req.ip,
-			dp: "/login"
-		  }
-		if (enableAnalytics) {visitor.pageview(params).send()};
-
+		sendPageViewUid(req.path, 'Login', req.ip, req.user.username, req.headers['user-agent']);
 		if (req.query.next) {
 			res.reconnect(req.query.next);
 		} else {
@@ -237,16 +128,8 @@ router.post('/login', restrictiveLimiter,
 // Register/ Newuser (Get)
 ///////////////////////////////////////////////////////////////////////////
 router.get('/newuser', defaultLimiter, function(req,res){
-    var view = {
-        dp: req.path,
-        dh: 'https://' + process.env.WEB_HOSTNAME,
-        dt: 'New User',
-        uip: req.ip,
-        ua: req.headers['user-agent']
-    }
-    if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/newuser");
-
+	sendPageView(req.path, 'New User', req.ip, req.headers['user-agent']);
+	//outputSessionID(req, "/newuser");
     res.render('pages/register',{user: req.user, newuser: true});
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -256,21 +139,34 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
     var body = JSON.parse(JSON.stringify(req.body));
     if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
 		logger.log('verbose', "[New User] Looking up region for country: " + req.body.country.toUpperCase());
-        const pCountry = countries.findByCountryCode(req.body.country.toUpperCase());
-        Promise.all([pCountry]).then(([userCountry]) => {
-			if (userCountry.statusCode == 200) {
-                var region = userCountry.data[0].region;
-                Account.register(new Account({ username : req.body.username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo", active: true }), req.body.password, function(err, account) {
-                    if (err) {
-                        logger.log('error', "[New User] New user creation error: " + err);
-                        return res.status(400).send(err.message);
-                    }
-                    var topics = new Topics({topics: [
+		const pCountry = countries.findByCountryCode(req.body.country.toUpperCase());
+		const pUsers = Account.findOne({email: req.body.email});
+
+        Promise.all([pCountry, pUsers]).then(([userCountry, users]) => {
+			if (!users && userCountry.statusCode == 200) {
+				var region = userCountry.data[0].region;
+				// Force new usernames to be lowercase, will also prevent duplicate usernames with case variances
+				var username = req.body.username.toLowerCase();
+				/// Change this from register to ?create? then move out login so that user has to manually login
+                Account.register(new Account({ username : username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo", active: true }), req.body.password, function(err, account) {
+					// On error stop any further processing
+					if (err) {
+						logger.log('error', "[New User] New user creation error: " + err);
+						//res.locals.error_messages = 'Failed to create account!';
+						req.flash('error_messages', 'Failed to create account!');
+						return res.status(500).send('Failed to create account!');
+                        //return res.status(400).send(err.message);
+					}
+					// No error, so account creation was successful
+					logger.log('info', "[New User] Created new user, username: " + username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
+					// Construct MQTT topics for new user
+					var topics = new Topics({topics: [
                             'command/' + account.username +'/#',
                             'state/'+ account.username + '/#',
 							'response/' + account.username + '/#',
 							'message/' + account.username + '/#'
-                        ]});
+						]});
+					// Save MQTT Topics for new user
                     topics.save(function(err){
                         if (!err){
                             var s = Buffer.from(account.salt, 'hex').toString('base64');
@@ -286,121 +182,290 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
                                 }
                             );
                         }
-                    });
-                    passport.authenticate('local')(req, res, function () {
-                        logger.log('info', "[New User] Created new user, username: " + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region );
-                        var params = {
-                            ec: "Security",
-                            ea: "Create user, username:" + req.body.username + " email:"  + req.body.email + " country:" +  req.body.country + " region:" + region,
-                            uid: req.user,
-                            dp: "/newuser"
-                        }
-                        if (enableAnalytics) {visitor.event(params).send()};
-                        res.status(201).send();
-                    });
+					});
+					/////// Trigger Email Validation Workflow
+					var mailToken = new verifyEmail({ _userId: account._id, token: crypto.randomBytes(16).toString('hex') });
+					// Save the verification token
+					mailToken.save(function (err) {
+						if (err) {
+							logger.log('error' , "[New User] Save user email verification token failed, error: " + err);
+							req.flash('error_messages', 'Failed to create email verification token!');
+							return res.status(500).send('Failed to create email verification token!');
+						}
+						// Send Verification Email
+						var body = mailer.buildVerifyEmail(mailToken.token, account.username, process.env.WEB_HOSTNAME);
+						//var mailSent = mailer.send(account.email, process.env.MAIL_USER, 'Account Verification for Node-RED Smart Home Control', body.text, body.html);
+						mailer.send(req.body.email, process.env.MAIL_USER, 'Account Verification for Node-RED Smart Home Control', body.text, body.html, function(returnValue) {
+							if (returnValue == true) {
+								sendEventUid(req.path, "Security", "Create Account", req.ip, req.body.username, req.headers['user-agent']);
+								req.flash('success_messages', 'A verification email has been sent to: ' + req.body.email);
+								res.status(200).send('A verification email has been sent to: ' + req.body.email)
+							}
+							else {
+								req.flash('error_messages', 'Verification email failed to send!');
+								res.status(500).send('Verification email failed to send!');
+							}
+						});
+					});
                 });
-            }
+			}
+			else if (users){
+				logger.log('error', "[New User] Cannot create new user, user with email address already exists!");
+				req.flash('error_messages', 'Cannot create new user, user with email address already exists!');
+				return res.status(500).send('Cannot create new user, user with email address already exists!');
+			}
         }).catch(err => {
-            logger.log('warn', "[New User] User region lookup failed, error:" + err);
+			logger.log('warn', "[New User] User region lookup failed, error:" + err);
+			req.flash('error_messages', 'Account creation failed, please check country is correctly specified!');
             res.status(500).send("Account creation failed, please check country is correctly specified!");
         });
     }
     else {
-        logger.log('warn', "[New User] Missing/ incorrect elements supplied for user account creation");
+		logger.log('warn', "[New User] Missing/ incorrect elements supplied for user account creation");
+		req.flash('error_messages', 'Missing required attributes, please check registration form!');
         res.status(500).send("Missing required attributes, please check registration form!");
     }
 });
 ///////////////////////////////////////////////////////////////////////////
-// changePassword/:key (Get)
+// Verify GET
 ///////////////////////////////////////////////////////////////////////////
-router.get('/changePassword/:key', defaultLimiter, function(req, res, next){
-    var uuid = req.params.key;
-    LostPassword.findOne({uuid: uuid}).populate('user').exec(function(error, lostPassword){
-        if (!error && lostPassword) {
-            req.login(lostPassword.user, function(err){
-                if (!err){
-                    lostPassword.remove();
-                    res.redirect('/changePassword');
-                } else {
-                    logger.log('warn', "[Change Password] Unable to find correlating password reset key for user: " + lostPassword.user);
-                    //logger.log('debug', "[Change Password] " + err);
-                    res.redirect('/');
-                }
-            })
-        } else {
-            res.redirect('/');
-        }
-    });
+router.get(['/verify', '/verify/:token'], defaultLimiter, function(req,res){
+	sendPageView(req.path, 'Verify', req.ip, req.headers['user-agent']);
+	if (req.params.token) {
+		res.render('pages/verify', {token: req.params.token, user: req.user});
+	}
+	else {
+		req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!');
+		res.render('pages/verify',{token: undefined, user: req.user});
+	}
 });
 ///////////////////////////////////////////////////////////////////////////
-// changePassword (Get)
+// Verify Status
 ///////////////////////////////////////////////////////////////////////////
-router.get('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
-    var view = {
-        dp: req.path,
-        dh: 'https://' + process.env.WEB_HOSTNAME,
-        dt: 'Change Password',
-        uid: req.user.username,
-        uip: req.ip,
-        ua: req.headers['user-agent']
-    }
-    if (enableAnalytics) {visitor.pageview(view).send()};
-    outputSessionID(req, "/changePassword");
-    res.render('pages/changePassword', {user: req.user});
+router.post('/verify', defaultLimiter, function(req,res){
+	if (req.body.token && req.body.email) {
+		// Find a matching token
+		verifyEmail.findOne({ token: req.body.token }, function (err, token) {
+			if (!token) {
+				req.flash('error_messages', 'We were unable to find a valid token. Your token my have expired!');
+				return res.status(400).send('We were unable to find a valid token. Your token my have expired!');
+			}
+			// If we found a token, find a matching user
+			Account.findOne({ _id: token._userId, email: req.body.email }, function (err, account) {
+				if (!account) {
+					req.flash('error_messages', 'We were unable to find a user for this token!');
+					return res.status(400).send('We were unable to find a user for this token!');
+				}
+				if (account.isVerified) {
+					req.flash('error_messages', 'Your account is already verified!');
+					return res.status(400).send('Your account is already verified!');
+				}
+
+				// Verify and save the user
+				account.isVerified = true;
+				account.save(function (err) {
+					if (err) {
+						logger.log('error' , "[Verify] Update user account: " + account.username + " isVerified:true failed, error: " + err);
+						req.flash('error_messages', 'Failed to update user account!');
+						return res.status(500).send('Failed to update user account!');
+					}
+					logger.log('verbose' , "[Verify] Update user account: " + account.username + " isVerified:true success");
+					req.flash('success_messages', 'The account has been verified, you can now log in!');
+					res.status(200).send("The account has been verified, you can now log in!");
+				});
+			});
+		});
+	}
+	else {
+		//logger.log('debug' , "[Verify] Req.body: " + JSON.stringify(req.body));
+		if (!req.body.email) {
+			req.flash('error_messages', 'Please ensure you fill-in email address!');
+			return res.status(400).send('Please ensure you fill-in email address!');
+		}
+		if (!req.body.token) {
+			req.flash('error_messages', 'Please ensure you fill-in token value!');
+			return res.status(400).send('Please ensure you fill-in token value!');
+		}
+	}
+});
+
+///////////////////////////////////////////////////////////////////////////
+// Verify Resend GET
+///////////////////////////////////////////////////////////////////////////
+router.get('/verify-resend', defaultLimiter, function(req,res){
+	sendPageView(req.path, 'Verify Resend', req.ip, req.headers['user-agent']);
+    res.render('pages/verify-resend', {user: req.user});
+});
+///////////////////////////////////////////////////////////////////////////
+// Verify Resend POST
+///////////////////////////////////////////////////////////////////////////
+router.post('/verify-resend', defaultLimiter, function(req,res){
+	if (req.body.email) {
+		Account.findOne({email: req.body.email}, function(error, account){
+			if (!error){
+				if (account && (!account.isVerified || account.isVerified && account.isVerified == false)){
+					var mailToken = new verifyEmail({ _userId: account._id, token: crypto.randomBytes(16).toString('hex') });
+					// Save the verification token
+					mailToken.save(function (err) {
+						if (err) {
+							logger.log('error' , "[Verify Resend] Save user email verification token failed, error: " + err);
+							req.flash('error_messages', 'Failed to create email verification token!');
+							return res.status(500).send('Failed to create email verification token!');
+						}
+						// Send Verification Email
+						var body = mailer.buildVerifyEmail(mailToken.token, account.username, process.env.WEB_HOSTNAME);
+						mailer.send(account.email, process.env.MAIL_USER, 'Account Verification for Node-RED Smart Home Control', body.text, body.html, function(returnValue) {
+							if (returnValue == true) {
+								sendEventUid(req.path, "Security", "Send re-verification email", req.ip, account.username, req.headers['user-agent']);
+								logger.log('info' , "[Verify Resend] A new verification email has been sent to: " + account.email);
+								req.flash('success_messages', 'A verification email has been sent to: ' + account.email);
+								return res.status(200).send('A verification email has been sent to: ' + account.email);
+							}
+							else {
+								logger.log('error' , "[Verify Resend] Failed to send verification email to: " + account.email);
+								req.flash('error_messages', 'Verification email failed to send!');
+								return res.status(500).send('Verification email failed to send!');
+							}
+						});
+					});
+				}
+				else if (account && account.isVerified && account.isVerified == true) {
+					req.flash('error_messages', 'Your account is already verified!');
+					return res.status(400).send('Your account is already verified!');
+				}
+				else {
+					logger.log('warn' , "[Verify Resend] No user found with supplied email: " + req.body.email);
+					req.flash('error_messages', "No user found with that email address, check your account configuration under 'My Account'");
+					res.status(400).send("No user found with that email address, check your account configuration under 'My Account'");
+				}
+			}
+			else {
+				logger.log('error' , "[Verify Resend] Error looking up user account with supplied email: " + req.body.email);
+				req.flash('error_messages', 'Error looking up user account!');
+				return res.status(500).send('Error looking up user account!');
+			}
+		});
+	}
+	else {
+		logger.log('verbose' , "[Verify Resend] Missing email address!");
+		req.flash('error_messages', 'Please ensure you fill-in email address!');
+		return res.status(400).send('Missing email address!');
+	}
+});
+
+///////////////////////////////////////////////////////////////////////////
+// changePassword/:token (Get)
+///////////////////////////////////////////////////////////////////////////
+router.get(['/changePassword', '/changePassword/:token'], restrictiveLimiter, function(req, res, next){
+	sendPageView(req.path, 'Change Password with Token', req.ip, req.headers['user-agent']);
+	if (req.params.token) {
+		res.render('pages/changePassword', {token: req.params.token, user: req.user});
+	}
+	else {
+		// Disable flash message if logged in
+		if (!req.user) {req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!')};
+		res.render('pages/changePassword',{token: undefined, user: req.user});
+	}
 });
 ///////////////////////////////////////////////////////////////////////////
 // changePassword (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/changePassword', defaultLimiter, ensureAuthenticated, function(req, res, next){
-    Account.findOne({username: req.user.username}, function (err, user){
-        if (!err && user) {
-			//logger.log('debug', "[Change Password] req.body: " + JSON.stringify(req.body));
-			//logger.log('debug', "[Change Password] Setting password to: " + req.body.password);
-			//logger.log('debug', "[Change Password] Old hash: " + user.mqttPass);
-            user.setPassword(req.body.password, function(e,u){
-                //var s = Buffer.from(user.salt, 'hex').toString('base64');
-                //var h = Buffer.from(user.hash, 'hex').toString(('base64'));
-                var mqttPass = "PBKDF2$sha256$901$" + user.salt + "$" + user.hash;
-                u.mqttPass = mqttPass;
-                u.save(function(error){
-                    if (!error) {
-                        var params = {
-                            ec: "Security",
-                            ea: "Changed password for username:" + u.username,
-                            uid: req.user,
-                            dp: "/changePassword"
-                            }
-						if (enableAnalytics) {visitor.event(params).send()};
-						logger.log('verbose', "[Change Password] Changed password for: " + u.username);
-						//logger.log('debug', "[Change Password] New hash: " + mqttPass);
-                        res.status(200).send();
-                    } else {
-                        logger.log('warn', "[Change Password] Unable to change password for: " + u.username);
-                        logger.log('debug', "[Change Password] " + error);
-                        res.status(400).send("Problem setting new password");
-                    }
-                });
-            });
-        } else {
-            logger.log('warn', "[Change Password] Unable to change password for user, user not found: " + req.user.username);
-            logger.log('debug', "[Change Password] " + err);
-            res.status(400).send("Problem setting new password");
-        }
-    });
+router.post('/changePassword', defaultLimiter, function(req, res, next){
+	// Authenticated user, accessing via "My Account" page, no token required
+	if (req.isAuthenticated()) {
+		logger.log('verbose' , "[Change Password] Logged in user request to change password for user account: " + req.user.username);
+		// User is already logged-in, reset their password
+		resetPassword(req.user.username, req.body.password)
+			.then(result => {
+				//logger.log('verbose' , "[Change Password] resetPassword result: " + result);
+				if (result == true) {
+					sendEventUid(req.path, "Security", "Successfully Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+					req.flash('success_messages', 'Changed Password!');
+					//res.locals.success_messages = 'Changed Password!';
+					res.status(200).send();
+				}
+				else {
+					sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+					req.flash('error_messages', 'Error setting new password!');
+					//res.locals.error_messages = 'Error setting new password!';
+					res.status(400).send("Problem setting new password");
+				}
+			})
+			.catch(e => {
+				//sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+				req.flash('error_messages', 'Error setting new password!');
+				//res.locals.error_messages = 'Error setting new password!';
+				res.status(400).send("Problem setting new password");
+			})
+	}
+	else {
+		// Un-authenticated user, accessing via /changePassword page, token required
+		logger.log('verbose' , "[Change Password] Anonymous user request to change password for user account");
+		//logger.log('verbose' , "[Change Password] Anonymous user request, body: " + JSON.stringify(req.body));
+		if (req.body.token) {
+			// Validate a token exists to change password, if it does, and it matches log user in and reset password
+			var token = req.body.token;
+			LostPassword.findOne({uuid: token}).populate('user').exec(function(error, lostPassword){
+				if (!error && lostPassword) {
+					req.login(lostPassword.user, function(err){
+						if (!err){
+							lostPassword.remove();
+							resetPassword(req.user.username, req.body.password)
+								.then(result => {
+									logger.log('verbose' , "[Change Password] resetPassword result: " + result);
+									if (result == true) {
+										sendEventUid(req.path, "Security", "Successfully Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+										req.flash('success_messages', 'Changed Password!');
+										//res.locals.success_messages = 'Changed Password!';
+										return res.status(200).send();
+									}
+									else {
+										sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+										req.flash('error_messages', 'Error setting new password!');
+										return res.status(400).send("Error setting new password");
+									}
+								})
+								.catch(e => {
+									//sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+									req.flash('error_messages', 'Error setting new password!');
+									//res.locals.error_messages = 'Error setting new password!';
+									res.status(400).send("Error setting new password");
+								})
+						}
+						else {
+							logger.log('error', "[Change Password] Unable to login user to reset password, user: " + lostPassword.user);
+							req.flash('error_messages', 'Failed to reset password!');
+							//res.locals.error_messages = 'Failed to reset password!';
+							return res.status(400).send('Failed to reset password!');
+						}
+					})
+				} else {
+					logger.log('warn', "[Change Password] Unable to find matching token for account!");
+					req.flash('error_messages', 'Unable to find matching token for your account!');
+					//res.locals.error_messages = 'Unable to find matching token for your account!';
+					return res.status(400).send('Unable to find matching token for your account!');
+				}
+			});
+		}
+		else {
+			req.flash('error_messages', 'Please ensure you fill-in token value!');
+			//res.locals.error_messages = 'Please ensure you fill-in token value!';
+			return res.status(400).send('Please ensure you fill-in token value!');
+		}
+	}
 });
+
 ///////////////////////////////////////////////////////////////////////////
 // lostPassword (Get)
 ///////////////////////////////////////////////////////////////////////////
 router.get('/lostPassword', defaultLimiter, function(req, res, next){
-    var view = {
-        dp: req.path,
-        dh: 'https://' + process.env.WEB_HOSTNAME,
-        dt: 'Lost Password',
-        uip: req.ip,
-        ua: req.headers['user-agent']
-    }
-    if (enableAnalytics) {visitor.pageview(view).send()};
-	outputSessionID(req, "/lostPassword");
+	if (req.user){
+		sendPageViewUid(req.path, 'Lost Password', req.ip, req.user.username, req.headers['user-agent']);
+	}
+	else {
+		sendPageView(req.path, 'Lost Password', req.ip, req.headers['user-agent']);
+	}
+	//outputSessionID(req, "/lostPassword");
     res.render('pages/lostPassword', { user: req.user});
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -419,8 +484,8 @@ router.post('/lostPassword', defaultLimiter, function(req, res, next){
                     }
                     //console.log(lostPassword.uuid);
                     //console.log(lostPassword.user.username);
-                    var body = mailer.buildLostPasswordBody(lostPassword.uuid, lostPassword.user.username);
-                    mailer.send(email, 'nr-alexav3@cb-net.co.uk', 'Password Reset for Node-Red-Alexa-Smart-Home-v3', body.text, body.html);
+                    var body = mailer.buildLostPasswordBody(lostPassword.uuid, lostPassword.user.username, process.env.WEB_HOSTNAME);
+					mailer.send(req.body.email, process.env.MAIL_USER, 'Password Reset for Node-Red-Alexa-Smart-Home-v3', body.text, body.html);
                 });
             } else {
                 res.status(404).send("No user found with that email address");
@@ -434,16 +499,8 @@ router.post('/lostPassword', defaultLimiter, function(req, res, next){
 router.get('/my-account', defaultLimiter,
     ensureAuthenticated,
     function(req,res){
-        var view = {
-            dp: req.path,
-            dh: 'https://' + process.env.WEB_HOSTNAME,
-            dt: 'My Account',
-            uid: req.user.username,
-            uip: req.ip,
-            ua: req.headers['user-agent']
-        }
-        if (enableAnalytics) {visitor.pageview(view).send()};
-		outputSessionID(req, "/my-account");
+		sendPageViewUid(req.path, 'My Account', req.ip, req.user.username, req.headers['user-agent']);
+		//outputSessionID(req, "/my-account");
         const pUser = Account.findOne({username: req.user.username});
         Promise.all([pUser]).then(([userAccount]) => {
             //logger.log('info', "userAccount: " + userAccount);
@@ -458,17 +515,10 @@ router.get('/my-account', defaultLimiter,
 router.get('/devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
-		var view = {
-			dp: req.path,
-			dh: 'https://' + process.env.WEB_HOSTNAME,
-			dt: 'Devices',
-			uid: req.user.username,
-			uip: req.ip,
-			ua: req.headers['user-agent']
-		}
-		if (enableAnalytics) {visitor.pageview(view).send()};
-		outputSessionID(req, "/devices");
+		sendPageViewUid(req.path, 'My Devices', req.ip, req.user.username, req.headers['user-agent']);
+		//outputSessionID(req, "/devices");
 		var user = req.user.username;
+		var verified = undefined;
 		const pUserDevices = Devices.find({username:user});
 		const pCountDevices = Devices.countDocuments({username:user});
 		const pCountGrants = Account.aggregate([
@@ -491,10 +541,18 @@ router.get('/devices', defaultLimiter,
 			}}
 		]);
 
+		// Capture verification status
+		if (!req.user.isVerified || req.user.isVerified == false){
+			verified = false;
+		}
+		else {
+			verified = true;
+		}
+
 		Promise.all([pUserDevices, pCountDevices, pCountGrants]).then(([devices, countDevs, countUserGrants]) => {
 			//logger.log('info', "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
 			//logger.log('info', "countUserGrants: " + JSON.stringify(countUserGrants));
-			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, devs: true});
+			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, isVerified: verified, fqdn: process.env.WEB_HOSTNAME, devs: true});
 		}).catch(err => {
 			res.status(500).json({error: err});
 		});
@@ -752,15 +810,70 @@ function ensureAuthenticated(req,res,next) {
     }
 }
 
-function outputSessionID(req, path) {
-	if (req.session.id) {
-		if (req.user) {
-			logger.log("debug","[Express Session] User: " + req.user.username + ", path: " + path + ", IP address: " + req.ip + ", sessionID: " + req.session.id);
-		}
-		else {
-			logger.log("debug","[Express Session] User path: " + path + ", IP address: " + req.ip + ", sessionID: " + req.session.id);
-		}
+// function outputSessionID(req, path) {
+// 	if (req.session.id) {
+// 		if (req.user) {
+// 			logger.log("debug","[Express Session] User: " + req.user.username + ", path: " + path + ", IP address: " + req.ip + ", sessionID: " + req.session.id);
+// 		}
+// 		else {
+// 			logger.log("debug","[Express Session] User path: " + path + ", IP address: " + req.ip + ", sessionID: " + req.session.id);
+// 		}
+// 	}
+// }
+
+// Async function for password reset
+const resetPassword = async(username, password) => {
+	try {
+		// Find User/ Set Password
+		var user = await Account.findOne({username: username});
+		await user.setPassword(password);
+		// Set MQTT Password
+		var mqttPass = "PBKDF2$sha256$901$" + user.salt + "$" + user.hash;
+		user.mqttPass = mqttPass;
+		// Save Account
+		await user.save();
+		// Return Success
+		logger.log('verbose', "[Change Password] Changed password for: " + user.username);
+		return true;
+
 	}
+	catch(e) {
+		logger.log('error', "[Change Password] Unable to change password for user, error: " + e);
+		return false;
+	}
+
+	// Account.findOne({username: username})
+	// 	.then(user => {
+	// 		if (user) {
+	// 			user.setPassword(password, function(e,u){
+	// 				//var s = Buffer.from(user.salt, 'hex').toString('base64');
+	// 				//var h = Buffer.from(user.hash, 'hex').toString(('base64'));
+	// 				var mqttPass = "PBKDF2$sha256$901$" + user.salt + "$" + user.hash;
+	// 				u.mqttPass = mqttPass;
+	// 				u.save(function(error){
+	// 					if (!error) {
+	// 						logger.log('verbose', "[Change Password] Changed password for: " + u.username);
+	// 						return true;
+
+	// 					} else {
+	// 						logger.log('warn', "[Change Password] Unable to change password for: " + u.username);
+	// 						logger.log('debug', "[Change Password] " + error);
+	// 						return false;
+	// 					}
+	// 				});
+	// 			});
+	// 		}
+	// 		else {
+	// 			logger.log('warn', "[Change Password] Unable to change password for user, user not found: " + username);
+	// 			logger.log('debug', "[Change Password] " + err);
+	// 			return false;
+	// 		}
+	// 	})
+	// 	.catch(err => {
+	// 		logger.log('error', "[Change Password] Unable to lookup user, error: " + err);
+	// 		return false;
+	// 	});
+
 }
 
 module.exports = router;

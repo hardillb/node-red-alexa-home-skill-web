@@ -10,13 +10,12 @@ var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var passport = require('passport');
-// var BasicStrategy = require('passport-http').BasicStrategy;
-// var LocalStrategy = require('passport-local').Strategy;
-// var PassportOAuthBearer = require('passport-http-bearer');
 var logger = require('../loaders/logger');
-var ua = require('universal-analytics');
-var mqtt = require('mqtt');
-var client = require('../loaders/redis');
+var mqttClient = require('../loaders/mqtt').mqttClient;
+var ongoingCommands = require('../loaders/mqtt').ongoingCommands;
+//var client = require('../loaders/staging/redis-mqtt'); // Redis MQTT Command Holding Area
+const defaultLimiter = require('../loaders/limiter').defaultLimiter;
+const getStateLimiter = require('../loaders/limiter').getStateLimiter;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -25,209 +24,20 @@ const alexaFunc = require('../services/func-alexa');
 const updateUserServices = servicesFunc.updateUserServices;
 const queryDeviceState = alexaFunc.queryDeviceState;
 const saveGrant = alexaFunc.saveGrant;
+const sendPageView = require('../services/ganalytics').sendPageView;
+const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
+const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var debug = (process.env.ALEXA_DEBUG || false);
-// MQTT ENV variables========================
-var mqtt_user = (process.env.MQTT_USER);
-var mqtt_password = (process.env.MQTT_PASSWORD);
-var mqtt_port = (process.env.MQTT_PORT || "1883");
-var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
-// Google Analytics ==========================
-var enableAnalytics = false;
-if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = true;
-    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
-}
-///////////////////////////////////////////////////////////////////////////
-// Passport Configuration
-///////////////////////////////////////////////////////////////////////////
-// passport.use(new LocalStrategy(Account.authenticate()));
-// passport.use(new BasicStrategy(Account.authenticate()));
-// passport.serializeUser(Account.serializeUser());
-// passport.deserializeUser(Account.deserializeUser());
-// var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
-// 	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-// 		if (!error && token && !token.grant) {
-// 			logger.log('error', "[Core] Alexa Missing grant token: " + token);
-// 		}
-// 		// Added check for user account active (boolean)
-// 		if (!error && token && token.active && token.grant && token.grant.active && token.user && token.user.active) {
-// 			logger.log('debug', "[Core] Alexa OAuth Token good, token: " + token);
-// 			done(null, token.user, { scope: token.scope });
-// 		}
-// 		else if (!error) {
-// 			if (token.user && token.user.active == false) {
-// 				logger.log('warn', "[Core] Alexa OAuth Token warning, user: " + token.user.username + ", 'active' is false");
-// 			}
-// 			else {
-// 				logger.log('warn', "[Core] Alexa OAuth Token warning, token: " + token);
-// 			}
-// 			done(null, false);
-// 		}
-// 		else {
-// 			logger.log('error', "[Core] Alexa OAuth Token error: " + error);
-// 			done(error);
-// 		}
-// 	});
-// });
-// passport.use(accessTokenStrategy);
-///////////////////////////////////////////////////////////////////////////
-// MQTT Client Configuration
-///////////////////////////////////////////////////////////////////////////
-var mqttClient;
-var mqttOptions = {
-	connectTimeout: 30 * 1000,
-	reconnectPeriod: 1000,
-	keepAlive: 10,
-	clean: true,
-	resubscribe: true,
-	clientId: 'alexaAPI_' + Math.random().toString(16).substr(2, 8)
-};
-if (mqtt_user) {
-	mqttOptions.username = mqtt_user;
-	mqttOptions.password = mqtt_password;
-}
-logger.log('info', "[Alexa API] Connecting to MQTT server: " + mqtt_url);
-mqttClient = mqtt.connect(mqtt_url, mqttOptions);
-mqttClient.on('error',function(err){
-	logger.log('error', "[Alexa API] MQTT connect error");
-});
-mqttClient.on('reconnect', function(){
-	logger.log('warn', "[Alexa API] MQTT reconnect event");
-});
-mqttClient.on('connect', function(){
-	logger.log('info', "[Alexa API] MQTT connected, subscribing to 'response/#'")
-	mqttClient.subscribe('response/#');
-});
-///////////////////////////////////////////////////////////////////////////
-// Rate-limiter
-///////////////////////////////////////////////////////////////////////////
-const limiter = require('express-limiter')(router, client)
-// Default Limiter, used on majority of routers ex. OAuth2-related and Command API
-const defaultLimiter = limiter({
-	lookup: function(req, res, opts, next) {
-		//opts.lookup = 'connection.remoteAddress'
-		opts.lookup = 'headers.x-forwarded-for'
-		opts.total = 100
-		opts.expire = 1000 * 60 * 60
-		return next()
-  },
-	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address: " + req.ip)
-		var params = {
-			ec: "Express-limiter",
-			ea: "Default: rate-limited path: " + req.path + ", IP address: " + req.ip,
-			uip: req.ip
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-		res.status(429).json('Rate limit exceeded');
-	  }
-});
-// GetState Limiter, uses specific param, 100 reqs/ hr
-const getStateLimiter = limiter({
-	lookup: function(req, res, opts, next) {
-		  opts.lookup = ['params.dev_id']
-		  opts.total = 100
-		  opts.expire = 1000 * 60 * 60
-		  return next()
-	},
-	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] GetState rate-limit exceeded for IP address: " + req.ip)
-		var params = {
-			ec: "Express-limiter",
-			ea: "GetState: rate-limited path: " + req.path + ", IP address: " + req.ip,
-			uip: req.ip
-			}
-		if (enableAnalytics) {visitor.event(params).send()};
-		// MQTT message code, will provide client-side notification in Node-RED console
-		var endpointId = (req.params.dev_id || 0);
-		if (endpointId != 0) {
-			// New Redis hash-based lookup
-			var strAlert;
-			client.hgetall('endpointId', function(err, object) {
-				// No endpointId:username match in Redis, query MongoDB
-				if (!err && object == undefined) {
-					var pDevice = Devices.findOne({endpointId:endpointId});
-					Promise.all([pDevice]).then(([device]) => {
-						var username = getSafe(() => device.username);
-						if (username != undefined) {
-							strAlert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggered. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
-							// Add endpointId : username | friendlyName hash to Redis as its likely we'll get repeat hits!
-							client.hmset('endpointId', 'username', device.username, 'deviceFriendlyName', device.friendlyName);
-							notifyUser('warn', username, endpointId, strAlert);
-						}
-						else {
-							logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup username");
-						}
-					});
-				}
-				// Matched endpointId hash in Redis, saved MongoDB query
-				else if (!err) {
-					strAlert = '[' + object.deviceFriendlyName + '] ' + 'API Rate limiter triggered. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
-					notifyUser('warn', object.username, endpointId, strAlert);
-				}
-				// An error occurred on Redis client.get
-				else {
-					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
-				}
-			});
-
-			// Old Redis key/pair-based lookup
-			/*	client.get(endpointId, function(err, reply) {
-				// No endpointId:username match in Redis, query MongoDB
-				if (!err && reply == undefined) {
-					var pDevice = Devices.findOne({endpointId:endpointId});
-					Promise.all([pDevice]).then(([device]) => {
-						var username = getSafe(() => device.username);
-						if (username != undefined) {
-							alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
-							// Add endpointId : username pair to Redis as its likely we'll get repeat hits!
-							client.set(endpointId, username);
-
-							// Need to use HASH in REDIS, not a key pair, require: enpointId, device.username and device.friendlyName
-							// client.hmset('endpointId', 'username', device.username, 'deviceFriendlyName', 'device.friendlyName');
-
-							notifyUser('warn', username, endpointId, alert);
-						}
-						else {
-							logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup username");
-						}
-					});
-				}
-				// Matched endpointId:username match in Redis, saved MongoDB query
-				else if (!err) {
-					//alert = '[' + device.friendlyName + '] ' + 'API Rate limiter triggerd. You will be unable to view state in Alexa App for up to 1 hour. Please refrain from leaving Alexa App open/ polling for extended periods, see wiki for more information.';
-					notifyUser('warn', reply, endpointId, alert);
-				}
-				// An error occurred on Redis client.get
-				else {
-					logger.log('warn', "[Rate Limiter] Redis get failed with error: " + err);
-				}
-			}); */
-		}
-		else {
-			logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup dev_id param");
-		}
-		res.status(429).json('Rate limit exceeded for GetState API');
-	  }
-  });
+//var debug = (process.env.ALEXA_DEBUG || false);
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
 ///////////////////////////////////////////////////////////////////////////
 router.get('/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	function(req,res,next){
-		var params = {
-			ec: "Discovery",
-			ea: "Running device discovery for username: " + req.user.username,
-			uid: req.user.username,
-			uip: req.ip,
-			dp: "/api/v1/devices"
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-
+		sendEventUid(req.path, "Discovery", "Running device discovery", req.ip, req.user.username, req.headers['user-agent']);
 		var user = req.user.username
 		Devices.find({username: user},function(error, data){
 			if (!error) {
@@ -274,16 +84,7 @@ router.get('/getstate/:dev_id', getStateLimiter,
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
 		var id = req.params.dev_id;
-
-		var params = {
-			ec: "Get State",
-			ea: "GetState API request for username: " + req.user.username + ", endpointId: " + id,
-			uid: req.user.username,
-			uip: req.ip,
-			dp: "/api/v1/getstate"
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-
+		sendEventUid(req.path, "Get State", "GetState API Request, endpointId: " + id, req.ip, req.user.username, req.headers['user-agent']);
 		var serviceName = "Amazon"; // As user has authenticated, assume activeService
 		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
 
@@ -330,15 +131,7 @@ router.get('/getstate/:dev_id', getStateLimiter,
 router.post('/command2',
 	passport.authenticate('bearer', { session: false }),
 	function(req,res,next){
-		var params = {
-			ec: "Command",
-			ea: req.body.directive.header ? "Command API directive: " + req.body.directive.header.name + ", username: " + req.user.username + ", endpointId: " + req.body.directive.endpoint.endpointId : "Command API directive",
-			uid: req.user.username,
-			uip: req.ip,
-			dp: "/api/v1/command"
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-
+		sendEventUid(req.path, "Command", "Execute Command, endpointId: " + req.body.directive.endpoint.endpointId, req.ip, req.user.username, req.headers['user-agent']);
 		var serviceName = "Amazon"; // As user has authenticated, assume activeService
 		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
 
@@ -855,6 +648,7 @@ router.post('/command2',
 
 				if (validationStatus) {
 					try{
+						// Send Command to MQTT
 						mqttClient.publish(topic,message);
 						logger.log('info', "[Alexa API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 					} catch (err) {
@@ -869,8 +663,8 @@ router.post('/command2',
 						timestamp: Date.now()
 					};
 
-					// Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
-					onGoingCommands[req.body.directive.header.messageId] = command;
+					ongoingCommands[req.body.directive.header.messageId] = command;
+					//client.hset(req.body.directive.header.messageId, 'command', command); // Command drops into redis database, used to generate failure messages if not ack
 				}
 			}
 		});
@@ -953,102 +747,6 @@ router.post('/authorization', getStateLimiter,
 		}
 	}
 );
-
-///////////////////////////////////////////////////////////////////////////
-// MQTT Message Handlers
-///////////////////////////////////////////////////////////////////////////
-var onGoingCommands = {};
-
-// Event handler for received MQTT messages - note subscribe near top of script.
-mqttClient.on('message',function(topic,message){
-	var arrTopic = topic.split("/");
-	var username = arrTopic[1];
-	var endpointId = arrTopic[2];
-
-	if (topic.startsWith('response/')){
-		logger.log('info', "[Alexa API] Acknowledged MQTT response message for topic: " + topic);
-		//if (debug == "true") {console.time('mqtt-response')};
-		var payload = JSON.parse(message.toString());
-		//console.log("response payload", payload)
-		var commandWaiting = onGoingCommands[payload.messageId];
-		if (commandWaiting) {
-			//if (commandWaiting.hasOwnProperty('source')){logger.log('debug', "[Alexa API] Found matching command for user: " + username + ", command.source: " + JSON.stringify(commandWaiting.source));};
-			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
-			if (payload.success) {
-				//logger.log('debug', "[Alexa API] MQTT response message is success for topic: " + topic);
-				// Alexa success response send to Lambda for full response construction
-				if (commandWaiting.hasOwnProperty('source')) {
-					var commandSource = JSON.stringify(commandWaiting.source);
-					commandSource = commandSource.replace(/['"]+/g, '');
-					if (commandSource == "Alexa") {
-						if (commandWaiting.hasOwnProperty('response')) {
-							logger.log('debug', "[Alexa API] Successful MQTT command for user: " + username + ", response: " + JSON.stringify(commandWaiting.response));
-							commandWaiting.res.status(200).json(commandWaiting.response)
-						}
-						else {
-							logger.log('debug', "[Alexa API] Successful MQTT command for user: " + username);
-							commandWaiting.res.status(200).send()
-						}
-					}
-				}
-			} else {
-				// Alexa failure response send to Lambda for full response construction
-				if (commandWaiting.hasOwnProperty('source')) {
-					var commandSource = JSON.stringify(commandWaiting.source);
-					commandSource = commandSource.replace(/['"]+/g, '');
-					if (commandSource == "Alexa") {
-						if (commandWaiting.hasOwnProperty('response')) {
-							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command for user: " + username + ", response: " + + JSON.stringify(commandWaiting.response));
-							commandWaiting.res.status(503).json(commandWaiting.response)
-						}
-						else {
-							logger.log('warn', "[Alexa API] Failed Alexa MQTT Command for user: " + username);
-							commandWaiting.res.status(503).send()
-						}
-					}
-				}
-			}
-			delete onGoingCommands[payload.messageId];
-			var params = {
-				ec: "Command",
-				ea: "Command API successfully processed MQTT command for username: " + username,
-				uid: username,
-			  }
-			if (enableAnalytics) {visitor.event(params).send()};
-		}
-		//if (debug == "true") {console.timeEnd('mqtt-response')};
-	}
-	else {
-		logger.log('debug', "[MQTT] Unhandled MQTT via on message event handler: " + topic + message);
-	}
-});
-///////////////////////////////////////////////////////////////////////////
-// Timer
-///////////////////////////////////////////////////////////////////////////
-var timeout = setInterval(function(){
-	var now = Date.now();
-	var keys = Object.keys(onGoingCommands);
-	for (key in keys){
-		var waiting = onGoingCommands[keys[key]];
-		//logger.log('debug', "[MQTT] Queued MQTT message: " + keys[key]);
-		logger.log('debug', "[MQTT] Queued MQTT message for user: " + waiting.user + ", message: " + keys[key]);
-		if (waiting) {
-			var diff = now - waiting.timestamp;
-			if (diff > 6000) {
-				//logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged: " + keys[key]);
-				//logger.log('warn', "[MQTT] MQTT command timed out/ unacknowledged for user: " + waiting.user + ", message: " + keys[key]);
-				waiting.res.status(504).send('{"error": "timeout"}');
-				delete onGoingCommands[keys[key]];
-				//measurement.send({
-				//	t:'event',
-				//	ec:'command',
-				//	ea: 'timeout',
-				//	uid: waiting.user
-				//});
-			}
-		}
-	}
-},500);
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -1516,20 +1214,6 @@ function replaceCapability(capability, reportState, attributes, type) {
               "supportedModes": supportedModes
 			}
 		};
-	}
-};
-
-// Post MQTT message that users' Node-RED instance will display in GUI as warning
-function notifyUser(severity, username, endpointId, message){
-	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifiations
-	var alert = {};
-	alert.severity = severity;
-	alert.message = message
-	try{
-		mqttClient.publish(topic,JSON.stringify(alert));
-		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
-	} catch (err) {
-		logger.log('warn', "[State API] Failed to publish MQTT alert, error: " + err);
 	}
 };
 

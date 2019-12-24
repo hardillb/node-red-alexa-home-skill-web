@@ -12,7 +12,7 @@ const util = require("util");
 ///////////////////////////////////////////////////////////////////////////
 const ghomeJWT_file = 'ghomejwt.json';
 const readFile = util.promisify(fs.readFile);
-var debug = (process.env.ALEXA_DEBUG || false);
+//var debug = (process.env.ALEXA_DEBUG || false);
 
 // Google JWT OAuth =========================
 var reportState = false;

@@ -2,6 +2,7 @@ var fs = require("fs");
 var ejs = require('ejs');
 var path = require('path');
 var nodemailer = require('nodemailer');
+var logger = require('../loaders/logger');
 
 var smtpOptions = {
 	host: process.env.MAIL_SERVER,
@@ -15,21 +16,36 @@ var smtpOptions = {
 
 var lostPasswordTxtTemplate;
 var lostPasswordHTMLTemplate;
+var verifyEmailTxtTemplate;
+var verifyEmailHTMLTemplate;
 
 fs.readFile(
-	path.join(__dirname, 'views', 'email', 'resetPasswordText.ejs'),
+	path.join(__dirname, '../interfaces/views/email', 'resetPasswordText.ejs'),
 	"utf-8",
 	function(err, file){
 		lostPasswordTxtTemplate = file;
 	});
 
-
 fs.readFile(
-	path.join(__dirname, 'views', 'email', 'resetPasswordHTML.ejs'),
+	path.join(__dirname, '../interfaces/views/email', 'resetPasswordHTML.ejs'),
 	"utf-8",
 	function(err, file){
 		lostPasswordHTMLTemplate = file;
 	});
+
+fs.readFile(
+	path.join(__dirname, '../interfaces/views/email', 'verifyEmailText.ejs'),
+	"utf-8",
+	function(err, file){
+		verifyEmailTxtTemplate = file;
+});
+
+fs.readFile(
+	path.join(__dirname, '../interfaces/views/email', 'verifyEmailHTML.ejs'),
+	"utf-8",
+	function(err, file){
+		verifyEmailHTMLTemplate = file;
+});
 
 var transporter = nodemailer.createTransport(smtpOptions);
 
@@ -37,7 +53,7 @@ var Mailer = function() {
 
 };
 
-Mailer.prototype.send = function send(to, from, subject, text, html){
+Mailer.prototype.send = function send(to, from, subject, text, html, callback){
 	var message = {
 		to: to,
 		from: from,
@@ -47,18 +63,27 @@ Mailer.prototype.send = function send(to, from, subject, text, html){
 	};
 
 	transporter.sendMail(message, function(error, info){
-		var dt = new Date().toISOString();
 		if(error){
-			return console.log("[" + dt + "] " + "[ERROR] Unable to send email ",error);
+			logger.log('error' , "[Send Email] Error sending email, subject: " + message.subject +  ", to email address: " + message.to + ", error: " + error);
+			callback(false);
 		}
-		console.log("[" + dt + "] " + "[INFO] [Mail] EMail sent to: " + message.to + ", subject: " + message.subject, info.response);
+		else {
+			logger.log('info' , "[Send Email] Sent email, subject: " + message.subject +  ", to email address: " + message.to + ", response: " + info.response);
+			callback(true);
+		}
 	});
 }
 
-Mailer.prototype.buildLostPasswordBody = function buildLostBody(uuid, userid){
-	var body = ejs.render(lostPasswordTxtTemplate, {uuid: uuid, username: userid});
-	var htmlBody = ejs.render(lostPasswordHTMLTemplate, {uuid: uuid, username: userid});
+Mailer.prototype.buildLostPasswordBody = function buildLostBody(uuid, userid, fqdn){
+	var body = ejs.render(lostPasswordTxtTemplate, {uuid: uuid, username: userid, fqdn: fqdn});
+	var htmlBody = ejs.render(lostPasswordHTMLTemplate, {uuid: uuid, username: userid, fqdn: fqdn});
+	return {text: body, html: htmlBody };
+}
 
+
+Mailer.prototype.buildVerifyEmail = function buildVerifyEmail(token, userid, fqdn){
+	var body = ejs.render(verifyEmailTxtTemplate, {token: token, username: userid, fqdn: fqdn });
+	var htmlBody = ejs.render(verifyEmailHTMLTemplate, {token: token, username: userid, fqdn: fqdn});
 	return {text: body, html: htmlBody };
 }
 

@@ -1,9 +1,16 @@
 <h1 class="h3 mb-3 font-weight-normal">Please Sign In</h1>
-<label for="username" class="sr-only">Username</label>
-<input type="text" id="username" name="username" class="form-control" autocomplete="username" placeholder="Username" required autofocus>
-<br>
-<label for="password" class="sr-only">Password</label>
-<input type="password" id="password" name="password" class="form-control" autocomplete="current-password" placeholder="Password" required>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="width: 102px;" id="basic-addon2" disabled><strong>Username</strong></span>
+    </div>
+    <input type="text" id="username" name="username" class="form-control" autocomplete="username" required autofocus>
+</div>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="width: 102px;" id="basic-addon2" disabled><strong>Password</strong></span>
+    </div>
+    <input type="password" id="password" name="password" class="form-control" autocomplete="current-password" required>
+</div>
 <small id="tosLink" class="form-text text-muted"><a href="#tosModal">View Terms of Service</a></small>
 <small id="privacyLink" class="form-text text-muted"><a href="#privacyModal">View Privacy Policy</a></small>
 <br>

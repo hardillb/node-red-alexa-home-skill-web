@@ -14,19 +14,17 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
 var countries = require('countries-api');
 var logger = require('../loaders/logger');
-var ua = require('universal-analytics');
-var client = require('../loaders/redis')
+const defaultLimiter = require('../loaders/limiter').defaultLimiter;
+const restrictiveLimiter = require('../loaders/limiter').restrictiveLimiter;
+const sendPageView = require('../services/ganalytics').sendPageView;
+const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
+const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var debug = (process.env.ALEXA_DEBUG || false);
+//var debug = (process.env.ALEXA_DEBUG || false);
 // MQTT Settings  =========================================
 var mqtt_user = (process.env.MQTT_USER);
-var enableAnalytics = false;
-if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = true;
-    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
-}
 ///////////////////////////////////////////////////////////////////////////
 // Passport Configuration
 ///////////////////////////////////////////////////////////////////////////
@@ -35,46 +33,13 @@ passport.use(new BasicStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 ///////////////////////////////////////////////////////////////////////////
-// Rate-limiter
-///////////////////////////////////////////////////////////////////////////
-const limiter = require('express-limiter')(router, client)
-// Default Limiter, used on majority of routers ex. OAuth2-related and Command API
-const defaultLimiter = limiter({
-	lookup: function(req, res, opts, next) {
-		//opts.lookup = 'connection.remoteAddress'
-		opts.lookup = 'headers.x-forwarded-for'
-		opts.total = 100
-		opts.expire = 1000 * 60 * 60
-		return next()
-  },
-	onRateLimited: function (req, res, next) {
-		logger.log('warn', "[Rate Limiter] Default rate-limit exceeded for path: " + req.path + ", IP address:" + req.ip)
-		var params = {
-			ec: "Express-limiter",
-			ea: "Default: rate-limited path: " + req.path + ", IP address:" + req.ip,
-			uip: req.ip
-		  }
-		if (enableAnalytics) {visitor.event(params).send()};
-		res.status(429).json('Rate limit exceeded');
-	  }
-});
-///////////////////////////////////////////////////////////////////////////
 // Services
 ///////////////////////////////////////////////////////////////////////////
 router.get('/services', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			var view = {
-				dp: req.path,
-				dh: 'https://' + process.env.WEB_HOSTNAME,
-				dt: 'Services Admin',
-				uid: req.user.username,
-				uip: req.ip,
-				ua: req.headers['user-agent']
-			}
-			if (enableAnalytics) {visitor.pageview(view).send()};
-
+			sendPageViewUid(req.path, 'Services Admin', req.ip, req.user.username, req.headers['user-agent']);
 			const pApplications = oauthModels.Application.find({});
 			Promise.all([pApplications]).then(([apps]) => {
 					res.render('pages/services',{user:req.user, services: apps});
@@ -82,7 +47,8 @@ router.get('/services', defaultLimiter,
 					res.status(500).json({error: err});
 				});
 		} else {
-			res.status(401).send();
+			//res.status(401).send();
+			res.redirect(303, '/');
 		}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -93,15 +59,7 @@ router.get('/users', defaultLimiter,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
 			// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
-			var view = {
-				dp: req.path,
-				dh: 'https://' + process.env.WEB_HOSTNAME,
-				dt: 'User Admin',
-				uid: req.user.username,
-				uip: req.ip,
-				ua: req.headers['user-agent']
-			}
-			if (enableAnalytics) {visitor.pageview(view).send()};
+			sendPageViewUid(req.path, 'User Admin', req.ip, req.user.username, req.headers['user-agent']);
 			const pCountUsers = Account.countDocuments({});
 			const pUsersAndCountDevices = Account.aggregate([
 				{ "$lookup": {
@@ -126,9 +84,45 @@ router.get('/users', defaultLimiter,
 			});
 		}
 		else {
-			res.status(401).send();
+			//res.status(401).send();
+			res.redirect(303, '/');
 		}
 });
+///////////////////////////////////////////////////////////////////////////
+// User Disable/ Enable
+///////////////////////////////////////////////////////////////////////////
+router.post('/user/:id/:state', defaultLimiter,
+	ensureAuthenticated,
+	function(req,res){
+		if (req.user.username === mqtt_user) {
+			if (req.params.id && req.params.state) {
+				// Convert string input to boolean
+				var state = (req.params.state === "true");
+				toggleUser(req.params.id, state)
+					.then(result => {
+						if (result == true) {
+							req.flash('success_messages', 'Updated Account State!');
+							return res.status(200).send();
+						}
+						else {
+							req.flash('error_messages', 'Error updating account state!');
+							return res.status(400).send("Error updating account state!");
+						}
+					})
+					.catch(e => {
+						//sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
+						req.flash('error_messages', 'Error updating account state!');
+						//res.locals.error_messages = 'Error setting new password!';
+						return res.status(400).send("Error updating account state!");
+					})
+			}
+		}
+		else {
+			//res.status(401).send();
+			res.redirect(303, '/');
+		}
+});
+
 ///////////////////////////////////////////////////////////////////////////
 // User Devices
 ///////////////////////////////////////////////////////////////////////////
@@ -136,16 +130,7 @@ router.get('/user-devices', defaultLimiter,
 	ensureAuthenticated,
 	function(req,res){
 		if (req.user.username === mqtt_user) {
-			var view = {
-				dp: req.path,
-				dh: 'https://' + process.env.WEB_HOSTNAME,
-				dt: 'User Device Admin',
-				uid: req.user.username,
-				uip: req.ip,
-				ua: req.headers['user-agent']
-			}
-			if (enableAnalytics) {visitor.pageview(view).send()};
-
+			sendPageViewUid(req.path, 'User Device Admin', req.ip, req.user.username, req.headers['user-agent']);
 			const pUserDevices = Devices.find({});
 			const pCountDevices = Devices.countDocuments({});
 			Promise.all([pUserDevices, pCountDevices]).then(([devices, count]) => {
@@ -153,9 +138,10 @@ router.get('/user-devices', defaultLimiter,
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
-	} else {
-			res.status(401).send();
-		}
+		} else {
+				//res.status(401).send();
+				res.redirect(303, '/');
+			}
 });
 ///////////////////////////////////////////////////////////////////////////
 // Services (Put)
@@ -171,7 +157,8 @@ function(req,res){
             }
         });
     } else {
-        res.status(401).send();
+		//res.status(401).send();
+		res.redirect(303, '/');
     }
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -180,22 +167,27 @@ function(req,res){
 router.post('/service/:id', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
-    var service = req.body;
-    oauthModels.Application.findOne({_id: req.params.id},
-        function(err,data){
-            if (err) {
-                    res.status(500);
-                    res.send(err);
-                } else {
-                    data.title = service.title;
-                    data.oauth_secret = service.oauth_secret;
-                    data.domains = service.domains;
-                    data.save(function(err, d){
-                        res.status(201);
-                        res.send(d);
-                    });
-                }
-        });
+	var service = req.body;
+	if (req.user.username == mqtt_user) {
+		oauthModels.Application.findOne({_id: req.params.id},
+			function(err,data){
+				if (err) {
+						res.status(500);
+						res.send(err);
+					} else {
+						data.title = service.title;
+						data.oauth_secret = service.oauth_secret;
+						data.domains = service.domains;
+						data.save(function(err, d){
+							res.status(201);
+							res.send(d);
+						});
+					}
+			});
+	} else {
+		//res.status(401).send();
+		res.redirect(303, '/');
+    }
 });
 ///////////////////////////////////////////////////////////////////////////
 // Service (Delete)
@@ -203,14 +195,20 @@ function(req,res){
 router.delete('/service/:id', defaultLimiter,
 ensureAuthenticated,
 function(req,res){
-    oauthModels.Application.remove({_id:req.params.id},
-        function(err){
-            if (!err) {
-                res.status(200).send();
-            } else {
-                res.status(500).send();
-            }
-        });
+	if (req.user.username == mqtt_user) {
+		oauthModels.Application.remove({_id:req.params.id},
+			function(err){
+				if (!err) {
+					res.status(200).send();
+				} else {
+					res.status(500).send();
+				}
+			});
+
+	} else {
+		//res.status(401).send();
+		res.redirect(303, '/');
+	}
 });
 ///////////////////////////////////////////////////////////////////////////
 // Functions
@@ -224,6 +222,34 @@ function ensureAuthenticated(req,res,next) {
 	} else {
 		//console.log("failed auth?");
 		res.redirect('/login');
+	}
+}
+
+const toggleUser = async(id, enabled) => {
+	try {
+		// Find User
+		var user = await Account.findOne({_id: id});
+		// Set Account Status
+		if (enabled == true && user.username != mqtt_user) {
+			user.active = true
+			logger.log('verbose', "[Admin] Enabling User Account: " + user.username);
+		}
+		else if (enabled == false && user.username != mqtt_user) {
+			user.active = false
+			logger.log('verbose', "[Admin] Disabling User Account: " + user.username);
+		}
+		else {
+			logger.log('error', "[Admin] toggleUser invalid state requested: " + enabled);
+			return false;
+		}
+		// Save Account
+		await user.save();
+		logger.log('verbose', "[Admin] Account saved following 'active' element change: " + user.username);
+		return true;
+	}
+	catch(e) {
+		logger.log('error', "[Admin] Unable to change user 'active' element, error: " + e);
+		return false;
 	}
 }
 

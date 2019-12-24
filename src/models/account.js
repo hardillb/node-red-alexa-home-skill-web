@@ -15,7 +15,8 @@ var Account = new Schema({
         return new Date();
     }},
     activeServices: [],
-    active: { type: Boolean, default: true}
+    active: { type: Boolean, default: true},
+    isVerified: { type: Boolean, default: false}
 });
 
 var options = {
@@ -24,6 +25,7 @@ var options = {
 	keylen: 24,
 	iterations: 901,
     encoding: 'base64',
+    limitAttempts: true,
     findByUsername: function(model, queryParameters) {
         // Add additional query parameter - AND condition - active: true
         queryParameters.active = true;

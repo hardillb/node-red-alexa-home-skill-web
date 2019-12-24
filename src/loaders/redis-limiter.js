@@ -6,7 +6,8 @@ var logger = require('./logger'); // Moved to own module
 // Redis Client Config
 ///////////////////////////////////////////////////////////////////////////
 var client = require('redis').createClient({
-	host: 'redis',
+    host: 'redis',
+    db: 0,
 	retry_strategy: function (options) {
         if (options.error && options.error.code === 'ECONNREFUSED') {
 			return new Error('The server refused the connection');

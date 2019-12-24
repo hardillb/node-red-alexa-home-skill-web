@@ -1,0 +1,65 @@
+<% include ../fragments/header.ejs %>
+  <div class="container main-content">
+      <form class="form-verifySend" id="form-verifySend">
+          <% if (error_messages) { %>
+            <p><strong><%= error_messages %></strong></p>
+          <% } %>
+          <% if (success_messages) { %>
+            <p><strong><%= success_messages %></strong></p>
+          <% } %>
+          <h1 class="h3 mb-3 font-weight-normal">Account Verification</h1>
+          <p>Use this form to verify your account.</p>
+          <div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="basic-addon2" disabled><strong>Email Address</strong></span>
+							</div>
+							<input type="email" class="form-control" id="email" placeholder="Email Address" required autofocus>
+          </div>
+          <% if (token != undefined) { %>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon2" disabled><strong>Token</strong></span>
+                </div>
+                <input type="text" class="form-control" id="token" value="<%= token %>" required>
+            </div>
+          <% } else { %>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon2"><strong>Token</strong></span>
+                </div>
+                <input type="text" class="form-control" id="token" placeholder="Token" required>
+            </div>
+          <% } %>
+          <br>
+          <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Submit</button>
+        </form>
+
+        <script type="application/javascript">
+          $("#form-verifySend").submit(function(e) {
+              e.preventDefault();
+              var xhr = new XMLHttpRequest();
+              var token = $('#token').val().trim();
+              var email = $('#email').val().trim();
+
+              var params = 'email=' + encodeURIComponent(email)
+              + "&token=" + encodeURIComponent(token);
+
+              xhr.open('POST', '/verify',true);
+              xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+              xhr.onreadystatechange = function () {
+                if( xhr.readyState == 4 && xhr.status == 200) {
+                  //new verify token created / sent to users email address
+                  //alert(xhr.responseText);
+                  window.location = '/verify';
+                } else if (xhr.readyState == 4 && (xhr.status == 400 || xhr.status == 500)) {
+                  //show error
+                  //alert(xhr.responseText);
+                  window.location = '/verify';
+                }
+              }
+            xhr.send(params);
+          });
+      </script>
+    </div>
+  </div>
+<% include ../fragments/footer.ejs %>

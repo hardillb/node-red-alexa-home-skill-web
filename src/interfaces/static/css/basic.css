@@ -21,7 +21,7 @@
 .service {
 	padding: 5px;
 	margin: 1px;
-	border: 1px solid;	
+	border: 1px solid;
 }
 
 .serviceTitle {
@@ -44,14 +44,14 @@
 
 .form-changePassword {
 	width: 100%;
-	max-width: 330px;
+	max-width: 440px;
 	padding: 15px;
 	margin: auto;
 }
 
 .form-lostPassword {
 	width: 100%;
-	max-width: 330px;
+	max-width: 440px;
 	padding: 15px;
 	margin: auto;
 }
@@ -64,7 +64,7 @@
 }
 
 .form-register .checkbox {
-font-weight: 400;
+	font-weight: 400;
 }
 
 .form-register .form-control {
@@ -77,7 +77,7 @@ font-weight: 400;
 
 .form-signin {
 	width: 100%;
-	max-width: 330px;
+	max-width: 440px;
 	padding: 15px;
 	margin: auto;
 }
@@ -102,7 +102,40 @@ font-weight: 400;
 	border-bottom-left-radius: 0;
 }
 .form-signin input[type="password"] {
-	margin-bottom: 10px;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
+}
+
+.form-verifyResend {
+	width: 100%;
+	max-width: 440px;
+	padding: 15px;
+	margin: auto;
+}
+
+.form-verifySend {
+	width: 100%;
+	max-width: 440px;
+	padding: 15px;
+	margin: auto;
+}
+
+.col-sm-2 {
+	position: static !important;
+}
+
+.col-sm-6 {
+	position: static !important;
+}
+
+.col-sm-7 {
+	position: static !important;
+}
+
+.col-sm-9 {
+	position: static !important;
+}
+
+.darkmode--activated .modal-content {
+	background-color: #dedad6 !important;
 }

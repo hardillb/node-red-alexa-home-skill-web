@@ -2,16 +2,20 @@
 	<div class="container main-content">
 		<h1>User Accounts</h1>
 		<h3>Total Count: <%= usercount %></h3>
-		<table id="tblUsers" class="table table-striped" style="display:none">
+		<table id="tblUsers" class="table table-responsive table-sm table-striped" style="display:none">
 			<thead>
 				<tr>
 				  <th scope="col">Username</th>
-				  <th scope="col">isSuperUser</th>
+				  <th scope="col">SU</th>
 				  <th scope="col">Email Address</th>
-				  <th scope="col">Country</th>
+				  <th scope="col">Verified</th>
+				  <th scope="col">Last Logon</th>
+				  <th scope="col">Ctry.</th>
 				  <th scope="col">Region</th>
-				  <th scope="col">Device Count</th>
+				  <th scope="col">Devices</th>
 				  <th scope="col">Manage</th>
+				  <th scope="col">Toggle</th>
+				  <th scope="col">Delete</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -21,13 +25,19 @@
 						<th scope="row"><%= account.username %></th>
 						<td><%= account.superuser %></td>
 						<td><%= account.email %></td>
+						<td><%= account.isVerified %></td>
+						<td><%= account.last %></td>
 						<td><%= account.country %></td>
 						<td><%= account.region %></td>
 						<td><%= account.countDevices %></td>
-						<td>
-							<button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button>
-							<button type="button" class="btn btn-secondary" onclick="deleteAccount('<%= account._id %>')">Delete</button>
-						</td>
+						<td><button type="button" class="btn btn-secondary" onclick="editAccount('<%= account._id %>')">Edit</button></td>
+						<% if (account.active == false) { %>
+						<td><button type="button" class="btn btn-success" onclick="toggleActive('<%= account._id %>', true)">Enable</button></td>
+						<% } %>
+						<% if (account.active == true) { %>
+							<td><button type="button" class="btn btn-warning" onclick="toggleActive('<%= account._id %>', false)">Disable</button></td>
+						<% } %>
+						<td><button type="button" class="btn btn-danger" onclick="deleteAccount('<%= account._id %>')">Delete</button></td>
 					</tr>
 				<% }); %>
 			</tbody>
@@ -144,10 +154,24 @@
 		}
 	}
 
+	function toggleActive(id, state) {
+		var answer = confirm("Are you sure you want to toggle state for this user account?");
+		if(answer) {
+			$.ajax({
+				url:"/admin/user/" + id + "/" + state,
+				type: 'POST',
+				success: function(data){
+					document.location.reload();
+				}
+			});
+		}
+	}
+
 	// Generate javascript object for use in JS code only
 	var users = {};
 	<%- JSON.stringify(users) %>.forEach(function(user){
 			//console.log("user: " + JSON.stringify(user));
+			var lastLogin = (user.last || 'Not Set');
 			var objUser = {
 				"_id": user._id,
 				"superuser": user.superuser,
@@ -155,7 +179,8 @@
 				"email": user.email,
 				"country": user.country,
 				"region": user.region,
-				"countDevices": user.countDevices
+				"countDevices": user.countDevices,
+				"lastLogin": lastLogin
 			};
 			//console.log("Constructed user: " + JSON.stringify(objUser));
 			users[objUser._id] = objUser; // Users now contained under _id element

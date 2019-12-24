@@ -15,17 +15,10 @@ var passport = require('passport');
 var oauthServer = require('../services/oauth');
 var url = require('url');
 var logger = require('../loaders/logger');
-var ua = require('universal-analytics');
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-var debug = (process.env.ALEXA_DEBUG || false);
-// Google Analytics ==========================
-var enableAnalytics = false;
-if (process.env.GOOGLE_ANALYTICS_TID != undefined) {
-    enableAnalytics = true;
-    var visitor = ua(process.env.GOOGLE_ANALYTICS_TID);
-}
+//var debug = (process.env.ALEXA_DEBUG || false);
 ///////////////////////////////////////////////////////////////////////////
 // Passport Configuration
 ///////////////////////////////////////////////////////////////////////////
