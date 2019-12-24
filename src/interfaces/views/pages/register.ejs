@@ -6,8 +6,8 @@
     </button>
   </div>
 
-  <% include ../fragments/tos-modal.ejs %>
-  <% include ../fragments/privacy-modal.ejs %>
+  <%- include('../fragments/tos-modal'); -%>
+  <%- include('../fragments/privacy-policy'); -%>
 
   <div class="container main-content">
       <% if (error_messages) { %>
@@ -17,7 +17,7 @@
         <p><strong><%= success_messages %></strong></p>
       <% } %>
       <form class="form-register" id="form-register">
-        <% include ../fragments/register.ejs %>
+        <%- include('../fragments/register'); -%>
       </form>
       <script type="application/javascript">
         // Load CountrySelect

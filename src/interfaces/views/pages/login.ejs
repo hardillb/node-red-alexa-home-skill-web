@@ -4,12 +4,12 @@
       <p><strong><%= message %></strong></p>
     <% } %>
 
-    <% include ../fragments/tos-modal.ejs %>
-    <% include ../fragments/privacy-modal.ejs %>
+    <%- include('../fragments/tos-modal'); -%>
+    <%- include('../fragments/privacy-modal'); -%>
 
     <div id="login">
       <form class="form-signin" method="POST" action="/login">
-        <% include ../fragments/login.ejs %>
+        <%- include('../fragments/login'); -%>
       </form>
     </div>
   </div>
