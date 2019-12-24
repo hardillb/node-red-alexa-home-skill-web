@@ -28,7 +28,7 @@
     "connect-flash": "^0.1.1",
     "countries-api": "^2.0.2",
     "dotenv" : "^8.2.0",
-    "ejs": "^3.0.1",
+    "ejs": "^2.7.1",
     "express": "^4.17.1",
     "express-limiter": "^1.6.1",
     "express-session": "^1.17.0",
