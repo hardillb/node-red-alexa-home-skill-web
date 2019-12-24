@@ -56,7 +56,10 @@ var Mailer = function() {
 Mailer.prototype.send = function send(to, from, subject, text, html, callback){
 	var message = {
 		to: to,
-		from: from,
+		from: {
+			name: 'Node-RED Smart Home Control',
+			address: from
+		},
 		subject: subject,
 		text: text,
 		html: html
