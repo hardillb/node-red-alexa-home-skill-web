@@ -165,7 +165,7 @@ app.get('/sitemap.xml', function(req, res) {
 	  return
 	}
 	try {
-	  const smStream = new SitemapStream({ hostname: 'https://' + process.end.WEB_HOSTNAME + '/' })
+	  const smStream = new SitemapStream({ hostname: 'https://' + process.env.WEB_HOSTNAME + '/' })
 	  const pipeline = smStream.pipe(createGzip())
 
 	  smStream.write({ url: '/',  changefreq: 'weekly', priority: 0.5 })
