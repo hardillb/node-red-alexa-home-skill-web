@@ -10,6 +10,8 @@ const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var bodyParser = require('body-parser');
 const path = require('path');
+const { SitemapStream, streamToPromise } = require('sitemap')
+const { createGzip } = require('zlib')
 //var cookieParser = require('cookie-parser');
 ///////////////////////////////////////////////////////////////////////////
 // Loaders
@@ -151,6 +153,38 @@ app.use(function(req, res, next){
     res.locals.error_messages = req.flash('error_messages');
     next();
 });
+
+// Site Map, based on example here: https://www.npmjs.com/package/sitemap#example-of-using-sitemapjs-with-express
+app.get('/sitemap.xml', function(req, res) {
+	res.header('Content-Type', 'application/xml');
+	res.header('Content-Encoding', 'gzip');
+	// if we have a cached entry send it
+	if (sitemap) {
+	  res.send(sitemap)
+	  return
+	}
+	try {
+	  const smStream = new SitemapStream({ hostname: 'https://' + process.end.WEB_HOSTNAME + '/' })
+	  const pipeline = smStream.pipe(createGzip())
+
+	  smStream.write({ url: '/',  changefreq: 'weekly', priority: 0.5 })
+	  smStream.write({ url: '/about/',  changefreq: 'weekly',  priority: 0.5})
+	  smStream.write({ url: '/docs',  changefreq: 'weekly',  priority: 0.5 })
+	  smStream.write({ url: '/login/',  changefreq: 'monthly',  priority: 0.3})
+	  smStream.write({ url: '/newuser/',  changefreq: 'monthly',  priority: 0.3})
+	  smStream.write({ url: '/privacy/',  changefreq: 'monthly',  priority: 0.3})
+	  smStream.write({ url: '/tos/',  changefreq: 'monthly',  priority: 0.3})
+	  smStream.end()
+
+	  // cache the response
+	  streamToPromise(pipeline).then(sm => sitemap = sm)
+	  // stream the response
+	  pipeline.pipe(res).on('error', (e) => {throw e})
+	} catch (e) {
+	  console.error(e)
+	  res.status(500).end()
+	}
+  })
 
 ///////////////////////////////////////////////////////////////////////////
 // Load Routes

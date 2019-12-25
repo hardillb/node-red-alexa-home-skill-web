@@ -52,6 +52,7 @@
     "request": "^2.88.0",
     "saslprep": "^1.0.3",
     "serve-favicon": "^2.5.0",
+    "sitemap" : "^5.1.0",
     "uid2": "0.0.3",
     "universal-analytics": "^0.4.20",
     "uuid": "^3.3.3",
