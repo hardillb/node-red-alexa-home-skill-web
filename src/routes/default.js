@@ -49,7 +49,7 @@ if (!(process.env.HOMEGRAPH_APIKEY)){
 router.get('/', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Home', req.ip, req.headers['user-agent']);
 	// outputSessionID(req, "/");
-	res.render('pages/index', {user: req.user, home: true});
+	res.render('pages/index', {user: req.user, home: true, title: "Home | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Docs
@@ -57,7 +57,7 @@ router.get('/', defaultLimiter, function(req,res){
 router.get('/docs', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Docs', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/docs");
-	res.render('pages/docs', {user: req.user, docs: true});
+	res.render('pages/docs', {user: req.user, docs: true, title: "Docs | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // About
@@ -65,7 +65,7 @@ router.get('/docs', defaultLimiter, function(req,res){
 router.get('/about', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'About', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/about");
-	res.render('pages/about', {user: req.user, about: true});
+	res.render('pages/about', {user: req.user, about: true, title: "About | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Privacy
@@ -73,7 +73,7 @@ router.get('/about', defaultLimiter, function(req,res){
 router.get('/privacy', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Privacy', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/privacy");
-	res.render('pages/privacy', {user: req.user, privacy: true});
+	res.render('pages/privacy', {user: req.user, privacy: true, title: "Privacy Policy | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // TOS
@@ -81,7 +81,7 @@ router.get('/privacy', defaultLimiter, function(req,res){
 router.get('/tos', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Terms of Service', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/tos");
-	res.render('pages/tos', {user: req.user, tos: true});
+	res.render('pages/tos', {user: req.user, tos: true, title: "Terms of Service | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Login (Get)
@@ -89,7 +89,7 @@ router.get('/tos', defaultLimiter, function(req,res){
 router.get('/login', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Login', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/login");
-	res.render('pages/login',{user: req.user, login: true, message: req.flash('error')});
+	res.render('pages/login',{user: req.user, login: true, title: "Login | Node-RED Smart Home Control", message: req.flash('error')});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Logout
@@ -130,7 +130,7 @@ router.post('/login', defaultLimiter,
 router.get('/newuser', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'New User', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/newuser");
-    res.render('pages/register',{user: req.user, newuser: true});
+    res.render('pages/register',{user: req.user, newuser: true, title: "Register | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Register/ Newuser (Post) restrictiveLimiter
@@ -232,11 +232,11 @@ router.post('/newuser', restrictiveLimiter, function(req,res){
 router.get(['/verify', '/verify/:token'], defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Verify', req.ip, req.headers['user-agent']);
 	if (req.params.token) {
-		res.render('pages/verify', {token: req.params.token, user: req.user});
+		res.render('pages/verify', {token: req.params.token, user: req.user, title: "Verify Account | Node-RED Smart Home Control"});
 	}
 	else {
 		req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!');
-		res.render('pages/verify',{token: undefined, user: req.user});
+		res.render('pages/verify',{token: undefined, user: req.user, title: "Verify Account | Node-RED Smart Home Control"});
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -294,7 +294,7 @@ router.post('/verify', defaultLimiter, function(req,res){
 ///////////////////////////////////////////////////////////////////////////
 router.get('/verify-resend', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Verify Resend', req.ip, req.headers['user-agent']);
-    res.render('pages/verify-resend', {user: req.user});
+    res.render('pages/verify-resend', {user: req.user, title: "Verify Re-Send | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Verify Resend POST
@@ -359,12 +359,12 @@ router.post('/verify-resend', defaultLimiter, function(req,res){
 router.get(['/change-password', '/change-password/:token'], restrictiveLimiter, function(req, res, next){
 	sendPageView(req.path, 'Change Password with Token', req.ip, req.headers['user-agent']);
 	if (req.params.token) {
-		res.render('pages/change-password', {token: req.params.token, user: req.user});
+		res.render('pages/change-password', {token: req.params.token, user: req.user, title: "Change Password | Node-RED Smart Home Control"});
 	}
 	else {
 		// Disable flash message if logged in
 		if (!req.user) {req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!')};
-		res.render('pages/change-password',{token: undefined, user: req.user});
+		res.render('pages/change-password',{token: undefined, user: req.user, title: "Change Password | Node-RED Smart Home Control"});
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -466,7 +466,7 @@ router.get('/lost-password', defaultLimiter, function(req, res, next){
 		sendPageView(req.path, 'Lost Password', req.ip, req.headers['user-agent']);
 	}
 	//outputSessionID(req, "/lost-password");
-    res.render('pages/lost-password', { user: req.user});
+    res.render('pages/lost-password', { user: req.user, title: "Account Recovery | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // lost-password (Post) restrictiveLimiter
@@ -504,7 +504,7 @@ router.get('/my-account', defaultLimiter,
         const pUser = Account.findOne({username: req.user.username});
         Promise.all([pUser]).then(([userAccount]) => {
             //logger.log('info', "userAccount: " + userAccount);
-            res.render('pages/account',{user: userAccount, acc: true});
+            res.render('pages/account',{user: userAccount, acc: true, title: "My Account | Node-RED Smart Home Control"});
         }).catch(err => {
             res.status(500).json({error: err});
         });
@@ -552,7 +552,7 @@ router.get('/devices', defaultLimiter,
 		Promise.all([pUserDevices, pCountDevices, pCountGrants]).then(([devices, countDevs, countUserGrants]) => {
 			//logger.log('info', "Grant count for user: " + user + ", grants: " + countUserGrants[0].countGrants);
 			//logger.log('info', "countUserGrants: " + JSON.stringify(countUserGrants));
-			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, isVerified: verified, fqdn: process.env.WEB_HOSTNAME, devs: true});
+			res.render('pages/devices',{user: req.user, devices: devices, count: countDevs, grants: countUserGrants[0].countGrants, isVerified: verified, fqdn: process.env.WEB_HOSTNAME, devs: true, title: "My Devices | Node-RED Smart Home Control"});
 		}).catch(err => {
 			res.status(500).json({error: err});
 		});

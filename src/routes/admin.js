@@ -42,7 +42,7 @@ router.get('/services', defaultLimiter,
 			sendPageViewUid(req.path, 'Services Admin', req.ip, req.user.username, req.headers['user-agent']);
 			const pApplications = oauthModels.Application.find({});
 			Promise.all([pApplications]).then(([apps]) => {
-					res.render('pages/services',{user:req.user, services: apps});
+					res.render('pages/services',{user:req.user, services: apps, title: "OAuth Services | Node-RED Smart Home Control"});
 				}).catch(err => {
 					res.status(500).json({error: err});
 				});
@@ -78,7 +78,7 @@ router.get('/users', defaultLimiter,
 				  }}
 			 ]);
 			Promise.all([pCountUsers, pUsersAndCountDevices]).then(([totalCount, usersAndDevs]) => {
-				res.render('pages/users',{user:req.user, users: usersAndDevs, usercount: totalCount});
+				res.render('pages/users',{user:req.user, users: usersAndDevs, usercount: totalCount, title: "User Admin | Node-RED Smart Home Control"});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
@@ -134,7 +134,7 @@ router.get('/user-devices', defaultLimiter,
 			const pUserDevices = Devices.find({});
 			const pCountDevices = Devices.countDocuments({});
 			Promise.all([pUserDevices, pCountDevices]).then(([devices, count]) => {
-				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count});
+				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count, title: "Device Admin | Node-RED Smart Home Control"});
 			}).catch(err => {
 				res.status(500).json({error: err});
 			});
