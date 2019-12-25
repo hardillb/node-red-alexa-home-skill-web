@@ -155,6 +155,7 @@ app.use(function(req, res, next){
 });
 
 // Site Map, based on example here: https://www.npmjs.com/package/sitemap#example-of-using-sitemapjs-with-express
+let sitemap
 app.get('/sitemap.xml', function(req, res) {
 	res.header('Content-Type', 'application/xml');
 	res.header('Content-Encoding', 'gzip');
