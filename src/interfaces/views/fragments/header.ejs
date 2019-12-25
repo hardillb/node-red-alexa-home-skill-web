@@ -7,6 +7,10 @@
 
   <!-- Bootsrap Code -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <!-- Docs TOC Sidebar CSS -->
+  <% if (locals.docs) {%>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.css" />
+  <% } %>
   <!-- Site-specific Code -->
   <link href="/static/css/navbar.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/basic.css">
@@ -17,12 +21,16 @@
   <link rel="stylesheet" href="/static/octicons/build.css">
   <!-- Call JQuery as used in forms too early to be in footer-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-    <!-- Country Select Code -->
+  <!-- Country Select Code -->
   <script src="/static/js/countrySelect.min.js"></script>
 
 </head>
+
+<% if (locals.docs) {%>
+<body data-spy="scroll" data-target="#toc">
+<% } else { %>
 <body>
+<% } %>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
         <a class="navbar-brand notranslate" href="#">Node-RED Smart Home Control</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-label="Toggle Navigation">
