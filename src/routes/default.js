@@ -354,23 +354,23 @@ router.post('/verify-resend', defaultLimiter, function(req,res){
 });
 
 ///////////////////////////////////////////////////////////////////////////
-// changePassword/:token (Get)
+// change-password/:token (Get)
 ///////////////////////////////////////////////////////////////////////////
-router.get(['/changePassword', '/changePassword/:token'], restrictiveLimiter, function(req, res, next){
+router.get(['/change-password', '/change-password/:token'], restrictiveLimiter, function(req, res, next){
 	sendPageView(req.path, 'Change Password with Token', req.ip, req.headers['user-agent']);
 	if (req.params.token) {
-		res.render('pages/changePassword', {token: req.params.token, user: req.user});
+		res.render('pages/change-password', {token: req.params.token, user: req.user});
 	}
 	else {
 		// Disable flash message if logged in
 		if (!req.user) {req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!')};
-		res.render('pages/changePassword',{token: undefined, user: req.user});
+		res.render('pages/change-password',{token: undefined, user: req.user});
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
-// changePassword (Post) restrictiveLimiter
+// change-password (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/changePassword', defaultLimiter, function(req, res, next){
+router.post('/change-password', defaultLimiter, function(req, res, next){
 	// Authenticated user, accessing via "My Account" page, no token required
 	if (req.isAuthenticated()) {
 		logger.log('verbose' , "[Change Password] Logged in user request to change password for user account: " + req.user.username);
@@ -399,7 +399,7 @@ router.post('/changePassword', defaultLimiter, function(req, res, next){
 			})
 	}
 	else {
-		// Un-authenticated user, accessing via /changePassword page, token required
+		// Un-authenticated user, accessing via /change-password page, token required
 		logger.log('verbose' , "[Change Password] Anonymous user request to change password for user account");
 		//logger.log('verbose' , "[Change Password] Anonymous user request, body: " + JSON.stringify(req.body));
 		if (req.body.token) {
@@ -456,22 +456,22 @@ router.post('/changePassword', defaultLimiter, function(req, res, next){
 });
 
 ///////////////////////////////////////////////////////////////////////////
-// lostPassword (Get)
+// lost-password (Get)
 ///////////////////////////////////////////////////////////////////////////
-router.get('/lostPassword', defaultLimiter, function(req, res, next){
+router.get('/lost-password', defaultLimiter, function(req, res, next){
 	if (req.user){
 		sendPageViewUid(req.path, 'Lost Password', req.ip, req.user.username, req.headers['user-agent']);
 	}
 	else {
 		sendPageView(req.path, 'Lost Password', req.ip, req.headers['user-agent']);
 	}
-	//outputSessionID(req, "/lostPassword");
-    res.render('pages/lostPassword', { user: req.user});
+	//outputSessionID(req, "/lost-password");
+    res.render('pages/lost-password', { user: req.user});
 });
 ///////////////////////////////////////////////////////////////////////////
-// lostPassword (Post) restrictiveLimiter
+// lost-password (Post) restrictiveLimiter
 ///////////////////////////////////////////////////////////////////////////
-router.post('/lostPassword', defaultLimiter, function(req, res, next){
+router.post('/lost-password', defaultLimiter, function(req, res, next){
     var email = req.body.email;
     Account.findOne({email: email}, function(error, user){
         if (!error){
