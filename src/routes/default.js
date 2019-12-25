@@ -57,7 +57,7 @@ router.get('/', defaultLimiter, function(req,res){
 router.get('/docs', defaultLimiter, function(req,res){
 	sendPageView(req.path, 'Documentation', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/docs");
-	res.render('pages/docs', {user: req.user, docs: true, title: "Docs | Node-RED Smart Home Control"});
+	res.render('pages/docs', {user: req.user, docs: true, title: "Documentation | Node-RED Smart Home Control"});
 });
 ///////////////////////////////////////////////////////////////////////////
 // About
