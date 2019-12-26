@@ -28,13 +28,13 @@
         <div class="input-group-prepend">
             <span class="input-group-text" style="width: 165px;" id="basic-addon2" disabled><strong>Password</strong></span>
         </div>
-        <input type="password" id="password" name="password" pattern=".{12,}" class="form-control" autocomplete="new-password" required title="Minimum 12 characters">
+        <input type="password" id="password" name="password" pattern="(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" class="form-control" autocomplete="new-password" required title="Minimum 12 characters">
 </div>
 <div class="input-group mb-3">
     <div class="input-group-prepend">
         <span class="input-group-text" style="width: 165px;" id="basic-addon2" disabled><strong>Confirm Password</strong></span>
     </div>
-    <input type="password" id="verify" name="verify" pattern=".{12,}" class="form-control" autocomplete="new-password" required title="Re-enter Password">
+    <input type="password" id="verify" name="verify" pattern="(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" class="form-control" autocomplete="new-password" required title="Re-enter Password">
 </div>
 <p><small id="passwordHelpBlock" class="form-text text-muted">Password must be at least 12 characters.</small></p>
 <small id="tosLink" class="form-text text-muted"><a href="#tosModal">View Terms of Service</a></small>
