@@ -4,11 +4,11 @@
 var Account = require('../models/account');
 var Devices = require('../models/devices');
 //var mqtt = require('mqtt');
-var mqttClient = require('../loaders/mqtt').mqttClient;
 const uuidv4 = require('uuid/v4');
-var logger = require('../loaders/logger');
+const logger = require('../loaders/logger');
 const fs = require('fs');
 const util = require("util");
+const mqttClient = require('../loaders/mqtt').mqttClient;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
