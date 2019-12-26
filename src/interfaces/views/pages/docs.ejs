@@ -693,12 +693,12 @@
         <p>&quot;MQTT > NodeRed Smart Home Control&quot; function code below:</p>
         <div class="bg-light text-dark">
         <pre><code>// Motion State
-                <span class="hljs-keyword">if</span> (msg.payload == <span class="hljs-string">"ON"</span>) {
-                    return { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"motion"</span> : <span class="hljs-string">"DETECTED"</span> } }, <span class="hljs-string">"acknowledge"</span> : true };
-                }
-                <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.payload == <span class="hljs-string">"OFF"</span>) {
-                    return { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"motion"</span> : <span class="hljs-string">"NOT_DETECTED"</span> } }, <span class="hljs-string">"acknowledge"</span> : true };
-                }
+        <span class="hljs-keyword">if</span> (msg.payload == <span class="hljs-string">"ON"</span>) {
+            return { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"motion"</span> : <span class="hljs-string">"DETECTED"</span> } }, <span class="hljs-string">"acknowledge"</span> : true };
+        }
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (msg.payload == <span class="hljs-string">"OFF"</span>) {
+            return { <span class="hljs-string">"payload"</span> : { <span class="hljs-string">"state"</span> : { <span class="hljs-string">"motion"</span> : <span class="hljs-string">"NOT_DETECTED"</span> } }, <span class="hljs-string">"acknowledge"</span> : true };
+        }
         </code></pre>
         </div>
         <h3 id="powercontroller-and-brightnesscontroller">PowerController and BrightnessController</h3>

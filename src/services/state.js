@@ -469,11 +469,13 @@ module.exports.setstate = function setstate(username, endpointId, payload) {
 // Post MQTT message that users' Node-RED instance will display in GUI as warning
 function notifyUser(severity, username, endpointId, message){
 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
-	var alert = {};
-	alert.severity = severity;
-	alert.message = message
+	var alert = {
+		"severity" : severity,
+		"message" : message
+	}
+	var alertJSON = JSON.stringify(alert);
 	try{
-		mqttClient.publish(topic,JSON.stringify(alert));
+		mqttClient.publish(topic, alertJSON);
 		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
 	} catch (err) {
 		logger.log('warn', "[State API] Failed to publish MQTT alert, error: " + err);
