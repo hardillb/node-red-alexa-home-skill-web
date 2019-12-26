@@ -473,9 +473,9 @@ function notifyUser(severity, username, endpointId, message){
 		"severity" : severity,
 		"message" : message
 	}
-	var alertJSON = JSON.stringify(alert);
-	try{
-		mqttClient.publish(topic, alertJSON);
+	var alertString = JSON.stringify(alert);
+	try {
+		mqttClient.publish(topic,alertString);
 		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
 	} catch (err) {
 		logger.log('error', "[State API] Failed to publish MQTT alert, error: " + err.stack);

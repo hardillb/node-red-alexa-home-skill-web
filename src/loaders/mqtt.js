@@ -67,8 +67,6 @@ mqttClient.on('message',function(topic,message){
 	var payload = JSON.parse(message.toString());
 	var commandSource = undefined;
 
-
-
 	// Alexa uses messageId, GHome uses payload.messageId + endpointId as commands can contain multiple devices, this allows for collation
 	var commandWaiting = (ongoingCommands[payload.messageId] || ongoingCommands[payload.messageId + endpointId]);
 
