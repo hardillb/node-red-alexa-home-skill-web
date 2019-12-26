@@ -31,6 +31,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-limiter": "^1.6.1",
+    "express-robots-txt" : "^0.4.1",
     "express-session": "^1.17.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.8.3",

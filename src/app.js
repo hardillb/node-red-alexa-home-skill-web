@@ -10,8 +10,9 @@ const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var bodyParser = require('body-parser');
 const path = require('path');
-const { SitemapStream, streamToPromise } = require('sitemap')
-const { createGzip } = require('zlib')
+const { SitemapStream, streamToPromise } = require('sitemap');
+const { createGzip } = require('zlib');
+const robots = require('express-robots-txt');
 //var cookieParser = require('cookie-parser');
 ///////////////////////////////////////////////////////////////////////////
 // Loaders
@@ -154,6 +155,9 @@ app.use(function(req, res, next){
     next();
 });
 
+// robots.txt
+app.use(robots({UserAgent: '*', Allow: '/', CrawlDelay: '5', Sitemap: 'https://' + process.env.WEB_HOSTNAME + '/sitemap.xml'}))
+
 // Site Map, based on example here: https://www.npmjs.com/package/sitemap#example-of-using-sitemapjs-with-express
 let sitemap
 app.get('/sitemap.xml', function(req, res) {
@@ -185,7 +189,8 @@ app.get('/sitemap.xml', function(req, res) {
 	  console.error(e)
 	  res.status(500).end()
 	}
-  })
+});
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Load Routes
