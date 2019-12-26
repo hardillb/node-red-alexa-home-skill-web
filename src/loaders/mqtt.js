@@ -11,7 +11,8 @@ const logger = require('./logger'); // Moved to own module
 // const delAsync = promisify(client.del).bind(client);
 // const setAsync = promisify(client.set).bind(client);
 //const scanner = new redisScan(client);
-const setstate = require('../services/state').setstate;
+const stateApi = require('../services/state');
+const setstate = stateApi.setstate;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
