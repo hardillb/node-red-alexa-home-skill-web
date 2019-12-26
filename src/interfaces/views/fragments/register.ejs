@@ -28,7 +28,7 @@
         <div class="input-group-prepend">
             <span class="input-group-text" style="width: 165px;" id="basic-addon2" disabled><strong>Password</strong></span>
         </div>
-        <input type="password" id="password" name="password" pattern="(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" class="form-control" autocomplete="new-password" required title="Minimum 12 characters">
+        <input type="password" id="password" name="password" pattern="(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" class="form-control" autocomplete="new-password" required title="Must include UpperCase, LowerCase, Number/Special and Minimum 12 Characters">
 </div>
 <div class="input-group mb-3">
     <div class="input-group-prepend">
@@ -36,7 +36,7 @@
     </div>
     <input type="password" id="verify" name="verify" pattern="(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" class="form-control" autocomplete="new-password" required title="Re-enter Password">
 </div>
-<p><small id="passwordHelpBlock" class="form-text text-muted">Password must be at least 12 characters.</small></p>
+<p><small id="passwordHelpBlock" class="form-text text-muted">Password must be at least 12 characters and include Upper Case, Lower Case and Number/ Symbol characters.</small></p>
 <small id="tosLink" class="form-text text-muted"><a href="#tosModal">View Terms of Service</a></small>
 <small id="privacyLink" class="form-text text-muted"><a href="#privacyModal">View Privacy Policy</a></small>
 <br>
