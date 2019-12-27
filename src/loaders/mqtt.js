@@ -23,7 +23,7 @@ var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Shared Array Object for Alexa/ GHome Commands that are un-acknowledged
-var ongoingCommands = {};
+module.exports.ongoingCommands = {};
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Client Configuration
 ///////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ var mqttOptions = {
 ///////////////////////////////////////////////////////////////////////////
 logger.log('info', "[MQTT] Connecting to MQTT server: " + mqtt_url);
 
-var mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+module.exports.mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
 	logger.log('error', "[MQTT] MQTT connect error");
@@ -349,7 +349,7 @@ var timeout = setInterval(function(){
 },500);
 
 // Post MQTT message that users' Node-RED instance will display in GUI as warning
-function notifyUser(severity, username, endpointId, message){
+module.exports.notifyUser = function notifyUser(severity, username, endpointId, message){
 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifiations
 	var alert = {};
 	alert.severity = severity;
@@ -363,8 +363,7 @@ function notifyUser(severity, username, endpointId, message){
 };
 
 
-module.exports = {
-	mqttClient,
-	ongoingCommands,
-	notifyUser
-}
+// module.exports = {
+// 	mqttClient,
+// 	ongoingCommands
+// }
