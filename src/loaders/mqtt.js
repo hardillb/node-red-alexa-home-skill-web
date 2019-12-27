@@ -23,7 +23,7 @@ var mqtt_password = (process.env.MQTT_PASSWORD);
 var mqtt_port = (process.env.MQTT_PORT || "1883");
 var mqtt_url = (process.env.MQTT_URL || "mqtt://mosquitto:" + mqtt_port);
 // Shared Array Object for Alexa/ GHome Commands that are un-acknowledged
-ongoingCommands = {};
+var ongoingCommands = {};
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Client Configuration
 ///////////////////////////////////////////////////////////////////////////
