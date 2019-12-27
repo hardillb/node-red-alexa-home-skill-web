@@ -264,9 +264,9 @@ const updateDeviceState = async(username, endpointId, payload) => {
 			// Get device associated user
 			var user = await Account.findOne({username: username});
 			// Send Google Home State Update, if user is GHome-enabled
-			if (user.activeServices && user.activeServices.indexOf('Google') != -1){sendGoogleHomeState(user, device)};
+			if (user.activeServices && user.activeServices.indexOf('Google') > -1){sendGoogleHomeState(user, device)};
 			// Send Alexa State Update, if user is Alexa-enabled
-			if (user.activeServices && user.activeServices.indexOf('Amazon') != -1){sendAlexaState(user, device)};
+			if (user.activeServices && user.activeServices.indexOf('Amazon') > -1){sendAlexaState(user, device)};
 			// Return Success
 			return true;
 		}
