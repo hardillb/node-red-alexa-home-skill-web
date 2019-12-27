@@ -11,8 +11,8 @@ const logger = require('./logger'); // Moved to own module
 // const delAsync = promisify(client.del).bind(client);
 // const setAsync = promisify(client.set).bind(client);
 //const scanner = new redisScan(client);
-const stateApi = require('../services/state');
-const setstate = stateApi.setstate;
+const updateDeviceState = require('../services/state').updateDeviceState;
+//const setstate = stateApi.setstate;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
@@ -215,13 +215,29 @@ mqttClient.on('message',function(topic,message){
 		// Split topic/ get username and endpointId
 		var messageJSON = JSON.parse(message);
 		var payload = messageJSON.payload;
-		// Call setstate to update attribute in mongodb
-		setstate(username,endpointId,payload) //arrTopic[1] is username, arrTopic[2] is endpointId
+		// Call updateDeviceState to update state element in mongodb
+		updateDeviceState(username, endpointId, payload) //arrTopic[1] is username, arrTopic[2] is endpointId
+			.then(result => {
+				if (result == true) {
+					logger.log('verbose', "[MQTT] Successfully updated state for user: " + username + ", endpointId: " + endpointId);
+				}
+				else if (Array.isArray(result)){
+					result.forEach(message => {
+						notifyUser(severity, username, endpointId, message)
+
+					});
+				}
+				else if (result == false){
+					logger.log('warn', "[MQTT] Failed to updated state for user: " + username + ", endpointId: " + endpointId);
+				}
+			})
+			.catch(e => {
+				logger.log('error', "[MQTT] Error trying to update state for user: " + username + ", endpointId: " + endpointId + ", error" + e.stack);
+			});
 	}
 	else {
 		logger.log('debug', "[MQTT] Unhandled MQTT message event: " + topic + message);
 	}
-
 });
 
 ///////////////////////////////////////////////////////////////////////////
@@ -361,6 +377,22 @@ var timeout = setInterval(function(){
 // 		logger.log('warn', "[MQTT] Failed to publish MQTT alert, error: " + err);
 // 	}
 // };
+
+function notifyUser(severity, username, endpointId, message){
+	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
+	var alert = {
+		"severity" : severity,
+		"message" : message
+	}
+	var alertString = JSON.stringify(alert);
+	try {
+		logger.log('debug', "[State API] Publishing MQTT alert, topic: " + topic + ", alert: " + alertString);
+		mqttClient.publish(topic,alertString);
+		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + alertString);
+	} catch (err) {
+		logger.log('error', "[State API] Failed to publish MQTT alert, error: " + err.stack);
+	}
+};
 
 module.exports = {
 	mqttClient,
