@@ -3,7 +3,6 @@
 ///////////////////////////////////////////////////////////////////////////
 var Account = require('../models/account');
 var Devices = require('../models/devices');
-//var mqtt = require('mqtt');
 const uuidv4 = require('uuid/v4');
 const logger = require('../loaders/logger');
 const fs = require('fs');
@@ -78,7 +77,7 @@ else {
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 // Set State Function, sets device "state" element in MongoDB based upon Node-RED MQTT 'state' message
-module.exports.setstate = function setstate(username, endpointId, payload) {
+function setstate(username, endpointId, payload) {
 	// Check payload has state property
 	logger.log('debug', "[State API] SetState payload:" + JSON.stringify(payload));
 	if (payload.hasOwnProperty('state')) {
@@ -494,5 +493,9 @@ function getSafe(fn) {
         return undefined;
     }
 };
+
+module.exports = {
+	setstate
+}
 
 
