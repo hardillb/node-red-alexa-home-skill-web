@@ -223,7 +223,7 @@ mqttClient.on('message',function(topic,message){
 				}
 				else if (Array.isArray(result)){
 					result.forEach(message => {
-						notifyUser(severity, username, endpointId, message)
+						notifyUser('warn', username, endpointId, message)
 
 					});
 				}
