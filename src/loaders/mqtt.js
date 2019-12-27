@@ -223,8 +223,7 @@ mqttClient.on('message',function(topic,message){
 				}
 				else if (Array.isArray(result)){
 					result.forEach(message => {
-						notifyUser('warn', username, endpointId, message)
-
+						notifyUser('warn', username, endpointId, message);
 					});
 				}
 				else if (result == false){
@@ -365,19 +364,6 @@ var timeout = setInterval(function(){
 },500);
 
 // Post MQTT message that users' Node-RED instance will display in GUI as warning
-// module.exports.notifyUser = function notifyUser(severity, username, endpointId, message){
-// 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
-// 	var alert = {};
-// 	alert.severity = severity;
-// 	alert.message = message
-// 	try{
-// 		mqttClient.publish(topic,JSON.stringify(alert));
-// 		logger.log('warn', "[MQTT] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
-// 	} catch (err) {
-// 		logger.log('warn', "[MQTT] Failed to publish MQTT alert, error: " + err);
-// 	}
-// };
-
 function notifyUser(severity, username, endpointId, message){
 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
 	var alert = {
@@ -386,11 +372,11 @@ function notifyUser(severity, username, endpointId, message){
 	}
 	var alertString = JSON.stringify(alert);
 	try {
-		logger.log('debug', "[State API] Publishing MQTT alert, topic: " + topic + ", alert: " + alertString);
+		logger.log('debug', "[MQTT] Publishing MQTT alert, topic: " + topic + ", alert: " + alertString);
 		mqttClient.publish(topic,alertString);
-		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + alertString);
+		logger.log('warn', "[MQTT] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + alertString);
 	} catch (err) {
-		logger.log('error', "[State API] Failed to publish MQTT alert, error: " + err.stack);
+		logger.log('error', "[MQTT] Failed to publish MQTT alert, error: " + err.stack);
 	}
 };
 
