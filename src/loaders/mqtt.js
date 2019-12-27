@@ -42,7 +42,7 @@ var mqttOptions = {
 ///////////////////////////////////////////////////////////////////////////
 logger.log('info', "[MQTT] Connecting to MQTT server: " + mqtt_url);
 
-module.exports.mqttClient = mqtt.connect(mqtt_url, mqttOptions);
+mqttClient = mqtt.connect(mqtt_url, mqttOptions);
 
 mqttClient.on('error',function(err){
 	logger.log('error', "[MQTT] MQTT connect error");
@@ -363,7 +363,7 @@ module.exports.notifyUser = function notifyUser(severity, username, endpointId, 
 };
 
 
-// module.exports = {
-// 	mqttClient,
-// 	ongoingCommands
-// }
+module.exports = {
+	mqttClient,
+ 	ongoingCommands
+}
