@@ -349,19 +349,18 @@ var timeout = setInterval(function(){
 },500);
 
 // Post MQTT message that users' Node-RED instance will display in GUI as warning
-module.exports.notifyUser = function notifyUser(severity, username, endpointId, message){
-	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
-	var alert = {};
-	alert.severity = severity;
-	alert.message = message
-	try{
-		mqttClient.publish(topic,JSON.stringify(alert));
-		logger.log('warn', "[Limiter] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
-	} catch (err) {
-		logger.log('warn', "[Limiter] Failed to publish MQTT alert, error: " + err);
-	}
-};
-
+// module.exports.notifyUser = function notifyUser(severity, username, endpointId, message){
+// 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
+// 	var alert = {};
+// 	alert.severity = severity;
+// 	alert.message = message
+// 	try{
+// 		mqttClient.publish(topic,JSON.stringify(alert));
+// 		logger.log('warn', "[MQTT] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + message);
+// 	} catch (err) {
+// 		logger.log('warn', "[MQTT] Failed to publish MQTT alert, error: " + err);
+// 	}
+// };
 
 module.exports = {
 	mqttClient,

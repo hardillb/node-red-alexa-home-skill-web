@@ -9,7 +9,7 @@ const logger = require('../loaders/logger');
 const fs = require('fs');
 const util = require("util");
 const mqttClient = require('../loaders/mqtt').mqttClient;
-const notifyUser = require('../loaders/mqtt').notifyUser;
+//const notifyUser = require('../loaders/mqtt').notifyUser;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -468,21 +468,21 @@ module.exports.setstate = function setstate(username, endpointId, payload) {
 }
 
 // Post MQTT message that users' Node-RED instance will display in GUI as warning
-// function notifyUser(severity, username, endpointId, message){
-// 	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
-// 	var alert = {
-// 		"severity" : severity,
-// 		"message" : message
-// 	}
-// 	var alertString = JSON.stringify(alert);
-// 	try {
-// 		logger.log('debug', "[State API] Publishing MQTT alert, topic: " + topic + ", alert: " + alertString);
-// 		mqttClient.publish(topic,alertString);
-// 		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + alertString);
-// 	} catch (err) {
-// 		logger.log('error', "[State API] Failed to publish MQTT alert, error: " + err.stack);
-// 	}
-// };
+function notifyUser(severity, username, endpointId, message){
+	var topic = "message/" + username + "/" + endpointId; // Prepare MQTT topic for client-side notifications
+	var alert = {
+		"severity" : severity,
+		"message" : message
+	}
+	var alertString = JSON.stringify(alert);
+	try {
+		logger.log('debug', "[State API] Publishing MQTT alert, topic: " + topic + ", alert: " + alertString);
+		mqttClient.publish(topic,alertString);
+		logger.log('warn', "[State API] Published MQTT alert for user: " + username + " endpointId: " + endpointId + " message: " + alertString);
+	} catch (err) {
+		logger.log('error', "[State API] Failed to publish MQTT alert, error: " + err.stack);
+	}
+};
 
 // Nested attribute/ element tester
 function getSafe(fn) {
