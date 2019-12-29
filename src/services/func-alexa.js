@@ -433,7 +433,7 @@ const queryDeviceStateAsync = async(device) => {
         }
     }
     catch(e) {
-        logger.log('error', "[Alexa State] Device: " + deviceJSON.endpointId +  " has no reportState attribute, check MongoDB schema");
+        logger.log('error', "[Alexa State] Device: has no reportState attribute, check MongoDB schema, device: " + JSON.stringify(device));
         return undefined;
     }
 }

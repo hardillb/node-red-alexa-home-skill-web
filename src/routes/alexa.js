@@ -89,9 +89,9 @@ router.get('/getstate/:dev_id', getStateLimiter,
 			// Fine Device using endpointId supplied in req.params.dev_id
 			var device = await Devices.findOne({username:req.user.username, endpointId:id});
 			// Generate state response
-			var state = await queryDeviceStateAsync(device);
+			if (device) var state = await queryDeviceStateAsync(device);
 			// Success, return state as JSON
-			if (state != undefined) {
+			if (state && state != undefined) {
 				//logger.log('debug', "[State API] Callback returned: " + JSON.stringify(state));
 				res.status(200).json(state);
 			}
