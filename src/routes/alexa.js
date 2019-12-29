@@ -27,6 +27,7 @@ const updateUserServices = require('../services/func-services').updateUserServic
 const queryDeviceStateAsync = require('../services/func-alexa').queryDeviceStateAsync;
 const replaceCapability = require('../services/func-alexa').replaceCapabilityAsync;
 const saveGrantAsync = require('../services/func-alexa').saveGrantAsync;
+const validateCommandAsync = require('../services/func-alexa').validateCommandAsync;
 //const sendPageView = require('../services/ganalytics').sendPageView;
 //const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
 const sendEventUid = require('../services/ganalytics').sendEventUid;
@@ -96,8 +97,7 @@ router.get('/getstate/:dev_id', getStateLimiter,
 			var id = req.params.dev_id;
 			sendEventUid(req.path, "Get State", "GetState API Request, endpointId: " + id, req.ip, req.user.username, req.headers['user-agent']);
 			// As user has authenticated, assume activeService
-			var serviceName = "Amazon";
-			if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
+			if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf("Amazon")) == -1) {updateUserServices(req.user.username, "Amazon")};
 			// Fine Device using endpointId supplied in req.params.dev_id
 			var device = await Devices.findOne({username:req.user.username, endpointId:id});
 			// Generate state response
@@ -137,8 +137,7 @@ router.post('/command2',
 	async (req, res) => {
 		try {
 			sendEventUid(req.path, "Command", "Execute Command, endpointId: " + req.body.directive.endpoint.endpointId, req.ip, req.user.username, req.headers['user-agent']);
-			var serviceName = "Amazon"; // As user has authenticated, assume activeService
-			if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
+			if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf("Amazon")) == -1) {updateUserServices(req.user.username, "Amazon")};
 			logger.log('debug', "[Alexa API] Received command for user: " + req.user.username + ", command: " + JSON.stringify(req.body));
 			// Find matching device
 			var device = await Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId});
@@ -594,7 +593,6 @@ router.post('/command2',
 
 				// Prepare MQTT topic/ message validation
 				var topic = "command/" + req.user.username + "/" + req.body.directive.endpoint.endpointId;
-				var validationStatus = true;
 
 				// Cleanup MQTT message
 				delete req.body.directive.header.correlationToken;
@@ -603,47 +601,16 @@ router.post('/command2',
 				logger.log('debug', "[Alexa Command] Received command API request for user: " + req.user.username + " command: " + message);
 
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-				// Check attributes.colorTemperatureRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
-				if (namespace == "Alexa.ColorTemperatureController" && name == "SetColorTemperature") {
-					var compare = req.body.directive.payload.colorTemperatureInKelvin;
-					// Handle Out of Range
-					var hasColorTemperatureRange = getSafe(() => deviceJSON.attributes.colorTemperatureRange);
-					if (hasColorTemperatureRange != undefined) {
-						if (compare < deviceJSON.attributes.colorTemperatureRange.temperatureMinK || compare > deviceJSON.attributes.colorTemperatureRange.temperatureMaxK) {
-							logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
-							// Send 417 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
-							res.status(417).send();
-							validationStatus = false;
-						}
-					}
-					else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
+				// Validate command against any limits set on devices
+				var validation = await validateCommandAsync(device,req);
+				// Validation returned false, check response code and send relevant failure back
+				if (validation.status == false) {
+					if (validation.response == 416) return res.status(416).send();
+					if (validation.response == 417) return res.status(417).send();
 				}
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				// Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
-				if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
-					var compare = req.body.directive.payload.targetSetpoint.value;
-					// Handle Temperature Out of Range
-					var hasTemperatureRange = getSafe(() => deviceJSON.attributes.temperatureRange);
-					if (hasTemperatureRange != undefined) {
-						if (compare < deviceJSON.attributes.temperatureRange.temperatureMin || compare > deviceJSON.attributes.temperatureRange.temperatureMax) {
-							logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
-							// Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
-							res.status(416).send();
-							validationStatus = false;
-						}
-					}
-					else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
-				}
-
-				// Generate 418 error, INVALID_DIRECTIVE on ModeController AdjustMode
-				// if (req.body.directive.header.namespace == "Alexa.ModeController" && req.body.directive.header.name == "AdjustMode" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
-				// 	logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested AdjustMode directive which is unsupported on the device type." );
-				// 	res.status(418).send();
-				// 	validationStatus = false;
-				// }
-
-				if (validationStatus) {
+				if (validation.status == true) {
 					try{
 						// Send Command to MQTT
 						mqttClient.publish(topic,message);

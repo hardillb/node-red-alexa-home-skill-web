@@ -139,7 +139,7 @@ const sendStateAsync = async(token, response, username) => {
 	catch(e) {
 		// User has likely disabled Google Home link with service
 		if (e.response && e.response.status && e.response.status == 404) {
-			logger.log('warning', "[Google Report State] Failed to send change report for user: " + username + ", to Google Homegraph API, user no-longer has linked skill.");
+			logger.log('warn', "[Google Report State] Failed to send change report for user: " + username + ", to Google Homegraph API, user no-longer has linked skill.");
 			// Remove 'Google' from users' active services
 			removeUserServices(username, "Google");
 		}

@@ -489,7 +489,7 @@ const sendStateAsync = async(user, state) => {
     catch(e) {
         // User no-longer has skill linked with Amazon account, see: https://developer.amazon.com/en-US/docs/alexa/smarthome/debug-your-smart-home-skill.html
         if (e.response && e.response.status && e.response.status == 403) {
-            logger.log('warning', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa, user no-longer has linked skill.");
+            logger.log('warn', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa, user no-longer has linked skill.");
             // Remove 'Amazon' from users' active services
 			removeUserServices(user.username, "Amazon");
         }
@@ -497,6 +497,63 @@ const sendStateAsync = async(user, state) => {
         else {logger.log('error', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa failed, error" + e.stack)}
     }
 }
+
+// Validate command where limits are in-place, i.e. min/ max thermostat temperature or bulb colour temperature
+const validateCommandAsync = async(device, req) => {
+    try{
+        var deviceJSON = JSON.parse(JSON.stringify(device));
+        var name = req.body.directive.header.name;
+        var namespace = req.body.directive.header.namespace;
+        // Check attributes.colorTemperatureRange, send 417 to Lambda (VALUE_OUT_OF_RANGE) response if values are out of range
+        if (namespace == "Alexa.ColorTemperatureController" && name == "SetColorTemperature") {
+            var compare = req.body.directive.payload.colorTemperatureInKelvin;
+            // Handle Out of Range
+            var hasColorTemperatureRange = getSafe(() => deviceJSON.attributes.colorTemperatureRange);
+            if (hasColorTemperatureRange != undefined) {
+                if (compare < deviceJSON.attributes.colorTemperatureRange.temperatureMinK || compare > deviceJSON.attributes.colorTemperatureRange.temperatureMaxK) {
+                    logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
+                    // Send 417 HTTP code back to Lambda, Lambda will send correct error message to Alexa
+                    //res.status(417).send();
+                    //validationStatus = false;
+                    return {status: false, response: 417};
+                }
+            }
+            else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
+        }
+        // Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
+        else if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
+            var compare = req.body.directive.payload.targetSetpoint.value;
+            // Handle Temperature Out of Range
+            var hasTemperatureRange = getSafe(() => deviceJSON.attributes.temperatureRange);
+            if (hasTemperatureRange != undefined) {
+                if (compare < deviceJSON.attributes.temperatureRange.temperatureMin || compare > deviceJSON.attributes.temperatureRange.temperatureMax) {
+                    logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
+                    // Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
+                    //res.status(416).send();
+                    //validationStatus = false;
+                    return {status: false, response: 416};
+                }
+            }
+            else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
+        }
+        // Generate 418 error, INVALID_DIRECTIVE on ModeController AdjustMode
+        // if (req.body.directive.header.namespace == "Alexa.ModeController" && req.body.directive.header.name == "AdjustMode" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
+        // 	logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested AdjustMode directive which is unsupported on the device type." );
+        // 	res.status(418).send();
+        // 	validationStatus = false;
+        // }
+        else {
+            return {status: true};
+        }
+    }
+    catch(e) {
+        logger.log('error', "[Alexa Command] Validation of command failed, error: " + e.stack);
+        return {status: false, response : undefined}
+    }
+}
+const buildCommandResponseAsync = async(req) => {
+}
+
 
 // Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
 const replaceCapabilityAsync = async(capability, reportState, attributes, type) => {
@@ -973,5 +1030,6 @@ module.exports = {
     queryDeviceStateAsync,
     requestAccessTokenAsync,
     sendStateAsync,
-    replaceCapabilityAsync
+    replaceCapabilityAsync,
+    validateCommandAsync
 }
