@@ -488,7 +488,7 @@ const sendStateAsync = async(user, state) => {
     }
     catch(e) {
         // User no-longer has skill linked with Amazon account, see: https://developer.amazon.com/en-US/docs/alexa/smarthome/debug-your-smart-home-skill.html
-        if (error.response && error.response.status && error.response.status == 403) {
+        if (e.response && e.response.status && e.response.status == 403) {
             logger.log('warning', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa, user no-longer has linked skill.");
             // Remove 'Amazon' from users' active services
 			removeUserServices(user.username, "Amazon");
