@@ -141,7 +141,7 @@ const sendStateAsync = async(token, response, username) => {
 		if (e.response && e.response.status && e.response.status == 404) {
 			logger.log('warning', "[Google Report State] Failed to send change report for user: " + username + ", to Google Homegraph API, user no-longer has linked skill.");
 			// Remove 'Google' from users' active services
-			removeUserServices(user.username, "Google");
+			removeUserServices(username, "Google");
 		}
 		else {
 			logger.log('error', "[Google Report State] Failed to report state for user: " + username + ", error: " + e.stack);

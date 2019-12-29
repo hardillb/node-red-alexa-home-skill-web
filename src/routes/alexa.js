@@ -43,7 +43,7 @@ router.get('/devices',
 		var user = req.user.username;
 		var devices = await Devices.find({username: user});
 		var devs = [];
-		devices.forEach(device => {
+		for (let device of devices) {
 			var dev = {};
 			dev.endpointId = "" + device.endpointId;
 			dev.friendlyName = device.friendlyName;
@@ -54,9 +54,9 @@ router.get('/devices',
 			dev.capabilities = [];
 			// Grab device attributes for use in building discovery response
 			var devAttributes = (device.attributes || null);
-			device.capabilities.forEach(function(capability){
+			for (let capability of device.capabilities){
 				dev.capabilities.push(replaceCapability(capability, device.reportState, devAttributes, dev.displayCategories));
-			});
+			}
 			// Add specific RangeController interface
 			if (device.capabilities.indexOf('RangeController') > -1){
 				dev.capabilities.push(
@@ -69,7 +69,7 @@ router.get('/devices',
 			dev.version = "0.0.3";
 			dev.manufacturerName = "Node-RED"
 			devs.push(dev);
-		});
+		}
 		res.send(devs);
 	}
 );
