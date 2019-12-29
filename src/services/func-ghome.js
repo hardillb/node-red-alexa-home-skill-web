@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
 // Depends
 ///////////////////////////////////////////////////////////////////////////
-const request = require('request');
+const axios = require('axios');
+const querystring = require('querystring');
 var Account = require('../models/account');
 var logger = require('../loaders/logger');
 const jwt = require('jsonwebtoken');
@@ -45,9 +46,104 @@ else {
 ///////////////////////////////////////////////////////////////////////////
 // Exports
 ///////////////////////////////////////////////////////////////////////////
+
+const gHomeSyncAsync = async(userId) => {
+	try {
+		var user = await Account.findOne({_id:userId});
+		if (user.activeServices && user.activeServices.indexOf('Google') != -1) {
+			// POST SYNC Update to Google Home
+			var response = await axios({
+				method: 'post',
+				url: SYNC_API,
+				data: {agentUserId: user._id},
+				headers: {
+					"User-Agent": "request",
+					"Referer": "https://" + process.env.WEB_HOSTNAME
+				}
+			});
+			logger.log('verbose', "[GHome Sync Devices] Success for user: " + user.username + ", userId" + user._id);
+		}
+	}
+	catch(e) {
+		logger.log('error', "[GHome Sync Devices] Failure for user: " + user.username + ", error: " + e.stack);
+	}
+}
+
+const requestToken2Async = async(keys) => {
+	try {
+		if (reportState == true) {
+			// Build request
+			var payload = {
+				"iss": keys.client_email,
+				"scope": "https://www.googleapis.com/auth/homegraph",
+				"aud": "https://accounts.google.com/o/oauth2/token",
+				"iat": new Date().getTime()/1000,
+				"exp": new Date().getTime()/1000 + 3600,
+			}
+			var privKey = keys.private_key;
+			// Use jsonwebtoken to sign token
+			var token = jwt.sign(payload, privKey, { algorithm: 'RS256'});
+			// Compose form data
+			var formData = {
+				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+				assertion: token
+			}
+			// POST form data to request access token from Google Auth Service
+			var response = await axios({
+				method: 'post',
+				url: 'https://accounts.google.com/o/oauth2/token',
+				data: querystring.stringify(formData),
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			});
+			// Success, return token
+			if (response.status == 200) {
+				logger.log('verbose', "[Google Home Token Request] Successfully requested token, response: " + JSON.stringify(response.data.access_token));
+				return response.data.access_token;
+			}
+			// Failure, return undefined
+			else {
+				logger.log('error', "[Google Home Token Request] Failed to request token, response code: " + response.status);
+				return undefined;
+			}
+		}
+	}
+	catch(e) {
+		logger.log('error', "[Google Home Token Request] Failed to request token, error: " + e.stack);
+		return undefined;
+	}
+}
+
+
+const sendStateAsync = async(token, response, username) => {
+	try {
+		if (reportState == true && token != undefined) {
+			// POST state report to Home Graph API
+			var response = await axios({
+				method: 'post',
+				url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
+				data: response,
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
+					'X-GFE-SSL': 'yes'
+				}
+			});
+			if (response.status == 200) {
+				logger.log('verbose', "[State API] Successfully sent GHome HomeGraph state report for user: " + username);
+			}
+		}
+	}
+	catch(e) {
+		logger.log('error', "[Google Report State] Failed to report state for user: " + username + ", error: " + e.stack);
+	}
+}
+
+
 // Call this from QUERY intent or reportstate API endpoint
-module.exports.queryDeviceState = function queryDeviceState(device, callback) {
-	if (device) {
+const queryDeviceStateAsync = async(device) => {
+	try {
 		var dev = {};
 		// Create initial JSON object for device
 		dev.online = true;
@@ -101,7 +197,6 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 					else {
 						dev.on = false;
 					}
-
 				}
 				if (trait == "action.devices.traits.OpenClose") {
 					dev.openPercent = device.state.rangeValue;
@@ -120,112 +215,21 @@ module.exports.queryDeviceState = function queryDeviceState(device, callback) {
 				}
 			});
 			// Return device state
-			callback(dev);
+			return dev;
 	}
-	else if (!device) {
-		logger.log('warn', "[GHome Query API] queryDeviceState Device not specified");
-		callback(undefined);
-	}
-}
-// Check user is actually enabled / account-linked for Google Home
-module.exports.isGhomeUser = function isGhomeUser(user, callback) {
-	if (user.activeServices && user.activeServices.indexOf('Google') != -1) {
-		//logger.log('verbose', "[State API] User: " + users[0].username + ", IS a Google Home-enabled user");
-		callback(true);
-	}
-	else {
-		//logger.log('verbose', "[State API] User: " + users[0].username + ", is NOT a Google Home-enabled user.");
-		callback(false);
+	catch(e) {
+		logger.log('warn', "[GHome Query API] queryDeviceState error: " + e.stack);
+		return undefined;
 	}
 }
-// Send State Update
-module.exports.sendState = function sendState(token, response, username) {
-	if (reportState == true && token != undefined) {
-		logger.log('verbose', "[State API] Sending GHome HomeGraph State report for user: " + username + ", report: " + JSON.stringify(response));
-		request.post({
-			url: 'https://homegraph.googleapis.com/v1/devices:reportStateAndNotification',
-				headers:{
-					'Content-Type': 'application/json',
-					'Authorization': 'Bearer ' + token,
-					'X-GFE-SSL': 'yes'
-				},
-				json: response
-		}, function(err,res, body){
-			if (err) {
-				logger.log('warn', "[State API] Failed to send GHome HomeGraph state report for user: " + username + ", error:" + err);
-			}
-			else {
-				if (res.statusCode == 200) {
-					logger.log('verbose', "[State API] Successfully sent GHome HomeGraph state report for user: " + username);
-				}
-				else {logger.log('warn', "[State API] Invalid status code returned from GHome HomeGraph, user: " + username + ", status code:" + res.statusCode)}
-			}
-		});
-	}
+
+module.exports = {
+	queryDeviceStateAsync,
+	gHomeSyncAsync,
+	sendStateAsync,
+	requestToken2Async
 }
-// Get OAuth HomeGraph token
-module.exports.requestToken2 = function requestToken2(keys, callback) {
-	if (reportState == true) {
-		var payload = {
-				"iss": keys.client_email,
-				"scope": "https://www.googleapis.com/auth/homegraph",
-				"aud": "https://accounts.google.com/o/oauth2/token",
-				"iat": new Date().getTime()/1000,
-				"exp": new Date().getTime()/1000 + 3600,
-		}
-		var privKey = keys.private_key;
-		var token = jwt.sign(payload, privKey, { algorithm: 'RS256'}); // Use jsonwebtoken to sign token
-		request.post({
-			url: 'https://accounts.google.com/o/oauth2/token',
-			form: {
-				grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-				assertion: token
-				}
-			},
-			function(err,res, body){
-				if (err) {
-					callback(undefined);
-				} else {
-					callback(JSON.parse(body).access_token);
-				}
-			}
-		);
-	}
-	else {callback(undefined)}
-}
-// GHome Request Sync, see: https://developers.google.com/actions/smarthome/request-sync
-module.exports.gHomeSync = function gHomeSync(userid){
-    const pUsers = Account.findOne({_id:userid});
-	Promise.all([pUsers]).then(([user]) => {
-        if (user){
-			if (user.activeServices && user.activeServices.indexOf('Google') != -1) {
-				request(
-					{
-						headers: {
-							"User-Agent": "request",
-							"Referer": "https://" + process.env.WEB_HOSTNAME
-						  },
-						url: SYNC_API,
-						method: "POST",
-						json: {
-							agentUserId: user._id
-						}
-					},
-					function(err, resp, body) {
-						if (!err) {
-							logger.log('debug', "[GHome Sync Devices] Success for user: " + user.username + ", userid" + user._id);
-						} else {
-							logger.log('debug', "[GHome Sync Devices] Failure for user: " + user.username + ", error: " + err);
-						}
-					}
-				);
-			}
-			else {
-				logger.log('debug', "[GHome Sync Devices] Not sending Sync Request for user: " + user.username + ", user has not linked Google Account with bridge account");
-			}
-		}
-	});
-}
+
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////

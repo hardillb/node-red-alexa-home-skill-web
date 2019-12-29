@@ -89,7 +89,8 @@ router.get('/start',oauthServer.authorize(function(applicationID, redirectURI, d
 		application: req.oauth2.client,
 		user: req.user,
 		map: scopeMap,
-		title: "Link Account | Node-RED Smart Home Control"
+		brand: process.env.BRAND,
+		title: "Link Account | " + process.env.BRAND
 	});
 });
 ///////////////////////////////////////////////////////////////////////////

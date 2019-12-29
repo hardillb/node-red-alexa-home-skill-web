@@ -15,13 +15,11 @@ const util = require("util");
 const gHomeFunc = require('./func-ghome');
 const alexaFunc = require('./func-alexa');
 const ghomeJWT_file = './ghomejwt.json';
-const gHomeSendState =  gHomeFunc.sendState;
-const gHomeQueryDeviceState = gHomeFunc.queryDeviceState;
-//const isGhomeUser = gHomeFunc.isGhomeUser;
-const alexaSendState =  alexaFunc.sendState;
-const alexaQueryDeviceState = alexaFunc.queryDeviceState;
-//const isAlexaUser = alexaFunc.isAlexaUser;
-const requestToken2 = gHomeFunc.requestToken2;
+const gHomeSendState =  gHomeFunc.sendStateAsync;
+const gHomeQueryDeviceState = gHomeFunc.queryDeviceStateAsync;
+const alexaSendState =  alexaFunc.sendStateAsync;
+const alexaQueryDeviceState = alexaFunc.queryDeviceStateAsync;
+const requestToken2Async = gHomeFunc.requestToken2Async;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
@@ -31,40 +29,6 @@ const readFile = util.promisify(fs.readFile);
 var gToken = undefined; // Store Report State OAuth Token
 var gHomeReportState = false;
 var keys; // variable used to store JWT for Out-of-Band State Reporting to Google Home Graph API
-
-const readFileAsync = async() => {
-	var data = await readFile(ghomeJWT_file, 'utf8');
-	return data;
-}
-
-readFileAsync()
-	.then(result => {
-		// Read JSON file was successful, enable GHome HomeGraph state reporting
-		gHomeReportState = true;
-		keys = JSON.parse(result);
-		///////////////////////////////////////////////////////////////////////////
-		// Home Graph API Token Request/ Refresh
-		///////////////////////////////////////////////////////////////////////////
-		requestToken2(keys, function(returnValue) {
-			gToken = returnValue;
-			logger.log('info', "[State API] Obtained GHome HomeGraph OAuth token");
-			logger.log('debug', "[State API] GHome HomeGraph OAuth token:" + JSON.stringify(gToken));
-		});
-		// Refresh Google oAuth Token used for State Reporting
-		var refreshToken = setInterval(function(){
-			requestToken2(keys, function(returnValue) {
-				gToken = returnValue;
-				logger.log('info', "[State API] Refreshed GHome HomeGraph OAuth token");
-				logger.log('debug', "[State API] GHome HomeGraph OAuth token:" + JSON.stringify(gToken));
-			});
-		},3540000);
-	})
-	.catch(err => {
-		logger.log('warn', "[State API] Error reading GHome HomeGraph API JSON file, Report State disabled. Error message: " + err );
-		logger.log('warn', "[State API] Please ensure you have mapped a valid GHome HomeGraph API JSON file, to /usr/src/app/ghomejwt.json, see .ghomejwt.example for more information" );
-	})
-
-
 // Alexa State Reporting
 var alexaReportState = false;
 if (!process.env.ALEXA_CLIENTID && !process.env.ALEXA_CLIENTSECRET) {
@@ -74,8 +38,34 @@ else {
 	alexaReportState = true;
 }
 ///////////////////////////////////////////////////////////////////////////
+// Main
+///////////////////////////////////////////////////////////////////////////
+const setupHomeGraph = async() => {
+	try {
+		var data = await readFile(ghomeJWT_file, 'utf8');
+		gHomeReportState = true;
+		keys = JSON.parse(data);
+		// Request Token
+		gToken = await requestToken2Async(keys);
+		logger.log('info', "[State API] Obtained GHome HomeGraph OAuth token");
+		//logger.log('debug', "[State API] GHome HomeGraph OAuth token:" + gToken);
+	}
+	catch(e) {
+		logger.log('error', "[State API] Report state setup failed, error: " + e.stack );
+	}
+}
+
+setupHomeGraph();
+
+// Create timer job to re-request access token before expiration
+var refreshToken = setInterval(function(){
+	setupHomeGraph();
+},3540000);
+///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
+
+
 const updateDeviceState = async(username, endpointId, payload) => {
 	try {
 		logger.log('debug', "[State API] SetState payload:" + JSON.stringify(payload));
@@ -263,7 +253,7 @@ const updateDeviceState = async(username, endpointId, payload) => {
 			var device = await  Devices.findOne({username: username, endpointId: endpointId});
 			// Get device associated user
 			var user = await Account.findOne({username: username});
-			// Send Google Home State Update, if user is GHome-enabled
+			// Send Google Home State Update, if user is Google Home-enabled
 			if (user.activeServices && user.activeServices.indexOf('Google') > -1){sendGoogleHomeState(user, device)};
 			// Send Alexa State Update, if user is Alexa-enabled
 			if (user.activeServices && user.activeServices.indexOf('Amazon') > -1){sendAlexaState(user, device)};
@@ -317,30 +307,29 @@ const sendGoogleHomeState = async(user, device) => {
 
 		// If user is Google Home user/ Report State is Enable, send state update to Home Graph API
 		if (gHomeReportState == true && sendGoogleStateUpdate == true && enableDevTypeStateReport == true){
-			gHomeQueryDeviceState(device, function(response) {
-				if (response != undefined) {
-					var stateReport = {
-						"agentUserId": user._id,
-						"payload": {
-							"devices" : {
-								"states": {}
-							}
-						}
-					}
-					var countProps = Object.keys(response).length; // Drop anything that simply has online: true property
-					if (countProps >= 2) {
-						stateReport.payload.devices.states[device.endpointId] = response;
-						logger.log('debug', "[State API] Generated GHome state report for user: " + user.username + ", report: " + JSON.stringify(stateReport));
-						if (gToken != undefined) {
-							//logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
-							gHomeSendState(gToken, stateReport, user.username);
-						}
-						else {
-							logger.log('verbose', '[State API] Unable to call GHome Send State, no gToken');
+			var response = await gHomeQueryDeviceState(device);
+			if (response != undefined) {
+				var stateReport = {
+					"agentUserId": user._id,
+					"payload": {
+						"devices" : {
+							"states": {}
 						}
 					}
 				}
-			});
+				var countProps = Object.keys(response).length; // Drop anything that simply has online: true property
+				if (countProps >= 2) {
+					stateReport.payload.devices.states[device.endpointId] = response;
+					logger.log('debug', "[State API] Generated GHome state report for user: " + user.username + ", report: " + JSON.stringify(stateReport));
+					if (gToken != undefined) {
+						//logger.log('verbose', '[State API] Calling Send State with gToken:' + JSON.stringify(gToken));
+						gHomeSendState(gToken, stateReport, user.username);
+					}
+					else {
+						logger.log('verbose', '[State API] Unable to call GHome Send State, no gToken');
+					}
+				}
+			}
 		}
 		else {
 			if (gHomeReportState == false){logger.log('debug', "[State API] GHome state reporting DISABLED")};
@@ -386,37 +375,36 @@ const sendAlexaState = async(user, device) => {
 			}
 		}
 		if (alexaReportState == true && sendAlexaStateUpdate == true && enableDevTypeStateReport == true) {
-			alexaQueryDeviceState(device, function(state) {
-				if (state != undefined) {
-					var messageId = uuidv4(); // Generate messageId
-					var changeReport = {
-						event: {
-							header: {
-								namespace: "Alexa",
-								name: "ChangeReport",
-								payloadVersion: "3",
-								messageId: messageId
-							},
-							endpoint: {
-							scope: {
-								type: "BearerToken",
-								token: "placeholder"
-							},
-							endpointId: device.endpointId
-							},
-							payload: {
-								change: {
-									cause: {
-									type: "APP_INTERACTION"
-									},
-									properties: state
-								}
+			var state = await alexaQueryDeviceState(device);
+			if (state != undefined) {
+				var messageId = uuidv4(); // Generate messageId
+				var changeReport = {
+					event: {
+						header: {
+							namespace: "Alexa",
+							name: "ChangeReport",
+							payloadVersion: "3",
+							messageId: messageId
+						},
+						endpoint: {
+						scope: {
+							type: "BearerToken",
+							token: "placeholder"
+						},
+						endpointId: device.endpointId
+						},
+						payload: {
+							change: {
+								cause: {
+								type: "APP_INTERACTION"
+								},
+								properties: state
 							}
 						}
 					}
-					alexaSendState(user, changeReport);
 				}
-			});
+				alexaSendState(user, changeReport);
+			}
 		}
 		else {
 			if (alexaReportState == false){logger.log('debug', "[State API] Alexa Report State DISABLED")};

@@ -27,6 +27,11 @@ if (!(process.env.MONGO_USER && process.env.MONGO_PASSWORD && process.env.MQTT_U
 	logger.log('error',"[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
 	process.exit()
 }
+// Validate BRAND environment variables passed to container
+if (!(process.env.BRAND)) {
+	logger.log('error',"[Core] You MUST supply MONGO_USER, MONGO_PASSWORD, MQTT_USER, MQTT_PASSWORD and MQTT_PORT environment variables");
+	process.exit()
+}
 // Warn on not supply of MONGO/ MQTT host names
 if (!(process.env.MONGO_HOST && process.env.MQTT_URL)) {
 	logger.log('warn',"[Core] Using 'mongodb' for Mongodb and 'mosquitto' for MQTT service endpoints, no MONGO_HOST/ MQTT_URL environment variable supplied");

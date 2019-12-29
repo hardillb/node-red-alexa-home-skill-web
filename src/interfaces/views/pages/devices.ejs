@@ -2,7 +2,7 @@
 
 <% if (isVerified == false) { %>
 	<div class="alert alert-danger alert-dismissible fade show" role="alert">
-		<strong>Warning!</strong> You need to verify your account! Browse to <a href='https://<%= fqdn %>/verify-resend'>https://<%= fqdn %>/verify-resend</a> to generate email verification token and complete the process.
+		<strong>Warning!</strong> You need to verify your account! If your account is new, Node-RED nodes will fail to connect until your account is verified. Browse to <a href='https://<%= fqdn %>/verify-resend'>https://<%= fqdn %>/verify-resend</a> to generate email verification token and complete the process.
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 		</button>
@@ -705,7 +705,7 @@ function saveDevice() {
 				alert("failed to create device");
 			});
 		} else {
-			alert("Name or desciption can not be empty and at least one action is needed");
+			alert("Name or description can not be empty and at least one action is needed");
 		}
 	} else {
 		// Modify Existing Device

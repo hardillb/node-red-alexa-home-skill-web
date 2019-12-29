@@ -6,8 +6,8 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-var Account = require('../models/account');
-var oauthModels = require('../models/oauth');
+//var Account = require('../models/account');
+//var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var passport = require('passport');
 var logger = require('../loaders/logger');
@@ -19,13 +19,15 @@ const getStateLimiter = require('../loaders/limiter').getStateLimiter;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-const servicesFunc = require('../services/func-services');
-const alexaFunc = require('../services/func-alexa');
-const updateUserServices = servicesFunc.updateUserServices;
-const queryDeviceState = alexaFunc.queryDeviceState;
-const saveGrant = alexaFunc.saveGrant;
-const sendPageView = require('../services/ganalytics').sendPageView;
-const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
+//const servicesFunc = require('../services/func-services');
+//const alexaFunc = require('../services/func-alexa');
+//const queryDeviceState = alexaFunc.queryDeviceState;
+//const saveGrant = alexaFunc.saveGrant;
+const updateUserServices = require('../services/func-services').updateUserServices;
+const queryDeviceStateAsync = require('../services/func-alexa').queryDeviceStateAsync;
+const saveGrantAsync = require('../services/func-alexa').saveGrantAsync;
+//const sendPageView = require('../services/ganalytics').sendPageView;
+//const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
 const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
@@ -36,83 +38,73 @@ const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////
 router.get('/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
-	function(req,res,next){
+	async (req, res) => {
 		sendEventUid(req.path, "Discovery", "Running device discovery", req.ip, req.user.username, req.headers['user-agent']);
-		var user = req.user.username
-		Devices.find({username: user},function(error, data){
-			if (!error) {
-				logger.log('info', "[Discover API] Running device discovery for user: " + user);
-				var devs = [];
-				for (var i=0; i< data.length; i++) {
-					var dev = {};
-					dev.endpointId = "" + data[i].endpointId;
-					dev.friendlyName = data[i].friendlyName;
-					dev.description = data[i].description;
-					dev.displayCategories = data[i].displayCategories;
-					//dev.reportState = data[i].reportState;
-					// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
-					dev.capabilities = [];
-					// Grab device attributes for use in building discovery response
-					var devAttributes = (data[i].attributes || null);
-					data[i].capabilities.forEach(function(capability){
-						dev.capabilities.push(replaceCapability(capability, data[i].reportState, devAttributes, dev.displayCategories));
-					});
-					// Add specific RangeController interface
-					if (data[i].capabilities.indexOf('RangeController') > -1){
-						dev.capabilities.push(
-						{  "type": "AlexaInterface",
-							"interface": "Alexa",
-							"version": "3"
-						});
-					}
-					dev.cookie = data[i].cookie;
-					dev.version = "0.0.3";
-					dev.manufacturerName = "Node-RED"
-					devs.push(dev);
-				}
-				//console.log(devs)
-				res.send(devs);
+		var user = req.user.username;
+		var devices = await Devices.find({username: user});
+		var devs = [];
+		devices.forEach(device => {
+			var dev = {};
+			dev.endpointId = "" + device.endpointId;
+			dev.friendlyName = device.friendlyName;
+			dev.description = device.description;
+			dev.displayCategories = device.displayCategories;
+			//dev.reportState = device.reportState;
+			// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
+			dev.capabilities = [];
+			// Grab device attributes for use in building discovery response
+			var devAttributes = (device.attributes || null);
+			device.capabilities.forEach(function(capability){
+				dev.capabilities.push(replaceCapability(capability, device.reportState, devAttributes, dev.displayCategories));
+			});
+			// Add specific RangeController interface
+			if (device.capabilities.indexOf('RangeController') > -1){
+				dev.capabilities.push(
+				{  "type": "AlexaInterface",
+					"interface": "Alexa",
+					"version": "3"
+				});
 			}
+			dev.cookie = device.cookie;
+			dev.version = "0.0.3";
+			dev.manufacturerName = "Node-RED"
+			devs.push(dev);
 		});
+		res.send(devs);
 	}
 );
+
 ///////////////////////////////////////////////////////////////////////////
 // Get State API res.status(200).json(properties);
 ///////////////////////////////////////////////////////////////////////////
-// Modified authentication due to service abuse, original configuration: passport.authenticate(['bearer', 'basic'], { session: false }),
 router.get('/getstate/:dev_id', getStateLimiter,
-	passport.authenticate('bearer', { session: false }),
-	function(req,res,next){
-		var id = req.params.dev_id;
-		sendEventUid(req.path, "Get State", "GetState API Request, endpointId: " + id, req.ip, req.user.username, req.headers['user-agent']);
-		var serviceName = "Amazon"; // As user has authenticated, assume activeService
-		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
-
-		// Identify device, we know who user is from request
-		logger.log('debug', "[State API] Received GetState API request for user: " + req.user.username + " endpointId: " + id);
-
-		Devices.findOne({username:req.user.username, endpointId:id}, function(err, data){
-			if (err) {
-				logger.log('warn',"[State API] No device found for username: " + req.user.username + " endpointId: " + id);
+	passport.authenticate(['bearer', 'basic'], { session: false }),
+	async (req, res) => {
+		try {
+			var id = req.params.dev_id;
+			sendEventUid(req.path, "Get State", "GetState API Request, endpointId: " + id, req.ip, req.user.username, req.headers['user-agent']);
+			// As user has authenticated, assume activeService
+			var serviceName = "Amazon";
+			if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
+			// Fine Device using endpointId supplied in req.params.dev_id
+			var device = await Devices.findOne({username:req.user.username, endpointId:id});
+			// Generate state response
+			var state = await queryDeviceStateAsync(device);
+			// Success, return state as JSON
+			if (state != undefined) {
+				//logger.log('debug', "[State API] Callback returned: " + JSON.stringify(state));
+				res.status(200).json(state);
+			}
+			// Failure, return 500 error
+			else {
 				res.status(500).send();
 			}
-			if (data) {
-				const start = async () => {
-					await queryDeviceState(data, function(state) {
-						if (state != undefined) {
-							//logger.log('debug', "[State API] Callback returned: " + JSON.stringify(state));
-							res.status(200).json(state);
-						}
-						else {
-							res.status(500).send();
-						}
-					});
-				}
-				start();
-
-			}
-		});
- 	}
+		}
+		catch(e) {
+			// General failure
+			logger.log('error', "[Alexa State API] Error getting state for endpointId: " + req.params.dev_id + ", error: " + e.stack);
+		}
+	}
 );
 
 ///////////////////////////////////////////////////////////////////////////
@@ -130,47 +122,40 @@ router.get('/getstate/:dev_id', getStateLimiter,
 ///////////////////////////////////////////////////////////////////////////
 router.post('/command2',
 	passport.authenticate('bearer', { session: false }),
-	function(req,res,next){
-		sendEventUid(req.path, "Command", "Execute Command, endpointId: " + req.body.directive.endpoint.endpointId, req.ip, req.user.username, req.headers['user-agent']);
-		var serviceName = "Amazon"; // As user has authenticated, assume activeService
-		if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
-
-		logger.log('debug', "[Alexa API] Received command for user: " + req.user.username + ", command: " + JSON.stringify(req.body));
-
-		Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId}, function(err, data){
-			if (err) {
-				logger.log('warn', "[Alexa API] Unable to lookup device: " + req.body.directive.endpoint.endpointId + " for user: " + req.user.username + ", command execution failed");
-				res.status(404).send();
+	async (req, res) => {
+		try {
+			sendEventUid(req.path, "Command", "Execute Command, endpointId: " + req.body.directive.endpoint.endpointId, req.ip, req.user.username, req.headers['user-agent']);
+			var serviceName = "Amazon"; // As user has authenticated, assume activeService
+			if (!req.user.activeServices || (req.user.activeServices && req.user.activeServices.indexOf(serviceName)) == -1) {updateUserServices(req.user.username, serviceName)};
+			logger.log('debug', "[Alexa API] Received command for user: " + req.user.username + ", command: " + JSON.stringify(req.body));
+			// Find matching device
+			var device = await Devices.findOne({username:req.user.username, endpointId:req.body.directive.endpoint.endpointId});
+			// Convert "model" object class to JSON object
+			var deviceJSON = JSON.parse(JSON.stringify(device));
+			var endpointId = req.body.directive.endpoint.endpointId;
+			var messageId = req.body.directive.header.messageId;
+			var oauth_id = req.body.directive.endpoint.scope.token;
+			var correlationToken = req.body.directive.header.correlationToken;
+			var dt = new Date();
+			var name = req.body.directive.header.name;
+			var namespace = req.body.directive.header.namespace;
+			// Build Response Header
+			var header = {
+				"namespace": "Alexa",
+				"name": "Response",
+				"payloadVersion": "3",
+				"messageId": messageId + "-R",
+				"correlationToken": correlationToken
 			}
-			if (data) {
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				// Revised Command API Router, offloading from Lambda to avoid multiple requests/ data comparison
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				// Convert "model" object class to JSON object
-				var deviceJSON = JSON.parse(JSON.stringify(data));
-				var endpointId = req.body.directive.endpoint.endpointId;
-				var messageId = req.body.directive.header.messageId;
-				var oauth_id = req.body.directive.endpoint.scope.token;
-				var correlationToken = req.body.directive.header.correlationToken;
-				var dt = new Date();
-				var name = req.body.directive.header.name;
-				var namespace = req.body.directive.header.namespace;
-				// Build Header
-				var header = {
-					"namespace": "Alexa",
-					"name": "Response",
-					"payloadVersion": "3",
-					"messageId": messageId + "-R",
-					"correlationToken": correlationToken
-				}
-				// Build Default Endpoint Response
-				var endpoint = {
-					"scope": {
-						"type": "BearerToken",
-						"token": oauth_id
-					},
-					"endpointId": endpointId
-				}
+			// Build Default Endpoint Response
+			var endpoint = {
+				"scope": {
+					"type": "BearerToken",
+					"token": oauth_id
+				},
+				"endpointId": endpointId
+			}
+			// Build command/ device-specific response information
 				// Build Brightness Controller Response Context
 				if (namespace == "Alexa.BrightnessController" && (name == "AdjustBrightness" || name == "SetBrightness")) {
 					if (name == "AdjustBrightness") {
@@ -207,7 +192,7 @@ router.post('/command2',
 					};
 				}
 				// Build Channel Controller Response Context
-				if (namespace == "Alexa.ChannelController") {
+				else if (namespace == "Alexa.ChannelController") {
 					if (name == "ChangeChannel") {
 						if (req.body.directive.payload.channel.hasOwnProperty('number')) {
 							var contextResult = {
@@ -240,7 +225,7 @@ router.post('/command2',
 					}
 				}
 				// ColorController
-				if (namespace == "Alexa.ColorController") {
+				else if (namespace == "Alexa.ColorController") {
 					var contextResult = {
 						"properties": [{
 							"namespace" : "Alexa.ColorController",
@@ -255,9 +240,8 @@ router.post('/command2',
 						}]
 					};
 				}
-
 				// Build ColorTemperatureController Response Context
-				if (namespace == "Alexa.ColorTemperatureController") {
+				else if (namespace == "Alexa.ColorTemperatureController") {
 					var strPayload = req.body.directive.payload.colorTemperatureInKelvin;
 					var colorTemp;
 					if (typeof strPayload != 'number') {
@@ -281,7 +265,7 @@ router.post('/command2',
 					}
 				}
 				// Build Input Controller Response Context
-				if (namespace == "Alexa.InputController") {
+				else if (namespace == "Alexa.InputController") {
 					var contextResult = {
 						"properties": [{
 							"namespace" : "Alexa.InputController",
@@ -296,7 +280,7 @@ router.post('/command2',
 					}
 				}
 				// Build Lock Controller Response Context - SetThermostatMode
-				if (namespace == "Alexa.LockController") {
+				else if (namespace == "Alexa.LockController") {
 					var lockState;
 					if (name == "Lock") {lockState = "LOCKED"};
 					if (name == "Unlock") {lockState = "UNLOCKED"};
@@ -330,7 +314,7 @@ router.post('/command2',
 				// 	}
 				// }
 				// Build PercentageController Response Context
-				if (namespace == "Alexa.PercentageController") {
+				else if (namespace == "Alexa.PercentageController") {
 					if (name == "SetPercentage") {
 						var contextResult = {
 							"properties": [{
@@ -362,13 +346,13 @@ router.post('/command2',
 					}
 				}
 				// Build PlaybackController Response Context
-				if (namespace == "Alexa.PlaybackController") {
+				else if (namespace == "Alexa.PlaybackController") {
 					var contextResult = {
 						"properties": []
 					};
 				}
 				// Build PowerController Response Context
-				if (namespace == "Alexa.PowerController") {
+				else if (namespace == "Alexa.PowerController") {
 					if (name == "TurnOn") {var newState = "ON"};
 					if (name == "TurnOff") {var newState = "OFF"};
 					var contextResult = {
@@ -382,7 +366,7 @@ router.post('/command2',
 					};
 				}
 				// Build RangeController Interior/ Exterior Blind Response Context
-				if (namespace == "Alexa.RangeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
+				else if (namespace == "Alexa.RangeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
 					if (name == "SetRangeValue") {
 						var contextResult = {
 							"properties": [
@@ -452,7 +436,7 @@ router.post('/command2',
 					}
 				}
 				// Build Scene Controller Activation Started Event
-				if (namespace == "Alexa.SceneController") {
+				else if (namespace == "Alexa.SceneController") {
 					header.namespace = "Alexa.SceneController";
 					header.name = "ActivationStarted";
 					var contextResult = {};
@@ -464,7 +448,7 @@ router.post('/command2',
 							};
 				}
 				// Build Speaker Response Context
-				if (namespace == "Alexa.Speaker") {
+				else if (namespace == "Alexa.Speaker") {
 					if (name == "SetVolume") {
 						var contextResult = {
 							"properties": [
@@ -496,13 +480,13 @@ router.post('/command2',
 					}
 				}
 				// Build StepSpeaker Response Context
-				if (namespace == "Alexa.StepSpeaker") {
+				else if (namespace == "Alexa.StepSpeaker") {
 					var contextResult = {
 						"properties": []
 						};
 				}
 				//Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
-				if (namespace == "Alexa.ThermostatController"
+				else if (namespace == "Alexa.ThermostatController"
 					&& (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
 					// Workout new targetSetpoint
 					if (name == "AdjustTargetTemperature") {
@@ -558,7 +542,7 @@ router.post('/command2',
 					};
 				}
 				// Build Thermostat Controller Response Context - SetThermostatMode
-				if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
+				else if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
 					var contextResult = {
 						"properties": [{
 						"namespace": "Alexa.ThermostatController",
@@ -569,7 +553,9 @@ router.post('/command2',
 					}]
 					};
 				}
-				// Default Response Format (payload is empty)
+				/////////////////////////////
+				// Form Final Response, use default format (payload is empty)
+				/////////////////////////////
 				if (namespace != "Alexa.SceneController"){
 					// Compile Final Response Message
 					var response = {
@@ -581,7 +567,7 @@ router.post('/command2',
 						}
 					};
 				}
-				// SceneController Specific Event
+				// Form Final Response, SceneController Specific Event
 				else {
 					var response = {
 						context: contextResult,
@@ -592,7 +578,6 @@ router.post('/command2',
 						}
 					};
 				}
-
 				//logger.log('debug', "[Alexa API] Command response: " + response);
 
 				// Prepare MQTT topic/ message validation
@@ -603,7 +588,7 @@ router.post('/command2',
 				delete req.body.directive.header.correlationToken;
 				delete req.body.directive.endpoint.scope.token;
 				var message = JSON.stringify(req.body);
-				logger.log('debug', "[Alexa API] Received command API request for user: " + req.user.username + " command: " + message);
+				logger.log('debug', "[Alexa Command] Received command API request for user: " + req.user.username + " command: " + message);
 
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -614,13 +599,13 @@ router.post('/command2',
 					var hasColorTemperatureRange = getSafe(() => deviceJSON.attributes.colorTemperatureRange);
 					if (hasColorTemperatureRange != undefined) {
 						if (compare < deviceJSON.attributes.colorTemperatureRange.temperatureMinK || compare > deviceJSON.attributes.colorTemperatureRange.temperatureMaxK) {
-							logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
+							logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
 							// Send 417 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
 							res.status(417).send();
 							validationStatus = false;
 						}
 					}
-					else {logger.log('debug', "[Alexa API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
+					else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
 				}
 
 				// Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
@@ -630,13 +615,13 @@ router.post('/command2',
 					var hasTemperatureRange = getSafe(() => deviceJSON.attributes.temperatureRange);
 					if (hasTemperatureRange != undefined) {
 						if (compare < deviceJSON.attributes.temperatureRange.temperatureMin || compare > deviceJSON.attributes.temperatureRange.temperatureMax) {
-							logger.log('warn', "[Alexa API] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
+							logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
 							// Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
 							res.status(416).send();
 							validationStatus = false;
 						}
 					}
-					else {logger.log('debug', "[Alexa API] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
+					else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
 				}
 
 				// Generate 418 error, INVALID_DIRECTIVE on ModeController AdjustMode
@@ -650,9 +635,9 @@ router.post('/command2',
 					try{
 						// Send Command to MQTT
 						mqttClient.publish(topic,message);
-						logger.log('info', "[Alexa API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+						logger.log('info', "[Alexa Command] Published MQTT command for user: " + req.user.username + " topic: " + topic);
 					} catch (err) {
-						logger.log('warn', "[Alexa API] Failed to publish MQTT command for user: " + req.user.username);
+						logger.log('warn', "[Alexa Command] Failed to publish MQTT command for user: " + req.user.username);
 					}
 					var command = {
 						user: req.user.username,
@@ -666,8 +651,11 @@ router.post('/command2',
 					ongoingCommands[req.body.directive.header.messageId] = command;
 					//client.hset(req.body.directive.header.messageId, 'command', command); // Command drops into redis database, used to generate failure messages if not ack
 				}
-			}
-		});
+		}
+		catch(e) {
+			logger.log('error', "[Alexa Command] Failed to execute command for user: " + req.user.username + ", error: " + e.stack);
+			res.status(404).send();
+		}
 	}
 );
 ///////////////////////////////////////////////////////////////////////////
@@ -691,9 +679,10 @@ router.post('/command2',
 ///////////////////////////////////////////////////////////////////////////
 // Alexa Authorization Handler (Under Development)
 ///////////////////////////////////////////////////////////////////////////
-router.post('/authorization', getStateLimiter,
+router.post('/authorization', defaultLimiter,
 	passport.authenticate(['bearer', 'basic'], { session: false }),
-	function(req,res,next){
+	async (req, res) => {
+		//const user = await User.findOne({email: req.body.email})
 		if (req.body.directive.payload.grant.type == "OAuth2.AuthorizationCode") {
 			logger.log('info', "[Alexa Authorization] Request body: " + JSON.stringify(req.body));
 			var messageId = req.body.directive.header.messageId;
@@ -725,28 +714,74 @@ router.post('/authorization', getStateLimiter,
 				}
 			};
 			// Save GrantCode and attempt to generate AccessToken
-			saveGrant(req.user, grantcode, function(grant) {
-				if (grant != undefined) {
-					res.status(200).json(success);
-					// requestAccessToken(req.user, function(accesstoken) {
-					// 	if (accesstoken != undefined) {
-					// 		logger.log('info', "[Alexa Authorization] Success, sending: " + JSON.stringify(success));
-							//res.status(200).json(success);
-					// 	}
-					// 	else {
-					// 		logger.log('error', "[Alexa Authorization] Failure, sending: " + JSON.stringify(failure));
-					// 		res.status(200).json(failure);
-					// 	}
-					// });
-				}
-				else {
-					logger.log('error', "[Alexa Authorization] General failure, sending: " + JSON.stringify(failure));
-					res.status(200).json(failure);
-				}
-			});
+			var grant = await saveGrantAsync(req.user, grantcode);
+			if (grant != undefined) {
+				res.status(200).json(success);
+			}
+			else {
+				logger.log('error', "[Alexa Authorization] General failure, sending: " + JSON.stringify(failure));
+				res.status(200).json(failure);
+			}
 		}
-	}
-);
+});
+
+
+// router.post('/authorization', getStateLimiter,
+// 	passport.authenticate(['bearer', 'basic'], { session: false }),
+// 	function(req,res,next){
+// 		if (req.body.directive.payload.grant.type == "OAuth2.AuthorizationCode") {
+// 			logger.log('info', "[Alexa Authorization] Request body: " + JSON.stringify(req.body));
+// 			var messageId = req.body.directive.header.messageId;
+// 			var grantcode = req.body.directive.payload.grant.code;
+// 			// Pre-build success and failure responses
+// 			var success = {
+// 					event: {
+// 					header: {
+// 						messageId: messageId,
+// 						namespace: "Alexa.Authorization",
+// 						name: "AcceptGrant.Response",
+// 						payloadVersion: "3"
+// 					},
+// 					payload: {}
+// 				}
+// 			};
+// 			var failure = {
+// 				event: {
+// 					header: {
+// 						messageId: messageId,
+// 						namespace: "Alexa.Authorization",
+// 						name: "ErrorResponse",
+// 						payloadVersion: "3"
+// 					},
+// 					payload: {
+// 						type: "ACCEPT_GRANT_FAILED",
+// 						message: "Failed to handle the AcceptGrant directive"
+// 					}
+// 				}
+// 			};
+// 			// Save GrantCode and attempt to generate AccessToken
+// 			saveGrant(req.user, grantcode, function(grant) {
+// 				if (grant != undefined) {
+// 					res.status(200).json(success);
+// 					// requestAccessToken(req.user, function(accesstoken) {
+// 					// 	if (accesstoken != undefined) {
+// 					// 		logger.log('info', "[Alexa Authorization] Success, sending: " + JSON.stringify(success));
+// 							//res.status(200).json(success);
+// 					// 	}
+// 					// 	else {
+// 					// 		logger.log('error', "[Alexa Authorization] Failure, sending: " + JSON.stringify(failure));
+// 					// 		res.status(200).json(failure);
+// 					// 	}
+// 					// });
+// 				}
+// 				else {
+// 					logger.log('error', "[Alexa Authorization] General failure, sending: " + JSON.stringify(failure));
+// 					res.status(200).json(failure);
+// 				}
+// 			});
+// 		}
+// 	}
+// );
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////

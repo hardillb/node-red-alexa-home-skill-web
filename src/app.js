@@ -176,7 +176,7 @@ app.get('/sitemap.xml', function(req, res) {
 	  smStream.write({ url: '/about/',  changefreq: 'weekly',  priority: 0.5})
 	  smStream.write({ url: '/docs',  changefreq: 'weekly',  priority: 0.5 })
 	  smStream.write({ url: '/login/',  changefreq: 'monthly',  priority: 0.3})
-	  smStream.write({ url: '/newuser/',  changefreq: 'monthly',  priority: 0.3})
+	  smStream.write({ url: '/new-user/',  changefreq: 'monthly',  priority: 0.3})
 	  smStream.write({ url: '/privacy/',  changefreq: 'monthly',  priority: 0.3})
 	  smStream.write({ url: '/tos/',  changefreq: 'monthly',  priority: 0.3})
 	  smStream.end()
@@ -186,8 +186,8 @@ app.get('/sitemap.xml', function(req, res) {
 	  // stream the response
 	  pipeline.pipe(res).on('error', (e) => {throw e})
 	} catch (e) {
-	  console.error(e)
-	  res.status(500).end()
+		console.error(e)
+		res.status(500).end()
 	}
 });
 

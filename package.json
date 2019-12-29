@@ -24,6 +24,7 @@
   "author": "chrismbradford@gmail.com",
   "license": "Apache-2.0",
   "dependencies": {
+    "axios" : "^0.19.0",
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
     "countries-api": "^2.0.2",
@@ -50,7 +51,6 @@
     "passport-totp": "0.0.2",
     "querystring": "^0.2.0",
     "redis": "^2.8.0",
-    "request": "^2.88.0",
     "saslprep": "^1.0.3",
     "serve-favicon": "^2.5.0",
     "sitemap" : "^5.1.0",

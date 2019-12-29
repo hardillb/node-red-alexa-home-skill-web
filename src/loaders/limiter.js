@@ -90,7 +90,7 @@ module.exports.getStateLimiter = limiter({
 			});
 		}
 		else {
-			logger.log('warn', "[Rate Limiter] GetState rate-limit unable to lookup dev_id param");
+			logger.log('verbose', "[Rate Limiter] GetState rate-limit unable to lookup dev_id param");
 		}
 		res.status(429).json('Rate limit exceeded for GetState API');
 	  }
