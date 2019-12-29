@@ -8,6 +8,7 @@ var logger = require('../loaders/logger');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const util = require("util");
+const removeUserServices = require('../services/func-services').removeUserServices;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////

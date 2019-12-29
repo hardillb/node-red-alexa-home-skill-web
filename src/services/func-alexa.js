@@ -5,7 +5,7 @@ const axios = require('axios');
 const querystring = require('querystring');
 var logger = require('../loaders/logger');
 var AlexaAuth = require('../models/alexa-auth');
-const removeUserServices = servicesFunc.removeUserServices;
+const removeUserServices = require('../services/func-services').removeUserServices;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
