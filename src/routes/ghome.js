@@ -71,13 +71,13 @@ router.post('/action', defaultLimiter,
 					// Check supported device type
 					if (dev.type != "NA") {
 						// Check supported capability/ trait
-						device.capabilities.forEach(function(capability){
+						for (let capability of device.capabilities){
 							var trait = await gHomeReplaceCapability(capability, dev.type);
 							// Add supported traits, don't add duplicates
 							if (trait != "Not Supported" && dev.traits.indexOf(trait) == -1){
 								dev.traits.push(trait);
 							}
-						});
+						}
 					}
 					dev.name = {
 						name : device.friendlyName
