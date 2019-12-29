@@ -149,7 +149,6 @@ const sendStateAsync = async(token, response, username) => {
 	}
 }
 
-
 // Call this from QUERY intent or reportstate API endpoint
 const queryDeviceStateAsync = async(device) => {
 	try {
@@ -157,74 +156,74 @@ const queryDeviceStateAsync = async(device) => {
 		// Create initial JSON object for device
 		dev.online = true;
 		// Convert Alexa Device Types to Google Home-compatible
-		var deviceType = gHomeReplaceType(device.displayCategories);
+		var deviceType = await gHomeReplaceType(device.displayCategories);
 		// Add state response based upon device traits
-		device.capabilities.forEach(function(capability){
-			var trait = gHomeReplaceCapability(capability, deviceType);
-				// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
-				if (trait == "action.devices.traits.Brightness"){
-					dev.brightness = device.state.brightness;
+		for (let capability of device.capabilities){
+			var trait = await gHomeReplaceCapability(capability, deviceType);
+			// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
+			if (trait == "action.devices.traits.Brightness"){
+				dev.brightness = device.state.brightness;
+			}
+			if (trait == "action.devices.traits.ColorSetting") {
+				if (!dev.hasOwnProperty('on')){
+					dev.on = device.state.power.toLowerCase();
 				}
-				if (trait == "action.devices.traits.ColorSetting") {
-					if (!dev.hasOwnProperty('on')){
-						dev.on = device.state.power.toLowerCase();
-					}
-					if (device.capabilities.indexOf('ColorController') > -1 ){
-						dev.color = {
-							"spectrumHsv": {
-								"hue": device.state.colorHue,
-								"saturation": device.state.colorSaturation,
-								"value": device.state.colorBrightness
-								}
-						}
-					}
-					if (device.capabilities.indexOf('ColorTemperatureController') > -1){
-						var hasColorElement = getSafe(() => dev.color);
-						if (hasColorElement != undefined) {dev.color.temperatureK = device.state.colorTemperature}
-						else {
-							dev.color = {
-								"temperatureK" : device.state.colorTemperature
+				if (device.capabilities.indexOf('ColorController') > -1 ){
+					dev.color = {
+						"spectrumHsv": {
+							"hue": device.state.colorHue,
+							"saturation": device.state.colorSaturation,
+							"value": device.state.colorBrightness
 							}
+					}
+				}
+				if (device.capabilities.indexOf('ColorTemperatureController') > -1){
+					var hasColorElement = getSafe(() => dev.color);
+					if (hasColorElement != undefined) {dev.color.temperatureK = device.state.colorTemperature}
+					else {
+						dev.color = {
+							"temperatureK" : device.state.colorTemperature
 						}
 					}
 				}
-				if (trait == "action.devices.traits.FanSpeed") {
-					dev.currentFanSpeedSetting = "S" + device.state.rangeValue.toString();
+			}
+			if (trait == "action.devices.traits.FanSpeed") {
+				dev.currentFanSpeedSetting = "S" + device.state.rangeValue.toString();
+			}
+			if (trait == "action.devices.traits.LockUnlock") {
+				if (device.state.lock.toLowerCase() == 'locked') {
+					dev.isLocked = true;
 				}
-				if (trait == "action.devices.traits.LockUnlock") {
-					if (device.state.lock.toLowerCase() == 'locked') {
-						dev.isLocked = true;
-					}
-					else {
-						dev.isLocked = false;
-					}
+				else {
+					dev.isLocked = false;
 				}
-				if (trait == "action.devices.traits.OnOff") {
-					if (device.state.power.toLowerCase() == 'on') {
-						dev.on = true;
-					}
-					else {
-						dev.on = false;
-					}
+			}
+			if (trait == "action.devices.traits.OnOff") {
+				if (device.state.power.toLowerCase() == 'on') {
+					dev.on = true;
 				}
-				if (trait == "action.devices.traits.OpenClose") {
-					dev.openPercent = device.state.rangeValue;
+				else {
+					dev.on = false;
 				}
-				// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
-				if (trait == "action.devices.traits.TemperatureSetting") {
-					dev.thermostatMode = device.state.thermostatMode.toLowerCase();
-					dev.thermostatTemperatureSetpoint = device.state.thermostatSetPoint;
-					if (device.state.hasOwnProperty('temperature')) {
-						dev.thermostatTemperatureAmbient = device.state.temperature;
-					}
+			}
+			if (trait == "action.devices.traits.OpenClose") {
+				dev.openPercent = device.state.rangeValue;
+			}
+			// if (trait == "action.devices.traits.Scene") {} // Only requires 'online' which is set above
+			if (trait == "action.devices.traits.TemperatureSetting") {
+				dev.thermostatMode = device.state.thermostatMode.toLowerCase();
+				dev.thermostatTemperatureSetpoint = device.state.thermostatSetPoint;
+				if (device.state.hasOwnProperty('temperature')) {
+					dev.thermostatTemperatureAmbient = device.state.temperature;
 				}
-				if (trait = "action.devices.traits.Volume") {
-					dev.currentVolume = device.state.volume;
-					dev.isMuted = device.state.mute;
-				}
-			});
-			// Return device state
-			return dev;
+			}
+			if (trait = "action.devices.traits.Volume") {
+				dev.currentVolume = device.state.volume;
+				dev.isMuted = device.state.mute;
+			}
+		}
+		// Return device state
+		return dev;
 	}
 	catch(e) {
 		logger.log('warn', "[GHome Query API] queryDeviceState error: " + e.stack);
