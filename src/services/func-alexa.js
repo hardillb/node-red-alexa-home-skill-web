@@ -517,8 +517,14 @@ const validateCommandAsync = async(device, req) => {
                     //validationStatus = false;
                     return {status: false, response: 417};
                 }
+                else {
+                    return {status: true};
+                }
             }
-            else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined")}
+            else {
+                logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.colorTemperatureRange defined");
+                return {status: true};
+            }
         }
         // Check attributes.temperatureRange, send 416 to Lambda (TEMPERATURE_VALUE_OUT_OF_RANGE) response if values are out of range
         else if (req.body.directive.header.namespace == "Alexa.ThermostatController" && req.body.directive.header.name == "SetTargetTemperature") {
@@ -533,8 +539,14 @@ const validateCommandAsync = async(device, req) => {
                     //validationStatus = false;
                     return {status: false, response: 416};
                 }
+                else {
+                    return {status: true};
+                }
             }
-            else {logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined")}
+            else {
+                logger.log('debug', "[Alexa Command] Device: " + req.body.directive.endpoint.endpointId + " does not have attributes.temperatureRange defined");
+                return {status: true};
+            }
         }
         // Generate 418 error, INVALID_DIRECTIVE on ModeController AdjustMode
         // if (req.body.directive.header.namespace == "Alexa.ModeController" && req.body.directive.header.name == "AdjustMode" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
