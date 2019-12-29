@@ -40,42 +40,49 @@ const sendEventUid = require('../services/ganalytics').sendEventUid;
 router.get('/devices',
 	passport.authenticate(['bearer', 'basic'], { session: false }),
 	async (req, res) => {
-		sendEventUid(req.path, "Discovery", "Running device discovery", req.ip, req.user.username, req.headers['user-agent']);
-		var user = req.user.username;
-		var devices = await Devices.find({username: user});
-		var devs = [];
-		for (let device of devices) {
-			var dev = {};
-			// Stringify endpointId
-			dev.endpointId = "" + device.endpointId;
-			dev.friendlyName = device.friendlyName;
-			dev.description = device.description;
-			dev.displayCategories = device.displayCategories;
-			//dev.reportState = device.reportState;
-			// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
-			dev.capabilities = [];
-			// Grab device attributes for use in building discovery response
-			var devAttributes = (device.attributes || null);
-			for (let capability of device.capabilities){
-				// Get Alexa-ified capability
-				let alexaCapability = await replaceCapability(capability, device.reportState, devAttributes, dev.displayCategories);
-				// Push to device capabilities
-				dev.capabilities.push(alexaCapability);
+		try {
+			sendEventUid(req.path, "Discovery", "Running device discovery", req.ip, req.user.username, req.headers['user-agent']);
+			var user = req.user.username;
+			var devices = await Devices.find({username: user});
+			var devs = [];
+			for (let device of devices) {
+				var dev = {};
+				// Stringify endpointId
+				dev.endpointId = "" + device.endpointId;
+				dev.friendlyName = device.friendlyName;
+				dev.description = device.description;
+				dev.displayCategories = device.displayCategories;
+				//dev.reportState = device.reportState;
+				// Handle multiple capabilities, call replaceCapability to replace placeholder capabilities
+				dev.capabilities = [];
+				// Grab device attributes for use in building discovery response
+				var devAttributes = (device.attributes || null);
+				for (let capability of device.capabilities){
+					// Get Alexa-ified capability
+					let alexaCapability = await replaceCapability(capability, device.reportState, devAttributes, dev.displayCategories);
+					// Push to device capabilities
+					dev.capabilities.push(alexaCapability);
+				}
+				// Add specific RangeController interface
+				if (device.capabilities.indexOf('RangeController') > -1){
+					dev.capabilities.push(
+					{  "type": "AlexaInterface",
+						"interface": "Alexa",
+						"version": "3"
+					});
+				}
+				dev.cookie = device.cookie;
+				dev.version = "0.0.3";
+				dev.manufacturerName = "Node-RED"
+				devs.push(dev);
 			}
-			// Add specific RangeController interface
-			if (device.capabilities.indexOf('RangeController') > -1){
-				dev.capabilities.push(
-				{  "type": "AlexaInterface",
-					"interface": "Alexa",
-					"version": "3"
-				});
-			}
-			dev.cookie = device.cookie;
-			dev.version = "0.0.3";
-			dev.manufacturerName = "Node-RED"
-			devs.push(dev);
+			res.send(devs);
 		}
-		res.send(devs);
+		catch(e) {
+			logger.log('error', "[Alexa Devices] Error getting device data for: " + req.user.username + ", error: " + e.stack);
+			res.status(500).send();
+		}
+
 	}
 );
 
