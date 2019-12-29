@@ -498,6 +498,465 @@ const sendStateAsync = async(user, state) => {
     }
 }
 
+// Replace Capability function, replaces 'placeholders' stored under device.capabilities in mongoDB with Amazon JSON
+const replaceCapabilityAsync = async(capability, reportState, attributes, type) => {
+	// BrightnessController
+	if(capability == "BrightnessController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.BrightnessController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "brightness"
+					}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// ChannelController
+	if(capability == "ChannelController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.ChannelController",
+			"version": "3",
+			};
+	}
+	// ColorController
+	if(capability == "ColorController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "color"
+					}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// ContactSensor
+	if(capability == "ContactSensor")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ContactSensor",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "detectionState"
+					  }],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// ColorTemperatureController
+	if(capability == "ColorTemperatureController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.ColorTemperatureController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "colorTemperatureInKelvin"
+					}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// InputController, pre-defined 4x HDMI inputs and phono
+	if(capability == "InputController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.InputController",
+			"version": "3",
+			"inputs": [{
+				"name": "HDMI1"
+			  },
+			  {
+				"name": "HDMI2"
+			  },
+			  {
+				"name": "HDMI3"
+			  },
+			  {
+				"name": "HDMI4"
+			  },
+			  {
+				"name": "phono"
+			  },
+			  {
+				"name": "audio1"
+			  },
+			  {
+				"name": "audio2"
+			  },
+			  {
+				"name": "chromecast"
+			  }
+			]};
+	}
+	// LockController
+	if(capability == "LockController")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.LockController",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "lockState"
+					}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// MotionSensor
+	if(capability == "MotionSensor")  {
+		return {
+				"type": "AlexaInterface",
+				"interface": "Alexa.MotionSensor",
+				"version": "3",
+				"properties": {
+					"supported": [{
+						"name": "detectionState"
+						}],
+					"proactivelyReported": reportState,
+					"retrievable": reportState
+				}
+			};
+	}
+	// PercentageController
+	if(capability == "PercentageController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PercentageController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "percentage"
+				}],
+				"proactivelyReported": reportState,
+				"retrievable": reportState
+			}
+		};
+	}
+	// PlaybackController
+	if(capability == "PlaybackController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PlaybackController",
+			"version": "3",
+			"supportedOperations" : ["Play", "Pause", "Stop", "FastForward", "StartOver", "Previous", "Rewind", "Next"]
+			};
+	}
+	// PowerController
+	if(capability == "PowerController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.PowerController",
+			"version": "3",
+			"properties": {
+				"supported": [{
+					"name": "powerState"
+				}],
+				"proactivelyReported": reportState,
+				"retrievable": reportState
+				}
+			};
+	}
+	// RangeController | Interior and Exterior Blinds
+	if(capability == "RangeController" && (type.indexOf("INTERIOR_BLIND") > -1 || type.indexOf("EXTERIOR_BLIND") > -1)) {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.RangeController",
+			"instance": "Blind.Lift",
+			"version": "3",
+			"properties": {
+				"supported": [
+					{
+						"name": "rangeValue"
+					}
+				],
+				"proactivelyReported": true,
+				"retrievable": true
+			},
+			"capabilityResources": {
+				"friendlyNames": [
+				{
+					"@type": "asset",
+					"value": {
+						"assetId": "Alexa.Setting.Opening"
+					}
+				}
+				]
+			},
+			"configuration": {
+				"supportedRange": {
+					"minimumValue": 0,
+					"maximumValue": 100,
+					"precision": 1
+				},
+				"unitOfMeasure": "Alexa.Unit.Percent"
+			},
+			"semantics": {
+				"actionMappings": [
+				{
+					"@type": "ActionsToDirective",
+					"actions": ["Alexa.Actions.Close"],
+					"directive": {
+						"name": "SetRangeValue",
+						"payload": {
+							"rangeValue": 0
+						}
+					}
+				},
+				{
+					"@type": "ActionsToDirective",
+					"actions": ["Alexa.Actions.Open"],
+					"directive": {
+						"name": "SetRangeValue",
+						"payload": {
+							"rangeValue": 100
+						}
+					}
+				},
+				{
+					"@type": "ActionsToDirective",
+					"actions": ["Alexa.Actions.Lower"],
+					"directive": {
+						"name": "AdjustRangeValue",
+						"payload": {
+							"rangeValueDelta": -10,
+							"rangeValueDeltaDefault": false
+						}
+					}
+				},
+				{
+					"@type": "ActionsToDirective",
+					"actions": ["Alexa.Actions.Raise"],
+					"directive": {
+						"name": "AdjustRangeValue",
+						"payload": {
+							"rangeValueDelta": 10,
+							"rangeValueDeltaDefault": false
+						}
+					}
+				}
+				],
+				"stateMappings": [
+				{
+					"@type": "StatesToValue",
+					"states": ["Alexa.States.Closed"],
+					"value": 0
+				},
+				{
+					"@type": "StatesToRange",
+					"states": ["Alexa.States.Open"],
+					"range": {
+						"minimumValue": 1,
+						"maximumValue": 100
+					}
+				}
+				]
+			}
+			}
+	}
+	// RangeController
+	if(capability == "RangeController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.RangeController",
+			"version": "3",
+			"instance": "NodeRed.Fan.Speed",
+			"capabilityResources": {
+			  "friendlyNames": [
+				{
+                    "@type": "text",
+                    "value": {
+                      "text": "Fan Speed",
+                      "locale": "en-US"
+                    }
+				},
+				{
+                    "@type": "text",
+                    "value": {
+                      "text": "Position",
+                      "locale": "en-US"
+                    }
+                }
+			  ]
+			},
+			"properties": {
+			  "supported": [
+				{
+				  "name": "rangeValue"
+				}
+			  ],
+			  "proactivelyReported": reportState,
+			  "retrievable": reportState
+			},
+			"configuration": {
+			  "supportedRange": {
+				"minimumValue": 1,
+				"maximumValue": 10,
+				"precision": 1
+			  },
+			  "presets": [
+				{
+					"rangeValue": 1,
+					"presetResources": {
+					  "friendlyNames": [
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Low"
+						  }
+						},
+                        {
+                          "@type": "asset",
+                          "value": {
+                            "assetId": "Alexa.Value.Minimum"
+                          }
+                        }
+					  ]
+					}
+				  },
+				{
+					"rangeValue": 5,
+					"presetResources": {
+					  "friendlyNames": [
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Medium"
+						  }
+						}
+					  ]
+					}
+				  },
+				  {
+					"rangeValue": 10,
+					"presetResources": {
+					  "friendlyNames": [
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.Maximum"
+						  }
+						},
+						{
+						  "@type": "asset",
+						  "value": {
+							"assetId": "Alexa.Value.High"
+						  }
+						}
+					  ]
+					}
+				  }
+			  ]
+			}
+		 };
+	 }
+	// Speaker
+	if(capability == "Speaker") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.Speaker",
+			"version": "3",
+			"properties":{
+				"supported":[{
+						"name":"volume"
+					},
+					{
+						"name":"muted"
+					}
+				]}
+			};
+	}
+	// SceneController
+	if(capability == "SceneController") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.SceneController",
+			"version" : "3",
+			"supportsDeactivation" : false
+			};
+	}
+	// StepSpeaker
+	if(capability == "StepSpeaker") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.StepSpeaker",
+			"version": "3",
+			"properties":{
+				"supported":[{
+					  "name":"volume"
+				   },
+				   {
+					  "name":"muted"
+				   }
+				]}
+			};
+	}
+	// TemperatureSensor
+	if(capability == "TemperatureSensor") {
+		return {
+			"type": "AlexaInterface",
+			"interface": "Alexa.TemperatureSensor",
+			"version" : "3",
+			"properties": {
+                "supported": [
+                  {
+                    "name": "temperature"
+                  }
+                ],
+                "proactivelyReported": reportState,
+                "retrievable": reportState
+              }
+			};
+	}
+	// ThermostatController - SinglePoint
+	if(capability == "ThermostatController")  {
+		var supportedModes;
+		var hasModes = getSafe(() => attributes.thermostatModes);
+		if (attributes != null && hasModes != undefined) {
+			//supportedModes = attributes.thermostatModes;
+			supportedModes = attributes.thermostatModes.filter(function(value, index, arr){
+				// Google Home filter, remove modes that are not Alexa Compliant
+				return value != "ON";
+			});
+		}
+		else {
+			supportedModes = ["HEAT","COOL","AUTO"];
+		}
+		return {
+			"type": "AlexaInterface",
+            "interface": "Alexa.ThermostatController",
+            "version": "3",
+            "properties": {
+              "supported": [{
+                  "name": "targetSetpoint"
+                },
+                {
+                  "name": "thermostatMode"
+                }
+              ],
+			  "proactivelyReported": reportState,
+			  "retrievable": reportState
+            },
+            "configuration": {
+              "supportsScheduling": false,
+              "supportedModes": supportedModes
+			}
+		};
+	}
+};
+
 // Nested attribute/ element tester
 function getSafe(fn) {
 	//logger.log('debug', "[getSafe] Checking element exists:" + fn)
@@ -513,5 +972,6 @@ module.exports = {
     saveGrantAsync,
     queryDeviceStateAsync,
     requestAccessTokenAsync,
-    sendStateAsync
+    sendStateAsync,
+    replaceCapabilityAsync
 }
