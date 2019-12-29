@@ -5,6 +5,7 @@ const axios = require('axios');
 const querystring = require('querystring');
 var logger = require('../loaders/logger');
 var AlexaAuth = require('../models/alexa-auth');
+const removeUserServices = servicesFunc.removeUserServices;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
@@ -486,8 +487,14 @@ const sendStateAsync = async(user, state) => {
         }
     }
     catch(e) {
-        // Handle failure
-        logger.log('error', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa failed, error" + e.stack);
+        // User no-longer has skill linked with Amazon account, see: https://developer.amazon.com/en-US/docs/alexa/smarthome/debug-your-smart-home-skill.html
+        if (response && response.status && response.status == 403) {
+            logger.log('warning', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa, user no-longer has linked skill.");
+            // Remove 'Amazon' from users' active services
+			removeUserServices(user.username, "Amazon");
+        }
+        // Handle failures
+        else {logger.log('error', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa failed, error" + e.stack)}
     }
 }
 

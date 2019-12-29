@@ -131,12 +131,20 @@ const sendStateAsync = async(token, response, username) => {
 				}
 			});
 			if (response.status == 200) {
-				logger.log('verbose', "[State API] Successfully sent GHome HomeGraph state report for user: " + username);
+				logger.log('verbose', "[Google Report State] Successfully sent GHome HomeGraph state report for user: " + username);
 			}
 		}
 	}
 	catch(e) {
-		logger.log('error', "[Google Report State] Failed to report state for user: " + username + ", error: " + e.stack);
+		// User has likely disabled Google Home link with service
+		if (response && response.status && response.status == 404) {
+			logger.log('warning', "[Google Report State] Failed to send change report for user: " + user.username + ", to Google Homegraph API, user no-longer has linked skill.");
+			// Remove 'Google' from users' active services
+			removeUserServices(user.username, "Google");
+		}
+		else {
+			logger.log('error', "[Google Report State] Failed to report state for user: " + username + ", error: " + e.stack);
+		}
 	}
 }
 
