@@ -157,10 +157,10 @@ const queryDeviceStateAsync = async(device) => {
 		// Create initial JSON object for device
 		dev.online = true;
 		// Convert Alexa Device Types to Google Home-compatible
-		var deviceType = gHomeReplaceType(device.displayCategories);
+		var deviceType = await gHomeReplaceType(device.displayCategories);
 		// Add state response based upon device traits
 		device.capabilities.forEach(function(capability){
-			var trait = gHomeReplaceCapability(capability, deviceType);
+			var trait = await gHomeReplaceCapability(capability, deviceType);
 				// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
 				if (trait == "action.devices.traits.Brightness"){
 					dev.brightness = device.state.brightness;
@@ -232,18 +232,8 @@ const queryDeviceStateAsync = async(device) => {
 	}
 }
 
-module.exports = {
-	queryDeviceStateAsync,
-	gHomeSyncAsync,
-	sendStateAsync,
-	requestToken2Async
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Functions
-///////////////////////////////////////////////////////////////////////////
 // Convert Alexa Device Capabilities to Google Home-compatible
-function gHomeReplaceCapability(capability, type) {
+const gHomeReplaceCapability = async(capability, type) => {
 	// Generic mappings - capabilities, limited to GHome supported traits, add new ones here
 	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
@@ -265,7 +255,7 @@ function gHomeReplaceCapability(capability, type) {
 	else {return "Not Supported"}
 }
 // Convert Alexa Device Types to Google Home-compatible
-function gHomeReplaceType(type) {
+const gHomeReplaceType = async(type) => {
 	// Limit supported device types, add new ones here
 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
 	else if (type == "EXTERIOR_BLIND") {return "action.devices.types.AWNING"}
@@ -287,4 +277,13 @@ function getSafe(fn) {
     } catch (e) {
         return undefined;
     }
+}
+
+module.exports = {
+	queryDeviceStateAsync,
+	gHomeSyncAsync,
+	sendStateAsync,
+	requestToken2Async,
+	gHomeReplaceCapability,
+	gHomeReplaceType
 }
