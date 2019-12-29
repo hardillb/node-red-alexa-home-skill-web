@@ -14,8 +14,8 @@ var mqttClient = require('../loaders/mqtt').mqttClient;
 var ongoingCommands = require('../loaders/mqtt').ongoingCommands;
 var logger = require('../loaders/logger');
 const gHomeFunc = require('../services/func-ghome');
-// const gHomeReplaceCapability = require('../services/func-ghome').gHomeReplaceCapability;
-// const gHomeReplaceType = require('../services/func-ghome').gHomeReplaceType;
+const gHomeReplaceCapability = require('../services/func-ghome').gHomeReplaceCapability;
+const gHomeReplaceType = require('../services/func-ghome').gHomeReplaceType;
 const servicesFunc = require('../services/func-services');
 //var client = require('../loaders/redis-mqtt'); // Redis MQTT Command Holding Area
 const defaultLimiter = require('../loaders/limiter').defaultLimiter;
@@ -60,18 +60,19 @@ router.post('/action', defaultLimiter,
 				logger.log('debug', "[GHome Sync API] User: " + JSON.stringify(user[0]));
 				// Build Device Array
 				var devs = [];
-				for (var i=0; i< devices.length; i++) {
-					var deviceJSON = JSON.parse(JSON.stringify(devices[i]));
-					//logger.log('debug','[GHome Sync API] Building device data for device:' + JSON.stringify(devices[i]))
+				// For each user device, create Google-ified SYNC data
+				for (let device of devices){
+					var deviceJSON = JSON.parse(JSON.stringify(device));
+					//logger.log('debug','[GHome Sync API] Building device data for device:' + JSON.stringify(device))
 					var dev = {}
-					dev.id = "" + devices[i].endpointId;
-					dev.type = gHomeReplaceType(devices[i].displayCategories);
+					dev.id = "" + device.endpointId;
+					dev.type = await gHomeReplaceType(device.displayCategories);
 					dev.traits = [];
 					// Check supported device type
 					if (dev.type != "NA") {
 						// Check supported capability/ trait
-						devices[i].capabilities.forEach(function(capability){
-							var trait = gHomeReplaceCapability(capability, dev.type);
+						device.capabilities.forEach(function(capability){
+							var trait = await gHomeReplaceCapability(capability, dev.type);
 							// Add supported traits, don't add duplicates
 							if (trait != "Not Supported" && dev.traits.indexOf(trait) == -1){
 								dev.traits.push(trait);
@@ -79,12 +80,12 @@ router.post('/action', defaultLimiter,
 						});
 					}
 					dev.name = {
-						name : devices[i].friendlyName
+						name : device.friendlyName
 						}
-					dev.willReportState = devices[i].reportState;
+					dev.willReportState = device.reportState;
 					var hasAttributes = 'attributes' in deviceJSON;
 					if (hasAttributes == true) {
-						dev.attributes = devices[i].attributes;
+						dev.attributes = device.attributes;
 					}
 					else {
 						dev.attributes = {};
@@ -97,17 +98,17 @@ router.post('/action', defaultLimiter,
 						}
 					}
 					// Add colorModel attribute if color is supported interface/ trait
-					if (devices[i].capabilities.indexOf("ColorController") > -1 ){
+					if (device.capabilities.indexOf("ColorController") > -1 ){
 						dev.attributes.colorModel = "hsv";
 						delete dev.attributes.commandOnlyColorSetting; // defaults to false anyway
 					}
 					// Pass min/ max values as float
-					if (devices[i].capabilities.indexOf("ColorTemperatureController") > -1 ){
+					if (device.capabilities.indexOf("ColorTemperatureController") > -1 ){
 						dev.attributes.colorTemperatureRange.temperatureMinK = parseInt(dev.attributes.colorTemperatureRange.temperatureMinK);
 						dev.attributes.colorTemperatureRange.temperatureMaxK = parseInt(dev.attributes.colorTemperatureRange.temperatureMaxK);
 					}
 					// FanSpeed, map 1:1 with RangeController 1-10
-					if (devices[i].capabilities.indexOf("RangeController") > -1 && (dev.type.indexOf('action.devices.types.FAN') > -1 || dev.type.indexOf('action.devices.types.THERMOSTAT') > -1 )){
+					if (device.capabilities.indexOf("RangeController") > -1 && (dev.type.indexOf('action.devices.types.FAN') > -1 || dev.type.indexOf('action.devices.types.THERMOSTAT') > -1 )){
 						dev.attributes.availableFanSpeeds = {
 							"availableFanSpeeds": {
 							"speeds": [{
@@ -478,43 +479,43 @@ router.post('/action', defaultLimiter,
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 // Convert Alexa Device Capabilities to Google Home-compatible
-function gHomeReplaceCapability(capability, type) {
-	// Generic mappings - capabilities, limited to GHome supported traits, add new ones here
-	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
-	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
-	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
-	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
-	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"}
-	else if(capability == "InputController"){return "action.devices.traits.InputSelector"}
-	else if(capability == "PlaybackController"){return "action.devices.traits.MediaState"}
-	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
-	else if(capability == "Speaker"){return "action.devices.traits.Volume"}
-	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
-	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
-	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){
-		return "action.devices.traits.OpenClose";
-	}
-	else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
-		return "action.devices.traits.FanSpeed";
-	}
-	else {return "Not Supported"}
-}
-//Convert Alexa Device Types to Google Home-compatible
-function gHomeReplaceType(type) {
-	// Limit supported device types, add new ones here
-	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
-	else if (type == "EXTERIOR_BLIND") {return "action.devices.types.AWNING"}
-	else if (type == "FAN") {return "action.devices.types.FAN"}
-	else if (type == "INTERIOR_BLIND") {return "action.devices.types.BLINDS"}
-	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
-	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}
-	else if (type == "SMARTLOCK") {return "action.devices.types.LOCK"}
-	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
-	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
-	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
-	else if (type == "TV") {return "action.devices.types.TV"}
-	else {return "NA"}
-}
+// function gHomeReplaceCapability(capability, type) {
+// 	// Generic mappings - capabilities, limited to GHome supported traits, add new ones here
+// 	if (capability == "PowerController"){return "action.devices.traits.OnOff"}
+// 	else if(capability == "BrightnessController"){return "action.devices.traits.Brightness"}
+// 	else if(capability == "ColorController" || capability == "ColorTemperatureController"){return "action.devices.traits.ColorSetting"}
+// 	else if(capability == "ChannelController"){return "action.devices.traits.Channel"}
+// 	else if(capability == "LockController"){return "action.devices.traits.LockUnlock"}
+// 	else if(capability == "InputController"){return "action.devices.traits.InputSelector"}
+// 	else if(capability == "PlaybackController"){return "action.devices.traits.MediaState"}
+// 	else if(capability == "SceneController"){return "action.devices.traits.Scene"}
+// 	else if(capability == "Speaker"){return "action.devices.traits.Volume"}
+// 	else if(capability == "ThermostatController"){return "action.devices.traits.TemperatureSetting"}
+// 	// Complex mappings - device-type specific capability mappings, generally RangeController/ ModeController centric
+// 	else if(capability == "RangeController" && (type.indexOf('action.devices.types.AWNING') > -1 || type.indexOf('action.devices.types.BLINDS') > -1)){
+// 		return "action.devices.traits.OpenClose";
+// 	}
+// 	else if(capability == "RangeController" && (type.indexOf('action.devices.types.FAN') > -1 || type.indexOf('action.devices.types.THERMOSTAT') > -1)){
+// 		return "action.devices.traits.FanSpeed";
+// 	}
+// 	else {return "Not Supported"}
+// }
+// //Convert Alexa Device Types to Google Home-compatible
+// function gHomeReplaceType(type) {
+// 	// Limit supported device types, add new ones here
+// 	if (type == "ACTIVITY_TRIGGER") {return "action.devices.types.SCENE"}
+// 	else if (type == "EXTERIOR_BLIND") {return "action.devices.types.AWNING"}
+// 	else if (type == "FAN") {return "action.devices.types.FAN"}
+// 	else if (type == "INTERIOR_BLIND") {return "action.devices.types.BLINDS"}
+// 	else if (type == "LIGHT") {return "action.devices.types.LIGHT"}
+// 	else if (type == "SPEAKER") {return "action.devices.types.SPEAKER"}
+// 	else if (type == "SMARTLOCK") {return "action.devices.types.LOCK"}
+// 	else if (type == "SMARTPLUG") {return "action.devices.types.OUTLET"}
+// 	else if (type == "SWITCH") {return "action.devices.types.SWITCH"}
+// 	else if (type.indexOf('THERMOSTAT') > -1) {return "action.devices.types.THERMOSTAT"}
+// 	else if (type == "TV") {return "action.devices.types.TV"}
+// 	else {return "NA"}
+// }
 // Nested attribute/ element tester
 function getSafe(fn) {
 	try {
