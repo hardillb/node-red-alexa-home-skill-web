@@ -157,10 +157,10 @@ const queryDeviceStateAsync = async(device) => {
 		// Create initial JSON object for device
 		dev.online = true;
 		// Convert Alexa Device Types to Google Home-compatible
-		var deviceType = await gHomeReplaceType(device.displayCategories);
+		var deviceType = gHomeReplaceType(device.displayCategories);
 		// Add state response based upon device traits
 		device.capabilities.forEach(function(capability){
-			var trait = await gHomeReplaceCapability(capability, deviceType);
+			var trait = gHomeReplaceCapability(capability, deviceType);
 				// Limit supported traits, add new ones here once SYNC and gHomeReplaceCapability function updated
 				if (trait == "action.devices.traits.Brightness"){
 					dev.brightness = device.state.brightness;
