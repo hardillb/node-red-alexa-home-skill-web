@@ -65,13 +65,13 @@ router.post('/action', defaultLimiter,
 					//logger.log('debug','[GHome Sync API] Building device data for device:' + JSON.stringify(devices[i]))
 					var dev = {}
 					dev.id = "" + devices[i].endpointId;
-					dev.type = await gHomeReplaceType(devices[i].displayCategories);
+					dev.type = gHomeReplaceType(devices[i].displayCategories);
 					dev.traits = [];
 					// Check supported device type
 					if (dev.type != "NA") {
 						// Check supported capability/ trait
 						devices[i].capabilities.forEach(function(capability){
-							var trait = await gHomeReplaceCapability(capability, dev.type);
+							var trait = gHomeReplaceCapability(capability, dev.type);
 							// Add supported traits, don't add duplicates
 							if (trait != "Not Supported" && dev.traits.indexOf(trait) == -1){
 								dev.traits.push(trait);
