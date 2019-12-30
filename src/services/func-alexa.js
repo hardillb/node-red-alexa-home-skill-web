@@ -922,8 +922,7 @@ const buildCommandResponseAsync = async(device, req) => {
                 };
         }
         //Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
-        else if (namespace == "Alexa.ThermostatController"
-            && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature")) {
+        else if (namespace == "Alexa.ThermostatController" && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature")) {
             // Check existing attributes
             var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
             var hasThermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
@@ -954,7 +953,7 @@ const buildCommandResponseAsync = async(device, req) => {
                 thermostatMode = req.body.directive.payload.thermostatMode.value;
             }
             // Workout new thermostatMode
-            if (hasThermostatModes != undefined){
+            if (hasThermostatModes != undefined && thermostatMode == undefined){
                 thermostatMode = deviceJSON.state.thermostatMode;
             }
             else {

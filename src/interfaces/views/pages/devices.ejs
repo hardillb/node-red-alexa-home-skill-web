@@ -2,7 +2,7 @@
 
 <% if (isVerified == false) { %>
 	<div class="alert alert-danger alert-dismissible fade show" role="alert">
-		<strong>Warning!</strong> You need to verify your account! If your account is new, Node-RED nodes will fail to connect until your account is verified. Browse to <a href='https://<%= fqdn %>/verify-resend'>https://<%= fqdn %>/verify-resend</a> to generate email verification token and complete the process.
+		<strong>Warning!</strong> You need to verify your account! Browse to <a href='https://<%= fqdn %>/verify-resend'>https://<%= fqdn %>/verify-resend</a> to generate email verification token and complete the process.
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 		</button>
@@ -10,7 +10,7 @@
 <% } %>
 <% if (grants == 0) { %>
 	<div class="alert alert-danger alert-dismissible fade show" role="alert">
-		<strong>Warning!</strong> You still need to link your Amazon Account via the Alexa App! See <a href='https://github.com/coldfire84/node-red-alexa-home-skill-v3-web/wiki/Use-the-Hosted-Instance'>here</a> for more information.
+		<strong>Warning!</strong> You still need to link your Amazon Account via the Alexa App! See <a href='/docs#account-linking'>here</a> for more information.
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 		</button>

@@ -77,7 +77,7 @@ router.get('/privacy', defaultLimiter, async (req, res) => {
 router.get('/tos', defaultLimiter, async (req, res) => {
 	sendPageView(req.path, 'Terms of Service', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/tos");
-	res.render('pages/tos', {user: req.user, tos: true, brand: process.env.BRAND, title: "Terms of Service | " + process.env.BRAND});
+	res.render('pages/tos', {user: req.user, tos: true, brand: process.env.BRAND, title: "Terms of Service | " + process.env.BRAND, fqdn: process.env.WEB_HOSTNAME});
 });
 ///////////////////////////////////////////////////////////////////////////
 // Login (Get)
