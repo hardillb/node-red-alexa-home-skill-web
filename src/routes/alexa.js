@@ -6,36 +6,23 @@ var router = express.Router();
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-//var Account = require('../models/account');
-//var oauthModels = require('../models/oauth');
 var Devices = require('../models/devices');
 var passport = require('passport');
 var logger = require('../loaders/logger');
 var mqttClient = require('../loaders/mqtt').mqttClient;
 var ongoingCommands = require('../loaders/mqtt').ongoingCommands;
-//var client = require('../loaders/staging/redis-mqtt'); // Redis MQTT Command Holding Area
 const defaultLimiter = require('../loaders/limiter').defaultLimiter;
 const getStateLimiter = require('../loaders/limiter').getStateLimiter;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-//const servicesFunc = require('../services/func-services');
-//const alexaFunc = require('../services/func-alexa');
-//const queryDeviceState = alexaFunc.queryDeviceState;
-//const saveGrant = alexaFunc.saveGrant;
 const updateUserServices = require('../services/func-services').updateUserServices;
 const queryDeviceStateAsync = require('../services/func-alexa').queryDeviceStateAsync;
 const replaceCapability = require('../services/func-alexa').replaceCapabilityAsync;
 const saveGrantAsync = require('../services/func-alexa').saveGrantAsync;
 const validateCommandAsync = require('../services/func-alexa').validateCommandAsync;
 const buildCommandResponseAsync = require('../services/func-alexa').buildCommandResponseAsync;
-//const sendPageView = require('../services/ganalytics').sendPageView;
-//const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
 const sendEventUid = require('../services/ganalytics').sendEventUid;
-///////////////////////////////////////////////////////////////////////////
-// Variables
-///////////////////////////////////////////////////////////////////////////
-//var debug = (process.env.ALEXA_DEBUG || false);
 ///////////////////////////////////////////////////////////////////////////
 // Discovery API, can be tested via credentials of an account/ browsing to http://<hostname>/api/v1/devices
 ///////////////////////////////////////////////////////////////////////////

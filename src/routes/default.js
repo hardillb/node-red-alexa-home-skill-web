@@ -24,8 +24,6 @@ const restrictiveLimiter = require('../loaders/limiter').restrictiveLimiter;
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 const gHomeFunc = require('../services/func-ghome');
-//const sendState =  gHomeFunc.sendState;
-//const isGhomeUser = gHomeFunc.isGhomeUser;
 const gHomeSync = gHomeFunc.gHomeSyncAsync;
 const sendPageView = require('../services/ganalytics').sendPageView;
 const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;

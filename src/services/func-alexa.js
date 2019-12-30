@@ -924,33 +924,49 @@ const buildCommandResponseAsync = async(device, req) => {
         //Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
         else if (namespace == "Alexa.ThermostatController"
             && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
-            // Workout new targetSetpoint
+            // Check existing attributes
+            var hasThermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
+            var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
+            var hasThermostatSetPoint = getSafe(() => deviceJSON.attributes.thermostatSetPoint);
+            var hasThermostatModes = getSafe(() => deviceJSON.attributes.thermostatModes);
+            // Create placeholder variables
+            var targetTemp, scale, thermostatMode;
+            // Adjust command, will be +/- delta
             if (name == "AdjustTargetTemperature") {
-                var newTemp, scale, newMode;
-                // Workout values for targetTemperature
-                var hasthermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
-                var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
-                if (hasthermostatSetPoint != undefined){newTemp = deviceJSON.state.thermostatSetPoint + req.body.directive.payload.targetSetpointDelta.value}
-                else {newTemp = req.body.directive.payload.targetSetpointDelta.value}
+                // Use existing thermostatSetPoint to establish new thermostatSetPoint to feedback in response
+                if (hasThermostatSetPoint != undefined){targetTemp = deviceJSON.state.thermostatSetPoint + req.body.directive.payload.targetSetpointDelta.value}
+                // No existing thermostatSetPoint value, use delta as new Set Point to feedback in response
+                else {targetTemp = req.body.directive.payload.targetSetpointDelta.value}
+                // Use existing temperatureScale value
                 if (hasTemperatureScale != undefined){scale = deviceJSON.attributes.temperatureScale}
+                // No existing temperatureScale value, use scale supplied
                 else {scale = req.body.directive.payload.targetSetpointDelta.scale}
             }
-            else if (name == "SetTargetTemperature") { // Use command-supplied fields
-                newTemp = req.body.directive.payload.targetSetpoint.value;
+            // Specific temperature supplied in command, use command-supplied fields
+            else if (name == "SetTargetTemperature") {
+                targetTemp = req.body.directive.payload.targetSetpoint.value;
                 scale = req.body.directive.payload.targetSetpoint.scale;
             }
+            // Mode only, send existing value where they exist
+            else if (name == "SetThermostatMode") {
+                if (hasThermostatSetPoint != undefined) targetTemp = deviceJSON.attributes.thermostatSetPoint;
+                if (hasTemperatureScale != undefined) scale = deviceJSON.attributes.temperatureScale;
+                // Use command-supplied thermostat mode
+                thermostatMode = req.body.directive.payload.thermostatMode.value;
+            }
             // Workout new thermostatMode
-            var hasThermostatModes = getSafe(() => deviceJSON.attributes.thermostatModes);
             if (hasThermostatModes != undefined){
-                newMode = deviceJSON.state.thermostatMode;
+                thermostatMode = deviceJSON.state.thermostatMode;
             }
             else {
-                newMode = "HEAT";
+                thermostatMode = "HEAT";
             }
+            // Create response targetSetpoint value
             var targetSetPointValue = {
-                "value": newTemp,
+                "value": targetTemp,
                 "scale": scale
             };
+            // Create response context object
             var contextResult = {
                 "properties": [{
                     "namespace": "Alexa.ThermostatController",
@@ -962,7 +978,7 @@ const buildCommandResponseAsync = async(device, req) => {
                 {
                     "namespace": "Alexa.ThermostatController",
                     "name": "thermostatMode",
-                    "value": newMode,
+                    "value": thermostatMode,
                     "timeOfSample": dt.toISOString(),
                     "uncertaintyInMilliseconds": 50
                 },
@@ -978,17 +994,17 @@ const buildCommandResponseAsync = async(device, req) => {
             };
         }
         // Build Thermostat Controller Response Context - SetThermostatMode
-        else if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
-            var contextResult = {
-                "properties": [{
-                "namespace": "Alexa.ThermostatController",
-                "name": "thermostatMode",
-                "value": req.body.directive.payload.thermostatMode.value,
-                "timeOfSample": dt.toISOString(),
-                "uncertaintyInMilliseconds": 500
-            }]
-            };
-        }
+        // else if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
+        //     var contextResult = {
+        //         "properties": [{
+        //         "namespace": "Alexa.ThermostatController",
+        //         "name": "thermostatMode",
+        //         "value": req.body.directive.payload.thermostatMode.value,
+        //         "timeOfSample": dt.toISOString(),
+        //         "uncertaintyInMilliseconds": 500
+        //     }]
+        //     };
+        // }
         /////////////////////////////
         // Form Final Response, use default format (payload is empty)
         /////////////////////////////
