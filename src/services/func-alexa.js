@@ -925,9 +925,8 @@ const buildCommandResponseAsync = async(device, req) => {
         else if (namespace == "Alexa.ThermostatController"
             && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
             // Check existing attributes
-            var hasThermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
             var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
-            var hasThermostatSetPoint = getSafe(() => deviceJSON.attributes.thermostatSetPoint);
+            var hasThermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
             var hasThermostatModes = getSafe(() => deviceJSON.attributes.thermostatModes);
             // Create placeholder variables
             var targetTemp, scale, thermostatMode;
@@ -949,7 +948,7 @@ const buildCommandResponseAsync = async(device, req) => {
             }
             // Mode only, send existing value where they exist
             else if (name == "SetThermostatMode") {
-                if (hasThermostatSetPoint != undefined) targetTemp = deviceJSON.attributes.thermostatSetPoint;
+                if (hasThermostatSetPoint != undefined) targetTemp = deviceJSON.state.thermostatSetPoint;
                 if (hasTemperatureScale != undefined) scale = deviceJSON.attributes.temperatureScale;
                 // Use command-supplied thermostat mode
                 thermostatMode = req.body.directive.payload.thermostatMode.value;
