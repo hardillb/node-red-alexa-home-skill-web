@@ -923,7 +923,7 @@ const buildCommandResponseAsync = async(device, req) => {
         }
         //Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
         else if (namespace == "Alexa.ThermostatController"
-            && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
+            && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature")) {
             // Check existing attributes
             var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
             var hasThermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
@@ -993,17 +993,17 @@ const buildCommandResponseAsync = async(device, req) => {
             };
         }
         // Build Thermostat Controller Response Context - SetThermostatMode
-        // else if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
-        //     var contextResult = {
-        //         "properties": [{
-        //         "namespace": "Alexa.ThermostatController",
-        //         "name": "thermostatMode",
-        //         "value": req.body.directive.payload.thermostatMode.value,
-        //         "timeOfSample": dt.toISOString(),
-        //         "uncertaintyInMilliseconds": 500
-        //     }]
-        //     };
-        // }
+        else if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
+            var contextResult = {
+                "properties": [{
+                "namespace": "Alexa.ThermostatController",
+                "name": "thermostatMode",
+                "value": req.body.directive.payload.thermostatMode.value,
+                "timeOfSample": dt.toISOString(),
+                "uncertaintyInMilliseconds": 500
+            }]
+            };
+        }
         /////////////////////////////
         // Form Final Response, use default format (payload is empty)
         /////////////////////////////
