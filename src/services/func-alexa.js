@@ -563,7 +563,464 @@ const validateCommandAsync = async(device, req) => {
         return {status: false, response : undefined}
     }
 }
-const buildCommandResponseAsync = async(req) => {
+const buildCommandResponseAsync = async(device, req) => {
+    try {
+        // Convert "model" object class to JSON object
+        var deviceJSON = JSON.parse(JSON.stringify(device));
+        var endpointId = req.body.directive.endpoint.endpointId;
+        var messageId = req.body.directive.header.messageId;
+        var oauth_id = req.body.directive.endpoint.scope.token;
+        var correlationToken = req.body.directive.header.correlationToken;
+        var dt = new Date();
+        var name = req.body.directive.header.name;
+        var namespace = req.body.directive.header.namespace;
+
+        // Build Response Header
+        var header = {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": messageId + "-R",
+            "correlationToken": correlationToken
+        }
+        // Build Default Endpoint Response
+        var endpoint = {
+            "scope": {
+                "type": "BearerToken",
+                "token": oauth_id
+            },
+            "endpointId": endpointId
+        }
+        // Build command/ device-specific response information
+        // Build Brightness Controller Response Context
+        if (namespace == "Alexa.BrightnessController" && (name == "AdjustBrightness" || name == "SetBrightness")) {
+            if (name == "AdjustBrightness") {
+                var brightness;
+                if (req.body.directive.payload.brightnessDelta < 0) {
+                    brightness = req.body.directive.payload.brightnessDelta + 100;
+                }
+                else {
+                    brightness = req.body.directive.payload.brightnessDelta;
+                }
+                // Return Percentage Delta (NOT in-line with spec)
+                var contextResult = {
+                    "properties": [{
+                        "namespace" : "Alexa.BrightnessController",
+                        "name": "brightness",
+                        "value": brightness,
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 50
+                    }]
+                };
+
+            }
+            if (name == "SetBrightness") {
+                // Return Percentage
+                var contextResult = {
+                    "properties": [{
+                        "namespace" : "Alexa.BrightnessController",
+                        "name": "brightness",
+                        "value": req.body.directive.payload.brightness,
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 50
+                    }]
+                }
+            };
+        }
+        // Build Channel Controller Response Context
+        else if (namespace == "Alexa.ChannelController") {
+            if (name == "ChangeChannel") {
+                if (req.body.directive.payload.channel.hasOwnProperty('number')) {
+                    var contextResult = {
+                    "properties": [
+                        {
+                        "namespace": "Alexa.ChannelController",
+                        "name": "channel",
+                        "value": {
+                            "number": req.body.directive.payload.channel.number
+                        },
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 50
+                        }
+                    ]}
+                }
+                else if (req.body.directive.payload.channel.hasOwnProperty('callSign')) {
+                    var contextResult = {
+                        "properties": [
+                            {
+                            "namespace": "Alexa.ChannelController",
+                            "name": "channel",
+                            "value": {
+                                "callSign": req.body.directive.payload.channel.callSign
+                            },
+                            "timeOfSample": dt.toISOString(),
+                            "uncertaintyInMilliseconds": 50
+                            }
+                        ]}
+                }
+            }
+        }
+        // ColorController
+        else if (namespace == "Alexa.ColorController") {
+            var contextResult = {
+                "properties": [{
+                    "namespace" : "Alexa.ColorController",
+                    "name": "color",
+                    "value": {
+                        "hue": req.body.directive.payload.color.hue,
+                        "saturation": req.body.directive.payload.color.saturation,
+                        "brightness": req.body.directive.payload.color.brightness
+                    },
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                }]
+            };
+        }
+        // Build ColorTemperatureController Response Context
+        else if (namespace == "Alexa.ColorTemperatureController") {
+            var strPayload = req.body.directive.payload.colorTemperatureInKelvin;
+            var colorTemp;
+            if (typeof strPayload != 'number') {
+                if (strPayload == "warm" || strPayload == "warm white") {colorTemp = 2200};
+                if (strPayload == "incandescent" || strPayload == "soft white") {colorTemp = 2700};
+                if (strPayload == "white") {colorTemp = 4000};
+                if (strPayload == "daylight" || strPayload == "daylight white") {colorTemp = 5500};
+                if (strPayload == "cool" || strPayload == "cool white") {colorTemp = 7000};
+            }
+            else {
+                colorTemp = req.body.directive.payload.colorTemperatureInKelvin;
+            }
+            var contextResult = {
+                "properties": [{
+                    "namespace" : "Alexa.ColorTemperatureController",
+                    "name": "colorTemperatureInKelvin",
+                    "value": colorTemp,
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                }]
+            }
+        }
+        // Build Input Controller Response Context
+        else if (namespace == "Alexa.InputController") {
+            var contextResult = {
+                "properties": [{
+                    "namespace" : "Alexa.InputController",
+                    "name": "input",
+                    "value": req.body.directive.payload.input,
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                }]
+            }
+            endpoint = {
+                "endpointId": endpointId
+            }
+        }
+        // Build Lock Controller Response Context - SetThermostatMode
+        else if (namespace == "Alexa.LockController") {
+            var lockState;
+            if (name == "Lock") {lockState = "LOCKED"};
+            if (name == "Unlock") {lockState = "UNLOCKED"};
+            var contextResult = {
+                "properties": [{
+                "namespace": "Alexa.LockController",
+                "name": "lockState",
+                "value": lockState,
+                "timeOfSample": dt.toISOString(),
+                "uncertaintyInMilliseconds": 500
+                }]
+            };
+        }
+        // Build Mode Controller Response Context - Interior and Exterior Blinds
+        // if (namespace == "Alexa.ModeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
+        // 	if (name == "SetMode") {
+        // 		var contextResult = {
+        // 			"properties": [{
+        // 				"namespace": "Alexa.ModeController",
+        // 				"instance" : "Blinds.Position",
+        // 				"name": "mode",
+        // 				"value": req.body.directive.payload.percentage,
+        // 				"timeOfSample": dt.toISOString(),
+        // 				"uncertaintyInMilliseconds": 500
+        // 			}]
+        // 		};
+        // 	}
+        // 	if (name == "AdjustMode ") {
+        // 		// Unsupported for Interior/ Exterior Blinds
+        // 		// Send INVALID_DIRECTIVE : https://developer.amazon.com/docs/device-apis/alexa-errorresponse.html#error-types
+        // 	}
+        // }
+        // Build PercentageController Response Context
+        else if (namespace == "Alexa.PercentageController") {
+            if (name == "SetPercentage") {
+                var contextResult = {
+                    "properties": [{
+                        "namespace": "Alexa.PercentageController",
+                        "name": "percentage",
+                        "value": req.body.directive.payload.percentage,
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 500
+                    }]
+                };
+            }
+            if (name == "AdjustPercentage") {
+                var percentage;
+                var hasPercentage = getSafe(() => deviceJSON.state.percentage);
+                if (hasPercentage != undefined) {
+                    if (deviceJSON.state.percentage + req.body.directive.payload.percentageDelta > 100) {percentage = 100}
+                    else if (deviceJSON.state.percentage - req.body.directive.payload.percentageDelta < 0) {percentage = 0}
+                    else {percentage = deviceJSON.state.percentage + req.body.directive.payload.percentageDelta}
+                    var contextResult = {
+                        "properties": [{
+                            "namespace": "Alexa.PercentageController",
+                            "name": "percentage",
+                            "value": percentage,
+                            "timeOfSample": dt.toISOString(),
+                            "uncertaintyInMilliseconds": 500
+                            }]
+                        };
+                    }
+            }
+        }
+        // Build PlaybackController Response Context
+        else if (namespace == "Alexa.PlaybackController") {
+            var contextResult = {
+                "properties": []
+            };
+        }
+        // Build PowerController Response Context
+        else if (namespace == "Alexa.PowerController") {
+            if (name == "TurnOn") {var newState = "ON"};
+            if (name == "TurnOff") {var newState = "OFF"};
+            var contextResult = {
+                "properties": [{
+                    "namespace": "Alexa.PowerController",
+                    "name": "powerState",
+                    "value": newState,
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                }]
+            };
+        }
+        // Build RangeController Interior/ Exterior Blind Response Context
+        else if (namespace == "Alexa.RangeController" && (deviceJSON.displayCategories.indexOf('INTERIOR_BLIND') > -1 || deviceJSON.displayCategories.indexOf('EXTERIOR_BLIND') > -1)) {
+            if (name == "SetRangeValue") {
+                var contextResult = {
+                    "properties": [
+                        {
+                        "namespace": "Alexa.RangeController",
+                        "instance" : "Blind.Lift",
+                        "name": "rangeValue",
+                        "value":  req.body.directive.payload.rangeValue,
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 50
+                        }
+                    ]}
+            }
+            else if (name == "AdjustRangeValue") {
+                var rangeValue;
+                var hasrangeValue = getSafe(() => deviceJSON.state.rangeValue);
+                if (hasrangeValue != undefined) {
+                    if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta > 100) {rangeValue = 100}
+                    else if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta < 0) {rangeValue = 0}
+                    else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta}
+                    var contextResult = {
+                        "properties": [{
+                            "namespace": "Alexa.RangeController",
+                            "instance" : "Blind.Lift",
+                            "name": "rangeValue",
+                            "value":  rangeValue,
+                            "timeOfSample": dt.toISOString(),
+                            "uncertaintyInMilliseconds": 50
+                            }]
+                        };
+                    }
+            }
+        }
+        // Build Generic RangeController Response Context
+        else if (namespace == "Alexa.RangeController") {
+            if (name == "SetRangeValue") {
+                var contextResult = {
+                    "properties": [
+                        {
+                        "namespace": "Alexa.RangeController",
+                        "instance" : "NodeRed.Fan.Speed",
+                        "name": "rangeValue",
+                        "value":  req.body.directive.payload.rangeValue,
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 50
+                        }
+                    ]}
+            }
+            else if (name == "AdjustRangeValue") {
+                var rangeValue;
+                var hasrangeValue = getSafe(() => deviceJSON.state.rangeValue);
+                if (hasrangeValue != undefined) {
+                    if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta > 10) {rangeValue = 10}
+                    else if (deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta < 1) {rangeValue = 1}
+                    else {rangeValue = deviceJSON.state.rangeValue + req.body.directive.payload.rangeValueDelta}
+                    var contextResult = {
+                        "properties": [{
+                            "namespace": "Alexa.RangeController",
+                            "instance" : "NodeRed.Fan.Speed",
+                            "name": "rangeValue",
+                            "value":  rangeValue,
+                            "timeOfSample": dt.toISOString(),
+                            "uncertaintyInMilliseconds": 50
+                            }]
+                        };
+                    }
+            }
+        }
+        // Build Scene Controller Activation Started Event
+        else if (namespace == "Alexa.SceneController") {
+            header.namespace = "Alexa.SceneController";
+            header.name = "ActivationStarted";
+            var contextResult = {};
+            var payload = {
+                    "cause" : {
+                        "type" : "VOICE_INTERACTION"
+                        },
+                    "timestamp": dt.toISOString()
+                    };
+        }
+        // Build Speaker Response Context
+        else if (namespace == "Alexa.Speaker") {
+            if (name == "SetVolume") {
+                var contextResult = {
+                    "properties": [
+                        {
+                        "namespace": "Alexa.Speaker",
+                        "name": "volume",
+                        "value":  req.body.directive.payload.volume,
+                        "timeOfSample": dt.toISOString(),
+                        "uncertaintyInMilliseconds": 50
+                        }
+                    ]}
+                }
+            else if (name == "SetMute") {
+                var contextResult = {
+                    "properties": [
+                        {
+                            "namespace": "Alexa.Speaker",
+                            "name": "muted",
+                            "value": req.body.directive.payload.mute,
+                            "timeOfSample": dt.toISOString(),
+                            "uncertaintyInMilliseconds": 50
+                        }
+                    ]}
+            }
+            else {
+                var contextResult = {
+                    "properties": []
+                };
+            }
+        }
+        // Build StepSpeaker Response Context
+        else if (namespace == "Alexa.StepSpeaker") {
+            var contextResult = {
+                "properties": []
+                };
+        }
+        //Build Thermostat Controller Response Context - AdjustTargetTemperature/ SetTargetTemperature
+        else if (namespace == "Alexa.ThermostatController"
+            && (name == "AdjustTargetTemperature" || name == "SetTargetTemperature" || name == "SetThermostatMode")) {
+            // Workout new targetSetpoint
+            if (name == "AdjustTargetTemperature") {
+                var newTemp, scale, newMode;
+                // Workout values for targetTemperature
+                var hasthermostatSetPoint = getSafe(() => deviceJSON.state.thermostatSetPoint);
+                var hasTemperatureScale  = getSafe(() => deviceJSON.attributes.temperatureScale);
+                if (hasthermostatSetPoint != undefined){newTemp = deviceJSON.state.thermostatSetPoint + req.body.directive.payload.targetSetpointDelta.value}
+                else {newTemp = req.body.directive.payload.targetSetpointDelta.value}
+                if (hasTemperatureScale != undefined){scale = deviceJSON.attributes.temperatureScale}
+                else {scale = req.body.directive.payload.targetSetpointDelta.scale}
+            }
+            else if (name == "SetTargetTemperature") { // Use command-supplied fields
+                newTemp = req.body.directive.payload.targetSetpoint.value;
+                scale = req.body.directive.payload.targetSetpoint.scale;
+            }
+            // Workout new thermostatMode
+            var hasThermostatModes = getSafe(() => deviceJSON.attributes.thermostatModes);
+            if (hasThermostatModes != undefined){
+                newMode = deviceJSON.state.thermostatMode;
+            }
+            else {
+                newMode = "HEAT";
+            }
+            var targetSetPointValue = {
+                "value": newTemp,
+                "scale": scale
+            };
+            var contextResult = {
+                "properties": [{
+                    "namespace": "Alexa.ThermostatController",
+                    "name": "targetSetpoint",
+                    "value": targetSetPointValue,
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                },
+                {
+                    "namespace": "Alexa.ThermostatController",
+                    "name": "thermostatMode",
+                    "value": newMode,
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                },
+                {
+                    "namespace": "Alexa.EndpointHealth",
+                    "name": "connectivity",
+                    "value": {
+                        "value": "OK"
+                    },
+                    "timeOfSample": dt.toISOString(),
+                    "uncertaintyInMilliseconds": 50
+                }]
+            };
+        }
+        // Build Thermostat Controller Response Context - SetThermostatMode
+        else if (namespace == "Alexa.ThermostatController" && name == "SetThermostatMode") {
+            var contextResult = {
+                "properties": [{
+                "namespace": "Alexa.ThermostatController",
+                "name": "thermostatMode",
+                "value": req.body.directive.payload.thermostatMode.value,
+                "timeOfSample": dt.toISOString(),
+                "uncertaintyInMilliseconds": 500
+            }]
+            };
+        }
+        /////////////////////////////
+        // Form Final Response, use default format (payload is empty)
+        /////////////////////////////
+        if (namespace != "Alexa.SceneController"){
+            // Compile Final Response Message
+            var response = {
+                context: contextResult,
+                event: {
+                header: header,
+                endpoint: endpoint,
+                payload: {}
+                }
+            };
+        }
+        // Form Final Response, SceneController Specific Event
+        else {
+            var response = {
+                context: contextResult,
+                event: {
+                header: header,
+                endpoint: endpoint,
+                payload: payload
+                }
+            };
+        }
+        // Return response object
+        return response;
+    }
+    catch(e){
+        logger.log('error', "[Alexa Command] Response generation failed, error: " + e.stack);
+        return undefined;
+    }
 }
 
 
@@ -1043,5 +1500,6 @@ module.exports = {
     requestAccessTokenAsync,
     sendStateAsync,
     replaceCapabilityAsync,
-    validateCommandAsync
+    validateCommandAsync,
+    buildCommandResponseAsync
 }
