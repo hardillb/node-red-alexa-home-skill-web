@@ -11,3 +11,4 @@ views/fragments/de/privacy-policy.ejs
 views/fragments/de/terms-of-service.ejs
 views/fragments/es/privacy-policy.ejs
 views/fragments/es/terms-of-service.ejs
+src/test/test-public-apis.js

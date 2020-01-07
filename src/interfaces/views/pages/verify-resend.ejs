@@ -1,12 +1,6 @@
 <%- include('../fragments/header'); -%>
   <div class="container main-content">
       <form class="form-verifyResend" id="form-verifyResend">
-          <% if (error_messages) { %>
-            <p><strong><%= error_messages %></strong></p>
-          <% } %>
-          <% if (success_messages) { %>
-            <p><strong><%= success_messages %></strong></p>
-          <% } %>
           <h1 class="h3 mb-3 font-weight-normal">Re-send Verification Email</h1>
           <p>Use this form to re-send your account verification email.</p>
           <label for="email" class="sr-only">Email Address</label>
@@ -24,13 +18,13 @@
               xhr.open('POST', '/verify-resend',true);
               xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
               xhr.onreadystatechange = function () {
-                if( xhr.readyState == 4 && xhr.status == 200) {
-                  //new verify token created / sent to users email address
-                  //alert(xhr.responseText);
+                if( xhr.readyState == 4 && xhr.status == 202) {
+                  //new re-verification email sent to users email address
+                  alert(xhr.responseText);
                   window.location = '/verify-resend';
                 } else if (xhr.readyState == 4 && (xhr.status == 400 || xhr.status == 500)) {
                   //show error
-                  //alert(xhr.responseText);
+                  alert(xhr.responseText);
                   window.location = '/verify-resend';
                 }
               }

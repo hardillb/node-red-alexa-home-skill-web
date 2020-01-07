@@ -138,10 +138,10 @@ const sendStateAsync = async(token, response, username) => {
 	}
 	catch(e) {
 		// User has likely disabled Google Home link with service
-		if (e.response && e.response.status && e.response.status == 404) {
-			logger.log('warn', "[Google Report State] Failed to send change report for user: " + username + ", to Google Homegraph API, user no-longer has linked skill.");
+		if (e.response && e.response.data && e.response.status) {
+			logger.log('warn', "[Google Send State] Failed to send change report for user: " + username + ", error response: " + JSON.stringify(e.response.data));
 			// Remove 'Google' from users' active services
-			removeUserServices(username, "Google");
+			if (e.response.status == 404) removeUserServices(username, "Google");
 		}
 		else {
 			logger.log('error', "[Google Report State] Failed to report state for user: " + username + ", error: " + e.stack);
@@ -231,6 +231,111 @@ const queryDeviceStateAsync = async(device) => {
 	}
 }
 
+
+
+const validateCommandAsync = async(command, commandDevice, dbDevice, req) => {
+	try {
+		// Get command parameters
+		var params = command.execution[0].params;
+		// Handle Thermostat valueOutOfRange
+		if (command.execution[0].command == "action.devices.commands.ThermostatTemperatureSetpoint") {
+			var hasTemperatureMax = getSafe(() => dbDevice.attributes.temperatureRange.temperatureMax);
+			var hasTemperatureMin = getSafe(() => dbDevice.attributes.temperatureRange.temperatureMin);
+			if (hasTemperatureMin != undefined && hasTemperatureMax != undefined) {
+				var temperatureMin = dbDevice.attributes.temperatureRange.temperatureMin;
+				var temperatureMax = dbDevice.attributes.temperatureRange.temperatureMax;
+				logger.log('debug', "[GHome Validation] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , against temperatureRange, temperatureMin:" + temperatureMin + ", temperatureMax:" + temperatureMax);
+				if (params.thermostatTemperatureSetpoint > temperatureMax || params.thermostatTemperatureSetpoint < temperatureMin){
+					// Build valueOutOfRange error response
+					logger.log('warn', "[GHome Validation] Temperature valueOutOfRange error for endpointId:" + commandDevice.id);
+					// Global error response
+					var errResponse = {
+						"requestId": req.body.requestId,
+						"payload": {
+							"errorCode": "valueOutOfRange"
+						}
+					}
+					logger.log('debug', "[GHome Validation] valueOutOfRange error response:" + JSON.stringify(errResponse));
+					return {status: false, response: errResponse};
+				}
+			}
+		}
+		// Handle Color Temperature valueOutOfRange
+		if (command.execution[0].command == "action.devices.commands.ColorAbsolute") {
+			var hasTemperatureMaxK = getSafe(() => dbDevice.attributes.colorTemperatureRange.temperatureMaxK);
+			var hasTemperatureMinK = getSafe(() => dbDevice.attributes.colorTemperatureRange.temperatureMinK);
+			if (hasTemperatureMinK != undefined && hasTemperatureMaxK != undefined) {
+				var temperatureMinK = dbDevice.attributes.colorTemperatureRange.temperatureMinK;
+				var temperatureMaxK = dbDevice.attributes.colorTemperatureRange.temperatureMaxK;
+				logger.log('debug', "[GHome Validation] Checking requested setpoint: " + params.color.temperature + " , against temperatureRange, temperatureMin:" + temperatureMinK + ", temperatureMax:" + temperatureMaxK);
+				if (params.color.temperature > temperatureMaxK || params.color.temperature < temperatureMinK){
+					// Build valueOutOfRange error response
+					logger.log('warn', "[GHome Validation] valueOutOfRange error for endpointId:" + commandDevice.id);
+					// Global error response
+					var errResponse = {
+						"requestId": req.body.requestId,
+						"payload": {
+							"errorCode": "valueOutOfRange"
+						}
+					}
+					logger.log('debug', "[GHome Validation] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
+					return {status: false, response: errResponse};
+				}
+			}
+		}
+		// Handle 2FA requirement
+		var hasRequire2FA = getSafe(() => dbDevice.attributes.require2FA);
+		if (hasRequire2FA == true) {
+			var hasChallengeType = getSafe(() => dbDevice.attributes.type2FA); // check device for 2FA challenge type
+			var hasChallengePin = getSafe(() => command.execution[0].challenge.pin); // check request itself for pin
+			// PIN Required, NO pin supplied
+			if (hasChallengeType == "pin" && hasChallengePin == undefined){
+				logger.log('warn', "[GHome Validation] pinNeeded but not supplied for command against endpointId:" + commandDevice.id);
+				var errResponse = {
+					requestId: req.body.requestId,
+					payload: {
+						commands: [{
+							ids: [commandDevice.id.toString()],
+							status: "ERROR",
+							errorCode: "challengeNeeded",
+							challengeNeeded : {
+								type: "pinNeeded"
+							}
+						}]
+					}
+				};
+				logger.log('debug', "[GHome Validation] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
+				return {status: false, response: errResponse};
+			}
+			// PIN required, wrong PIN
+			else if (hasChallengeType == "pin" && hasChallengePin != dbDevice.attributes.pin){
+				logger.log('warn', "[GHome Validation] wrong pin supplied for command against endpointId:" + commandDevice.id);
+				var errResponse = {
+					requestId: req.body.requestId,
+					payload: {
+						commands: [{
+							ids: [commandDevice.id.toString()],
+							status: "ERROR",
+							errorCode: "challengeNeeded",
+							challengeNeeded : {
+								type: "challengeFailedPinNeeded"
+							}
+						}]
+					}
+				};
+				logger.log('debug', "[GHome Validation] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
+				return {status: false, response: errResponse};
+			}
+		}
+		// No matches against defined validation rules, return true
+		return {status: true};
+	}
+	catch(e){
+        logger.log('error', "[Google Command] Validation of command failed, error: " + e.stack);
+        return {status: false, response : undefined}
+	}
+}
+
 // Convert Alexa Device Capabilities to Google Home-compatible
 const gHomeReplaceCapability = async(capability, type) => {
 	// Generic mappings - capabilities, limited to GHome supported traits, add new ones here
@@ -284,5 +389,6 @@ module.exports = {
 	sendStateAsync,
 	requestToken2Async,
 	gHomeReplaceCapability,
-	gHomeReplaceType
+	gHomeReplaceType,
+	validateCommandAsync
 }

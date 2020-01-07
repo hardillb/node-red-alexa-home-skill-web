@@ -39,14 +39,11 @@ const saveGrantAsync = async(user, grantCode) => {
         await newGrant.save();
         // Test Grant Code by requesting an Access Token for user
         var accessToken = await requestAccessTokenAsync(user);
-        // Success, return Grant Code
-        if (accessToken != undefined){
-            return newGrant;
-        }
         // Failure, return undefined
-        else {
-            return undefined;
-        }
+        if (accessToken == undefined) return undefined;
+        // Success, return Grant Code
+        return newGrant;
+        // Failure, return undefined
     }
     catch(e) {
         // Failure, return undefined
@@ -59,7 +56,8 @@ const saveGrantAsync = async(user, grantCode) => {
 const requestAccessTokenAsync = async(user) => {
     try {
         if (enableAlexaAuthorization == true) {
-            var now = (new Date().getTime());
+            // Create time comparator which is now, plus 5 seconds (to allow for request processing)
+            var now = (new Date().getTime() + 1000 * 5);
             // Get user Grant Code
             var grant = await AlexaAuth.AlexaAuthGrantCode.findOne({user: user});
             // Get user Refresh Token
@@ -73,6 +71,7 @@ const requestAccessTokenAsync = async(user) => {
             // Return existing, valid Access Token
             if (hasGrantCode != undefined && hasRefreshToken != undefined && hasAccessToken != undefined) {
                 logger.log('verbose', "[AlexaAuth] Returned existing Access Token for user: " + user.username);
+                logger.log('debug', "[AlexaAuth] Existing Access Token for user: " + user.username + ", token: " + JSON.stringify(access));
                 return access;
             }
             // Use existing Grant Code and Refresh Token to request new Access Token
@@ -170,6 +169,7 @@ const requestAccessTokenAsync = async(user) => {
     }
     catch(e) {
         logger.log('error', "[AlexaAuth] Error requesting Access Token for user: " + user.username + ", error: " + e.stack);
+        if (e.response && e.response.data) logger.log('error', "[AlexaAuth] Error response: " + JSON.stringify(e.response.data));
         return undefined;
     }
 }
@@ -459,6 +459,8 @@ const sendStateAsync = async(user, state) => {
         }
         // Get valid Access Token for User
         var accessToken = await requestAccessTokenAsync(user);
+        // If access token request failed, break
+        if (accessToken == undefined) return false;
         // Add valid Access Token to State Response
         state.event.endpoint.scope.token = accessToken.token
         // POST State Update to Alexa API
@@ -488,13 +490,13 @@ const sendStateAsync = async(user, state) => {
     }
     catch(e) {
         // User no-longer has skill linked with Amazon account, see: https://developer.amazon.com/en-US/docs/alexa/smarthome/debug-your-smart-home-skill.html
-        if (e.response && e.response.status && e.response.status == 403) {
-            logger.log('warn', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa, user no-longer has linked skill.");
+        if (e.response && e.response.data && e.response.status) {
+            logger.log('warn', "[Alexa Send State] Failed to send change report for user: " + user.username + ", error response: " + JSON.stringify(e.response.data));
             // Remove 'Amazon' from users' active services
-			removeUserServices(user.username, "Amazon");
+			if (e.response.status == 403) removeUserServices(user.username, "Amazon");
         }
         // Handle failures
-        else {logger.log('error', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa failed, error" + e.stack)}
+        else {logger.log('error', "[Alexa Send State] Failed to send change report for user: " + user.username + ", to Alexa failed, error: " + e.stack)}
     }
 }
 
@@ -513,8 +515,6 @@ const validateCommandAsync = async(device, req) => {
                 if (compare < deviceJSON.attributes.colorTemperatureRange.temperatureMinK || compare > deviceJSON.attributes.colorTemperatureRange.temperatureMaxK) {
                     logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested color temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.colorTemperatureRange));
                     // Send 417 HTTP code back to Lambda, Lambda will send correct error message to Alexa
-                    //res.status(417).send();
-                    //validationStatus = false;
                     return {status: false, response: 417};
                 }
                 else {
@@ -535,8 +535,6 @@ const validateCommandAsync = async(device, req) => {
                 if (compare < deviceJSON.attributes.temperatureRange.temperatureMin || compare > deviceJSON.attributes.temperatureRange.temperatureMax) {
                     logger.log('warn', "[Alexa Command] User: " + req.user.username + ", requested temperature: " + compare + ", on device: " + req.body.directive.endpoint.endpointId + ", which is out of range: " + JSON.stringify(deviceJSON.attributes.temperatureRange));
                     // Send 416 HTTP code back to Lamnda, Lambda will send correct error message to Alexa
-                    //res.status(416).send();
-                    //validationStatus = false;
                     return {status: false, response: 416};
                 }
                 else {

@@ -10,22 +10,12 @@
   <%- include('../fragments/privacy-modal'); -%>
 
   <div class="container main-content">
-      <% if (error_messages) { %>
-        <p><strong><%= error_messages %></strong></p>
-      <% } %>
-      <% if (success_messages) { %>
-        <p><strong><%= success_messages %></strong></p>
-      <% } %>
       <form class="form-register" id="form-register">
         <%- include('../fragments/register'); -%>
       </form>
       <script type="application/javascript">
         // Load CountrySelect
         $("#country").countrySelect();
-        var password = document.getElementById("password");
-        var verify = document.getElementById("verify");
-        password.onchange = validatePassword;
-        verify.onkeyup = validatePassword;
 
         $('a[href$="#tosModal"]').on( "click", function() {
           $('#tosModal').modal('show');
@@ -39,7 +29,6 @@
           // Username validation built-into input box
           var username = $('#username').val().trim().toLowerCase();
           var password = $('#password').val().trim();
-          var verify = $('#verify').val().trim();
           var email = $('#email').val().trim();
           var country = $("#country_code").val().trim();
 
@@ -54,13 +43,13 @@
           xhr.open('POST', '/new-user',true);
           xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
           xhr.onreadystatechange = function () {
-            if( xhr.readyState == 4 && xhr.status == 200) {
+            if( xhr.readyState == 4 && xhr.status == 201) {
               console.log("Created new user")
               //new user created, flash that a verification email has been sent
               alert(xhr.responseText);
               window.location.href = "/";
             }
-            else if (xhr.readyState == 4 && xhr.status == 500) {
+            else if (xhr.readyState == 4 && (xhr.status == 400 || xhr.status == 409 || xhr.status == 500)) {
               alert("Failed to create user account, response: " + xhr.responseText);
             }
           }
@@ -68,13 +57,6 @@
 
         });
 
-        function validatePassword(){
-          if(password.value != verify.value) {
-            verify.setCustomValidity("Passwords Don't Match");
-          } else {
-            verify.setCustomValidity('');
-          }
-        }
       </script>
   </div>
 <%- include('../fragments/footer'); -%>

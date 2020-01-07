@@ -7,8 +7,6 @@ const uuidv4 = require('uuid/v4');
 const logger = require('../loaders/logger');
 const fs = require('fs');
 const util = require("util");
-//const mqttClient = require('../loaders/mqtt').mqttClient;
-//const notifyUser = require('../loaders/mqtt').notifyUser;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -23,7 +21,6 @@ const requestToken2Async = gHomeFunc.requestToken2Async;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-//var debug = (process.env.ALEXA_DEBUG || false);
 const readFile = util.promisify(fs.readFile);
 // Google Auth JSON Web Token ================
 var gToken = undefined; // Store Report State OAuth Token
@@ -64,13 +61,14 @@ var refreshToken = setInterval(function(){
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
-
-
+// State update handler
 const updateDeviceState = async(username, endpointId, payload) => {
 	try {
 		logger.log('debug', "[State API] SetState payload:" + JSON.stringify(payload));
 		// Find matching device
 		var dev = await Devices.findOne({username:username, endpointId:endpointId});
+		// If no matching device found, stop further action (likely user has deleted device)
+		if (!dev) return false;
 		// Build state update
 		var dt = new Date().toISOString();
 		var deviceJSON = JSON.parse(JSON.stringify(dev));

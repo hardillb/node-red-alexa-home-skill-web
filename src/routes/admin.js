@@ -1,37 +1,26 @@
 ///////////////////////////////////////////////////////////////////////////
 // Depends
 ///////////////////////////////////////////////////////////////////////////
-var express = require('express');
-var router = express.Router();
-var bodyParser = require('body-parser');
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json());
-var Account = require('../models/account');
-var oauthModels = require('../models/oauth');
-var Devices = require('../models/devices');
-var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var LocalStrategy = require('passport-local').Strategy;
-//var countries = require('countries-api');
-var logger = require('../loaders/logger');
+const express = require('express');
+const bodyParser = require('body-parser');
+const Account = require('../models/account');
+const oauthModels = require('../models/oauth');
+const Devices = require('../models/devices');
+const Topics = require('../models/topics');
+const logger = require('../loaders/logger');
 const defaultLimiter = require('../loaders/limiter').defaultLimiter;
-//const restrictiveLimiter = require('../loaders/limiter').restrictiveLimiter;
-//const sendPageView = require('../services/ganalytics').sendPageView;
 const sendPageViewUid = require('../services/ganalytics').sendPageViewUid;
-//const sendEventUid = require('../services/ganalytics').sendEventUid;
 ///////////////////////////////////////////////////////////////////////////W
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-//var debug = (process.env.ALEXA_DEBUG || false);
 // MQTT Settings  =========================================
-var mqtt_user = (process.env.MQTT_USER);
+const mqtt_user = (process.env.MQTT_USER);
 ///////////////////////////////////////////////////////////////////////////
-// Passport Configuration
+// Main
 ///////////////////////////////////////////////////////////////////////////
-passport.use(new LocalStrategy(Account.authenticate()));
-passport.use(new BasicStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
+const router = express.Router();
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
 ///////////////////////////////////////////////////////////////////////////
 // Services
 ///////////////////////////////////////////////////////////////////////////
@@ -39,9 +28,9 @@ router.get('/services', defaultLimiter,
 	ensureAuthenticated,
 	async (req, res) => {
 		try {
-			if (req.user.username === mqtt_user) {
+			if (req.user.superuser === true) {
 				sendPageViewUid(req.path, 'Services Admin', req.ip, req.user.username, req.headers['user-agent']);
-				const apps = await oauthModels.Application.find({});
+				let apps = await oauthModels.Application.find({});
 				res.render('pages/services',{user:req.user, services: apps, brand: process.env.BRAND, title: "OAuth Services | " + process.env.BRAND});
 			} else {
 				res.redirect(303, '/');
@@ -59,11 +48,11 @@ router.get('/users', defaultLimiter,
 	ensureAuthenticated,
 	async (req, res) => {
 		try{
-			if (req.user.username === mqtt_user) {
+			if (req.user.superuser === true) {
 				sendPageViewUid(req.path, 'User Admin', req.ip, req.user.username, req.headers['user-agent']);
-				var totalCount = await Account.countDocuments({});
+				let totalCount = await Account.countDocuments({});
 				// https://docs.mongodb.com/manual/reference/method/db.collection.find/#explicitly-excluded-fields
-				var usersAndDevs = await Account.aggregate([
+				let usersAndDevs = await Account.aggregate([
 					{ "$lookup": {
 						"from": "devices",
 						"let": { "username": "$username" },
@@ -91,6 +80,46 @@ router.get('/users', defaultLimiter,
 		}
 });
 ///////////////////////////////////////////////////////////////////////////
+// Users Topics
+///////////////////////////////////////////////////////////////////////////
+router.post('/toggle-topics/:username', defaultLimiter,
+	ensureAuthenticated,
+	async (req, res) => {
+		try{
+			// Check req.user is super user
+			if (req.user.superuser === true) {
+				if (!req.params.username) return res.status(400).send('Username not supplied!');
+				// Get user-specific ACL
+				let aclUser = await Topics.findOne({topics:	['command/' + req.params.username + '/#','state/' + req.params.username + '/#','response/' + req.params.username + '/#','message/' + req.params.username + '/#']});
+				if (!aclUser) {
+					// Generate user-specific MQTT topics
+					aclUser = new Topics({topics: [
+						'command/' + req.params.username +'/#',
+						'state/'+ req.params.username + '/#',
+						'response/' + req.params.username + '/#',
+						'message/' + req.params.username + '/#'
+					]});
+					// Save new user-specific MQTT topics
+					await aclUser.save();
+				}
+				// // Get User
+				let account = await Account.findByUsername(req.params.username, true);
+				// Apply topic change
+				await Account.updateOne({username: account.username},{$set: {topics: aclUser._id}});
+				logger.log('debug' , "[Reset Topics] Reset MQTT topics for user: " + account.username + ", to: " + JSON.stringify(aclUser));
+			}
+			// Not superuser, redirect
+			else {
+				res.redirect(303, '/');
+			}
+		}
+		// Error handler
+		catch(e){
+			logger.log('error', "[Reset Topics] Failed to reset topics for user, error: " + e.stack);
+			return res.status(500).send('Error!');
+		}
+});
+///////////////////////////////////////////////////////////////////////////
 // User Disable/ Enable
 ///////////////////////////////////////////////////////////////////////////
 router.post('/user/:id/:state', defaultLimiter,
@@ -99,14 +128,12 @@ router.post('/user/:id/:state', defaultLimiter,
 		try{
 			if (req.user.username === mqtt_user && req.params.id && req.params.state) {
 				// Convert string input to boolean
-				var state = (req.params.state === "true");
-				var result = await toggleUser(req.params.id, state);
+				let state = (req.params.state === "true");
+				let result = await toggleUser(req.params.id, state);
 				if (result == true) {
-					req.flash('success_messages', 'Updated Account State!');
-					return res.status(200).send();
+					return res.status(200).send('Updated Account State!');
 				}
 				else {
-					req.flash('error_messages', 'Error updating account state!');
 					return res.status(400).send("Error updating account state!");
 				}
 			}
@@ -119,11 +146,9 @@ router.post('/user/:id/:state', defaultLimiter,
 		}
 		catch(e){
 			logger.log('error', "[Admin Users] Error disabling/ enabling user, error: " + e.stack);
-			req.flash('error_messages', 'Error updating account state!');
 			return res.status(400).send("Error updating account state!");
 		}
 });
-
 ///////////////////////////////////////////////////////////////////////////
 // User Devices
 ///////////////////////////////////////////////////////////////////////////
@@ -131,10 +156,10 @@ router.get('/user-devices', defaultLimiter,
 	ensureAuthenticated,
 	async (req, res) => {
 		try {
-			if (req.user.username === mqtt_user) {
+			if (req.user.superuser === true) {
 				sendPageViewUid(req.path, 'User Device Admin', req.ip, req.user.username, req.headers['user-agent']);
-				var devices = await Devices.find({});
-				var count = await Devices.countDocuments({});
+				let devices = await Devices.find({});
+				let count = await Devices.countDocuments({});
 				res.render('pages/user-devices',{user:req.user, devices: devices, devicecount: count, brand: process.env.BRAND, title: "Device Admin | " + process.env.BRAND});
 			}
 			else {
@@ -155,7 +180,7 @@ ensureAuthenticated,
 async (req, res) => {
 	try{
 		if (req.user.username == mqtt_user) {
-			var application = oauthModels.Application(req.body);
+			let application = oauthModels.Application(req.body);
 			await application.save();
 			res.status(201).send(application);
 		} else {
@@ -176,7 +201,7 @@ router.post('/service/:id', defaultLimiter,
 ensureAuthenticated,
 async (req, res) => {
 	try{
-		var service = req.body;
+		let service = req.body;
 		if (req.user.username == mqtt_user) {
 			await oauthModels.Application.findOne({_id: req.params.id});
 			data.title = service.title;
@@ -217,21 +242,17 @@ async (req, res) => {
 // Functions
 ///////////////////////////////////////////////////////////////////////////
 function ensureAuthenticated(req,res,next) {
-	//console.log("ensureAuthenticated - %j", req.isAuthenticated());
-	//console.log("ensureAuthenticated - %j", req.user);
-	//console.log("ensureAuthenticated - %j", req.session);
 	if (req.isAuthenticated()) {
     	return next();
 	} else {
-		//console.log("failed auth?");
 		res.redirect('/login');
 	}
 }
-
+// Disable/ enable user
 const toggleUser = async(id, enabled) => {
 	try {
 		// Find User
-		var user = await Account.findOne({_id: id});
+		let user = await Account.findOne({_id: id});
 		// Set Account Status
 		if (enabled == true && user.username != mqtt_user) {
 			user.active = true

@@ -1,20 +1,11 @@
 <%- include('../fragments/header'); -%>
   <div class="container main-content">
       <form class="form-verifySend" id="form-verifySend">
-          <% if (error_messages) { %>
-            <p><strong><%= error_messages %></strong></p>
-          <% } %>
-          <% if (success_messages) { %>
-            <p><strong><%= success_messages %></strong></p>
+          <% if (message) { %>
+            <p><strong><%= message %></strong></p>
           <% } %>
           <h1 class="h3 mb-3 font-weight-normal">Account Verification</h1>
-          <p>Use this form to verify your account.</p>
-          <div class="input-group mb-3">
-							<div class="input-group-prepend">
-								<span class="input-group-text" id="basic-addon2" disabled><strong>Email Address</strong></span>
-							</div>
-							<input type="email" class="form-control" id="email" placeholder="Email Address" required autofocus>
-          </div>
+          <p>Populate the Token value and click 'Verify Account' to complete the account verification process!</p>
           <% if (token != undefined) { %>
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
@@ -31,7 +22,7 @@
             </div>
           <% } %>
           <br>
-          <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Submit</button>
+          <button class="btn btn-lg btn-secondary btn-block" id="submit" type="submit" value="submit">Verify Account</button>
         </form>
 
         <script type="application/javascript">
@@ -39,21 +30,19 @@
               e.preventDefault();
               var xhr = new XMLHttpRequest();
               var token = $('#token').val().trim();
-              var email = $('#email').val().trim();
 
-              var params = 'email=' + encodeURIComponent(email)
-              + "&token=" + encodeURIComponent(token);
+              var params = "&token=" + encodeURIComponent(token);
 
               xhr.open('POST', '/verify',true);
               xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
               xhr.onreadystatechange = function () {
-                if( xhr.readyState == 4 && xhr.status == 200) {
-                  //new verify token created / sent to users email address
-                  //alert(xhr.responseText);
-                  window.location = '/verify';
+                if( xhr.readyState == 4 && xhr.status == 202) {
+                  //account verified
+                  alert(xhr.responseText);
+                  window.location = '/login';
                 } else if (xhr.readyState == 4 && (xhr.status == 400 || xhr.status == 500)) {
                   //show error
-                  //alert(xhr.responseText);
+                  alert(xhr.responseText);
                   window.location = '/verify';
                 }
               }

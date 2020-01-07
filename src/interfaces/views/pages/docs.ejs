@@ -105,7 +105,7 @@
         <li><a href="#troubleshooting">Troubleshooting</a></li>
         </ul>
         <h2 id="install-node-red-nodes">Install Node-RED Nodes</h2>
-        <p>Install the <a href="https://www.npmjs.com/package/node-red-contrib-alexa-smart-home">Node-RED Smart Home Nodes</a> by either:</p>
+        <p>Install the <a href="https://www.npmjs.com/package/node-red-contrib-alexa-smart-home">Node-RED Nodes</a> by either:</p>
         <ul>
         <li>Using the command: <code>npm i node-red-contrib-alexa-smart-home</code></li>
         <li>Using the palette look for &quot;node-red-contrib-alexa-smart-home&quot;</li>
@@ -114,10 +114,12 @@
         <p>On creating your first flow you&#39;ll need to define a configuration for the bridge. If you are using the hosted bridge, you can leave the default values.</p>
         <p>If you are hosting your own, then be sure to set the correct Web API and MQTT host names.</p>
 
-        <h2 id="concept-flow">Concept Flow</h2>
+        <h2 id="concept-flow">Concept Flows</h2>
         <p>Refer to <a href="#capabilities-that-support-state">this table</a> for capabilities that support state</p>
         <h3 id="start-simple">Start Simple</h3>
-        <p>If you are only planning to use voice control you only need a default and a state node. This is a good starting point for any flow, you can then extend the flow to enable external state updates, or to perform other functions as outlined below.</p>
+        <p>If you are only planning to use voice control you only need a default and a state node, plus a node that enables you to interact with the device itself.
+          This is a good starting point for any flow, you can then extend the flow to enable external state updates, or to perform other functions as outlined below.</p>
+        <p><img src="/static/images/basic-flow.png" class="img-fluid" alt="Basic Concept Flow Diagram"></p>
         <p><strong>You should only include a single default and state node per device.</strong></p>
         <h3 id="auto-acknowledge">Auto-Acknowledge</h3>
         <p>Essentially, to use this Node-RED &lt;&gt; Alexa bridge your flows will require:</p>
@@ -690,7 +692,7 @@
         <h3 id="motion-sensor">Motion Sensor</h3>
         <p>Use to send out-of-band state updates to Alexa/ Google Home. You can then use motion sensors as triggers in routines created via the Alexa / Google Home App.</p>
         <p><img src="/static/images/MotionSensorExampleFlow.PNG" class="img-fluid" alt="Motion Sensor flow example"></p>
-        <p>&quot;MQTT > NodeRed Smart Home Control&quot; function code below:</p>
+        <p>&quot;MQTT > <%= brand %>&quot; function code below:</p>
         <div class="bg-light text-dark">
         <pre><code>// Motion State
         <span class="hljs-keyword">if</span> (msg.payload == <span class="hljs-string">"ON"</span>) {
@@ -809,14 +811,14 @@
         </div>
         <h2 id="response-nodes">Response Nodes</h2>
         <p>By default nodes will automatically acknowledge any request via the Skill API. This means that irrespective of whether the flow generates the desired outcome Alexa will respond as if it has.</p>
-        <p>You can change this by disabling the &quot;Auto Acknowledge&quot; option and using a Alexa Smart Home v3 Response Node:</p>
+        <p>You can change this by disabling the &quot;Auto Acknowledge&quot; option and using a Response Node:</p>
         <p><img src="/static/images/AutoAcknowledge.png" class="img-fluid" alt="Auto Acknowledge"></p>
         <p>You must inject <strong>msg.acknowledge</strong> with either a boolean <strong>true</strong> or <strong>false</strong> value into the flow prior to the response and state nodes receive the message. Without this element any state update will be discarded and Alexa will report that the device is not responding. </p>
 
         <h2 id="troubleshooting">Troubleshooting</h2>
         <p>When a flow/ state update isn't working you have a few things you can check.</p>
         <h3 id="node-red-debug-console">Debug Console</h3>
-        <p>Start with the built-in debug console, available in the Node-RED web-interface. The skill will send message to your individiual console if you send an incorrect state update/ an update that is in the wrong format. You will also be warned if your usage is being throttled.</p>
+        <p>Start with the built-in debug console, available in the Node-RED web-interface. The skill will send message to your individual console if you send an incorrect state update/ an update that is in the wrong format. You will also be warned if your usage is being throttled.</p>
         <h3 id="mqtt-subscription">MQTT Subscription</h3>
         <p>No errors in the Node-RED debug console? You can use mosquitto_sub to check your account-specific MQTT messages using the commands below - this will enable you to confirm your Node-RED instance is communicating with the skill itself.</p>
         <div class="bg-light text-dark">

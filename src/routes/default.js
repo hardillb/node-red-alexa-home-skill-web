@@ -39,6 +39,10 @@ var enableGoogleHomeSync = true;
 if (!(process.env.HOMEGRAPH_APIKEY)){
 	enableGoogleHomeSync = false;
 }
+// Regular Expressions, used for validating API POST requests
+let passwordRegExp = /(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
+let emailRegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let usernameRegExp = /^[a-z0-9]{5,15}$/;
 ///////////////////////////////////////////////////////////////////////////
 // Home
 ///////////////////////////////////////////////////////////////////////////
@@ -135,6 +139,12 @@ router.post('/new-user', restrictiveLimiter, async (req, res) => {
 	try {
 		var body = JSON.parse(JSON.stringify(req.body));
 		if (body.hasOwnProperty('username') && body.hasOwnProperty('email') && body.hasOwnProperty('country') && body.hasOwnProperty('password')) {
+			// Check password meets complexity requirements (for programmatic consumers)
+			if (passwordRegExp.test(req.body.password) == false) return res.status(400).send('Password does not meet complexity requirements!');
+			// Check email address format (for programmatic consumers)
+			if (emailRegExp.test(req.body.email) == false) return res.status(400).send('Email address format incorrect!');
+			// Check username format (for programmatic consumers)
+			if (usernameRegExp.test(req.body.username) == false) return res.status(400).send('Username format incorrect!');
 			// Get country from user supplied entry
 			var userCountry = await countries.findByCountryCode(req.body.country.toUpperCase());
 			// Check for any account that match given email address
@@ -145,71 +155,50 @@ router.post('/new-user', restrictiveLimiter, async (req, res) => {
 				var region = userCountry.data[0].region;
 				// Force new usernames to be lowercase, will also prevent duplicate usernames with case variances
 				var username = req.body.username.toLowerCase();
-				// Register new user, Passport will verify username is unique
-				var account = await Account.register(new Account({ username : username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  mqttPass: "foo", active: true }), req.body.password);
-				// Create MQTT Topics for User
-				var topics = new Topics({topics: [
-					'command/' + account.username +'/#',
-					'state/'+ account.username + '/#',
-					'response/' + account.username + '/#',
-					'message/' + account.username + '/#'
-				]});
-				// Save new Topics
-				await topics.save();
-				// Check account.salt and account.hash are available to set MQTT password, if not present error to user
-				if (!account.salt || account.salt == undefined || !account.hash || account.hash == undefined){
-					logger.log('error', "[New User] Creation failed, password hash and salt not available to set MQTT password!");
-					req.flash('error_messages', 'Unable to set MQTT password!');
-					return res.status(500).send('New user creation failed, unable to set MQTT password!');
-				}
-				// Update User account with Topics and MQTT password
-				var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
-				logger.log('debug', "[New User] User hash: " + account.hash + ", user salt: " + account.salt);
-				await Account.updateOne({username: account.username},{$set: {mqttPass: mqttPass, topics: topics._id}});
+				// Generate random, temporary MQTT password
+				var mqttPass = crypto.randomBytes(16).toString('hex');
+				// Register new user, Passport will verify username is unique, MQTT password set to random in case of later failures
+				var account = await Account.register(new Account({ username : username, email: req.body.email, country: req.body.country.toUpperCase(), region: region,  password: mqttPass, mqttPass: mqttPass, active: true }), req.body.password);
 				//Generate Mail Verification Token
-				var mailToken = new verifyEmail({ _userId: account._id, token: crypto.randomBytes(16).toString('hex') });
+				var mailToken = new verifyEmail({ user: account, token: crypto.randomBytes(16).toString('hex') });
 				// Save Mail Verification Token
 				await mailToken.save();
 				// Generate Verification Email
 				var body = mailer.buildVerifyEmail(mailToken.token, account.username, process.env.WEB_HOSTNAME);
 				// Send  Verification Email
 				mailer.send(req.body.email, process.env.MAIL_USER, 'Account Verification for ' + process.env.BRAND, body.text, body.html, function(returnValue) {
-					// Success, send 200 status
+					// Success, 201 Created
 					if (returnValue == true) {
 						sendEventUid(req.path, "Security", "Create Account", req.ip, req.body.username, req.headers['user-agent']);
-						req.flash('success_messages', 'A verification email has been sent to: ' + req.body.email + ", you need to verify your account to use this service.");
-						res.status(200).send('A verification email has been sent to: ' + req.body.email + ", you need to verify your account to use this service.")
+						res.status(201).send('A verification email has been sent to: ' + req.body.email + ", you need to verify your account to use this service.")
 					}
-					// Failed, send 500 error status
+					// Failed, 500 Internal Service Error
 					else {
-						req.flash('error_messages', 'Verification email failed to send!');
 						res.status(500).send('Verification email failed to send!');
 					}
 				});
 			}
 			else {
-				// User exists with this email address
-				if (users.length > 0) {
+				// User exists with this email address, 409 Conflict
+				if (users) {
 					logger.log('error', "[New User] Cannot create new user, user with email address already exists!");
-					req.flash('error_messages', 'Cannot create new user, user with email address already exists!');
-					return res.status(500).send('User with this email address already exists!');
+					return res.status(409).send('User with this email address already exists!');
 				}
-				// Another error occurred, log and send 500 error
+				// Error occurred with userCountry, 500 Internal Service Error
 				else {
 					logger.log('error', "[New User] Creation failed, country status code: " + userCountry.statusCode);
-					req.flash('error_messages', 'Country lookup failed!');
 					return res.status(500).send('New user creation failed!');
 				}
 			}
 		}
 		else {
-			// Missing critical body elements
-			return res.status(500).send('Please complete all required fields!');
+			// Missing critical body elements, 400 Bad Request
+			return res.status(400).send('Please complete all required fields!');
 		}
 	}
 	catch (e) {
+		// General failure, 500 Internal Service Error
 		logger.log('error', "[New User] Cannot create new user, error: " + e.stack);
-		req.flash('error_messages', 'New user creation failed!');
 		return res.status(500).send('New user creation failed!');
 	}
 });
@@ -218,12 +207,13 @@ router.post('/new-user', restrictiveLimiter, async (req, res) => {
 ///////////////////////////////////////////////////////////////////////////
 router.get(['/verify', '/verify/:token'], defaultLimiter, async (req, res) => {
 	sendPageView(req.path, 'Verify', req.ip, req.headers['user-agent']);
-	if (req.params.token) {
-		res.render('pages/verify', {token: req.params.token, user: req.user, brand: process.env.BRAND, title: "Verify Account | " + process.env.BRAND});
+	let message = undefined;
+	if (!req.params.token) {
+		message = 'No token value supplied in URL, please ensure you manually enter token value below!';
+		res.render('pages/verify',{token: undefined, user: req.user, brand: process.env.BRAND, title: "Verify Account | " + process.env.BRAND, message: message});
 	}
 	else {
-		req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!');
-		res.render('pages/verify',{token: undefined, user: req.user, brand: process.env.BRAND, title: "Verify Account | " + process.env.BRAND});
+		res.render('pages/verify',{token: req.params.token, user: req.user, brand: process.env.BRAND, title: "Verify Account | " + process.env.BRAND, message: message});
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -231,57 +221,52 @@ router.get(['/verify', '/verify/:token'], defaultLimiter, async (req, res) => {
 ///////////////////////////////////////////////////////////////////////////
 router.post('/verify', defaultLimiter, async (req, res) => {
 	try {
-		if (req.body.token && req.body.email) {
-			// Find a matching token
-			var token = await verifyEmail.findOne({ token: req.body.token });
-			// Find related user
-			var account = await Account.findOne({ _id: token._userId, email: req.body.email });
+		if (req.body.token) {
+			// Find a matching token, populate user for use in findByUsername account lookup
+			var token = await verifyEmail.findOne({ token: req.body.token }).populate('user').exec();
+			// If no token return 400, bad request
+			if (!token) return res.status(400).send('Unable to find matching token!');
+			// Find related user, returning hash/ salt
+			var account = await Account.findByUsername(token.user.username, true);
 			// Check account is not already verified (no need to proceed if it is)
-			if (account.isVerified) {
-				req.flash('error_messages', 'Your account is already verified!');
+			if (!account) {
+				return res.status(400).send('Unable to find account associated with token!');
+			}
+			else if (account.isVerified) {
 				return res.status(400).send('Your account is already verified!');
 			}
-			logger.log('debug', "[Verify] User hash: " + account.hash + ", user salt: " + account.salt);
-			// // Create MQTT Topics for User
-			// var topics = new Topics({topics: [
-			// 	'command/' + account.username +'/#',
-			// 	'state/'+ account.username + '/#',
-			// 	'response/' + account.username + '/#',
-			// 	'message/' + account.username + '/#'
-			// ]});
-			// // // Save new MQTT Topics
-			// await topics.save();
-			// // // Update User account with Topics and MQTT password
-			// var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
-			// await Account.updateOne({username: account.username},{$set: {mqttPass: mqttPass, topics: topics._id, isVerified: true}});
-			// Update isVerified to true
-			account.isVerified = true;
-			// // Save account
-			await account.save();
+			if (account) logger.log('debug', "[Verify] account hash: " + account.hash + ", account salt: " + account.salt);
+			// Find pattern-based ACL
+			// var aclPattern = await Topics.findOne({topics:	['command/%u/#','state/%u/#','response/%u/#','message/%u/#']});
+			// Create user-specific ACL
+			var aclUser = new Topics({topics: [
+				'command/' + req.params.username +'/#',
+				'state/'+ req.params.username + '/#',
+				'response/' + req.params.username + '/#',
+				'message/' + req.params.username + '/#'
+			]});
+			// Save new user-specific MQTT topics
+			await aclUser.save();
+			// Create MQTT password based upon returned salt and hash
+			var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
+			// Update the user account with MQTT password and MQTT topics, set isVerified to true
+			await Account.updateOne({username: account.username},{$set: {password: mqttPass, mqttPass: mqttPass, topics: aclUser._id, isVerified: true}});
 			// Log success
-			logger.log('verbose' , "[Verify] Update user account: " + account.username + " isVerified:true success");
-			// Generate success flash message
-			req.flash('success_messages', 'The account has been verified, you can now log in!');
+			logger.log('verbose' , "[Verify] Update user account: " + account.username + " isVerified success");
+			logger.log('verbose' , "[Verify] Update user account: " + account.username + " topics: " + JSON.stringify(aclUser));
 			// Send 200 response
-			return res.status(200).send("The account has been verified, you can now log in!");
+			return res.status(202).send("The account has been verified, you can now use the service!");
 		}
 		else {
-			// Email address not supplied, send 400 status
-			if (!req.body.email) {
-				req.flash('error_messages', 'Please ensure you fill-in email address!');
-				return res.status(400).send('Please ensure you fill-in email address!');
-			}
 			// Token not supplied, send 400 status
 			if (!req.body.token) {
-				req.flash('error_messages', 'Please ensure you fill-in token value!');
 				return res.status(400).send('Please ensure you fill-in token value!');
 			}
 		}
 	}
 	catch(e) {
 		// General error, send 500 status
-		logger.log('error' , "[Verify] Update user account: " + account.username + ", error: " + e.stack);
-		req.flash('error_messages', 'Failed to update user account!');
+		logger.log('error' , "[Verify] Update user account error: " + e.stack);
 		return res.status(500).send('Failed to update user account!');
 	}
 });
@@ -302,9 +287,12 @@ router.post('/verify-resend', defaultLimiter,  async (req, res) => {
 			// Find related user
 			var account = await Account.findOne({email: req.body.email});
 			// Check account is not already verified
+			if (!account) {
+				return res.status(400).send('Unable to find matching account, check supplied email address!');
+			}
 			if (!account.isVerified || account.isVerified && account.isVerified == false){
 				// generate new Verification Token
-				var mailToken = new verifyEmail({ _userId: account._id, token: crypto.randomBytes(16).toString('hex') });
+				var mailToken = new verifyEmail({ user: account, token: crypto.randomBytes(16).toString('hex') });
 				// Save the verification token
 				await mailToken.save();
 				// Generate Verification Email
@@ -314,33 +302,28 @@ router.post('/verify-resend', defaultLimiter,  async (req, res) => {
 					if (returnValue == true) {
 						sendEventUid(req.path, "Security", "Send re-verification email", req.ip, account.username, req.headers['user-agent']);
 						logger.log('info' , "[Verify Resend] A new verification email has been sent to: " + account.email);
-						req.flash('success_messages', 'A verification email has been sent to: ' + account.email);
-						return res.status(200).send('A verification email has been sent to: ' + account.email);
+						return res.status(202).send('A verification email has been sent to: ' + account.email);
 					}
 					else {
 						logger.log('error' , "[Verify Resend] Failed to send verification email to: " + account.email);
-						req.flash('error_messages', 'Verification email failed to send!');
 						return res.status(500).send('Verification email failed to send!');
 					}
 				});
 			}
 			// Account already verified
 			else if (account && account.isVerified && account.isVerified == true) {
-				req.flash('error_messages', 'Your account is already verified!');
 				return res.status(400).send('Your account is already verified!');
 			}
 		}
 		// Missing req.body.email
 		else {
 			logger.log('verbose' , "[Verify Resend] Missing email address!");
-			req.flash('error_messages', 'Please ensure you fill-in email address!');
 			return res.status(400).send('Missing email address!');
 		}
 	}
 	catch(e){
 		// General error, send 500 status
 		logger.log('error' , "[Verify Resend] Save user email verification token failed, error: " + e.stack);
-		req.flash('error_messages', 'Failed to generate and send email verification token!');
 		return res.status(500).send('Failed to generate and send email verification token!');
 	}
 });
@@ -350,13 +333,13 @@ router.post('/verify-resend', defaultLimiter,  async (req, res) => {
 ///////////////////////////////////////////////////////////////////////////
 router.get(['/change-password', '/change-password/:token'], restrictiveLimiter, async (req, res) => {
 	sendPageView(req.path, 'Change Password with Token', req.ip, req.headers['user-agent']);
-	if (req.params.token) {
-		res.render('pages/change-password', {token: req.params.token, user: req.user, brand: process.env.BRAND, title: "Change Password | " + process.env.BRAND});
+	let message = undefined;
+	if (!req.params.token) {
+		message = 'No token value supplied in URL, please ensure you manually enter token value below!';
+		res.render('pages/change-password',{token: undefined, user: req.user, brand: process.env.BRAND, title: "Change Password | " + process.env.BRAND, message: message})
 	}
 	else {
-		// Disable flash message if logged in
-		if (!req.user) {req.flash('error_messages', 'No token value supplied in URL, please ensure you manually enter token value below!')};
-		res.render('pages/change-password',{token: undefined, user: req.user, brand: process.env.BRAND, title: "Change Password | " + process.env.BRAND});
+		res.render('pages/change-password',{token: req.params.token, user: req.user, brand: process.env.BRAND, title: "Change Password | " + process.env.BRAND, message: message})
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -367,25 +350,23 @@ router.post('/change-password', defaultLimiter, async (req, res) => {
 	if (req.isAuthenticated()) {
 		try {
 			logger.log('verbose' , "[Change Password] Logged in user request to change password for user account: " + req.user.username);
-			// User is already logged-in, reset their password
+			// Check password meets complexity requirements (for programmatic consumers)
+			if (passwordRegExp.test(req.body.password) == false) return res.status(400).send('Password does not meet complexity requirements!');
 			var result = await resetPassword(req.user.username, req.body.password);
-			//  Success, send 200 status
+			//  Success, send 202 status
 			if (result == true) {
 				sendEventUid(req.path, "Security", "Successfully Changed Password", req.ip, req.user.username, req.headers['user-agent']);
-				req.flash('success_messages', 'Changed Password!');
-				res.status(200).send();
+				res.status(202).send('Changed Password!');
 			}
-			//  Failure, send error 400 status
+			//  Failure, send status 500, Internal Service Error
 			else {
 				sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
-				req.flash('error_messages', 'Error setting new password!');
-				res.status(400).send("Problem setting new password");
+				res.status(500).send("Problem setting new password");
 			}
 		}
 		catch(e) {
 			// General error, send 500 status
 			logger.log('error' , "[Change Password] Error setting authenticated user's password, error: " + e.stack);
-			req.flash('error_messages', 'Error setting new password!');
 			res.status(500).send("Error setting new password!");
 		}
 
@@ -400,27 +381,24 @@ router.post('/change-password', defaultLimiter, async (req, res) => {
 				var token = req.body.token;
 				var lostPassword = await LostPassword.findOne({uuid: token}).populate('user').exec();
 				if (lostPassword) {
-					// Login user
-					await req.login(lostPassword.user);
+					// Check password meets complexity requirements (for programmatic consumers)
+					if (passwordRegExp.test(req.body.password) == false) return res.status(400).send('Password does not meet complexity requirements!');
 					// Remove one-time use token
 					lostPassword.remove();
-					var result = await resetPassword(req.user.username, req.body.password);
+					// Reset user password
+					var result = await resetPassword(lostPassword.user.username, req.body.password);
 					logger.log('verbose' , "[Change Password] resetPassword result: " + result);
 					if (result == true) {
-						sendEventUid(req.path, "Security", "Successfully Changed Password", req.ip, req.user.username, req.headers['user-agent']);
-						req.flash('success_messages', 'Changed Password!');
-						return res.status(200).send();
+						sendEventUid(req.path, "Security", "Successfully Changed Password", req.ip, lostPassword.user.username, req.headers['user-agent']);
+						return res.status(202).send('Changed Password!');
 					}
 					else {
-						sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
-						req.flash('error_messages', 'Error setting new password!');
-						return res.status(400).send("Error setting new password");
+						sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, lostPassword.user.username, req.headers['user-agent']);
+						return res.status(500).send("Error setting new password");
 					}
 				}
 			}
 			else {
-				req.flash('error_messages', 'Please ensure you fill-in token value!');
-				//res.locals.error_messages = 'Please ensure you fill-in token value!';
 				return res.status(400).send('Please ensure you fill-in token value!');
 			}
 		}
@@ -428,8 +406,6 @@ router.post('/change-password', defaultLimiter, async (req, res) => {
 			// General error, send 500 status
 			logger.log('error' , "[Change Password] Error setting unauthenticated user's password, error: " + e.stack);
 			//sendEventUid(req.path, "Security", "Failed to Changed Password", req.ip, req.user.username, req.headers['user-agent']);
-			req.flash('error_messages', 'Error setting new password!');
-			//res.locals.error_messages = 'Error setting new password!';
 			res.status(500).send("Error setting new password");
 		}
 	}
@@ -455,16 +431,25 @@ router.post('/lost-password', defaultLimiter, async (req, res) => {
 	try {
 		var email = req.body.email;
 		var user = await Account.findOne({email: email});
+		if (!user) return res.status(400).send('Unable to find user with supplied email address!');
 		var lostPassword = new LostPassword({user: user});
 		await lostPassword.save();
-		res.status(200).send();
 		var body = mailer.buildLostPasswordBody(lostPassword.uuid, user.username, process.env.WEB_HOSTNAME);
-		mailer.send(req.body.email, process.env.MAIL_USER, 'Password Reset for Node-Red-Alexa-Smart-Home-v3', body.text, body.html);
+		mailer.send(req.body.email, process.env.MAIL_USER, 'Password Reset for ' + process.env.BRAND, body.text, body.html, function(returnValue) {
+			// Success, 202 Accepted
+			if (returnValue == true) {
+				res.status(202).send('A password reset email has been sent to: ' + req.body.email + ".")
+			}
+			// Failed, 500 Internal Service Error
+			else {
+				res.status(500).send('Password reset email failed to send!');
+			}
+		});
 	}
 	catch(e){
 		// General error, send 500 status
 		logger.log('error' , "[Lost Password] Error generating lost password token/ email, error: " + e.stack);
-		res.status(404).send('Error generating lost password token/ email');
+		res.status(500).send('Error generating lost password token/ email');
 	}
 });
 ///////////////////////////////////////////////////////////////////////////
@@ -572,7 +557,7 @@ router.post('/account/:user_id', defaultLimiter,
 				const userCountry = await countries.findByCountryCode(user.country.toUpperCase());
 				var region = userCountry.data[0].region;
 				var account = await Account.findOne({_id: req.params.user_id});
-				if (req.user.username === mqtt_user) {
+				if (req.user.superuser === true) {
 					logger.log('info', "[Update User] Superuser updated user account: " + req.params.user_id);
 				}
 				else {
@@ -616,7 +601,7 @@ router.delete('/account/:user_id', defaultLimiter,
 				await Topics.deleteOne({_id:userAccount.topics});
 				// Success send 200 status
 				res.status(202).send('Account deleted"');
-				if (req.user.username === mqtt_user) {
+				if (req.user.superuser === true) {
 					logger.log('info', "[Delete User] Superuser deleted user account: " + username)
 				}
 				else {
@@ -625,7 +610,7 @@ router.delete('/account/:user_id', defaultLimiter,
 			}
 			else {
 				// Access denied, send 401 status
-				res.status(401).send();
+				res.status(401).send('Unauthorized');
 			}
 		}
 		catch(e){
@@ -653,7 +638,7 @@ async (req, res) => {
 			await oauthModels.RefreshToken.deleteMany({user: userId});
 			// Success send 200 status
 			res.status(202).json({message: 'deleted OAuth tokens'});
-			if (req.user.username === mqtt_user) {
+			if (req.user.superuser === true) {
 				logger.log('info', "[Delete Tokens] Superuser deleted OAuth tokens for account: " + username)
 			}
 			else {
@@ -784,21 +769,22 @@ function ensureAuthenticated(req,res,next) {
 // Async function for password reset
 const resetPassword = async(username, password) => {
 	try {
-		// Find User/ Set Password
-		var user = await Account.findOne({username: username});
-		await user.setPassword(password);
+		// Find related user, returning hash/ salt
+		var account = await Account.findByUsername(username, true);
+		await account.setPassword(password);
 		// Set MQTT Password
-		logger.log('debug', "[Change Password] User hash: " + user.hash + ", user salt: " + user.salt);
+		logger.log('debug', "[Change Password] Account hash: " + account.hash + ", account salt: " + account.salt);
 		if (!account.salt || account.salt == undefined || !account.hash || account.hash == undefined){
 			logger.log('error', "[Change Password] Unable to set MQTT password, hash / salt unavailable!");
 			return false;
 		}
-		var mqttPass = "PBKDF2$sha256$901$" + user.salt + "$" + user.hash;
-		user.mqttPass = mqttPass;
+		var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
+		account.mqttPass = mqttPass;
+		account.password = mqttPass;
 		// Save Account
-		await user.save();
+		await account.save();
 		// Return Success
-		logger.log('verbose', "[Change Password] Changed password for: " + user.username);
+		logger.log('verbose', "[Change Password] Changed password for: " + account.username);
 		return true;
 
 	}

@@ -2,10 +2,10 @@
   "name": "node-red-alexa-home-skill-v3",
   "version": "0.11.0",
   "description": "",
-  "main": "src/server.js",
+  "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
+    "start": "node src/app.js"
   },
   "keywords": [
     "alexa",
@@ -47,7 +47,7 @@
     "passport-http": "^0.3.0",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^5.0.1",
+    "passport-local-mongoose": "^6.0.1",
     "passport-totp": "0.0.2",
     "querystring": "^0.2.0",
     "redis": "^2.8.0",

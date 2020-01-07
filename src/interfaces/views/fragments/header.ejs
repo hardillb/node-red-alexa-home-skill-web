@@ -43,7 +43,7 @@
                 <li <% if (locals.about) {%>class="active"<% } %>><a class="nav-link" href="/about">About</a></li>
                 <li <% if (locals.privacy) {%>class="active"<% } %>><a class="nav-link" href="/privacy">Privacy Policy</a></li>
                 <% if (user) { %>
-                  <% if (user.superuser == 0) { %>
+                  <% if (user.superuser == false) { %>
                     <li <% if (locals.acc) {%>class="active"<% } %>><a class="nav-link" href="/my-account">My Account</a></li>
                     <li <% if (locals.devs) {%>class="active"<% } %>><a class="nav-link" href="/devices">My Devices</a></li>
                   <% } %>
@@ -56,7 +56,7 @@
                   <li <% if (locals.newuser) {%>class="active"<% } %>><a class="nav-link" href="/new-user">Register</a></li>
                 <% } %>
                 <% if (user) { %>
-                  <% if (user.superuser) { %>
+                  <% if (user.superuser == true) { %>
                   <div class="dropdown">
                       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Manage

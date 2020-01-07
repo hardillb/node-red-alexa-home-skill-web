@@ -1,22 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////
 // Depends
 ///////////////////////////////////////////////////////////////////////////
-//var express = require('express');
-//var router = express.Router();
 const mqtt = require('mqtt');
 const logger = require('./logger'); // Moved to own module
-// const client = require('../loaders/redis-mqtt'); // Redis MQTT Command Holding Area
-// const redisScan = require('node-redis-scan');
-// const hgetAsync = promisify(client.hget).bind(client);
-// const delAsync = promisify(client.del).bind(client);
-// const setAsync = promisify(client.set).bind(client);
-//const scanner = new redisScan(client);
 const updateDeviceState = require('../services/state').updateDeviceState;
-//const setstate = stateApi.setstate;
 ///////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////
-//var debug = (process.env.ALEXA_DEBUG || false);
 // MQTT ENV variables========================
 var mqtt_user = (process.env.MQTT_USER);
 var mqtt_password = (process.env.MQTT_PASSWORD);
@@ -51,14 +41,13 @@ mqttClient.on('reconnect', function(){
 	logger.log('warn', "[MQTT] MQTT reconnect event");
 });
 mqttClient.on('connect', function(){
-	logger.log('info', "[MQTT] MQTT connected, subscribing to 'response/#' and 'state/#")
+	logger.log('info', "[MQTT] MQTT connected, subscribing to 'response/#' and 'state/#'")
 	mqttClient.subscribe('response/#');
 	mqttClient.subscribe('state/#');
 });
 ///////////////////////////////////////////////////////////////////////////
 // MQTT Message Handlers
 ///////////////////////////////////////////////////////////////////////////
-
 // Event handler for received MQTT messages - note subscribe near top of script.
 mqttClient.on('message',function(topic,message){
 	var arrTopic = topic.split("/");
@@ -302,10 +291,10 @@ var timeout = setInterval(function(){
 								// Cleanup waiting acknowledge command response, we're ready to send it
 								delete ongoingCommands[additionalCommand.requestId + arrCommandDevices[x]];
 							}
+							// If we have a response, we can delete unacknowledged command older than > maxTime in ms
+							var diffAdditionalCommand = now - additionalCommand.timestamp;
+							if (diffAdditionalCommand > maxTime && response !== undefined) {delete ongoingCommands[additionalCommand.requestId + arrCommandDevices[x]];}
 						}
-						// If we have a response, we can delete unacknowledged command older than > maxTime in ms
-						var diffAdditionalCommand = now - additionalCommand.timestamp;
-						if (diffAdditionalCommand > maxTime && response !== undefined) {delete ongoingCommands[additionalCommand.requestId + arrCommandDevices[x]];}
 					}
 					// All commands in multi-device command have been executed successfully
 					if (response !== undefined) {

@@ -9,7 +9,7 @@ var Account = new Schema({
     country:String,
     region: String,
     mqttPass: { type: String, default: '' },
-    superuser: { type: Number, default: 0},
+    superuser: { type: Boolean, default: false},
     topics: { type: Number},
     created: { type: Date, default: function(){
         return new Date();
@@ -20,14 +20,14 @@ var Account = new Schema({
 });
 
 var options = {
-	usernameUnique: true,
-	saltlen: 12,
+    usernameUnique: true,
+    saltlen: 12,
 	keylen: 24,
 	iterations: 901,
     encoding: 'base64',
     limitAttempts: true,
     findByUsername: function(model, queryParameters) {
-        // Add additional query parameter - AND condition - active: true
+        // Check account.active true, if not auth will fail
         queryParameters.active = true;
         return model.findOne(queryParameters);
       }

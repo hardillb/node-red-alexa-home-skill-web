@@ -16,6 +16,7 @@ var logger = require('../loaders/logger');
 const gHomeFunc = require('../services/func-ghome');
 const gHomeReplaceCapability = require('../services/func-ghome').gHomeReplaceCapability;
 const gHomeReplaceType = require('../services/func-ghome').gHomeReplaceType;
+const validateCommandAsync = require('../services/func-ghome').validateCommandAsync;
 const servicesFunc = require('../services/func-services');
 //var client = require('../loaders/redis-mqtt'); // Redis MQTT Command Holding Area
 const defaultLimiter = require('../loaders/limiter').defaultLimiter;
@@ -221,185 +222,81 @@ router.post('/action', defaultLimiter,
 		///////////////////////////////////////////////////////////////////////////
 		case 'action.devices.EXECUTE' :
 			try {
-				logger.log('verbose', "[GHome Exec API] Execute command(s) for user: " + req.user.username);
 				sendEventUid(req.path, "EXECUTE", "GHome EXECUTE Event", req.ip, req.user.username, req.headers['user-agent']);
-				// Find users devices
+				// Find users devices defined on this service
 				var devices = await Devices.find({username: req.user.username});
-				logger.log('debug', "[GHome Exec API] Execute command(s) for user: " + req.user.username + ", command: " +  JSON.stringify(req.body.inputs[0].payload.commands));
-				// Array of commands, assume match with device array at same index?!
+				logger.log('verbose', "[GHome Exec API] Execute command(s) for user: " + req.user.username + ", command: " +  JSON.stringify(req.body.inputs[0].payload.commands));
+				// Create array of commands
 				var arrCommands = req.body.inputs[0].payload.commands;
-				// Iterate through commands in payload, against each listed
-				for (var i=0; i< arrCommands.length; i++) {
-					var arrCommandsDevices =  req.body.inputs[0].payload.commands[i].devices; // Array of devices to execute commands against
-					logger.log('debug', "[GHome Exec API] # of endpoints in command request: " + arrCommandsDevices.length);
-					var params = arrCommands[i].execution[0].params; // Google Home Parameters
-					var validationStatus = true;
-					// Match device to returned array in case of any required property/ validation
-					arrCommandsDevices.forEach(function(element) {
-						//logger.log('debug', "[GHome Exec API] Attempting to matching command device: " + element.id + ", against devicesJSON");
-						var data = devices.find(obj => obj.endpointId == element.id);
-						if (data == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
-						else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(data))}
-						///////////////////////////////////////////////////////////////////////////
-						// Perform Command Validation
-						///////////////////////////////////////////////////////////////////////////
-						// Handle Thermostat valueOutOfRange
-						if (arrCommands[i].execution[0].command == "action.devices.commands.ThermostatTemperatureSetpoint") {
-							var hastemperatureMax = getSafe(() => data.attributes.temperatureRange.temperatureMax);
-							var hastemperatureMin = getSafe(() => data.attributes.temperatureRange.temperatureMin);
-							if (hastemperatureMin != undefined && hastemperatureMax != undefined) {
-								var temperatureMin = data.attributes.temperatureRange.temperatureMin;
-								var temperatureMax = data.attributes.temperatureRange.temperatureMax;
-								logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.thermostatTemperatureSetpoint + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
-								if (params.thermostatTemperatureSetpoint > temperatureMax || params.thermostatTemperatureSetpoint < temperatureMin){
-									// Build valueOutOfRange error response
-									validationStatus = false;
-									logger.log('warn', "[GHome Exec API] Temperature valueOutOfRange error for endpointId:" + element.id);
-									// Global error response
-									var errResponse = {
-										"requestId": req.body.requestId,
-										"payload": {
-											"errorCode": "valueOutOfRange"
-										}
-									}
-									logger.log('debug', "[GHome Exec API] valueOutOfRange error response:" + JSON.stringify(errResponse));
-									res.status(200).json(errResponse);
-								}
+				logger.log('debug', "[GHome Exec API] # of commands in request: " + arrCommands.length);
+				// Iterate through each command
+				for (let command of arrCommands) {
+					//logger.log('verbose', "[GHome Exec API] Command to execute: " +  JSON.stringify(command));
+					logger.log('debug', "[GHome Exec API] # of endpoints in command request: " + command.devices.length);
+					// Get command parameters, for use in Google Home response
+					var params = command.execution[0].params;
+					// Loop through each device in command, validate and send MQTT command
+					for (let commandDevice of command.devices) {
+						logger.log('debug', "[GHome Exec API] Executing command for device id: " + commandDevice.id);
+						// Match command device with a device from user devices defined on this service
+						var dbDevice = devices.find(obj => obj.endpointId == commandDevice.id);
+						if (dbDevice == undefined) {logger.log('debug', "[GHome Exec API] Failed to match device against devicesJSON")}
+						else {logger.log('debug', "[GHome Exec API] Executing command against device:" + JSON.stringify(dbDevice))}
+						// Validate command against any limits set on devices
+						var validation = await validateCommandAsync(command, commandDevice, dbDevice, req);
+						// Validation returned false, check response code and send relevant failure back to Google
+						if (validation.status == false) {
+							if (validation.response != undefined) return res.status(200).json(validation.response);
+							else {return res.status(500).send()}
+							}
+						logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + commandDevice.id);
+						// Define MQTT Topic
+						var topic = "command/" + req.user.username + "/" + commandDevice.id;
+						// Define MQTT Message
+						var message = JSON.stringify({
+							requestId: requestId,
+							id: commandDevice.id,
+							execution: command
+						});
+						// Publish MQTT command to broker
+						mqttClient.publish(topic,message);
+						logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
+						logger.log('debug', "[GHome Exec API] MQTT message:" + message);
+						// Build success response and include in redis-stored command
+						var response = {
+							requestId: requestId,
+							payload: {
+								commands: [{
+									ids: [commandDevice.id],
+									status: "SUCCESS",
+									state: params
+								}]
 							}
 						}
-						// Handle Color Temperature valueOutOfRange
-						if (arrCommands[i].execution[0].command == "action.devices.commands.ColorAbsolute") {
-							var hastemperatureMaxK = getSafe(() => data.attributes.colorTemperatureRange.temperatureMaxK);
-							var hastemperatureMinK = getSafe(() => data.attributes.colorTemperatureRange.temperatureMinK);
-							if (hastemperatureMinK != undefined && hastemperatureMaxK != undefined) {
-								var temperatureMinK = data.attributes.colorTemperatureRange.temperatureMinK;
-								var temperatureMaxK = data.attributes.colorTemperatureRange.temperatureMaxK;
-								logger.log('debug', "[GHome Exec API] Checking requested setpoint: " + params.color.temperature + " , againast temperatureRange, temperatureMin:" + hastemperatureMin + ", temperatureMax:" + temperatureMax);
-								if (params.color.temperature > temperatureMaxK || params.color.temperature < temperatureMinK){
-									// Build valueOutOfRange error response
-									validationStatus = false;
-									logger.log('warn', "[GHome Exec API] valueOutOfRange error for endpointId:" + element.id);
-									// Global error response
-									var errResponse = {
-										"requestId": req.body.requestId,
-										"payload": {
-											"errorCode": "valueOutOfRange"
-										}
-									}
-									logger.log('debug', "[GHome Exec API] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
-									res.status(200).json(errResponse);
-								}
+						// Build command object used for correlation/ response tracking
+						var commandTracker = {
+							user: req.user.username,
+							userId: req.user._id,
+							requestId: requestId,
+							res: res,
+							response: response,
+							source: "Google",
+							devices: [],
+							acknowledged: false,
+							timestamp: Date.now()
+						};
+						// Add additional deviceIds to command.devices if multi-device command to enable correlation of responses
+						for (let device of command.devices) {
+							//logger.log('debug', "[GHome Exec API] Checking device.id: " + device.id + ", against commandDevice.id: " + commandDevice.id);
+							if (device.id != undefined && device.id != commandDevice.id){
+								commandTracker.devices.push(device.id);
+								logger.log('debug', "[GHome Exec API] Added endpointId to multi-device command");
 							}
 						}
-						// Handle 2FA requirement
-						var hasRequire2FA = getSafe(() => data.attributes.require2FA);
-						if (hasRequire2FA == true) {
-							var hasChallengeType = getSafe(() => data.attributes.type2FA); // check device for 2FA challenge type
-							var hasChallengePin = getSafe(() => arrCommands[i].execution[0].challenge.pin); // check request itself for pin
-							// PIN Required, NO pin supplied
-							if (hasChallengeType == "pin" && hasChallengePin == undefined){
-								validationStatus = false;
-								logger.log('warn', "[GHome Exec API] pinNeeded but not supplied for command against endpointId:" + element.id);
-								var errResponse = {
-									requestId: req.body.requestId,
-									payload: {
-										commands: [{
-											ids: [element.id.toString()],
-											status: "ERROR",
-											errorCode: "challengeNeeded",
-											challengeNeeded : {
-												type: "pinNeeded"
-											}
-										}]
-									}
-								};
-								logger.log('debug', "[GHome Exec API] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
-								res.status(200).json(errResponse);
-							}
-							// PIN required, wrong PIN
-							else if (hasChallengeType == "pin" && hasChallengePin != data.attributes.pin){
-								validationStatus = false;
-								logger.log('warn', "[GHome Exec API] wrong pin supplied for command against endpointId:" + element.id);
-								var errResponse = {
-									requestId: req.body.requestId,
-									payload: {
-										commands: [{
-											ids: [element.id.toString()],
-											status: "ERROR",
-											errorCode: "challengeNeeded",
-											challengeNeeded : {
-												type: "challengeFailedPinNeeded"
-											}
-										}]
-									}
-								};
-								logger.log('debug', "[GHome Exec API] Color Temperature valueOutOfRange error response:" + JSON.stringify(errResponse));
-								res.status(200).json(errResponse);
-							}
-						}
-						///////////////////////////////////////////////////////////////////////////
-						// End Validation
-						///////////////////////////////////////////////////////////////////////////
-						if (validationStatus == true) {
-							logger.log('debug', "[GHome Exec API] Command to be executed against endpointId:" + element.id);
-							// Set MQTT Topic
-							var topic = "command/" + req.user.username + "/" + element.id;
-							try{
-								// Define MQTT Message
-								var message = JSON.stringify({
-									requestId: requestId,
-									id: element.id,
-									execution: arrCommands[i]
-								});
-								// Publish Command
-								mqttClient.publish(topic,message);
-								logger.log('verbose', "[GHome Exec API] Published MQTT command for user: " + req.user.username + " topic: " + topic);
-								logger.log('debug', "[GHome Exec API] MQTT message:" + message);
-
-							} catch (err) {
-								logger.log('warn', "[GHome Exec API] Failed to publish MQTT command for user: " + req.user.username);
-								logger.log('debug', "[GHome Exec API] Publish MQTT command error: " + err);
-							}
-							// Build success response and include in redis-stored command
-							var response = {
-								requestId: requestId,
-								payload: {
-									commands: [{
-										ids: [element.id],
-										status: "SUCCESS",
-										state: params
-									}]
-								}
-							}
-							var command = {
-								user: req.user.username,
-								userId: req.user._id,
-								requestId: requestId,
-								res: res,
-								response: response,
-								source: "Google",
-								devices: [],
-								acknowledged: false,
-								timestamp: Date.now()
-							};
-
-							// Add additional deviceIds to command.devices if multi-device command to enable correlation of responses
-							for (x = 0; x < arrCommandsDevices.length; x++) {
-								try {
-									if (arrCommandsDevices[x].id != element.id){
-										//command.response.payload.commands[0].ids.push(arrCommandsDevices[x].id);
-										command.devices.push(arrCommandsDevices[x].id);
-										logger.log('debug', "[GHome Exec API] Added endpointId to multi-device command");
-									}
-								}
-								catch(e) {
-									logger.log('error', "[GHome Exec API] Unable to add endpointId to multi-command response, error: " + e);
-								}
-							}
-							ongoingCommands[requestId + element.id] = command; // Command drops into buffer w/ 6000ms timeout (see defined function above) - ACK comes from N/R flow
-							// client.hset(requestId + element.id, 'command', command); // Command drops into redis database, used to generate failure messages if not ack
-						}
-					});
+						// Drop into shared ongoingCommands array, state API will monitor for response within timeout period
+						ongoingCommands[requestId + commandDevice.id] = commandTracker;
+						// client.hset(requestId + device.id, 'command', command); // Command drops into redis database, used to generate failure messages if not ack
+					};
 				}
 			}
 			catch(e) {
