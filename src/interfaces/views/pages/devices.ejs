@@ -10,7 +10,7 @@
 <% } %>
 <% if (grants == 0) { %>
 	<div class="alert alert-danger alert-dismissible fade show" role="alert">
-		<strong>Warning!</strong> You still need to link your Amazon Account via the Alexa App! See <a href='/docs#account-linking'>here</a> for more information.
+		<strong>Warning!</strong> You still need to link your Amazon/ Google Account to use this service! See <a href='/docs'>here</a> for more information.
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 		</button>
@@ -51,7 +51,8 @@
 		<button type="button" class="btn btn-secondary" onclick="addDevice();">Add Device</button>
 	</div>
 	<br />
-	<p>After making any changes remember to ask Alexa to update devices it knows about by saying "Alexa, discover devices"</p>
+	<p>Google Home will automatically update with new devices, or changes to existing devices.</p>
+	<p>Amazon Alexa users need to manually to update devices, either via the Alexa App or by saying "Alexa, discover devices."</p>
 </div>
 
 <%- include('../fragments/device-modal'); -%>
@@ -701,9 +702,11 @@ function saveDevice() {
 					//reload
 					document.location.reload();
 				}
-			}).fail(function(){
-				alert("failed to create device");
-			});
+			}).fail(
+				function(jqXHR, textStatus, errorThrown) {
+					alert(jqXHR.responseText);
+				}
+			);
 		} else {
 			alert("Name or description can not be empty and at least one action is needed");
 		}
@@ -798,7 +801,11 @@ function saveDevice() {
 					//reload
 					document.location.reload();
 				},
-			});
+			}).fail(
+				function(jqXHR, textStatus, errorThrown) {
+					alert(jqXHR.responseText);
+				}
+			);
 			// console.log(JSON.stringify(device));
 		} else {
 			alert("Name or description can not be empty and at least one action is needed");

@@ -110,6 +110,7 @@ router.post('/action', defaultLimiter,
 					}
 					// FanSpeed, map 1:1 with RangeController 1-10
 					if (device.capabilities.indexOf("RangeController") > -1 && (dev.type.indexOf('action.devices.types.FAN') > -1 || dev.type.indexOf('action.devices.types.THERMOSTAT') > -1 )){
+						//dev.supportsFanSpeedPercent = true;
 						dev.attributes.availableFanSpeeds = {
 							"availableFanSpeeds": {
 							"speeds": [{

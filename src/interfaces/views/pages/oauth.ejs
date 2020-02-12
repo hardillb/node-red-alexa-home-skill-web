@@ -38,9 +38,10 @@
                 <% });%>
             </ul> -->
             <% if (user) { %>
-                <p>Click <em>Authorise</em> to allow <%= application.title %> access to control your devices.</p>
+                <p>Click <em>Authorise</em> to allow <%= application.title %> permission to control your devices.</p>
             <% } else { %>
-                <p>Please sign-in using your <a href='/'><span translate="no"><%= brand %></span></a> account in order to allow <%= application.title %> access to control your devices.</p>
+                <p>Please sign-in using your <a href='/'><span translate="no"><%= brand %></span></a> account.</p>
+                <p>By linking your account you are giving <%= application.title %> permission to control your devices.</p>
             <% } %>
         <div>
 

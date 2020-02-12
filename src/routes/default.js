@@ -20,6 +20,7 @@ var countries = require('countries-api');
 var logger = require('../loaders/logger');
 const defaultLimiter = require('../loaders/limiter').defaultLimiter;
 const restrictiveLimiter = require('../loaders/limiter').restrictiveLimiter;
+const removeUserServices = require('../services/func-services').removeUserServices;
 ///////////////////////////////////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -57,7 +58,8 @@ router.get('/', defaultLimiter, async (req, res) => {
 router.get('/docs', defaultLimiter, async (req, res) => {
 	sendPageView(req.path, 'Documentation', req.ip, req.headers['user-agent']);
 	//outputSessionID(req, "/docs");
-	res.render('pages/docs', {user: req.user, docs: true, brand: process.env.BRAND, title: "Documentation | " + process.env.BRAND});
+	//res.render('pages/docs', {user: req.user, docs: true, brand: process.env.BRAND, title: "Documentation | " + process.env.BRAND});
+	res.status(301).redirect('https://docs.cb-net.co.uk');
 });
 ///////////////////////////////////////////////////////////////////////////
 // About
@@ -238,15 +240,24 @@ router.post('/verify', defaultLimiter, async (req, res) => {
 			if (account) logger.log('debug', "[Verify] account hash: " + account.hash + ", account salt: " + account.salt);
 			// Find pattern-based ACL
 			// var aclPattern = await Topics.findOne({topics:	['command/%u/#','state/%u/#','response/%u/#','message/%u/#']});
-			// Create user-specific ACL
-			var aclUser = new Topics({topics: [
-				'command/' + req.params.username +'/#',
-				'state/'+ req.params.username + '/#',
-				'response/' + req.params.username + '/#',
-				'message/' + req.params.username + '/#'
+			// Check for existing ACL
+			var aclUser = await Topics.findOne({topics: [
+				'command/' + account.username +'/#',
+				'state/'+ account.username + '/#',
+				'response/' + account.username + '/#',
+				'message/' + account.username + '/#'
 			]});
-			// Save new user-specific MQTT topics
-			await aclUser.save();
+			// If does not exist, create user-specific ACL
+			if (!aclUser) {
+				var aclUser = new Topics({topics: [
+					'command/' + account.username +'/#',
+					'state/'+ account.username + '/#',
+					'response/' + account.username + '/#',
+					'message/' + account.username + '/#'
+				]});
+				// Save new user-specific MQTT topics
+				await aclUser.save();
+			}
 			// Create MQTT password based upon returned salt and hash
 			var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
 			// Update the user account with MQTT password and MQTT topics, set isVerified to true
@@ -334,7 +345,7 @@ router.post('/verify-resend', defaultLimiter,  async (req, res) => {
 router.get(['/change-password', '/change-password/:token'], restrictiveLimiter, async (req, res) => {
 	sendPageView(req.path, 'Change Password with Token', req.ip, req.headers['user-agent']);
 	let message = undefined;
-	if (!req.params.token) {
+	if (!req.params.token && !req.user) {
 		message = 'No token value supplied in URL, please ensure you manually enter token value below!';
 		res.render('pages/change-password',{token: undefined, user: req.user, brand: process.env.BRAND, title: "Change Password | " + process.env.BRAND, message: message})
 	}
@@ -528,6 +539,19 @@ router.put('/devices', defaultLimiter,
 			var device = req.body;
 			// Set username on device to match req.user.username
 			device.username = user;
+
+			// Check for duplicate device name
+			var checkDevice = await Devices.findOne({username:user, friendlyName: device.friendlyName});
+			if (checkDevice) {
+				logger.log('warn' , "[Create Device] User tried to create a device with duplicate friendly name");
+				return res.status(500).send('Please ensure your devices have unique names!');
+			}
+			// Require 2FA PIN on Google Home-enabled user Smart Lock
+			if (req.user.activeServices.indexOf('Google') > -1 && device.displayCategories == 'SMARTLOCK' && (!device.attributes.require2FA || !device.attributes.pin || !device.attributes.type2FA)){
+				logger.log('warn' , "[Create Device] Google Home user tried to create new Smart Lock device without a PIN");
+				return res.status(500).send('As a Google Home user you must set a PIN on your lock!');
+			}
+
 			// Create new device
 			var dev = new Devices(device);
 			// Save device
@@ -553,7 +577,7 @@ router.post('/account/:user_id', defaultLimiter,
 			// Get POST data
 			var user = req.body;
 			// Check requesting user matches req.params.user_id, or that user is SU
-			if (req.user.username === mqtt_user || req.user.username == user.username) {
+			if (req.user.superuser === true || req.user.username == user.username) {
 				const userCountry = await countries.findByCountryCode(user.country.toUpperCase());
 				var region = userCountry.data[0].region;
 				var account = await Account.findOne({_id: req.params.user_id});
@@ -590,7 +614,7 @@ router.delete('/account/:user_id', defaultLimiter,
 			// Find user based on req.params.user_id
 			var userAccount = await Account.findOne({_id: userId});
 			// Check requesting user matches req.params.user_id, or that user is SU
-			if (userAccount.username == req.user.username || req.user.username === mqtt_user) {
+			if (userAccount.username == req.user.username || req.user.superuser === true) {
 				var username = userAccount.username;
 				// Delete all account data
 				await Account.deleteOne({_id: userId});
@@ -630,12 +654,15 @@ async (req, res) => {
 		// Find user based on req.params.user_id
 		var userAccount = await Account.findOne({_id: userId});
 		// Check requesting user matches req.params.user_id, or that user is SU
-		if (userAccount.username == req.user.username || req.user.username === mqtt_user) {
+		if (userAccount.username == req.user.username || req.user.superuser === true) {
 			var username = userAccount.username;
 			// Delete Token data
 			await oauthModels.GrantCode.deleteMany({user: userId});
 			await oauthModels.AccessToken.deleteMany({user: userId});
 			await oauthModels.RefreshToken.deleteMany({user: userId});
+			// Remove active services
+			removeUserServices(userAccount.username, "Amazon");
+			removeUserServices(userAccount.username, "Google");
 			// Success send 200 status
 			res.status(202).json({message: 'deleted OAuth tokens'});
 			if (req.user.superuser === true) {
@@ -675,6 +702,13 @@ router.post('/device/:dev_id', defaultLimiter,
 				data.reportState = device.reportState;
 				data.attributes = device.attributes;
 				data.state = device.state;
+
+				// Require 2FA PIN on Google Home-enabled user Smart Lock
+				if (req.user.activeServices.indexOf('Google') > -1 && device.displayCategories == 'SMARTLOCK' && (!device.attributes.require2FA || !device.attributes.pin || !device.attributes.type2FA)){
+					logger.log('warn' , "[Create Device] Google Home user tried to create new Smart Lock device without a PIN");
+					return res.status(500).send('As a Google Home user you must set a PIN on your lock!');
+				}
+
 				// Save updated device
 				await data.save();
 				// Return 201 status
@@ -704,7 +738,7 @@ router.delete('/device/:dev_id', defaultLimiter,
 			var user = req.user.username;
 			var id = req.params.dev_id;
 			// Route for non-SU user, allow user to delete their own devices
-			if (req.user.username != mqtt_user) {
+			if (req.user.superuser !== true) {
 				// Delete device, using req.user.username and _id
 				await Devices.deleteOne({_id: id, username: user});
 				res.status(202).send();
@@ -712,7 +746,7 @@ router.delete('/device/:dev_id', defaultLimiter,
 				if (enableGoogleHomeSync == true){gHomeSync(req.user._id)};
 			}
 			// User is SU, can delete any device
-			else if  (req.user.username === mqtt_user) {
+			else if  (req.user.superuser === true) {
 				// Delete device, using _id only, SU limited
 				await Devices.deleteOne({_id: id});
 				res.status(202).send();
@@ -769,15 +803,20 @@ function ensureAuthenticated(req,res,next) {
 // Async function for password reset
 const resetPassword = async(username, password) => {
 	try {
-		// Find related user, returning hash/ salt
-		var account = await Account.findByUsername(username, true);
+		// Find related user
+		var account = await Account.findOne({username: username});
+		// Set password
 		await account.setPassword(password);
-		// Set MQTT Password
+		// Save Account
+		await account.save();
+		// Get updated user object, returning hash/ salt for use in PBKDF2 MQTT password
+		var account = await Account.findByUsername(username, true);
 		logger.log('debug', "[Change Password] Account hash: " + account.hash + ", account salt: " + account.salt);
 		if (!account.salt || account.salt == undefined || !account.hash || account.hash == undefined){
 			logger.log('error', "[Change Password] Unable to set MQTT password, hash / salt unavailable!");
 			return false;
 		}
+		// Set MQTT Password
 		var mqttPass = "PBKDF2$sha256$901$" + account.salt + "$" + account.hash;
 		account.mqttPass = mqttPass;
 		account.password = mqttPass;
@@ -786,7 +825,6 @@ const resetPassword = async(username, password) => {
 		// Return Success
 		logger.log('verbose', "[Change Password] Changed password for: " + account.username);
 		return true;
-
 	}
 	catch(e) {
 		logger.log('error', "[Change Password] Unable to change password for user, error: " + e);

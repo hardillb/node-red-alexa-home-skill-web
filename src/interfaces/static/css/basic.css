@@ -15,7 +15,6 @@
 .action {
 	padding: 1px;
 	margin: 1px;
-	border: 1px solid;
 }
 
 .service {
@@ -141,6 +140,9 @@
 }
 
 .darkmode--activated .octicon {
-	color: #aeaba8;
+	filter: invert(100%);
   }
 
+.darkmode--activated .action {
+  filter: invert(100%);
+}

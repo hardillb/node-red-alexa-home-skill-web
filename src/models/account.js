@@ -26,11 +26,7 @@ var options = {
 	iterations: 901,
     encoding: 'base64',
     limitAttempts: true,
-    findByUsername: function(model, queryParameters) {
-        // Check account.active true, if not auth will fail
-        queryParameters.active = true;
-        return model.findOne(queryParameters);
-      }
+    usernameQueryFields: ["email"]
 };
 
 Account.plugin(passportLocalMongoose,options);

@@ -9,6 +9,10 @@ var express = require('express');
 const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
+var BasicStrategy = require('passport-http').BasicStrategy;
+var LocalStrategy = require('passport-local').Strategy;
+var PassportOAuthBearer = require('passport-http-bearer');
+var logger = require('./loaders/logger');
 var bodyParser = require('body-parser');
 const path = require('path');
 const { SitemapStream, streamToPromise } = require('sitemap');
@@ -25,11 +29,6 @@ var state = require('./services/state'); // Load State API
 ///////////////////////////////////////////////////////////////////////////
 var Account = require('./models/account');
 var oauthModels = require('./models/oauth');
-var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var LocalStrategy = require('passport-local').Strategy;
-var PassportOAuthBearer = require('passport-http-bearer');
-var logger = require('./loaders/logger');
 ///////////////////////////////////////////////////////////////////////////
 // External Functions
 ///////////////////////////////////////////////////////////////////////////
@@ -50,15 +49,6 @@ var mqtt_password = (process.env.MQTT_PASSWORD);
 var cookieSecret = (process.env.COOKIE_SECRET || 'ihytsrf334');
 if (cookieSecret == 'ihytsrf334') {logger.log("warn", "[App] Using default Cookie Secret, please supply new secret using COOKIE_SECRET environment variable")}
 else {logger.log("info", "[App] Using user-defined cookie secret")}
-///////////////////////////////////////////////////////////////////////////
-// Passport Configuration
-///////////////////////////////////////////////////////////////////////////
-// Configure Passport Local Strategy via createStrategy() helper method, as-per https://www.npmjs.com/package/passport-local-mongoose#simplified-passportpassport-local-configuration
-passport.use(Account.createStrategy());
-// Create Passport Basic Strategy
-passport.use(new BasicStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
 ///////////////////////////////////////////////////////////////////////////
 // Main
 ///////////////////////////////////////////////////////////////////////////
@@ -92,9 +82,97 @@ if (!(process.env.MAIL_SERVER && process.env.MAIL_USER && process.env.MAIL_PASSW
 if (!(process.env.HOMEGRAPH_APIKEY)){
 	logger.log('warn',"[Core] No HOMEGRAPH_APIKEY environment variable supplied. New devices, removal or device changes will not show in users Google Home App without this");
 }
-// *****
-// Create server itself
-// *****
+///////////////////////////////////////////////////////////////////////////
+// Passport Configuration
+///////////////////////////////////////////////////////////////////////////
+// Configure Passport Local Strategy, checking that account is enabled, with user feedback on account disabled
+const authenticate = Account.authenticate();
+passport.use(new LocalStrategy((username, password, cb) => {
+  authenticate(username, password, (err, user, error) => {
+	logger.log('debug',"[Auth] Passport Local Strategy, authentication called for user: " + username);
+	// An error ocurred, do not authenticate
+	if (err) { return cb(err); }
+	// Check user is active, if not send customised error
+	if (user && user.active == false ) {return cb(null, false, new Error("User account disabled!"))};
+	// Check user is active and verified, if not send customised error depending on scenario
+	/*	if (user && (!user.active || !user.isVerifed)) {
+		if (!user.active) return cb(null, false, new Error("User account disabled!"))
+		if (!user.isVerified) return cb(null, false, new Error("User account not verified!"))
+	}; */
+    cb(null, user, error);
+  });
+}));
+
+// Create Passport Basic Strategy, checking that account is enabled, with user feedback on account disabled
+passport.use(new BasicStrategy((username, password, cb) => {
+	authenticate(username, password, (err, user, error) => {
+		logger.log('debug',"[Auth] Passport Basic Strategy, authentication called for user: " + username);
+		// An error ocurred, do not authenticate
+		if (err) { return cb(err); }
+		// Check user is active, if not send customised error
+		if (user && user.active == false ) {return cb(null, false, new Error("User account disabled!"))};
+		// Check user is active and verified, if not send customised error depending on scenario
+		/*	if (user && (!user.active || !user.isVerifed)) {
+			if (!user.active) return cb(null, false, new Error("User account disabled!"))
+			if (!user.isVerified) return cb(null, false, new Error("User account not verified!"))
+		}; */
+		cb(null, user, error);
+	});
+  }));
+
+// Create OAuth Bearer Strategy, checking that account is enabled
+  passport.use(new PassportOAuthBearer(function(token, done) {
+	oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
+		if (!error && token) {
+			logger.log('debug', "[OAuth] Returned OAuth Token: " + JSON.stringify(token));
+			// Check token is active, has a grant, grant is active, has use and user is active
+			if (token.active && token.grant && token.grant.active && token.user && token.user.active) {
+				logger.log('verbose', "[OAuth] OAuth Token success for user: " + token.user.username + ", token: " + JSON.stringify(token));
+				done(null, token.user, { scope: token.scope });
+			}
+			// Found OAuth token, however token not active
+			else if (!token.active) {
+				logger.log('warn', "[OAuth] OAuth Token failure, token not active: " + JSON.stringify(token));
+				done(null, false);
+			}
+			// Found OAuth token, however token has no grant
+			else if (!token.grant) {
+				logger.log('warn', "[OAuth] OAuth Token failure, missing grant token: " + JSON.stringify(token));
+				done(null, false);
+			}
+			// Found OAuth token, however token grant not active
+			else if (!token.grant.active) {
+				logger.log('warn', "[OAuth] OAuth Token failure, grant token not active: " + JSON.stringify(token));
+				done(null, false);
+			}
+			// Found OAuth token, however token user missing (should never get here!)
+			else if (!token.user) {
+				logger.log('warn', "[OAuth] OAuth Token failure, user population failed: " + JSON.stringify(token));
+				done(null, false);
+			}
+			// Found OAuth token, however user is not active/ enabled
+			else if (token.user && token.user.active == false) {
+				logger.log('warn', "[OAuth] OAuth Token failure, user: " + token.user.username + ", user.active is false");
+				done(null, false);
+			}
+		}
+		// No OAuth token found
+		else if (!token) {
+			logger.log('warn', "[OAuth] OAuth Token failure, token not found for user!");
+			done(null, false);
+		}
+		// An Error occurred in trying to find OAuth token
+		else {
+			logger.log('error', "[OAuth] OAuth Token lookup failed, error: " + error);
+			done(error);
+		}
+	});
+}));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
+///////////////////////////////////////////////////////////////////////////
+// Create Server
+///////////////////////////////////////////////////////////////////////////
 const createServer = async() => {
 	try {
 		// Connect to MongoDB
@@ -115,24 +193,41 @@ const createServer = async() => {
 		// Create Express instance
 		var app = express();
 		app.set('view engine', 'ejs');
-		app.enable('trust proxy');
+		// Configure favicon
 		app.use(favicon(path.join(__dirname, '/interfaces/static', 'favicon.ico')))
 		// Configure logging
 		app.use(morgan("combined", {stream: logger.stream})); // change to use Winston
 		// Enable req.flash support
 		app.use(flash());
-		// Setup session handler
-		app.use(session({
-			store: new mongoStore({
-				url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions"
-			}),
-			resave: true,
-			saveUninitialized: false,
-			secret: cookieSecret,
-			cookie: {
-				secure: true
-			}
-		}));
+		// Handle production environment session handler options
+		if (app.get('env') === 'production') {
+			logger.log('info', "[App] Production environment detected enabling trust proxy/ secure cookies");
+			app.enable('trust proxy');
+			app.use(session({
+				store: new mongoStore({
+					url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
+					touchAfter: 24 * 3600
+				}),
+				resave: false,
+				saveUninitialized: false,
+				secret: cookieSecret,
+				cookie: {
+					secure: true
+				}
+			}));
+		}
+		// Handle non production environment session handler options
+		else {
+			app.use(session({
+				store: new mongoStore({
+					url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
+					touchAfter: 24 * 3600
+				}),
+				resave: false,
+				saveUninitialized: false,
+				secret: cookieSecret
+			}));
+		}
 		app.use(bodyParser.json());
 		app.use(bodyParser.urlencoded({ extended: false }));
 		app.use(passport.initialize());
@@ -188,64 +283,6 @@ const createServer = async() => {
 		app.use('/api/ghome', rtGhome); // Google Home API
 		app.use('/api/v1', rtAlexa); // Alexa API
 		///////////////////////////////////////////////////////////////////////////
-		// Passport Configuration
-		///////////////////////////////////////////////////////////////////////////
-		passport.use(new LocalStrategy(Account.authenticate()));
-		passport.use(new BasicStrategy(Account.authenticate()));
-
-		passport.serializeUser(Account.serializeUser());
-		passport.deserializeUser(Account.deserializeUser());
-		var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
-			oauthModels.AccessToken.findOne({ token: token }).populate('user').populate('grant').exec(function(error, token) {
-				if (!error && token) {
-					logger.log('debug', "[OAuth] Returned OAuth Token: " + JSON.stringify(token));
-					// Check token is active, has a grant, grant is active, has use and user is active
-					if (token.active && token.grant && token.grant.active && token.user && token.user.active) {
-						logger.log('verbose', "[OAuth] OAuth Token success for user: " + token.user.username + ", token: " + JSON.stringify(token));
-						done(null, token.user, { scope: token.scope });
-					}
-					// Found OAuth token, however token not active
-					else if (!token.active) {
-						logger.log('warn', "[OAuth] OAuth Token failure, token not active: " + JSON.stringify(token));
-						done(null, false);
-					}
-					// Found OAuth token, however token has no grant
-					else if (!token.grant) {
-						logger.log('warn', "[OAuth] OAuth Token failure, missing grant token: " + JSON.stringify(token));
-						done(null, false);
-					}
-					// Found OAuth token, however token grant not active
-					else if (!token.grant.active) {
-						logger.log('warn', "[OAuth] OAuth Token failure, grant token not active: " + JSON.stringify(token));
-						done(null, false);
-					}
-					// Found OAuth token, however token user missing (should never get here!)
-					else if (!token.user) {
-						logger.log('warn', "[OAuth] OAuth Token failure, user population failed: " + JSON.stringify(token));
-						done(null, false);
-					}
-					// Found OAuth token, however user is not active/ enabled
-					else if (token.user && token.user.active == false) {
-						logger.log('warn', "[OAuth] OAuth Token failure, user: " + token.user.username + ", user.active is false");
-						done(null, false);
-					}
-				}
-				// No OAuth token found
-				else if (!token) {
-					logger.log('warn', "[OAuth] OAuth Token failure, token not found for user!");
-					done(null, false);
-				}
-				// An Error occurred in trying to find OAuth token
-				else {
-					logger.log('error', "[OAuth] OAuth Token lookup failed, error: " + error);
-					done(error);
-				}
-			});
-		});
-
-		passport.use(accessTokenStrategy);
-
-		///////////////////////////////////////////////////////////////////////////
 		// Error Handler
 		///////////////////////////////////////////////////////////////////////////
 
@@ -267,18 +304,22 @@ const createServer = async() => {
 		});
 
 		// NodeJS App Settings
-		var port = (process.env.VCAP_APP_PORT || 3000);
-		var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
+		var port, host, app_uri, app_id;
+		// Set TCP port
+		if (process.env.VCAP_APP_PORT) port = process.env.VCAP_APP_PORT;
+		else port = (process.env.WEB_APP_PORT || 3000);
+		// Set IP/ host
+		if (process.env.VCAP_APP_HOST) port = process.env.VCAP_APP_HOST;
+		else host = (process.env.WEB_APP_HOST || '0.0.0.0');
 		// Express Settings
 		if (process.env.VCAP_APPLICATION) {
 			var application = JSON.parse(process.env.VCAP_APPLICATION);
-			var app_uri = application['application_uris'][0];
+			app_uri = application['application_uris'][0];
 			app_id = 'https://' + app_uri;
 		}
 		else {
-			//var app_id = 'http://localhost:' + port;
-			var app_uri = (process.env.WEB_HOSTNAME || 'localhost');
-			var app_id = 'https://' + app_uri;
+			app_uri = (process.env.WEB_HOSTNAME || 'localhost');
+			app_id = 'https://' + app_uri;
 		}
 		// Create HTTP Server, to be proxied
 		var server = app.listen(port, function(){

@@ -1,0 +1,19 @@
+{% extends '!layout.html' %}
+
+{% block extrahead %}
+    <link href="{{ pathto("_static/css/rtd_dark_centre.css", True) }}" rel="stylesheet" type="text/css">
+    <link href="{{ pathto("_static/css/flags.css", True) }}" rel="stylesheet" type="text/css">
+    <style>
+        .flag {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: url("{{ pathto("_static/images/flags_oauth.png", True) }}") no-repeat;
+        }
+    </style>
+{% endblock %}
+
+{% block extrabody %}
+    <!-- Start Google Translate -->
+    <!-- <div id="google_translate_element" style="text-align: right;"></div> -->
+{% endblock %}
