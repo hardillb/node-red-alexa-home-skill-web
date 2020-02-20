@@ -36,9 +36,7 @@ To link your Amazon account:
 
 Link your Google Account
 ***************
-.. warning:: You currently have to request extension of the service to your Google account. Please contact `node-red@cb-net.co.uk <mailto:node-red@cb-net.co.uk>`_ for access.
-
-Once granted access you may need to browse to https://console.actions.google.com/u/0/project/node-red-208520/simulatorcreate?isDeepLink to accept Google Terms and Conditions to use the service.
+.. warning:: If your locale is **not** English you currently have to request extension of the service to your Google account. Please contact `node-red@cb-net.co.uk <mailto:node-red@cb-net.co.uk>`_ for access. Once granted access you may need to browse to https://console.actions.google.com/u/0/project/node-red-208520/simulatorcreate?isDeepLink to accept Google Terms and Conditions to use the service.
 
 To link your Google account:
 
@@ -58,7 +56,7 @@ To link your Google account:
 .. image:: _static/images/works-wih-google.png
     :alt: Add a "works with Google device"
 
-5. Select "[test] Node-RED Smart Home Control" and complete the account linking process
+5. For English locale users select "Node-RED Smart Home Control" otherwise, for non-English locale users, select "[test] Node-RED Smart Home Control" and complete the account linking process
 
 .. image:: _static/images/account-linking-google.png
     :alt: Screenshot of Google Account Linking process
