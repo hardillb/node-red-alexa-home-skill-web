@@ -285,7 +285,7 @@ Create the NGINX container using the following commands::
 
     sudo wget -O /var/docker/nginx/includes/letsencrypt.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/letsencrypt.conf
 
-    sudo wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.githubusercontent.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/e38df9035789676bdf13093af0ef1a7c657176af/nr-alexav3.cb-net.co.uk.conf
+    sudo wget -O /var/docker/nginx/conf.d/nr-alexav3.cb-net.co.uk.conf https://gist.githubusercontent.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/b6ad451c0e60e94a78136efa37606901b2df11c4/nr-alexav3.cb-net.co.uk.conf
 
     sudo wget -O /var/docker/nginx/includes/restrictions.conf https://gist.github.com/coldfire84/47f90bb19a91f218717e0b7632040970/raw/65bb04af575ab637fa279faef03444f2525793db/restrictions.conf
 
