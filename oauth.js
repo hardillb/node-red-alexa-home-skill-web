@@ -112,7 +112,7 @@ server.exchange(oauth2orize.exchange.refreshToken({
 	//console.log("Yay!");
 	OAuth.RefreshToken.findOne({token: token}, function(error, refresh){
 		if (refresh && refresh.application == application.id) {
-			OAuth.GrantCode.findOne({},function(error, grant){
+			OAuth.GrantCode.findOne({user: refresh.user},function(error, grant){
 				if (grant && grant.active && grant.application == application.id){
 					var newToken = new OAuth.AccessToken({
 						application: refresh.application,

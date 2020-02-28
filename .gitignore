@@ -1,4 +1,4 @@
 node_modules/*
-
+log/*
 test.sh
 test-aws.sh
