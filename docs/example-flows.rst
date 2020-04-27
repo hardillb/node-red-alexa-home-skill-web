@@ -67,7 +67,7 @@ An 'MQTT In' node is configured to listen on the relevant multi-sensor Tasmota t
 
     tele/sensor-esp-5/SENSOR
 
-Whilst the function node code will vary by environment, in this example we take the standard Tasmota telemetry messages and convert the output for use with the state node:
+Whilst the function node code will vary by environment, in this example we take the standard Tasmota telemetry messages and convert the output for use with the state node::
 
     var jsonPayload = JSON.parse(msg.payload);
     var temperature = jsonPayload.SI7021.Temperature;
