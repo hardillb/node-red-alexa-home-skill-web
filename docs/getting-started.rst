@@ -191,6 +191,11 @@ Enter your Node-RED Smart Home Control username and password and click 'Add' to 
 .. image:: _static/images/account-config-details.png
     :alt: Screenshot of username/ password configuration.
 
+You can also select a Context Store for the nodes to use: this must be a memory-based context store.
+
+.. image:: _static/images/context-store.png
+    :alt: Screenshot of initial account configuration.
+
 You can now start to build flows using the concept and example flows in this documentation for inspiration.
 
 .. tip:: Unless you are hosting your own instance of the API, you can leave the default "MQTT Hostname" and "Web API Hostname" fields as-is.
