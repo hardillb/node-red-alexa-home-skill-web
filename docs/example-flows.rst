@@ -53,3 +53,23 @@ Function code needed to submit the state updates to the Node-RED Smart Home Cont
     }
 
 .. tip:: In the majority of cases it will be more performant and more reliable to use your local Node-RED instance or MQTT server perform actions based upon motion sensor state changes.
+
+Temperature Sensor
+################
+.. note:: Google Home does not currently support dedicated temperature sensors.
+
+Use the flow below to send temperature sensor updates to Amazon/ Alexa, the temperature sensor in this instance is an ESP8266 multi-sensor running `Tasmota <https://github.com/arendst/Tasmota>`_.
+
+.. image:: _static/images/tempsensor-example.png
+    :alt: Screenshot of motion sensor example flow
+
+An 'MQTT In' node is configured to listen on the relevant multi-sensor Tasmota telemetry topic:
+
+    tele/sensor-esp-5/SENSOR
+
+Whilst the function node code will vary by environment, in this example we take the standard Tasmota telemetry messages and convert the output for use with the state node:
+
+    var jsonPayload = JSON.parse(msg.payload);
+    var temperature = jsonPayload.SI7021.Temperature;
+
+    return { "payload" : { "state" : { "temperature" : msg.payload.temperature } }, "acknowledge" : true };

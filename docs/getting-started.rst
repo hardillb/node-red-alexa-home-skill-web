@@ -3,6 +3,8 @@
 **********
 Getting Started
 **********
+ .. warning:: Do not try and connect your Node-RED instance to the service before you have verified your account.
+
 Before you can use this service with Alexa or Google Home you need to:
 
 1. Create an account via `https://red.cb-net.co.uk/new-user. <https://red.cb-net.co.uk/new-user>`_

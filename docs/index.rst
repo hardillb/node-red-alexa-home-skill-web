@@ -13,7 +13,7 @@
 **********
 Introduction
 **********
-With 1500+ users, and 4500+ defined devices, available in 12 Amazon Alexa markets and English locale for Google Assistant (other markets/ locales to follow), Node-RED Smart Home Control enables you to quickly bring voice-control to your Node-RED flows, using Amazon Alexa and/ or Google Assistant.
+With 2000+ users, and 5500+ defined devices, available in 12 Amazon Alexa markets and English locale for Google Assistant (other markets/ locales to follow), Node-RED Smart Home Control enables you to quickly bring voice-control to your Node-RED flows, using Amazon Alexa and/ or Google Assistant.
 
 You can support the ongoing development and hosting costs of this service via PayPal or alternatively through the `GitHub Sponsors programme <https://github.com/coldfire84>`_.
 
