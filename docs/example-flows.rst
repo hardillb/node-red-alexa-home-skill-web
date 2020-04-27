@@ -72,4 +72,4 @@ Whilst the function node code will vary by environment, in this example we take 
     var jsonPayload = JSON.parse(msg.payload);
     var temperature = jsonPayload.SI7021.Temperature;
 
-    return { "payload" : { "state" : { "temperature" : msg.payload.temperature } }, "acknowledge" : true };
+    return { "payload" : { "state" : { "temperature" : temperature } }, "acknowledge" : true };
