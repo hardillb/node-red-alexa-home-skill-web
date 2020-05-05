@@ -75,8 +75,8 @@ const setupServiceAccount = async(username, password) => {
             logger.log('info' , "[App] Created MQTT superuser account!");
             return true;
 		}
-		// Super User account needs updates based upon historical release changes
-		else if (account && !account.active && !account.isVerified) {
+		// Super User set active
+		else if (account && (!account.active || !account.isVerified)) {
 			// Update Super User account
 			logger.log('info', "[App] Superuser MQTT found but needs updating, modifying account: " + username);
 			await Account.updateOne({username: account.username},{$set: {isVerified: true, active: true}});
