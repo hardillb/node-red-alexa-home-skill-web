@@ -58,7 +58,9 @@ To link your Google account:
 .. image:: _static/images/works-wih-google.png
     :alt: Add a "works with Google device"
 
-5. For English locale users select "Node-RED Smart Home Control" otherwise, for non-English locale users, select "[test] Node-RED Smart Home Control" and complete the account linking process
+5. For English locale users select "Node-RED Smart Home Control" otherwise, for German locale user, look for "Node-RED Smart Home-Steuerung."
+
+For other locales look for "[test] Node-RED Smart Home Control" and complete the account linking process
 
 .. image:: _static/images/account-linking-google.png
     :alt: Screenshot of Google Account Linking process
