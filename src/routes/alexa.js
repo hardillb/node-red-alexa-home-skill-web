@@ -65,10 +65,11 @@ router.get('/devices',
 				dev.manufacturerName = "Node-RED"
 				devs.push(dev);
 			}
+			logger.log('debug', "[Alexa Discovery] Alexa Discovery response for user: " + req.user.username + ", response: " + JSON.stringify(devs));
 			res.send(devs);
 		}
 		catch(e) {
-			logger.log('error', "[Alexa Devices] Error getting device data for: " + req.user.username + ", error: " + e.stack);
+			logger.log('error', "[Alexa Discovery] Error getting device data for: " + req.user.username + ", error: " + e.stack);
 			res.status(500).send();
 		}
 
