@@ -988,7 +988,7 @@ function edit(id) {
 				//$("#Celsius").prop('required',true);
 				//$("#Farenheit").prop('required',true);
 				if (device.attributes.temperatureScale == 'CELSIUS') {$("#Celsius").prop('checked', true)}
-				if (device.attributes.temperatureScale == 'FARENHEIT') {$("#Farenheit").prop('checked', true)}
+				if (device.attributes.temperatureScale == 'FARENHEIT' || device.attributes.temperatureScale == 'FAHRENHEIT') {$("#Farenheit").prop('checked', true)}
 			}
 			// Handle user-selected thermostatModes
 			if (device.attributes.hasOwnProperty('thermostatModes')) {
