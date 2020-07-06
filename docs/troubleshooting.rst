@@ -5,7 +5,6 @@ Troubleshooting
 **********
 When something isn't working as expected you have a few things you can check.
 
-
 Add a Node-RED Debug Node
 ################
 Add a debug node after any "alexa-smart-home-v3" node, you can then verify that the command output is being received when you issue a voice command, or interact with a device using the Alexa/ Google Home applications. Ensure you configure the debug node to "output complete msg object."
@@ -45,6 +44,14 @@ If, after issuing a command via the Alexa or Google Home applications or, after 
 
 .. note:: You'll only see messages for your account, the service uses Access Control Lists (ACLs) to filter MQTT messages.
 
+Check your Credentials
+################
+Getting 401 errors in Node-RED/ unable to authenticate to the MQTT server? It's worth checking your credentials.
+
+Browse to the `<https://red.cb-net.co.uk/api/v1/devices>`_ Devices API and authenticate using your username and password, you should get a page full of text containing information about your defined devices.
+
+If you're unable to browse this API/ you get a 401 error `reset your password <https://red.cb-net.co.uk/lost-password>`_ .
+
 
 Review Node-RED Console Log
 ################
@@ -57,13 +64,18 @@ For Docker-deployed instances, this is as simple as executing the command (conta
 
 Re-link Your Account
 ################
-If you are still struggling to get the service working it is definitely worth un-linking/ disabling the service via your smart assistant application and re-linking/ enabling the service.
+If you are still struggling to get the service working it is definitely worth un-linking/ disabling the service. Issues this may fix include:
 
-Some long-term users of the service have been linked with a **development-only** edition of the service which can expire after 90 days of development inactivity. Since the majority of development work occurs in the API/ back-end it is highly likely that this can be a re-occurring issue.
+* Discovery of new devices not working (Some long-term users of the service have been linked with a **development-only** edition of the service which can expire after 90 days of development inactivity.)
+* Commands to existing devices not working
 
-The production version of the service is a "permanent" fixture.
+This is a three step process:
 
-.. tip:: Before re-linking your account it is worth clearing your account "tokens" - use the "Delete Tokens" button found on the "My Account" page.
+1. Use the Alexa/ Google Home smart assistant application to disable the service.
+2. Browse to `My Account <https://red.cb-net.co.uk/my-account>`_ and hit Delete Tokens.
+3. Re-link your Account via the Alexa/ Google Home smart assistant application.
+
+.. tip:: Don't skip the "Delete Tokens" step, you're likely to continue having issues unless you complete this step.
 
 
 Still Stuck?
