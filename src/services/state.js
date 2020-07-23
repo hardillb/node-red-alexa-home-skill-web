@@ -3,7 +3,8 @@
 ///////////////////////////////////////////////////////////////////////////
 var Account = require('../models/account');
 var Devices = require('../models/devices');
-const uuidv4 = require('uuid/v4');
+//const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const logger = require('../loaders/logger');
 const fs = require('fs');
 const util = require("util");
