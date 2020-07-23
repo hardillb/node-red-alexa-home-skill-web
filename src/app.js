@@ -7,7 +7,8 @@ var flash = require('connect-flash');
 var morgan = require('morgan');
 var express = require('express');
 const session = require('express-session');
-const mongoStore = require('connect-mongo')(session);
+//const mongoStore = require('connect-mongo')(session);
+const cookieSession = require('cookie-session')
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
@@ -205,30 +206,48 @@ const createServer = async() => {
 		if (app.get('env') === 'production') {
 			logger.log('info', "[App] Production environment detected enabling trust proxy/ secure cookies");
 			app.enable('trust proxy');
-			app.use(session({
-				store: new mongoStore({
-					url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
-					touchAfter: 24 * 3600
-				}),
-				resave: false,
-				saveUninitialized: false,
-				secret: cookieSecret,
-				cookie: {
-					secure: true
-				}
-			}));
+
+			// app.use(session({
+			// 	store: new mongoStore({
+			// 		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
+			// 		touchAfter: 24 * 3600
+			// 	}),
+			// 	resave: false,
+			// 	saveUninitialized: false,
+			// 	secret: cookieSecret,
+			// 	cookie: {
+			// 		secure: true
+			// 	}
+			// }));
+
+			app.use(cookieSession({
+				name: 'session',
+				keys: [cookieSecret],
+				// Cookie Options
+				maxAge: 24 * 60 * 60 * 1000, // 24 hours
+				secure: true
+			  }));
 		}
 		// Handle non production environment session handler options
 		else {
-			app.use(session({
-				store: new mongoStore({
-					url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
-					touchAfter: 24 * 3600
-				}),
-				resave: false,
-				saveUninitialized: false,
-				secret: cookieSecret
-			}));
+			// app.use(session({
+			// 	store: new mongoStore({
+			// 		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions",
+			// 		touchAfter: 24 * 3600
+			// 	}),
+			// 	resave: false,
+			// 	saveUninitialized: false,
+			// 	secret: cookieSecret
+			// }));
+
+			app.use(cookieSession({
+				name: 'session',
+				keys: [cookieSecret],
+				// Cookie Options
+				maxAge: 24 * 60 * 60 * 1000, // 24 hours
+				secure: false
+			  }));
+
 		}
 		app.use(bodyParser.json());
 		app.use(bodyParser.urlencoded({ extended: false }));
@@ -279,11 +298,11 @@ const createServer = async() => {
 		const rtAuth = require('./routes/auth');
 		const rtGhome = require('./routes/ghome');
 		const rtAlexa = require('./routes/alexa');
-		app.use('/', rtDefault);
 		app.use('/admin', rtAdmin); // Admin Interface
 		app.use('/auth', rtAuth); // OAuth endpoints
 		app.use('/api/ghome', rtGhome); // Google Home API
 		app.use('/api/v1', rtAlexa); // Alexa API
+		app.use('/', rtDefault);
 		///////////////////////////////////////////////////////////////////////////
 		// Error Handler
 		///////////////////////////////////////////////////////////////////////////
