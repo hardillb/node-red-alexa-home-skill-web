@@ -296,13 +296,14 @@ const createServer = async() => {
 		});
 		// Error Handler
 		app.use(function(err, req, res, next) {
-			res.status(err.status || 500).send(err.message);
 			if (err.status == 404){
 				logger.log('warn', "[App] Not found: " + err.status + ", path: " + req.path);
 			}
 			else {
 				logger.log('error', "[App] Fall-back error handler, status code: " + err.status + ", message: " + err.message);
+				logger.log('error', "[App] Fall-back error handler: " + err);
 			}
+			res.status(err.status || 500).send(err.message);
 		});
 
 		// NodeJS App Settings
