@@ -38,7 +38,7 @@ To link your Amazon account:
 
 Link your Google Account
 ***************
-.. warning:: If your locale is **not** English you currently have to request extension of the service to your Google account. Please contact `node-red@cb-net.co.uk <mailto:node-red@cb-net.co.uk>`_ for access. Once granted access you may need to browse to https://console.actions.google.com/u/0/project/node-red-208520/simulatorcreate?isDeepLink to accept Google Terms and Conditions to use the service.
+.. warning:: If your locale is **not** English **or** German you currently have to request extension of the service to your Google account. Please contact `node-red@cb-net.co.uk <mailto:node-red@cb-net.co.uk>`_ for access. Once granted access you may need to browse to https://console.actions.google.com/u/0/project/node-red-208520/simulatorcreate?isDeepLink to accept Google Terms and Conditions to use the service.
 
 To link your Google account:
 
