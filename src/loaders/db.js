@@ -59,7 +59,8 @@ exports.connect = () => {
 		useUnifiedTopology: false,
 		autoReconnect: true,
 		reconnectTries: 30,
-		reconnectInterval: 1000
+		reconnectInterval: 1000,
+		poolSize: 15
 	}).
 		catch(error => logger.log('error', '[Core] Error connecting to MongoDB: ' + error));
 }
