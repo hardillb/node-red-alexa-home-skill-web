@@ -48,7 +48,14 @@ mongoose.set('useUnifiedTopology', true);
 logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 
 exports.connect = () => {
-	mongoose.connect(mongo_url, {useNewUrlParser: true, useUnifiedTopology: true, socketTimeoutMS: 30000, keepAlive: true, keepAliveInitialDelay: 30000}).
+	mongoose.connect(mongo_url, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+		poolSize: 10,
+		socketTimeoutMS: 30000,
+		keepAlive: true,
+		keepAliveInitialDelay: 30000
+	}).
 		catch(error => logger.log('error', '[Core] Error connecting to MongoDB: ' + error));
 }
 
