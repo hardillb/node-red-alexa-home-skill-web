@@ -41,13 +41,25 @@ mongoose_connection.on('disconnected', function() {
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
+
+// Move back to useUnifiedTopology: false
 mongoose.set('useUnifiedTopology', true);
 
 logger.log('info', "[Core] Connecting to MongoDB server: mongodb://" + mongo_host + ":" + mongo_port + "/users");
 
+// exports.connect = () => {
+// 	mongoose.connect(mongo_url, {useNewUrlParser: true,useUnifiedTopology: true}).
+// 		catch(error => logger.log('error', '[Core] Error connecting to MongoDB: ' + error));
+// }
+
+// Move back to useUnifiedTopology: false
 exports.connect = () => {
 	mongoose.connect(mongo_url, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true
-	});
+		useNewUrlParser: true,
+		useUnifiedTopology: false,
+		autoReconnect: true,
+		reconnectTries: 30,
+		reconnectInterval: 1000
+	}).
+		catch(error => logger.log('error', '[Core] Error connecting to MongoDB: ' + error));
 }
