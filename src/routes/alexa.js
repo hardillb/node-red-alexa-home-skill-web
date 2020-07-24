@@ -190,16 +190,16 @@ router.post('/authorization', defaultLimiter,
 	async (req, res) => {
 		//const user = await User.findOne({email: req.body.email})
 		if (req.body.directive.payload.grant.type == "OAuth2.AuthorizationCode") {
-			logger.log('info', "[Alexa Authorization] Request body: " + JSON.stringify(req.body));
+			logger.log('info', "[AlexaAuth] Received authorisation request, body: " + JSON.stringify(req.body));
 			var messageId = req.body.directive.header.messageId;
 			var grantcode = req.body.directive.payload.grant.code;
 			// Pre-build success and failure responses
 			var success = {
 					event: {
 					header: {
-						messageId: messageId,
 						namespace: "Alexa.Authorization",
 						name: "AcceptGrant.Response",
+						messageId: messageId,
 						payloadVersion: "3"
 					},
 					payload: {}
@@ -223,9 +223,10 @@ router.post('/authorization', defaultLimiter,
 			var grant = await saveGrantAsync(req.user, grantcode);
 			if (grant != undefined) {
 				res.status(200).json(success);
+				logger.log('debug', "[AlexaAuth] Sent authorisation response, body: " + JSON.stringify(success));
 			}
 			else {
-				logger.log('error', "[Alexa Authorization] General failure, sending: " + JSON.stringify(failure));
+				logger.log('error', "[AlexaAuth] General authorisation failure, sending: " + JSON.stringify(failure));
 				res.status(200).json(failure);
 			}
 		}
