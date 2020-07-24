@@ -7,8 +7,8 @@ var flash = require('connect-flash');
 var morgan = require('morgan');
 var express = require('express');
 const session = require('express-session');
-const mongoStore = require('connect-mongo')(session);
-//const cookieSession = require('cookie-session');
+//const mongoStore = require('connect-mongo')(session);
+const cookieSession = require('cookie-session');
 var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local').Strategy;
@@ -207,46 +207,46 @@ const createServer = async() => {
 			logger.log('info', "[App] Production environment detected enabling trust proxy/ secure cookies");
 			app.enable('trust proxy');
 
-			app.use(session({
-				store: new mongoStore({
-					url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions?connectTimeoutMS=100000&minPoolSize=5&maxPoolSize=10",
-					touchAfter: 24 * 3600
-				}),
-				resave: false,
-				saveUninitialized: false,
-				secret: cookieSecret,
-				cookie: {
-					secure: true
-				}
-			}));
+			// app.use(session({
+			// 	store: new mongoStore({
+			// 		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions?connectTimeoutMS=100000&minPoolSize=5&maxPoolSize=10",
+			// 		touchAfter: 24 * 3600
+			// 	}),
+			// 	resave: false,
+			// 	saveUninitialized: false,
+			// 	secret: cookieSecret,
+			// 	cookie: {
+			// 		secure: true
+			// 	}
+			// }));
 
-			// app.use(cookieSession({
-			// 	name: 'session',
-			// 	keys: [cookieSecret],
-			// 	// Cookie Options
-			// 	maxAge: 24 * 60 * 60 * 1000, // 24 hours
-			// 	secure: true
-			//   }));
+			app.use(cookieSession({
+				name: 'session',
+				keys: [cookieSecret],
+				// Cookie Options
+				maxAge: 24 * 60 * 60 * 1000, // 24 hours
+				secure: true
+			  }));
 		}
 		// Handle non production environment session handler options
 		else {
-			app.use(session({
-				store: new mongoStore({
-					url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions?connectTimeoutMS=100000&minPoolSize=5&maxPoolSize=10",
-					touchAfter: 24 * 3600
-				}),
-				resave: false,
-				saveUninitialized: false,
-				secret: cookieSecret
-			}));
+			// app.use(session({
+			// 	store: new mongoStore({
+			// 		url: "mongodb://" + mongo_user +":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/sessions?connectTimeoutMS=100000&minPoolSize=5&maxPoolSize=10",
+			// 		touchAfter: 24 * 3600
+			// 	}),
+			// 	resave: false,
+			// 	saveUninitialized: false,
+			// 	secret: cookieSecret
+			// }));
 
-			// app.use(cookieSession({
-			// 	name: 'session',
-			// 	keys: [cookieSecret],
-			// 	// Cookie Options
-			// 	maxAge: 24 * 60 * 60 * 1000, // 24 hours
-			// 	secure: false
-			//   }));
+			app.use(cookieSession({
+				name: 'session',
+				keys: [cookieSecret],
+				// Cookie Options
+				maxAge: 24 * 60 * 60 * 1000, // 24 hours
+				secure: false
+			  }));
 
 		}
 		app.use(bodyParser.json());
