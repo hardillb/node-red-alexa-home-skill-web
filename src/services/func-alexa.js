@@ -42,6 +42,7 @@ const saveGrantAsync = async(user, grantCode) => {
         // Failure, return undefined
         if (accessToken == undefined) return undefined;
         // Success, return Grant Code
+        logger.log('info', "[AlexaAuth] Grant Code stored for user : " + user.username + ", grant: " + newGrant);
         return newGrant;
         // Failure, return undefined
     }
