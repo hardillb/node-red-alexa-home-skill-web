@@ -227,7 +227,7 @@ router.post('/authorization', defaultLimiter,
 				res.status(200).json(success);
 				logger.log('debug', "[AlexaAuth] Sent authorisation response for user :" + req.user.username + ",  body: " + JSON.stringify(success));
 				// Async, test Grant Code by requesting an Access Token for user
-				var accessToken = await requestAccessTokenAsync(user);
+				var accessToken = await requestAccessTokenAsync(req.user);
 				// Failure, return undefined
 				if (accessToken == undefined) logger.log('error', "[AlexaAuth] Failed to obtain AccessToken for user: " + req.user.username);
 			}
