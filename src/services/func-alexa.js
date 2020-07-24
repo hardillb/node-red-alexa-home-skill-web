@@ -26,6 +26,7 @@ else {
 // Save/ return valid Grant Code
 const saveGrantAsync = async(user, grantCode) => {
 	try {
+        logger.log('debug', "[AlexaAuth] Purging existing Grant Code stored for user : " + user.username);
         // Delete existing grant/ refresh/ access tokens for given user
         await AlexaAuth.AlexaAuthGrantCode.deleteMany({user: user});
         await AlexaAuth.AlexaAuthRefreshToken.deleteMany({user: user});
@@ -36,13 +37,14 @@ const saveGrantAsync = async(user, grantCode) => {
             code: grantCode
         });
         // Save Grant Code
+        logger.log('debug', "[AlexaAuth] Saving new Grant Code for user : " + user.username);
         await newGrant.save();
         // Test Grant Code by requesting an Access Token for user
         var accessToken = await requestAccessTokenAsync(user);
         // Failure, return undefined
         if (accessToken == undefined) return undefined;
         // Success, return Grant Code
-        logger.log('info', "[AlexaAuth] Grant Code stored for user : " + user.username + ", grant: " + newGrant);
+        logger.log('debug', "[AlexaAuth] Grant Code stored for user : " + user.username + ", grant: " + JSON.stringify(newGrant));
         return newGrant;
         // Failure, return undefined
     }
@@ -85,6 +87,7 @@ const requestAccessTokenAsync = async(user) => {
                     client_secret : client_secret
                 };
                 // Use Amazon Auth service to request Access Token and await response
+                logger.log('debug', "[AlexaAuth] Requesting new Access Token for user : " + user.username);
                 var response = await axios({
                     method: 'post',
                     url: 'https://api.amazon.com/auth/o2/token',
@@ -123,6 +126,7 @@ const requestAccessTokenAsync = async(user) => {
                     client_secret : client_secret
                 };
                 // Use Amazon Auth service to request Refresh Token and Access Token
+                logger.log('debug', "[AlexaAuth] Requesting new Refresh Token and Access Token for user : " + user.username);
                 var response = await axios({
                     method: 'post',
                     url: 'https://api.amazon.com/auth/o2/token',

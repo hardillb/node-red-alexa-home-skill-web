@@ -223,7 +223,7 @@ router.post('/authorization', defaultLimiter,
 			var grant = await saveGrantAsync(req.user, grantcode);
 			if (grant != undefined) {
 				res.status(200).json(success);
-				logger.log('debug', "[AlexaAuth] Sent authorisation response, body: " + JSON.stringify(success));
+				logger.log('debug', "[AlexaAuth] Sent authorisation response for user :" + req.user.username + ",  body: " + JSON.stringify(success));
 			}
 			else {
 				logger.log('error', "[AlexaAuth] General authorisation failure, sending: " + JSON.stringify(failure));
