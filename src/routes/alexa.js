@@ -20,6 +20,7 @@ const updateUserServices = require('../services/func-services').updateUserServic
 const queryDeviceStateAsync = require('../services/func-alexa').queryDeviceStateAsync;
 const replaceCapability = require('../services/func-alexa').replaceCapabilityAsync;
 const saveGrantAsync = require('../services/func-alexa').saveGrantAsync;
+const requestAccessTokenAsync = require('../services/func-alexa').requestAccessTokenAsync;
 const validateCommandAsync = require('../services/func-alexa').validateCommandAsync;
 const buildCommandResponseAsync = require('../services/func-alexa').buildCommandResponseAsync;
 const sendEventUid = require('../services/ganalytics').sendEventUid;
@@ -219,11 +220,16 @@ router.post('/authorization', defaultLimiter,
 					}
 				}
 			};
-			// Save GrantCode and attempt to generate AccessToken
+			// Save GrantCode
 			var grant = await saveGrantAsync(req.user, grantcode);
 			if (grant != undefined) {
+				// Send 200 response
 				res.status(200).json(success);
 				logger.log('debug', "[AlexaAuth] Sent authorisation response for user :" + req.user.username + ",  body: " + JSON.stringify(success));
+				// Async, test Grant Code by requesting an Access Token for user
+				var accessToken = await requestAccessTokenAsync(user);
+				// Failure, return undefined
+				if (accessToken == undefined) logger.log('error', "[AlexaAuth] Failed to obtain AccessToken for user: " + req.user.username);
 			}
 			else {
 				logger.log('error', "[AlexaAuth] General authorisation failure, sending: " + JSON.stringify(failure));
