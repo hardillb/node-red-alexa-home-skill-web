@@ -11,6 +11,7 @@ var sendemail = require('../services/sendemail');
 var mailer = new sendemail();
 var Account = require('../models/account');
 var oauthModels = require('../models/oauth');
+var alexaAuthModels = require('../models/alexa-auth');
 var Devices = require('../models/devices');
 var Topics = require('../models/topics');
 var LostPassword = require('../models/lostPassword');
@@ -656,10 +657,14 @@ async (req, res) => {
 		// Check requesting user matches req.params.user_id, or that user is SU
 		if (userAccount.username == req.user.username || req.user.superuser === true) {
 			var username = userAccount.username;
-			// Delete Token data
+			// Delete Service Oauth Token data
 			await oauthModels.GrantCode.deleteMany({user: userId});
 			await oauthModels.AccessToken.deleteMany({user: userId});
 			await oauthModels.RefreshToken.deleteMany({user: userId});
+			// Delete Alexa Auth Token Data
+			await alexaAuthModels.AlexaAuthGrantCode.deleteMany({user: userId});
+			await alexaAuthModels.AlexaAuthAccessToken.deleteMany({user: userId});
+			await alexaAuthModels.AlexaAuthRefreshToken.deleteMany({user: userId});
 			// Remove active services
 			removeUserServices(userAccount.username, "Amazon");
 			removeUserServices(userAccount.username, "Google");
