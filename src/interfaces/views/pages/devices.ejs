@@ -887,7 +887,8 @@ function edit(id) {
 	var device = devices[id];
 	$('#devID').val(device._id);
 	$('#friendlyName').val(device.friendlyName);
-	$('#friendlyName').prop('readonly', true);
+	// Set friendlyName read-only on Edit
+	// $('#friendlyName').prop('readonly', true);
 	$('#description').val(device.description);
 	// Disable all Interfaces/ Capabilities
 	$('input[name=capabilities]').each(function(index){
