@@ -25,7 +25,7 @@
     "mongoose-sequence": "^3.1.0",
     "morgan": "^1.7.0",
     "mqtt": "^2.0.1",
-    "nodemailer": "^1.11.0",
+    "nodemailer": "^6.6.1",
     "oauth2orize": "^1.5.1",
     "passport": "^0.6.0",
     "passport-http": "^0.3.0",
