@@ -27,7 +27,7 @@
     "mqtt": "^2.0.1",
     "nodemailer": "^1.11.0",
     "oauth2orize": "^1.5.1",
-    "passport": "^0.3.2",
+    "passport": "^0.6.0",
     "passport-http": "^0.3.0",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
