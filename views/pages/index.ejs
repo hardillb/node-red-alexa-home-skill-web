@@ -1,13 +1,19 @@
 <% include ../fragments/header.ejs %>
   <div class="container main-content">
     <h1>Node-RED Alexa Home Skill Bridge</h1>
-    <p>This site is the registration point for using the node-red-contrib-alexa-home-skill 
+    <p>This site is the registration point for using the node-red-contrib-alexa-home-skill
+<!--
+    <p style="color: red">Amazon have de-listed the skill for new users at the moment, I am trying to get this fixed, but existing users DO NOT unlink the skill or you will not be able to re-link</p>
+-->
+    <p>This site is the registration point for using the <a herf="https://flows.nodered.org/search?term=node-red-contrib-alexa-home-skill">node-red-contrib-alexa-home-skill</a> 
     <a href="http://nodered.org">Node-RED</a> module.</p>
+
+    <p style="color: green">New and Existing users, please take a moment to read the following <a href="https://blog.hardill.me.uk/2024/09/10/end-of-the-free-ride/">blog post</a></p>
 
     <p>This node and service allows you to create your own "devices" to work with the Amazon Echo's 
     Home Skill system, giving you voice control over basically anything you can interface 
     with Node-RED. There is support for not only things like Belkin WeMo and Philps Hue, 
-    but also a whole range of homebrew devices. You can also use Alexa to kick off seqences 
+    but also a whole range of homebrew devices. You can also use Amazon Alexa to kick off seqences 
     of events not just discrete on/off type actions</p>
 
     <img style="margin-right: auto; margin-left: auto; display: block; max-width: 100%; width: auto;" src="/images/node-red-alexa-small.png"/>

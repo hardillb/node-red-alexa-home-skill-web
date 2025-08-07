@@ -377,7 +377,7 @@ app.get('/changePassword/:key',function(req, res, next){
 		if (!error && lostPassword) {
 			req.login(lostPassword.user, function(err){
 				if (!err){
-					lostPassword.remove();
+					// lostPassword.remove();
 					res.redirect('/changePassword');
 				} else {
 					console.log(err);
@@ -405,6 +405,11 @@ app.post('/changePassword', ensureAuthenticated, function(req, res, next){
 				u.save(function(error){
 					if (!error) {
 						//console.log("Chagned %s's password", u.username);
+						LostPassword.findOne({user: user._id}).exec(function(e,lp){
+							if (!e && lp) {
+								lp.remove()
+							}
+						})
 						res.status(200).send();
 					} else {
 						logger.info("Error changing ", u.username, "'s password");
@@ -578,7 +583,13 @@ var onGoingCommands = {};
 
 mqttClient.on('message',function(topic,message){
 	if (topic.startsWith('response/')){
-		var payload = JSON.parse(message.toString());
+		var payload;
+		try {
+			payload = JSON.parse(message.toString());
+		} catch (errr) {
+			console.log(errr);
+			return;
+		}
 		var waiting = onGoingCommands[payload.messageId];
 		if (waiting) {
 			//console.log("mqtt response: " + JSON.stringify(payload,null," "));
