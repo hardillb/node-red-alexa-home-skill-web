@@ -335,7 +335,7 @@ npm install node-red-contrib-alexa-home-skill</pre>
       requests setting the <i>msg.payload</i> of the input message to true/false to signify success or failure.</p>
 
       <p>For SetTargetTemperatureRequest, IncrementTargetTemperatureRequest, DecrementTargetTemperatureRequest, GetTemperatureReadingRequest, 
-      GetTargetTemperatureRequest, GetLockStateRequest request you can also include a <i>msg.extra</i> object.
+      GetTargetTemperatureRequest, GetLockStateRequest request you must also include a <i>msg.extra</i> object.
       <p>When the input value is outside the supported range, the <i>msg.extra</i> should look like this:</p>
       <pre>{
     min: 10.0,
@@ -344,7 +344,11 @@ npm install node-red-contrib-alexa-home-skill</pre>
       <p>For a sucessful target temperature change the <i>msg.extra</i> should be simiar to this:</p>
       <pre>{
     targetTemperature: { 
-        value: 21.0
+        value: 21.0,
+    },
+    applianceResponseTimestamp: new Date().toISOString(),
+    temperatureMode: {
+        value: "AUTO"
     }
 }</pre>
       <p>Combining both of these in a single function node to handle the request would look something like the following: </p>
@@ -360,6 +364,10 @@ npm install node-red-contrib-alexa-home-skill</pre>
     msg.extra = {
         targetTemperature: {
             value: msg.payload
+        },
+        applianceResponseTimestamp: new Date().toISOString(),
+        temperatureMode: {
+            value: "AUTO"
         }
     };
     msg.payload = true;
