@@ -386,16 +386,7 @@ return msg;</pre>
         value: "AUTO"
     }
 }</pre>
-      <p>temperatureMode values can be AUTO, HEAT, COOL or CUSTOM. When Custom is used then you also need to include a freindlyName.</p>
-      <pre>{
-    targetTemperature: {
-        value: 25.0
-    },
-    temperatureMode: {
-        value: "CUSTOM",
-        friendlyName: "Space Heater"
-    }
-}</pre>
+      <p>temperatureMode values can be AUTO, HEAT, COOL.</p>
       <p>For GetTemperatureReadingRequest (the current temperature) a response whould look like this:</p>
       <pre>msg.extra = {
     "temperatureReading": {
